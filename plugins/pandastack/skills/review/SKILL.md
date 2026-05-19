@@ -199,14 +199,29 @@ Run Codex as an independent adversarial reviewer. This adds a second model's
 perspective (GPT) to Claude's review, catching blind spots from model-specific
 reasoning patterns.
 
-**Launch in parallel with Step 6** (both run in background):
+**Launch in parallel with Step 6.** Drive the installed `codex` CLI
+(codex-cli) directly — there is no Node companion script. Probe first;
+if `codex` is not on PATH, skip and note "Codex: unavailable (codex CLI
+not on PATH)" in the completion box (honest degrade, never silent):
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/codex-companion.mjs" adversarial-review --wait
+if command -v codex >/dev/null 2>&1; then
+  git diff origin/{main} -- ':!docs' > /tmp/pstack-review.diff
+  codex exec --skip-git-repo-check -c 'sandbox_mode="read-only"' \
+    "You are an adversarial cross-model reviewer (GPT) on this PR diff (stdin).
+Report ONLY real defects as: [P0|P1|P2|P3] file:line — issue — fix.
+Terse, no preamble, no praise, max 8 findings. Prioritise concurrency /
+data races, object lifetime & leaks, auth & permission gating, and
+error-path correctness. Say 'clean: <file>' for files with no defect." \
+    < /tmp/pstack-review.diff 2>&1 | tail -60
+else
+  echo "Codex: unavailable (codex CLI not on PATH)"
+fi
 ```
 
-If the Codex plugin is not available (command fails), skip this step silently
-and note "Codex: unavailable" in the final report.
+`codex exec` is non-interactive and self-terminating; cap it with a
+`timeout 360` if the harness needs a hard bound. Do NOT fall back to an
+interactive `codex` invocation (it would hang the review).
 
 **Outside Voice Integration Rule:** Codex findings are **informational only**. Each must be explicitly approved by the user before it lands in the final report or any follow-up commit. Cross-model consensus is a strong signal — surface it as such — but **do not auto-elevate** priority or confidence based on consensus alone.
 

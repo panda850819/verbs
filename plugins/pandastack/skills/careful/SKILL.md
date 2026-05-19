@@ -4,7 +4,8 @@ description: |
   Use when working on production code, shared infrastructure, or
   unfamiliar codebases. Adds confirmation gates before destructive
   commands (force push, rm -rf, publish, DROP).
-reads: []
+reads:
+  - repo: lib/verify-the-test-loop.md
 writes:
   - cli: stdout
 forbids:
@@ -50,6 +51,17 @@ Before executing any of the following, pause and ask the user for explicit confi
 ### Database
 - DROP, TRUNCATE, DELETE without WHERE
 - Schema migrations on production
+
+### Verification integrity (@../../lib/verify-the-test-loop.md)
+- Before asking a human to manually test a build, or claiming done based
+  on their manual test: prove the deployed artifact embeds the change
+  (content marker / source-not-newer / pinned path / stable identity).
+  Unproven ⇒ the bug is the pipeline; fix the loop, don't ask them to
+  re-test. ("BUILD SUCCEEDED" is not deploy-proof.)
+- Instrumentation you added not visible in their output ⇒ STOP, that is
+  a pipeline alarm, not a fluke.
+- 3 same-shape failures ⇒ switch abstraction / re-verify the loop, not a
+  4th variant of the same approach.
 
 ## Confirmation Format
 

@@ -28,6 +28,16 @@ Skip for purely mechanical skills (`tool-*`, `done`, `init`, `ship` — these do
 
 These 4 pairs are the source of truth. They live in `~/.agents/AGENTS.md` § Voice (substrate, multi-CLI). This lib file mirrors them for skill-level reference so skills can `@import` rather than scan the whole AGENTS.md.
 
+## Language (mirrors AGENTS.md §55)
+
+Same source-of-truth pattern as the pairs above: the rule lives in `~/.agents/AGENTS.md` § Language & Voice; mirrored here so loader skills bind to it instead of deciding per run.
+
+- **Conversational output** (the report/answer text a skill prints to the user) → **Traditional Chinese**. Technical terms, code, paths, identifiers, command names stay English inline (mixed-tech-Chinese, not translated).
+- **Written artifacts** (session docs, daily notes, vault/brain pages, commit messages) → match the *existing corpus convention of that artifact type*; do NOT auto-translate. Sample before writing (e.g. session-doc corpus is English-dominant; daily-note n8n sections `想法`/`連結收集`/`轉發` are Chinese-labeled and n8n-owned — never rewrite those).
+- English skill scaffolding (this lib's section names, SKILL.md prose) does NOT make the report English — render the report in 繁中 even when echoing an English-structured skill.
+
+On conflict, AGENTS.md §55 wins. This is a binding, not a redefinition.
+
 ## Application protocol
 
 When generating output text:

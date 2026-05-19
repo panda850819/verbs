@@ -15,6 +15,8 @@ Four steps. Goal: **finish in 1-2 minutes for routine sessions, 3-4 minutes when
 - Step 3: Value scan (skip if session < 5 substantive turns or purely mechanical)
 - Step 4: Commit handoff (skip if no git repo or working tree clean)
 
+**Output language** (same binding idiom as the Response Discipline refs below): the report printed back to the user follows `~/.agents/AGENTS.md` § Language & Voice — conversation in Traditional Chinese, technical terms / paths / code / commands stay English inline. Written artifacts (session.md / daily note / memory) match the existing corpus of that artifact type, NOT auto-translated (session-doc corpus is English-dominant; daily-note n8n sections are Chinese-labeled and n8n-owned, never rewrite). English skill scaffolding does not make the report English.
+
 ## Step 1: Save Session MD
 
 ### Determine path & metadata

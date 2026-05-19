@@ -17,6 +17,7 @@ reads:
   - repo: skills/review/SKILL.md
   - repo: skills/ship/SKILL.md
   - repo: skills/design-lead/SKILL.md
+  - repo: lib/verify-the-test-loop.md
   - vault: knowledge/**
   - vault: docs/learnings/**
 writes:
@@ -142,10 +143,20 @@ Three branches:
 
 ### Stage 5: Ship gate (terminal state decision)
 
+**Deploy-proof precondition (if the deliverable was validated by a human
+manually exercising a build/deploy).** Before `state = SHIPPED` or before
+asking the user to do that validation: @../../lib/verify-the-test-loop.md
+— prove the artifact the user tested embeds this change (content marker /
+source-not-newer / pinned path / stable identity). If unproven, the bug
+is the pipeline: do NOT ask the user to test and do NOT mark SHIPPED —
+fix the loop first (Rule 3). Conclusions from an unverified loop are void
+(Rule 2). 3 same-shape failures ⇒ Rule 4 (switch abstraction, not a 4th
+variant), not auto-FAILED-after-3.
+
 This is the critical gate. Compute terminal state:
 
 ```
-if review_clean AND user_approves_ship:
+if review_clean AND deploy_proven AND user_approves_ship:
     state = SHIPPED
 elif user_signals_pause ("park this" / "暫停" / "later"):
     state = PAUSED
@@ -253,6 +264,10 @@ Save to `Inbox/sprint-{slug}-{date}.md` regardless of terminal state.
 | "It's partly UI, partly backend, just mix personas" | Mixed personas dilute the cognitive lens and produce inconsistent output. Split into two sequential sprints. |
 | "Sprint within a sprint for the sub-task" | Flatten. Either the sub-task is a Stage 3 step in the current sprint, or it's a separate sprint that fires after this one ends. |
 | "Review found P1 but ship anyway" | Terminal state contract is load-bearing. P1 unaddressed = state ≠ SHIPPED. Mark PAUSED with the open finding logged, or fix and re-review. |
+| "BUILD SUCCEEDED, so the user is testing my fix" | Success proves the compiler ran, not that the deployed artifact is the one you built. Deploy-proof before human test (`lib/verify-the-test-loop.md` R1). |
+| "My instrumentation didn't show in their screenshot, weird — anyway" | That is the pipeline alarm, not a fluke. Stop, verify the loop (R1/R2). The session this rule exists for lost days exactly here. |
+| "3 lifecycle variants failed, the 4th is my escalation" | Same-shape failure ×3 ⇒ the abstraction/loop is wrong (R4). A 4th variant of the same approach is strike 4, not escalation. Switch primitive or re-verify the loop. |
+| "Re-asking the user to re-test is just one more round" | Each contaminated human round-trip is the expensive unit. If the loop needs repeated round-trips, harden the loop first (R3), then iterate. |
 
 ## Anti-patterns
 
@@ -261,6 +276,8 @@ Save to `Inbox/sprint-{slug}-{date}.md` regardless of terminal state.
 - ❌ Skipping Stage 0 capability probe ("substrate's fine, let's go") — probe each run, state changes
 - ❌ Running sprint inside another sprint ("sprint within sprint") — flatten or use sub-tasks within stage 3
 - ❌ Iteration > 3 — that's a FAILED state, not "let me try once more"
+- ❌ Marking SHIPPED on human-validated work without deploy-proof (`lib/verify-the-test-loop.md`) — the user may have tested a stale/ghost artifact
+- ❌ 4th variant of the same failing approach billed as "escalation" — switch the abstraction, not the parameters
 - ❌ Treating PAUSED as failure — PAUSED is a legitimate outcome, no extract/backflow
 
 ## Origin
