@@ -90,6 +90,8 @@ User brings a structured draft ready for polish. Your job:
 
 **Before starting**: Estimate the draft's word count. If under 200 words, apply short content rules: focus on opening and closing sentences (they carry disproportionate weight), provide 2-3 alternatives (not 3-5), but run slop check at full rigor.
 
+**Quality rubric self-score (mandatory before declaring edit done)** — load `lib/quality-rubric.md` and self-score 1-5 on Originality + Coherence (this skill's heavy axes per the per-skill weighting table). Any axis < 3 → revise before declaring ready, citing which anti-pattern hit. Generator-side binding per quality-rubric.md governance moment #1.
+
 **Conditional reference loading** (run BEFORE Voice check; load any that match):
 
 | Trigger signal | Load |

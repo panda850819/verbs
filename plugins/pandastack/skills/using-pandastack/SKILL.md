@@ -45,6 +45,27 @@ When the current task matches one of these signals, the corresponding skill must
 
 When a skill applies, announce: "Using `pandastack:<skill>` to <purpose>" — then invoke the `Skill` tool. Do not read `SKILL.md` files directly with the Read tool.
 
+## Session opener ritual (5-step, < 5 sec)
+
+Run at the start of any new session that touches code, brain pages, or shared infra. Skip for Hermes cron / background jobs / read-only Q&A. Adapted from Justin Young / Anthropic ([Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)) — cold-context agents drift without a forced ritual.
+
+```
+1. pwd + git status                        confirm cwd, surface uncommitted work
+2. ls -t sessions/*.md 2>/dev/null | head -3   what did the last 3 sessions touch?
+3. git log --oneline -10                   recent commit shape — am I on a thread?
+4. autocommit health (1-liner)             is the cron loop alive? launchd ok?
+5. surface 異常 only                        silent when healthy, loud when broken
+```
+
+Default behavior: run silently, output ONLY on anomaly. Healthy session = zero lines printed. Failure modes to surface:
+- Uncommitted changes from a prior session you don't remember
+- Autocommit cron stuck > 2 hours (launchd dead, or git push failing silently)
+- HEAD detached, or on an unexpected branch
+
+When user explicitly wants a deep state-restore (returning after long absence, post-dream consolidation), route to `gbrain:cold-start` (heavy 506-line version) instead — the 5-step ritual covers warm sessions, not cold revivals.
+
+This ritual does NOT live in its own skill. Folding it here (cognitive contract surface, already loaded at SessionStart) avoids a new `pandastack:cold-start` skill that would duplicate `gbrain:cold-start` and contradict v2.2.0 scope-tightening.
+
 ## Red flags (rationalizations to STOP on)
 
 These thoughts mean you are about to skip a skill that applies. Stop and check.

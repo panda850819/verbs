@@ -155,6 +155,12 @@ Launch review passes in parallel using `context: fork` (isolated subagents — r
 - Docker image using latest tag instead of pinned version
 - CI steps that can silently fail
 
+**Pass 8 — Quality Rubric** (only when diff contains writing or design artifacts, e.g. `.md` in writing/ media/ briefs/ topics/ paths, or `.html`/`.tsx`/`.css` with visual surface changes):
+- Load `lib/quality-rubric.md`. Evaluator-side binding per governance moment #2.
+- Score each changed artifact 1-5 on the 4 axes (coherence / originality / craft / functionality).
+- Any axis < 3 = fail the gate. Include the specific anti-pattern hit (e.g. "Originality 2 — symmetric bullet structure, LLM diversity collapse").
+- Use per-skill weighting table from the rubric when artifact came from `pandastack:write` / `pandastack:design-lead` output.
+
 Each pass outputs findings in the same format:
 ```
 [P0-P3] (confidence: N/10) file:line — description
