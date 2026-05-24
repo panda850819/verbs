@@ -116,6 +116,7 @@ Launch review passes in parallel using `context: fork` (isolated subagents — r
 - Race conditions, N+1 queries, stale reads
 - Missing error handling at system boundaries
 - Test gaps for changed code paths
+- **Test intent verification** (Mnilax Rule 9, adopted 2026-05-24): for each NEW or MODIFIED test, ask "if business logic flips, would this test catch it?" A test like `expect(getUserName()).toBe('John')` is worthless when the function `return 'John'` hardcoded — that asserts return shape, not business intent. Flag tests that pass on tautological assertions. Format: `[P1] file:line — test asserts shape but not intent — Fix: assert against derived/computed value, or add a test where business logic flip would fail`.
 
 **Pass 2 — Security**:
 - Injection (SQL, command, XSS)

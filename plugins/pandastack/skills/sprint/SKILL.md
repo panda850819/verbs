@@ -109,6 +109,14 @@ Apply minimal-diff + verify + 3-strike escalation (eng-lead iron laws apply even
 
 Track `iteration` counter starting at 1.
 
+**Step-level narrate** (Mnilax Rule 10, adopted 2026-05-24): every distinct sub-step within Stage 3 (file edit, command run, validation pass, persona-lens switch) must end with a one-line narrate:
+
+```
+done: {what was completed} | verified: {what was checked} | remaining: {next sub-step}
+```
+
+Mirrors background-session protocol (`result:` / `needs input:` / `failed:`) but applied to foreground sprint. Purpose: at 50-min mark, model + user both know where the sprint is even if context drifts. Skip ONLY for trivial 1-line edits (`--quick` mode auto-skips). If you completed something you can't summarize back, stop — you've drifted past the last known-good state.
+
 **When scope detection is ambiguous**: ask user once with the candidate personas listed; pick the highest-confidence single one based on user reply. Do not silently default to eng-lead when signals point elsewhere — that misroutes architecture / ops / product work.
 
 **Multi-source aggregator dispatch-branch test checklist**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator (e.g. `if (source.name === "X")` ladder, per-source `evaluateX` filter, per-source `_setXClientForTest` mock seam), **handler-level integration test for the new branch is part of Stage 3 implementation**, NOT Stage 4 review iter 2. Cold reviewer empirically catches this as P0 every time the branch is added without the test (companyos sprints 3 / 5 / 6 = Notion / Slack / Linear all hit this same gap). Test shape: drive `createCallToolHandler` (or equivalent) with one denied-input case + one allowed-input case, assert audit emit shape + that deny does NOT consume any cross-source state (pivot window / cache eviction).
