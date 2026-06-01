@@ -15,11 +15,15 @@ Create a new pandastack skill that follows the SKILL-FRONTMATTER.md contract and
 
 ### 1. Identify the gap
 
+Load `plugins/pandastack/lib/trigger-first-skill-evolution.md` before deciding whether to create, split, merge, or extract a skill.
+
 What user intent has no existing skill? Be explicit:
 - What phrase / trigger will invoke this?
 - What is the input shape?
 - What is the output shape?
 - Why doesn't an existing skill already handle it?
+
+Default to the smallest durable change: tighten trigger text and inline checklist / rubric first. Do not create lens / persona / rubric registries unless the shared rule's extraction threshold is met.
 
 ### 2. MECE check
 
@@ -51,6 +55,14 @@ agent context.                         Main agent only sees
 ```
 
 This rule is non-negotiable. Skills that violate it silently degrade long-session recall (see `learnings/patterns/long-session-evals` for evidence; observed in Arize Alyx and Claude Code source, converged solution).
+
+### 3.5. Decide inline vs extract
+
+Use `lib/trigger-first-skill-evolution.md`:
+
+- New / uncertain workflow → keep checks inline in the skill.
+- Same checks repeated in 3+ skills or diverging during maintenance → extract to `lib/` or `references/`.
+- One observed use only → keep in `_staging/`, not production.
 
 ### 4. Write SKILL.md
 
@@ -85,13 +97,36 @@ If no existing category fits, add a new section AND justify in commit message. C
 
 ### 6. Verify
 
-Run pandastack conformance:
+Run the checks that exist in this repo. Pandastack currently has a manual resolver golden file, not Bun test files.
 
 ```bash
-cd "$PANDASTACK_ROOT" && bun test tests/
+cd "$PANDASTACK_ROOT"
+
+git diff --check
+
+python - <<'PY'
+from pathlib import Path
+import re, sys
+root = Path('plugins/pandastack')
+errors = []
+for p in root.rglob('SKILL.md'):
+    s = p.read_text()
+    if not s.startswith('---'):
+        errors.append(f'{p}: missing frontmatter start')
+        continue
+    if '\n---\n' not in s[3:]:
+        errors.append(f'{p}: missing frontmatter close')
+if errors:
+    print('\n'.join(errors))
+    sys.exit(1)
+print('OK skill frontmatter')
+PY
+
+# If you changed routing / descriptions, manually run the affected cases in:
+# tests/resolver-golden.md
 ```
 
-Pass = ship. Fail = read the error and fix the frontmatter / RESOLVER / body before merging.
+Do not use `bun test tests/` unless actual `.test` / `.spec` files have been added. If a check fails, read the error and fix the frontmatter / RESOLVER / body before merging.
 
 ## Output Format
 
@@ -101,11 +136,12 @@ plugins/pandastack/skills/<name>/
 pandastack/RESOLVER.md   ← row added
 ```
 
-Conformance tests pass green.
+Verification checks pass, and any affected resolver-golden cases are noted.
 
 ## Anti-Patterns
 
 - **MECE violation** — overlapping an existing skill's trigger surface. Extend, don't add.
+- **Premature abstraction** — building lens / persona / rubric registries before `lib/trigger-first-skill-evolution.md` extraction threshold is met.
 - **Skipping Phase 3 (hot/cold check)** — data-heavy skill running inline degrades long sessions. See `learnings/patterns/long-session-evals`.
 - **gbrain-flavored frontmatter** — `triggers:` array, `tools:`, `mutating:`. Pandastack uses description-sentence + optional `allowed-tools`.
 - **Adding a new RESOLVER category without justification** — categories are an MECE budget, not a free namespace.

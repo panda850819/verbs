@@ -293,62 +293,15 @@ Source: Shann Holmberg Content OS essay (2026-05-08) -- the four-route idea gate
 
 ## Structural Toolkit (Spar & Structure modes)
 
-Before building any skeleton, run this checklist:
+Load `references/structural-checks.md` before building any skeleton or running a diagnostic pass. Contains:
 
-### 1. Spine Check — "What holds this article together?"
+- **Spine Check** — 5 spine types (operational principle / number inventory / before-after delta / borrowed framework / unresolved tension)
+- **Opening Check** — number-first / thesis-first / scene OK / generic REJECT
+- **Closing Check** — new insight / CTA / unresolved question OK; restate-intro REJECT
+- **Rhythm Check** — one-sentence paragraph per 500 words, varied length, cross-domain one-liner
+- **Four-Quadrant Check** (>500 words or X posts >200 words): Problem / Mechanism / Proof / Template. Missing 2+ → flag, don't auto-fill.
 
-Every article needs ONE of these as its structural spine:
-
-| Spine type | When to use | Example |
-|------------|-------------|---------|
-| **Operational principle** | Writing about systems, workflows, tools | "越懶越好" / "SSOT" / "blacklist > whitelist" |
-| **Number inventory** | Writing about what you built/shipped | "53 skills, 11 tools, 40 workflows" |
-| **Before → After delta** | Writing about transformation or results | "From 3h manual → 15min automated" |
-| **Borrowed framework** (Alan Chan style) | Writing about strategy, learning, or industry analysis | Christensen's disruption / S-curves / PMF treadmill |
-| **Unresolved tension** (Ping Chen style) | Writing about trade-offs, failures, or philosophical topics | "I automated everything but lost the craft feel" |
-
-If you can't identify the spine, stop and ask: "What's the ONE thing holding this piece together?"
-
-### 2. Opening Check — "Does the first sentence earn the second?"
-
-| Pattern | Rating | Example |
-|---------|--------|---------|
-| Number-first hook | Best for Panda | "53 個 AI 技能、11 個 CLI 工具" |
-| Thesis-first (先講結論) | Strong | "先講結論：��懶的人越能發揮出 AI 真正的價值。" |
-| Scene/anecdote | OK if short | "昨天半夜兩點我發現..." (max 2 sentences) |
-| Generic topic intro | REJECT | "在 AI 快速發展的今天..." |
-
-### 3. Closing Check — "Does the ending add something new?"
-
-| Pattern | Rating |
-|---------|--------|
-| New insight not in the intro | Best |
-| Call-to-action (try it, build it) | Good for operator pieces |
-| Unresolved question (Ping Chen style) | Good for reflective pieces |
-| Restate the intro | REJECT — either say something new or end one section earlier |
-
-### 4. Rhythm Check — "Does it breathe?"
-
-- At least one **one-sentence paragraph** per 500 words (let it breathe)
-- No more than 3 consecutive paragraphs of similar length
-- At least one **cross-domain one-liner** per article (an image from outside the topic)
-
-### 5. Four-Quadrant Check — "Does each piece carry reader weight?"
-
-For long-form pieces (>500 words) and X long posts (>200 words), every major section should hit all four quadrants:
-
-| Quadrant | Question | Weak signal | Fix |
-|----------|----------|-------------|-----|
-| **Problem** | Is the reader's pain named in the first 3 sentences? | Generic topic intro, no "you're doing X wrong" | Rewrite opening to name the pain |
-| **Mechanism** | Is there a specific framework/model/sequence? | Vague "approaches" or "ways to think" | Name the framework or cut the section |
-| **Proof** | Are there concrete numbers or named examples? | "Significant improvements" / "many users" | Add at least 1 specific number or named case |
-| **Template** | Can the reader copy a step-by-step action? | Ends with "food for thought" / "供參考" | Add 3-7 numbered steps or cut the piece to commentary |
-
-Missing 2+ quadrants → piece reads like commentary, not operator's log. Flag to user with which quadrant(s) are missing and suggest fix direction. Do NOT auto-fill quadrants with generic content.
-
-**Short pieces exemption**: Skip this check for posts under 200 words. Short-form is Panda's natural voice main stage — forcing four quadrants makes it read like a KOL template.
-
-Source: Shann Holmberg X analysis (2026-04-18). Updated 2026-05-11 with Content OS essay anchor → `[[people/shann-holmberg]]` · `[[media/articles/shann-content-os-bookmarkable-personalized]]`.
+Short pieces (<200 words) skip Four-Quadrant.
 
 ## Slop Detection System
 
@@ -360,36 +313,13 @@ Anti-slop is the signature feature of this skill. Run on EVERY `/write edit`, no
 
 Scan the entire draft for these instant-flag patterns. Zero tolerance — every match gets flagged.
 
-#### English vocabulary blacklist
+#### Vocabulary blacklists
 
-| Pattern | Action |
-|---------|--------|
-| "It's worth noting that" / "It bears mentioning" | Delete the wrapper, keep the content |
-| "In today's rapidly evolving landscape/world/era" | Delete entire sentence |
-| "Let's dive in" / "Let's explore" / "Let's unpack" | Delete |
-| "Furthermore" / "Moreover" / "Additionally" in sequence | Keep max one, cut rest |
-| "It might perhaps be possible" (hedge stack) | Commit or qualify once |
-| "In conclusion, X is important" | Say something new or end earlier |
-| "On one hand... on the other hand" (without real tension) | Commit to the opinion |
-| "Leverage" as verb (when "use" works) | Replace unless used deliberately |
-| "Robust" / "Streamline" / "Utilize" / "Facilitate" | Replace with plain English |
-| "Game-changer" / "Paradigm shift" / "Revolutionary" | Delete or state the actual change |
+Load by language:
+- English draft → `references/en-slop-patterns.md` (10 patterns: wrappers, hedge stacks, weak verbs, em dash ban)
+- Chinese draft → `references/zh-slop-patterns.md` (24 patterns: AI vocab, formulaic phrasing, em dash ban, scoring rubric)
 
-#### Chinese vocabulary blacklist
-
-| Pattern | Action |
-|---------|--------|
-| 賦能 / 閉環 / 抓手 / 顆粒度 / 底層邏輯 / 打通 | Use plain language |
-| 進行了深入的探討 / 進行了全面的分析 | 討論了 / 分析了 |
-| 這具有深遠的影響 / 這將徹底改變 | State actual impact |
-| 好的，讓我來 / 以下是 / 首先讓我們 | Delete, write directly |
-| 更X、更Y、更Z (rule-of-three) | Break the pattern |
-| 重要/關鍵/核心/至關重要 cycling | Pick one |
-| 引領潮流 / 開創新紀元 / 未來可期 | Cut or replace with specific fact |
-| 業內人士指出 / 專家表示 | Name the source or delete |
-| 挑戰與機��並存 | Commit to one or end earlier |
-| 不是X，而是Y (overused) | Vary structure |
-| Em dash (——) or ( — ) anywhere | **Banned.** Use comma, period, or line break. Zero tolerance. |
+Both files use the same format (Pattern / Example / Fix table). Zero tolerance — every match gets flagged.
 
 **Layer 2: Structure scan** (requires reading the full draft)
 
@@ -413,12 +343,11 @@ For every flagged passage, apply this test:
 - If "sort of but more formal" → simplify
 - If no → rewrite or delete
 
-Also check (in load order):
-- `references/zh-slop-patterns.md` (24 base patterns with scoring)
-- `references/slop-zh-translation.md` (translation-tone 4 traps; load condition above)
-- `references/slop-zh-report-tone.md` (report-tone replacement table; load condition above)
-- `references/slop-zh-residue.md` (10+ round polish residue checklist; load condition above)
-- `references/prose-zh-structure.md` (bold-period / list-dedensify / paragraph-end summary; load condition above)
+Conditional Chinese refs (load when Edit mode's trigger signals fire — see table above):
+- `references/slop-zh-translation.md` (translation-tone 4 traps)
+- `references/slop-zh-report-tone.md` (report-tone replacement table)
+- `references/slop-zh-residue.md` (10+ round polish residue checklist)
+- `references/prose-zh-structure.md` (bold-period / list-dedensify / paragraph-end summary)
 
 ## Article Patterns Library
 
@@ -441,34 +370,7 @@ When user says "I want to write like that Chase Wang piece", load the matching p
 
 ## Output Validation (mandatory)
 
-Before sending ANY response, verify against the active mode:
-
-| Mode | Check | Violation = |
-|------|-------|-------------|
-| Spar | Spine identified (one of 5 types) | Ask user to pick spine before proceeding |
-| Spar | Opening check passed (no generic intro) | Suggest number-first or thesis-first alternative |
-| Spar | No paragraph longer than 2 sentences | Rewrite as outline bullets |
-| Structure | Zero new sentences not in original | Delete any new content |
-| Structure | Closing check passed (ending adds something new) | Flag and suggest alternatives |
-| Edit | 3-layer slop detection completed (vocab → structure → voice) | Run all layers now |
-| Edit | Conditional zh references checked against trigger signals | Load matched ones; explicitly note "no zh signals matched" if none fired |
-| Edit | No consecutive 3+ sentences of new prose outside `→` annotations | Convert to annotations |
-| Edit | Multi-version alternatives were generated | Add them now |
-| Edit | Voice profile was loaded and checked | Load and check now |
-| Edit | At least one rhythm variation flagged or confirmed | Check paragraph lengths |
-| Spar / Structure / Edit | For pieces >500 words (or X long posts >200 words): Four-Quadrant Check completed | Flag missing quadrants; do not auto-fill |
-| Postmortem | Every category has an exact line quoted (or explicit "no line earns this row") | Restart and quote actual lines |
-| Postmortem | Zero banned generic-praise words ("great post", "strong hook", "compelling", "engaging", "powerful", "thought-provoking", "well-crafted") | Restart |
-| Postmortem | Chinese drafts quoted in source Chinese, not translated | Re-quote in source language |
-| Postmortem | "Weakest part" includes a specific fix, not just "consider X" | Add concrete rewrite/cut/proof-add direction |
-| Idea Gate | Stage-0 brain check ran (grep against writing/ + media/articles/ + topics/) | Run brain check now; if substantial overlap, default route → 暫不寫 |
-| Idea Gate | Route is one of: original / repurpose / rewrite / research+ideate / 暫不寫 | Pick one or ask 1-2 disambiguating questions |
-| Idea Gate | If route ≠ 暫不寫, full packet produced with ≤2 `missing` fields | If >2 missing, downgrade to 暫不寫 or flag user for specific info |
-| Idea Gate | No prose body in output (packet only) | Convert any prose to packet bullets |
-| Idea Gate | Packet ≤900 tokens (Shann's discipline) | Compress or split idea |
-| Idea Gate | Voice anchors quoted verbatim in source language (not translated) | Re-quote in source language |
-
-If any check fails, fix BEFORE responding. Do not mention the self-check to the user.
+Before sending ANY response, load `references/output-validation.md` and verify against the active mode. Contains the full check table per mode (Spar / Structure / Edit / Postmortem / Idea Gate). If any check fails, fix BEFORE responding. Do not mention the self-check to the user.
 
 ## Gotchas
 

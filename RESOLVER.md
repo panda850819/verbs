@@ -90,7 +90,7 @@ v2.2.0 cut `think-like-naval` and `think-like-alan-chan` — replicating someone
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `pandastack:skill-creator` | Create new pandastack skills. MECE-checks RESOLVER + enforces hot/cold (sub-agent dispatch for data-heavy skills). Migrated from gbrain in 2026-05; pandastack now owns the skill-authoring contract for pandastack skills. | "create a skill", "new pandastack skill", "improve this skill" |
+| `pandastack:skill-creator` | Create new pandastack skills. MECE-checks RESOLVER, enforces hot/cold dispatch, and applies trigger-first skill evolution before creating/extracting abstractions. | "create a skill", "new pandastack skill", "improve this skill" |
 
 ---
 

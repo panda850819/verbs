@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `lib/trigger-first-skill-evolution.md` — shared rule for skill evolution: trigger clarity first, inline checklist / rubric before extraction, no lens / persona / rubric registry until repeated evidence exists.
+
+### Changed
+
+- `skill-creator` now loads the trigger-first rule before creating, splitting, merging, or extracting skills.
+- `skill-creator` verification now reflects the repo's real check surface: `git diff --check`, SKILL frontmatter scan, and manual `tests/resolver-golden.md` cases when routing changes. It no longer points at absent Bun tests.
+- `using-pandastack` now points harness edits at the trigger-first rule so skill-library changes evolve from observed use instead of upfront taxonomy.
+- `RESOLVER.md` skill-creator row now reflects the trigger-first abstraction gate.
+
 ## v2.2.0 — 2026-05-09
 
 > **Scope tightening**. Public package shrinks 38 → 26 skills, 7 → 0 lifecycle flow specs. The personal tier moves out of this manifest entirely (lives in `pandastack-private` overlay). Notion / Slack ops migrate to MCP. Philosophy shifts from "personal AI operator OS that manages your retro / research / work / decisions" to "**skill library that ships verbs; the brain keeps state; lifecycle discipline is your job, not the package's**".

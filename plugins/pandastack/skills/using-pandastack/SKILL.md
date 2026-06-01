@@ -77,6 +77,17 @@ When triggered:
 
 Source: Mnilax Rule 6 office-hours 2026-05-24 (`~/site/knowledge/brain/inbox/briefs/2026-05-24-rule6-cross-agent-baton-aware-rituals.md`). Companion to brain-first protocol step 0 (session-start sync) in `~/.agents/AGENTS.md`.
 
+## Harness evolution rule
+
+When creating, improving, splitting, merging, or reviewing skills, load `lib/trigger-first-skill-evolution.md`. Default posture:
+
+- Trigger clarity first.
+- Inline checklist / rubric before extraction.
+- No lens / persona / rubric registry until repeated evidence exists.
+- Extract only after the same checks repeat across 3+ skills, maintenance diverges, or the parent skill becomes hard to scan.
+
+This keeps pandastack as a skill library that evolves from observed use, not a pre-designed role taxonomy.
+
 ## Red flags (rationalizations to STOP on)
 
 These thoughts mean you are about to skip a skill that applies. Stop and check.
