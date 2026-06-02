@@ -124,6 +124,8 @@ Launch review passes in parallel using `context: fork` (isolated subagents — r
 - Secrets in code or logs
 - Unsafe deserialization, SSRF
 
+**Grounding requirement (anti-hallucination, every finding, especially P0/P1):** each security finding MUST cite a concrete, attacker-reachable exploit path through the actual code — name who controls the input and trace how it reaches the sink. A dangerous-looking API name (e.g. `jwt.decode`, `eval`, `pickle.loads`) is NOT itself a finding. If the input is self-issued / internal / not attacker-controlled (e.g. a token the same service both issues and verifies), there is no exploit path — drop the finding entirely, do NOT downgrade it to a lower severity. No real exploit path named = not a finding.
+
 **Pass 3 — Architecture**:
 - Coupling that will hurt later
 - Abstractions that don't earn their complexity

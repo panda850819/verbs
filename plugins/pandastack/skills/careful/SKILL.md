@@ -39,9 +39,11 @@ Before executing any of the following, pause and ask the user for explicit confi
 - Any push to main/master
 
 ### Filesystem
-- `rm -rf` on any directory
+- `rm -rf` on an **unscoped / non-reinstallable** path: anything outside the current project, a path with a glob/variable that could expand wrong, or removal of source / data / config that isn't trivially regenerable
 - Deleting more than 3 files at once
 - Overwriting files outside the current project
+
+**Exemption (does NOT trigger the gate):** scoped-path removal of trivially-reinstallable build artifacts — `node_modules`, `build/` / `dist/` / `target/` / `.next/` output dirs, caches, and lockfile-regenerable deps — under the current project. These are reversible by re-running install/build, so just do it. (The gate is for irreversible / shared-state damage, not routine cleanup.)
 
 ### External
 - Any API call that mutates external state (POST/PUT/DELETE to production)

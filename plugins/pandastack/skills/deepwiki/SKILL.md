@@ -221,6 +221,8 @@ pnpm dev
 
 ## Phase 3: Mermaid Generation
 
+**Source-grounding guard (hard rule)**: A wired diagram with directional edges between modules (`A --> B`, `A -->|calls| B`) asserts relationships. Those edges MUST be grounded in source you actually read (imports/calls), never inferred from file names or READMEs. If you have NOT read/verified the source (per the Phase 2 Source Reading Rule), do NOT draw any wired diagram with directional edges. A caveat is not enough — caveating a fabricated structure still asserts unverified relationships. In that case, allowed options are: (a) prose-only description of the components, or (b) an explicit "insufficient source to diagram architecture" note in place of the diagram.
+
 Generate appropriate diagrams based on project type:
 
 ### Module Relationship Diagram (all projects)

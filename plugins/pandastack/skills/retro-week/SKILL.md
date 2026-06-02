@@ -151,7 +151,12 @@ KNOWLEDGE GAPS
 但你 brain 完全沒有: <missing perspective inferred from gap analysis>
 建議下週讀方向 (具體，不是書名): <direction>
 
-(Discipline: do not invent specific books/articles. Just direction.)
+(Discipline: do not invent specific books/articles. Just direction. This bar
+applies everywhere a reading source could be named — KNOWLEDGE GAPS here, the
+empty-week block, and every "Recommendation for Next Week". NO reading source
+— book title / author / blog / talk / brain path — may be named unless it has
+a vault basis (a slug/page that actually surfaced in the scan or gbrain
+output). No basis → name a direction only, never a source.)
 
 ONE ACTION
 這週最高槓桿一件事 (從 brain 推，不是憑空):
@@ -226,6 +231,7 @@ recurring pattern across 3+ files     → propose new skill
 ```
 
 4. **Cross-check MEMORY.md** — if the feedback is already indexed, mark `indexed:yes` (passive). If body has a `[[wikilink]]` to an existing skill, mark `linked:<skill>` (already partially mechanized).
+5. **Recurrence gate (load-bearing)** — count how many times this correction's pattern has occurred (distinct feedback files + any `count:`/recurrence marker in the body + matching continue-log events). A mechanism proposal (lint / hook / skill / CLAUDE.md rule) may ONLY be emitted to the table when `count >= 2`. A single occurrence (count == 1, no pattern signal) does NOT get a `propose` cell — render its row with `propose: leave (1x — stays as memory feedback)`. One-off corrections never become mechanisms; only recurrence justifies a forcing function.
 
 ### 1h-2. Process continue-failure events
 
@@ -257,13 +263,16 @@ Format:
 RECENT CORRECTIONS (past 7d): N files
 CONTINUE-FAILURES (past 7d):  N events across N projects
 
-| source                                 | trigger                | propose                                  |
-|----------------------------------------|------------------------|------------------------------------------|
-| feedback_no-wikilinks-in-h1            | brain page H1 with [[]]| lint: PreToolUse:Write `^# .*\[\[`       |
-| feedback_voice-rules                   | voice/phrasing slop    | CLAUDE.md §voice line addition           |
-| feedback_xxx                           | ...                    | leave-alone (already linked to [[skill]])|
-| continue-log                           | "commit now?" (5x)     | CLAUDE.md default: auto-commit unless flag |
-| continue-log                           | <unknown reason 3x>    | investigate — Lopopolo failure mode      |
+| source                                 | trigger                | count | propose                                  |
+|----------------------------------------|------------------------|-------|------------------------------------------|
+| feedback_no-wikilinks-in-h1            | brain page H1 with [[]]| 3x    | lint: PreToolUse:Write `^# .*\[\[`       |
+| feedback_voice-rules                   | voice/phrasing slop    | 2x    | CLAUDE.md §voice line addition           |
+| feedback_one-off-typo-fix             | single correction      | 1x    | leave (1x — stays as memory feedback)    |
+| feedback_xxx                           | ...                    | 2x    | leave-alone (already linked to [[skill]])|
+| continue-log                           | "commit now?" (5x)     | 5x    | CLAUDE.md default: auto-commit unless flag |
+| continue-log                           | <unknown reason 3x>    | 3x    | investigate — Lopopolo failure mode      |
+
+(count < 2 → propose cell MUST read `leave (1x — stays as memory feedback)`; never a mechanism.)
 
 PATTERN ACROSS FILES
 - N feedback files this week mention "<keyword>" → candidate new skill: <name>
@@ -300,7 +309,7 @@ Then say: **"GC sweep 完了。Phase 2 會把每個 proposal 變成 yes/no/defer
 ### 1j. Discipline — what NOT to do here
 
 - ❌ Do NOT write any lint / hook / skill file in Phase 1.6 — proposals only
-- ❌ Do NOT propose mechanisms for one-off corrections (single occurrence, no pattern signal) — those stay as memory feedback
+- ❌ Do NOT propose mechanisms for one-off corrections — the recurrence gate (1h step 5) is the enforcement: a `propose` cell is emitted ONLY when `count >= 2`. Single occurrences (count == 1) render as `leave (1x — stays as memory feedback)`, never a lint / hook / skill proposal. Recurrence is the trigger for a forcing function, not a single nag.
 - ❌ Do NOT propose duplicating an already-linked mechanism — check `linked:<skill>` first
 - ❌ Do NOT silently skip the table when 7d window is empty — print empty-week block so user sees the discipline ran
 
@@ -414,6 +423,9 @@ scan_data: true
 
 ## Recommendation for Next Week
 > One concrete action — from the interview, not invented. Use the user's exact phrasing.
+> No reading source (book / author / blog / talk / brain path) may be named here
+> without a vault basis (a slug/page that surfaced in scan or gbrain). No basis →
+> direction only, never a named source. Same bar as Phase 1.5 KNOWLEDGE GAPS.
 
 ## What I'm Sitting With
 > User's open questions or unresolved tensions, in their words.
