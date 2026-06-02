@@ -225,6 +225,8 @@ pnpm dev
 
 **A directory tree, file listing, or set of folder/file names is NOT source** — it grounds edges no more than a clone failure does. If all you have is names/structure (no actually-read import/call statements), you are in the unread case: no edged diagram, caveated or not, and no second "likely flow" / "canonical pipeline order" block that smuggles the same arrows back in. Inferring `ingest --> transform --> sink` from folder names is exactly the forbidden move.
 
+**Self-check (code gate, not honor system):** after writing any doc with a mermaid/flow diagram, run `lib/lint-mermaid-grounding.sh <output-file>`. Exit 2 = directional edges without a source citation, or a canonical/likely-layout block smuggling edges back in. On fail, replace the edged diagram with an edgeless inventory or an "insufficient source" note and re-run until exit 0. Two prose re-fixes leaked here; the lint is the backstop.
+
 Generate appropriate diagrams based on project type:
 
 ### Module Relationship Diagram (all projects)
