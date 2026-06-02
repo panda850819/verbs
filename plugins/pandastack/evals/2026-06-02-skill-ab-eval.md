@@ -880,3 +880,32 @@ Burn-in on the 3 boundary-help + 4 bug-hiding skills. 4 fixed fixtures x 3 runs/
 | NA — needs side-effect eval | agent-browser, checkpoint, init |
 
 Methodology win: burn-in killed careful + eng-lead (1-run 'help' = single-fixture luck), rescued dojo (1-run wrongly condemned it), confirmed gatekeeper/boardroom noise. Measuring once was not enough.
+
+---
+
+# Cut analysis (dependency check, 2026-06-02) — RESULT: cut 0
+
+Before cutting the 8 "format-only noise" skills, checked who references them:
+
+```
+eng-lead    ← sprint office-hours product-lead boardroom design-lead ops-lead
+ceo         ← sprint office-hours product-lead team-orchestrate boardroom
+design-lead ← sprint office-hours product-lead review boardroom eng-lead ops-lead
+ops-lead    ← sprint office-hours product-lead boardroom
+boardroom   ← sprint office-hours dojo grill
+```
+
+Every lens skill is a COMPONENT other (KEEP-verdict) skills compose: sprint
+routes to them by scope, boardroom convenes them as 4 voices, product-lead /
+office-hours / dojo / grill reference them. Cutting any breaks a KEEP skill.
+
+Their A/B "noise" verdict is the same measurement error as the NA bucket: A/B
+scores single-skill-loaded single-output correctness, but a lens skill's value
+is as a composable part invoked BY an orchestrator. The test measures the wrong
+axis. Same for sprint (lifecycle), qa (browser), freeze (scope-lock).
+
+**Decision: cut 0 skills.** The 8 "noise" + 3 "na" all need side-effect /
+composition eval, not load-vs-not A/B. The actionable output of this whole eval
+is the 6 guard-bug fixes (committed) + the 2 hurt skills (review, office-hours)
+patched, NOT deletions. Nisi's "delete 95%" does not transfer when the skills
+are a composed system rather than 34 independent doc-generated skills.
