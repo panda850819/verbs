@@ -1,6 +1,6 @@
 {
   "name": "pandastack",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Personal AI operator OS: skill-only stack with 38 skills (tiered core/ext/personal via manifest.toml), 5 scenario flows (sprint / office-hours / boardroom / dojo / retro), 5 persona skills, 11 lib/ shared modules. Covers dev / knowledge / writing / work / research / retro / decision lifecycles with a learning loop.",
   "author": {
     "name": "Panda Zeng",

@@ -58,7 +58,13 @@ Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project us
    {One sentence: what to do first when resuming.}
    ```
 
-3. Output: "Checkpoint saved. Resume with `/checkpoint resume`."
+3. If this maps to a brain project page (`projects/{slug}.md` exists), record the EVL datapoint deterministically (idempotent per-day; auto-skips METRICS for repo-backed projects, refreshing only `next`):
+   ```bash
+   project-state append {slug} --done {N} --open {N} --blocked {N} --next "{resume hint}"
+   ```
+   Best-effort — skip silently if `project-state` or the page is absent.
+
+4. Output: "Checkpoint saved. Resume with `/checkpoint resume`."
 
 ## Resume
 

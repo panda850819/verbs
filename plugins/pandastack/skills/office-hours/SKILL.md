@@ -15,6 +15,7 @@ reads:
 writes:
   - vault: Inbox/office-hours-*.md
   - vault: docs/briefs/*.md
+  - vault: docs/plans/*.md
   - cli: stdout
 domain: shared
 classification: lifecycle-flow
@@ -223,6 +224,46 @@ Persona for next skill (per lib/skill-decision-tree.md routing table):
 ```
 
 Print path. Surface the "Next skill (recommended)" block from the brief verbatim — that's the routing decision per `lib/skill-decision-tree.md`. Do NOT close with "want me to start it for you?" — operator says next skill name directly.
+
+### Stage 5b: Emit executable plan (when the next step is execution)
+
+If the chosen approach routes to `/sprint` or `/team-orchestrate` (there is build work to do, not a pure decision), ALSO write an executable plan to `docs/plans/{slug}.md` (NO date prefix — the date lives in frontmatter; readers `/sprint --plan {slug}` / `--continue {slug}` / `/ship codex {slug}` resolve by bare slug, so write and read must match). One active plan per slug; re-planning the same topic overwrites it. Skip this stage for pure-decision briefs with no execution.
+
+The brief is the **WHY** (problem, premise, rationale). The plan is the **WHAT** (tasks, acceptance, deps). Keep them strictly separate — do NOT copy the brief's rationale into the plan, do NOT put task IDs in the brief. Each fact lives in exactly one file (else the two drift).
+
+```markdown
+---
+slug: {slug}
+date: {YYYY-MM-DD}
+type: plan
+source: office-hours
+brief: docs/briefs/{YYYY-MM-DD}-{slug}.md
+execution: {code | knowledge-work}
+status: todo
+---
+
+# {Topic} — executable plan
+
+> WHAT only. WHY is in the brief (`brief:` above). Agents read this file; per-task `status:` is DERIVED from git at execute time, never hand-edited mid-sprint.
+
+## Tasks
+
+### {slug}-T01 — {title}
+- scope: {files / paths this task touches}
+- acceptance: {a concrete greppable or runnable check that proves it done}
+- depends-on: {none | U-ID list}
+- status: todo
+
+### {slug}-T02 — {title}
+- scope: ...
+- acceptance: ...
+- depends-on: {slug}-T01
+- status: todo
+```
+
+Then add ONE pointer line to the brief under `## Chosen approach`: `Executable plan: docs/plans/{slug}.md`. Print both paths.
+
+`acceptance:` MUST be a concrete check (a grep, a test/lint command, a file-exists assertion) — `/sprint --plan` derives per-task done/skip from it. A task with no checkable acceptance forces sprint back to the iteration counter, so write checks, not vibes. This plan file is also the cross-session resume checkpoint and the Codex handover payload — one artifact, three jobs.
 
 ## Anti-patterns
 

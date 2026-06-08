@@ -1,7 +1,7 @@
 {
   "name": "pandastack",
   "description": "Personal AI operator OS for Claude Code. Skill-only (no agents, no commands), 38 skills tiered as 27 core / 5 ext / 6 personal via plugins/pandastack/manifest.toml. 7 lifecycle flows, 5 scenario flow commands (sprint / office-hours / boardroom / dojo / retro), 5 persona skills (ceo + 4 -lead). Covers dev / knowledge / writing / work / research / retro / decision lifecycles.",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "author": {
     "name": "Panda Zeng"
   },

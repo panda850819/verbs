@@ -57,7 +57,6 @@ For greenfield design (DB schema / service topology / ADRs), use `eng-lead` pers
 |---|---|---|
 | `pandastack:retro-week` | Three-phase weekly retro (Auto-scan → Interview → Write). Phase 1 scans vault files directly (rg / find on `Blog/_daily/` + `Inbox/ship-log/`) to fetch retro inputs. | weekly retro |
 | `pandastack:retro-month` | Three-phase monthly retro (with weekly retros referenced) | monthly retro |
-| `pandastack:done` | Save session context, persist memory | session done, /done |
 
 ### Tool wrappers (1:1 with public CLIs)
 
@@ -146,13 +145,6 @@ If you're reviewing your own PR → `pandastack:review`. If you're deciding whet
 | git (default) | `/ship` (no args) or `/ship <branch-flag>` | test + commit + push + PR |
 | knowledge | `/ship knowledge <path>` or `/ship knowledge/...` or `/ship decisions/...` | Close + Extract + Backflow on a knowledge note. Decision-note variant (path matches `decisions/`) handles work-topic close — also writes `Inbox/ship-proposals/` markdown for manual external push. Replaces v2.1 `work-ship`. |
 | write | `/ship write <draft>` or `/ship Blog/_daily/...` | Close + Extract + Backflow on a Blog draft |
-
-### `done` vs `retro-week`
-
-`pandastack:done` = end of one session (commit + memory persist + brief summary).
-`pandastack:retro-week` = aggregate over 7 days, interactive interview.
-
-Different time horizons, both legitimate. Run `done` daily, `retro-week` once a week.
 
 ---
 
@@ -249,7 +241,7 @@ Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed
 | Added in v1 from `~/.claude/skills/` (local) | grill, retro-week, retro-month, gatekeeper, deepwiki, agent-browser |
 | Persona skills | ceo, eng-lead, design-lead, ops-lead, product-lead |
 | Decision/sprint flow | sprint, dojo, office-hours, boardroom, team-orchestrate |
-| Meta | using-pandastack, init, done |
+| Meta | using-pandastack, init |
 | Writing | write |
 
 ---
