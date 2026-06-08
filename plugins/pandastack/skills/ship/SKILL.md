@@ -78,6 +78,8 @@ Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses) 
 Search `{learnings_dir}` for `type: pitfall` related to the changed files.
 If any match, do a quick sanity check against the diff before proceeding.
 
+Also best-effort search `{brain}/learnings/{pitfalls,patterns,architecture}/` — the auto-sedimented learnings from past sessions (transcript-ingest). Skip silently if `{brain}` is unset or absent (Zero-Dependencies: a brain-less clone just uses `{learnings_dir}`). This is the READ side that closes the compound loop — a learning that sedimented from a past session surfaces here before you ship related work.
+
 ### Step 3: Scope Check
 
 If a brief exists for this branch (check `docs/briefs/`):

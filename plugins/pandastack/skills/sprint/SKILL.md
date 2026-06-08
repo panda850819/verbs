@@ -78,6 +78,8 @@ Abort or degrade per probe rules. Output probe block as opening.
 
 Invoke `skills/dojo/SKILL.md` for the topic. Output prep brief, print path. User reads, then continues.
 
+Best-effort: also surface `{brain}/learnings/` pages matching the topic (the auto-sedimented learnings from transcript-ingest) so plan-time context includes past lessons. Skip silently if `{brain}` is absent. (Semantic two-brain `gbrain query` is the private-overlay upgrade; this flat glob is the public, Zero-Dependencies-safe baseline that closes the write→read loop.)
+
 ### Stage 2: Grill (lite, skip if `--quick`)
 
 Run `skills/grill/SKILL.md` in default (adversarial) mode with **3-question cap** (not full 7). Cover:
