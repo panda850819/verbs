@@ -2,7 +2,7 @@
 name: boardroom
 mode: skill
 description: |
-  Multi-voice plan critique: one skill chains 4 voices (CEO, product, design, eng) sequentially, per-finding Apply? [Y/N/edit] gate, rejected findings route to OPEN_QUESTIONS. Triggers on /boardroom, "review this plan", "leadership review", "4-voice critique".
+  Multi-lens plan critique router for prepared plans: sequential CEO, product, design, and engineering review with per-finding Apply? [Y/N/edit] gate. Invoke explicitly via /boardroom, leadership review, 4-voice critique, or review-this-plan. NOT for tactical execution, loose ideas, single-domain review, or ordinary planning.
 reads:
   - repo: lib/persona-frame.md
   - repo: lib/outside-voice-rule.md
@@ -34,6 +34,12 @@ capability_required:
 # Boardroom — 4-voice plan critique
 
 > Replaces persona-pipeline (deleted v1.1). Same outcome, single skill, no agent chain. Each voice loads its own SKILL.md cognitive model + iron laws + on-invoke protocol via `lib/persona-frame.md`, critiques in its own posture, hands off to next voice. User gates each finding.
+
+## Routing Boundary
+
+Use this as the multi-lens router only when there is a plan, proposal, PRD, or strategy draft ready for cross-functional critique. It coordinates role lenses; it is not a default persona layer.
+
+Do not invoke for loose ideas that still need shaping, tactical execution, code debugging, ordinary planning, or single-domain review. Use the single role lens directly when only one lens is needed.
 
 ## When to invoke
 
