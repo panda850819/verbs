@@ -16,6 +16,7 @@ reads:
   - repo: skills/ship/SKILL.md
   - repo: skills/design-lead/SKILL.md
   - repo: lib/verify-the-test-loop.md
+  - repo: skills/sprint/references/codex-delegation.md
   - vault: knowledge/**
   - vault: docs/learnings/**
   - vault: docs/plans/**
@@ -63,6 +64,7 @@ capability_required:
 - `--design`: auto-invoke design-lead skill at execute stage (replaces `commands/design.md`)
 - `--plan {path|slug}`: execute against a durable plan at `docs/plans/{slug}.md` (the artifact `/office-hours` Stage 5b emits). Sprint reads it READ-ONLY and derives per-task progress from git — see Stage 3 plan-driven execution. Auto-detects `docs/plans/{slug}.md` when a plan for the topic exists.
 - `--continue {slug}`: resume a PAUSED sprint. Skips dojo + grill; loads the PAUSED checkpoint + `docs/plans/{slug}.md`, recomputes which U-IDs are already done (git + acceptance), and resumes at the first non-done task.
+- `--delegate codex`: in Stage 3, hand a batch of ≥5 mechanical units to Codex via `codex exec` (synchronous, in-loop). Default OFF — sprint uses free Claude subagents unless this flag is set or the batch clears the crossover. Requires a plan file. See `references/codex-delegation.md`. For ASYNC handover that frees this session, use `/ship codex`.
 
 ## Stages
 
@@ -96,6 +98,8 @@ Run `skills/grill/SKILL.md` in default (adversarial) mode with **3-question cap*
 - If a task has no checkable `acceptance:`, fall back to the `iteration` counter for that task and flag it in the narrate line.
 
 When no plan file is present, execute conversationally as before (this block is a no-op).
+
+**Codex delegation (when `--delegate codex`, or a plan batch ≥5 mechanical units):** instead of executing the batch with Claude, hand it to Codex via `codex exec`, keeping planning / review / git on Claude. Default OFF. Read `references/codex-delegation.md` for the gate, pre-checks, the verified invocation, the 5-row result classification, and the circuit breaker. This is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/ship codex` instead.
 
 @../../lib/skill-decision-tree.md applies — read the persona routing table.
 

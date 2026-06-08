@@ -6,6 +6,7 @@ description: |
   - /ship                    → git mode: test, commit, push, PR
   - /ship knowledge <path>   → vault: Close + Extract + Backflow on a knowledge/ note
   - /ship write <draft>      → vault: Close + Extract + Backflow on a Blog/_daily draft
+  - /ship codex [slug]       → vault: package plan + diff + open-Qs as an async Codex handover
   Vault modes never write to external systems.
   Use when asked to "ship", "create PR", "ship this note", "publish this draft".
 reads:
@@ -43,6 +44,7 @@ Pick mode from first arg:
 |---|---|---|
 | `knowledge` | knowledge mode | @./modes/knowledge.md |
 | `write` | write mode | @./references/modes/write-mode.md |
+| `codex` | codex handover mode | @./references/modes/codex-mode.md |
 | (none, or a path/flag for git) | git mode | continue below |
 
 If first arg is a path (no explicit mode word), sniff:
@@ -186,3 +188,9 @@ project-state append {slug} --done {N} --open {N} --blocked {N} --next "{one-lin
 ## Write mode
 
 @./references/modes/write-mode.md
+
+---
+
+## Codex handover mode
+
+@./references/modes/codex-mode.md
