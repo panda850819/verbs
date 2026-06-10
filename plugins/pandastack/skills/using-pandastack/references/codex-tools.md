@@ -78,7 +78,7 @@ Many pandastack skills (especially `tool-*`) invoke Panda's local CLI tools. The
 
 Notion / Slack ops moved to **Claude.ai Notion / Slack MCP** in v2.2.0 (OAuth, no local token). The decision-note variant of `/ship knowledge` writes proposals to `Inbox/ship-proposals/` as markdown — the user walks the `[ ]` items manually via MCP.
 
-Personal-tier CLI dependencies (`bird`, `gog`, `feed-server`, `defuddle`) are required only by skills in the `pandastack-private` overlay — see that repo's RESOLVER.md. (Notion + Slack + Jira ops retired from CLI in 2026-05; now MCP-only — see Tool Routing in `~/.agents/AGENTS.md`.)
+Personal-tier CLI dependencies (`bird`, `gog`, `feed-server`, `defuddle`) are required only by skills in the personal overlay (`~/.agents/skills/` — see its RESOLVER-private.md). (Notion + Slack + Jira ops retired from CLI in 2026-05; now MCP-only — see Tool Routing in `~/.agents/AGENTS.md`.)
 
 If a pandastack skill calls one of these and the binary is not installed, the skill will fail with a clear "command not found" error. These skills are intentionally local-environment-bound — there is no graceful cross-CLI fallback.
 

@@ -13,41 +13,31 @@ source: manual
 Three-phase flow:
 - **Phase 1 (Auto-scan)** — git log 30 days, learnings health, reference last 4 retro-week files; produce a raw scan block
 - **Phase 2 (Interview)** — strategic conversation ONE question at a time using scan + prep as data
-- **Phase 3 (Write)** — write final retro to docs/retros/monthly/
+- **Phase 3 (Write)** — write final retro to brain/reflections/monthly/
 
-Run AFTER the cron-driven `personal-monthly-retro` skill has produced a prep brief, OR run standalone (Phase 1 will generate raw data).
+**Data source = the BRAIN, not the retired obsidian-vault.** Phase 1 raw-data gathering is done by the shared, runtime-agnostic engine so Claude / Codex / Hermes all produce the same brief:
+
+```bash
+bash ~/site/skills/pandastack/plugins/pandastack/scripts/retro-scan.sh month
+# → writes brain/inbox/retros/<date>-retro-month-prep.md and prints its path
+```
+
+Run standalone OR after a Hermes cron has pre-generated the brief. Then read it and print a compressed scan block before Phase 2.
 
 ---
 
 ## Phase 1: Auto-scan (raw data, no interpretation)
 
-Run all commands. Print the raw scan block to user before Phase 2.
+Run the shared engine (above), then read its output. It covers git activity (brain + ~/site repos, past 30d), learnings health, recent brain pages, gbrain synthesis, and the cross-runtime GC sweep. The sub-sections below document what it gathers.
 
-### 1a. Git activity — past 30 days across active repos
+### 1a. Git activity (past 30 days)
 
-```bash
-SINCE="30 days ago"
-VAULT="<personal-vault>"
-cd "$VAULT" && git log --since="$SINCE" --oneline --no-merges | wc -l
-cd "$VAULT" && git shortlog --since="$SINCE" -sn
-```
-
-Also scan additional repos:
-
-```bash
-# Scan additional active repos. Default locations follow Panda's setup; adjust in private overlay if different.
-for d in "$HOME/site/skills/"* "$HOME/site/apps/"* "$HOME/site/cli/"* "$HOME/site/trading/"*; do
-  [ -d "$d/.git" ] && cd "$d" && git log --since="$SINCE" --oneline --no-merges 2>/dev/null | wc -l
-done
-for d in "$HOME/site/apps/"* "$HOME/site/cli/"* "$HOME/site/trading/"*; do
-  [ -d "$d/.git" ] && echo "--- $d ---" && cd "$d" && git log --since="$SINCE" --oneline --no-merges 2>/dev/null | wc -l
-done
-```
+Engine runs `git log` over the brain repo and every `~/site/{skills,apps,cli,trading}/*` repo. Summarize total commits + key deliverables by repo.
 
 ### 1b. Learnings health — past 30 days
 
 ```bash
-LEARNINGS_DIR="<personal-vault>/docs/learnings"
+LEARNINGS_DIR="$HOME/site/knowledge/brain/learnings"
 # Count total
 ls "$LEARNINGS_DIR"/*.md 2>/dev/null | wc -l
 # Count new this month
@@ -61,7 +51,7 @@ If `$LEARNINGS_DIR` not found: note "learnings/ dir not found — skip" and cont
 ### 1c. Reference last 4 retro-week files
 
 ```bash
-RETRO_WEEKLY="<personal-vault>/docs/retros/weekly"
+RETRO_WEEKLY="$HOME/site/knowledge/brain/reflections/weekly"
 ls "$RETRO_WEEKLY"/*.md 2>/dev/null | sort -r | head -4
 ```
 
@@ -70,7 +60,7 @@ For each found file, extract:
 - `## Obsolete-yourself Candidate` section (one line)
 - `## What I'm Sitting With` section (one line)
 
-If `docs/retros/weekly/` is empty (no weekly retros run yet this month), note "no weekly retros to reference, scan-only month" and continue.
+If `brain/reflections/weekly/` is empty (no weekly retros run yet this month), note "no weekly retros to reference, scan-only month" and continue.
 
 ### 1d. Print raw scan block
 
@@ -78,7 +68,7 @@ If `docs/retros/weekly/` is empty (no weekly retros run yet this month), note "n
 === MONTH SCAN: $YEAR-$MONTH ===
 
 GIT ACTIVITY (past 30 days)
-[repo: obsidian-vault]  N commits
+[repo: brain]           N commits
 [repo: ...]             N commits
 
 LEARNINGS HEALTH
@@ -103,8 +93,8 @@ Then say: **"掃完了。要開始月度 interview 嗎？"** — wait for user.
 
 ```bash
 LAST_MONTH=$(date -v-1m +%Y-%m)
-# Cron writes prep to Inbox/cron-reports/$DATE-retro-month-prep.md (most recent month-end)
-PREP=$(ls -t "<personal-vault>/Inbox/cron-reports/"*-retro-month-prep.md 2>/dev/null | head -1)
+# Engine (and any Hermes cron) writes prep to brain/inbox/retros/$DATE-retro-month-prep.md
+PREP=$(ls -t "$HOME/site/knowledge/brain/inbox/retros/"*-retro-month-prep.md 2>/dev/null | head -1)
 ```
 
 If prep file exists: print compressed summary in Traditional Chinese, max 40 lines:
@@ -163,10 +153,10 @@ For each `status: active` pattern in feedback-log.md:
 Ensure output directory exists:
 
 ```bash
-mkdir -p "<personal-vault>/docs/retros/monthly"
+mkdir -p "$HOME/site/knowledge/brain/reflections/monthly"
 ```
 
-Write `docs/retros/monthly/$YEAR-$MONTH.md`:
+Write `brain/reflections/monthly/$YEAR-$MONTH.md` (brain, not vault):
 
 ```markdown
 ---
@@ -235,7 +225,7 @@ weekly_retros_referenced: [W$N, W$N-1, W$N-2, W$N-3]
 - Update feedback-log.md status changes
 - If goals in me.md need update: ask user to confirm new wording, then edit `<memory-dir>/user_*.md` accordingly, then run the user's `me.md` rebuild command (e.g. `bash ~/.claude/scripts/build-me.sh` if such a script exists in the harness)
 - Update prep brief frontmatter `status: complete` if prep file exists
-- `git add + commit "chore(personal): monthly retro $YEAR-$MONTH (interactive)" + push`
+- Do NOT manually git commit/push — the brain's `com.pbrain.autocommit` (every 15 min) commits, pushes, and embeds.
 
 ---
 

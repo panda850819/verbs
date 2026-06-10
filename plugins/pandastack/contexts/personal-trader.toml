@@ -22,7 +22,7 @@ public = [
   "pandastack:retro-month",
   "pandastack:done",
 ]
-private = []  # extended by private overlay (bird, chain-scout — tier=personal — load via pandastack-private/contexts/personal-trader.overlay.toml)
+private = []  # extended by private overlay (bird, chain-scout — tier=personal — load via ~/.agents/contexts/personal-trader.overlay.toml)
 
 [memory]
 namespace    = "personal/trader"
@@ -39,5 +39,5 @@ deny = [
 
 [notes]
 # Public base: research + framing skills only. On-chain chip-structure analysis (chain-scout)
-# is sensitive position-adjacent logic and is added via overlay in pandastack-private.
+# is sensitive position-adjacent logic and is added via the personal overlay in ~/.agents/contexts/.
 # Firewall is wider than other personal contexts: trader memory must not bleed into developer or writer sessions either.

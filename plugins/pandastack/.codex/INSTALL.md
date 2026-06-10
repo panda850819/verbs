@@ -33,7 +33,7 @@ Enable pandastack skills in Codex via native skill discovery. Just clone and sym
 Pandastack's `using-pandastack` skill supports a private overlay that adds personal vault paths, private skill triggers, and active experiment windows. To enable:
 
 ```bash
-export PANDASTACK_OVERLAY=$HOME/site/skills/pandastack-private/overlays/using-pandastack.md
+export PANDASTACK_OVERLAY=$HOME/.agents/overlays/using-pandastack.md
 ```
 
 The SessionStart hook appends the overlay file to the public contract. If the overlay is missing, the public contract still works on its own.
@@ -71,6 +71,6 @@ Pandastack is designed Claude-Code-first but the lifecycle skills are CLI-agnost
 - **Needs Codex tool mapping** (uses `Skill` / `Agent` / subagent dispatch): see `skills/using-pandastack/references/codex-tools.md`
 - **Local-environment-bound** (depends on Panda's local CLIs): `agent-browser`, `qa` (npm `agent-browser`), `deepwiki` (curl + jq). These will fail with clear "command not found" errors if dependencies are missing — that's intentional, not a bug.
 
-Personal-tier skills (`bird`, `brief-morning`, `evening-distill`, `curate-feeds`) and Notion / Slack ops moved to the `pandastack-private` overlay or to Claude.ai MCP servers in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
+Personal-tier skills (`bird`, `brief-morning`, `evening-distill`, `curate-feeds`) and Notion / Slack ops moved to the personal overlay (`~/.agents/skills/`) or to Claude.ai MCP servers in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
 
 If you want to use only the portable subset, you can symlink individual skill directories instead of the whole `skills/` folder.

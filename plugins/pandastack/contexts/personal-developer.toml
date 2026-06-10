@@ -29,7 +29,7 @@ public = [
   "pandastack:retro-month",
   "pandastack:done",
 ]
-private = []  # personal-tier skills live in pandastack-private overlay (bird, brief-morning, evening-distill, curate-feeds)
+private = []  # personal-tier skills live in the personal overlay at ~/.agents/skills/ (bird, brief-morning, evening-distill, curate-feeds)
 
 [memory]
 namespace    = "personal/developer"

@@ -83,7 +83,7 @@ If `distribution` includes `twitter`, generate `Inbox/x-drafts/<slug>.md`:
 - 7-12 tweet thread, each <280 chars
 - Hook tweet first
 - Tail tweet links back to blog post
-- DO NOT post — manual posting later (via `pandastack-private:bird` if you have the overlay, or X UI directly)
+- DO NOT post — manual posting later (via the `bird` skill if installed, or X UI directly)
 
 ### 1.7 Show & Confirm (gate)
 

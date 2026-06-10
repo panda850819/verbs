@@ -6,7 +6,7 @@
 #
 # Two-tier content:
 #   1. Public contract: ${PLUGIN_ROOT}/skills/using-pandastack/SKILL.md
-#   2. Optional private overlay: ${PANDASTACK_OVERLAY:-$HOME/site/skills/pandastack-private/overlays/using-pandastack.md}
+#   2. Optional private overlay: ${PANDASTACK_OVERLAY:-$HOME/.agents/overlays/using-pandastack.md}
 #
 # Overlay is appended to the public contract before injection. If the overlay
 # file is missing, the public contract is injected on its own.
@@ -17,7 +17,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 public_file="${PLUGIN_ROOT}/skills/using-pandastack/SKILL.md"
-overlay_file="${PANDASTACK_OVERLAY:-$HOME/site/skills/pandastack-private/overlays/using-pandastack.md}"
+overlay_file="${PANDASTACK_OVERLAY:-$HOME/.agents/overlays/using-pandastack.md}"
 
 if [ ! -f "$public_file" ]; then
   printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":""}}\n'

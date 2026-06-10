@@ -17,61 +17,32 @@ Multi-phase flow:
 - **Phase 2 (Interview)** — show raw scan + synthesis + GC proposals to user, conduct interview ONE question at a time
 - **Phase 3 (Write)** — write final retro to docs/retros/
 
-Run AFTER the cron-driven `personal-weekly-retro` skill has produced a prep brief, OR run standalone (Phase 1 will generate the raw data itself).
+**Data source = the BRAIN, not the retired obsidian-vault.** All Phase 1 / 1.5 / 1.6 raw-data gathering is done by the shared, runtime-agnostic engine so Claude / Codex / Hermes all produce the same brief:
+
+```bash
+bash ~/site/skills/pandastack/plugins/pandastack/scripts/retro-scan.sh week
+# → writes the prep brief to brain/inbox/retros/<date>-retro-week-prep.md and prints its path
+```
+
+Run standalone OR after a Hermes cron has already pre-generated the brief (same script, same output path). Then read that brief and print a compressed scan block to the user before Phase 2.
 
 ---
 
 ## Phase 1: Auto-scan (raw data, no interpretation)
 
-Run all commands. Print the raw scan block to user before moving to Phase 2.
+Run the shared engine (above), then read its output. The engine already covers: git activity (brain + ~/site repos), learnings health, recent brain pages (sessions/decisions/reflections), gbrain synthesis, and the cross-runtime GC sweep. Print the brief's raw blocks to the user. The sub-sections below document what the engine gathers (for transparency / manual fallback).
 
-### 1a. Git activity — obsidian-vault (past 7 days)
+### 1a. Git activity (past 7 days)
 
-```bash
-SINCE="7 days ago"
-VAULT="<personal-vault>"
-cd "$VAULT" && git log --since="$SINCE" --oneline --no-merges
-cd "$VAULT" && git shortlog --since="$SINCE" -sn
-```
+Engine runs `git log` over the brain repo and every `~/site/{skills,apps,cli,trading}/*` repo. Summarize: total commits across repos, key deliverables by repo name.
 
-Also scan additional repos if user has active work there this week:
+### 1b. Learnings health — `brain/learnings/`
 
-```bash
-# Scan additional active repos. Default scan locations follow Panda's setup
-# (~/site/skills/, ~/site/apps/, ~/site/cli/, ~/site/trading/) — adjust to
-# your own layout in a private overlay if different.
-for d in "$HOME/site/skills/"* "$HOME/site/apps/"* "$HOME/site/cli/"* "$HOME/site/trading/"*; do
-  [ -d "$d/.git" ] && echo "--- $d ---" && cd "$d" && git log --since="$SINCE" --oneline --no-merges 2>/dev/null | head -5
-done
-```
+Engine counts total / new-this-week / stale(90d+) under `$HOME/site/knowledge/brain/learnings/`. If missing, it notes "learnings/ not found — skip".
 
-Summarize: total commits across repos, key deliverables by repo name.
+### 1c. Recent brain activity — past 7 days
 
-### 1b. Learnings health — vault learnings/ dir
-
-```bash
-LEARNINGS_DIR="<personal-vault>/docs/learnings"
-# Count total
-ls "$LEARNINGS_DIR"/*.md 2>/dev/null | wc -l
-# Count new this week (created in last 7 days)
-find "$LEARNINGS_DIR" -name "*.md" -newer <(date -v-7d +%Y-%m-%d) 2>/dev/null | wc -l
-# Check for stale (files not modified in 90+ days)
-find "$LEARNINGS_DIR" -name "*.md" -not -newer <(date -v-90d +%Y-%m-%d) 2>/dev/null | wc -l
-```
-
-If `$LEARNINGS_DIR` does not exist, note "learnings/ dir not found — skip health check" and continue.
-
-### 1c. Daily note highlights — past 7 days
-
-```bash
-DAILY_DIR="<personal-vault>/Blog/_daily"
-SINCE_DATE=$(date -v-7d +%Y-%m-%d)
-for f in $(ls "$DAILY_DIR"/*.md 2>/dev/null | sort -r | head -7); do
-  echo "=== $(basename $f) ===" && grep -E "^##|^- \[x\]|P0|decision|ship" "$f" | head -10
-done
-```
-
-Capture: action items marked `[x]`, any P0 events, key decisions mentioned.
+Engine lists recently-touched pages under `brain/sessions`, `brain/decisions`, `brain/reflections/daily`, `brain/plans`, `brain/projects`. Capture: key decisions, shipped work, open threads.
 
 ### 1d. Print raw scan block
 
@@ -81,7 +52,7 @@ Format as:
 === WEEK SCAN: $YEAR-W$WEEK_NUM ===
 
 GIT ACTIVITY (past 7 days)
-[repo: obsidian-vault]  N commits
+[repo: brain]           N commits
 [repo: ...]             N commits
 Key deliverables: ...
 
@@ -190,11 +161,18 @@ User has 3 options:
 # Do NOT capture into a var and re-loop with `for d in $VAR` — zsh and bash
 # word-split that expression differently and zsh treats it as one token.
 
-RECENT_FEEDBACK=$(find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 \
-  -path "*/memory/feedback_*.md" -mtime -7 2>/dev/null)
+# TRI-RUNTIME: scan all three runtimes' memory layers, not just Claude Code.
+#   Claude Code → ~/.claude/projects/*/memory/   Substrate (Codex+all) → ~/.agents/memory/
+#   Hermes → ~/.hermes/memories/                 Codex → ~/.codex/memories_*.sqlite (sqlite, inspect separately)
+RECENT_FEEDBACK=$( { \
+  find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 -path "*/memory/feedback_*.md" -mtime -7 2>/dev/null; \
+  find "$HOME/.agents/memory" -name "feedback_*.md" -mtime -7 2>/dev/null; \
+  find "$HOME/.hermes/memories" -name "*.md" -mtime -7 2>/dev/null; } )
 
-ALL_FEEDBACK=$(find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 \
-  -path "*/memory/feedback_*.md" 2>/dev/null)
+ALL_FEEDBACK=$( { \
+  find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 -path "*/memory/feedback_*.md" 2>/dev/null; \
+  find "$HOME/.agents/memory" -name "feedback_*.md" 2>/dev/null; \
+  find "$HOME/.hermes/memories" -name "*.md" 2>/dev/null; } )
 
 # Continue-failure logs (per careful skill "Stopping discipline" — each line
 # is one event where the agent had to ask the user instead of resolving via
@@ -228,6 +206,11 @@ filename / body keyword               → propose mechanism
 "second time", "Nth time"             → already covered by skill-gap rule, leave
                                         (do NOT propose — flag as already-mechanized)
 recurring pattern across 3+ files     → propose new skill
+universal rule, CC-project mem only   → promote to ~/.agents/memory/ (substrate;
+                                        Codex + Hermes read it). git mv + update
+                                        both MEMORY.md indexes. Exempt from the
+                                        count>=2 gate — relocation, not a new
+                                        mechanism. CC-local rule ≠ cross-CLI truth.
 ```
 
 4. **Cross-check MEMORY.md** — if the feedback is already indexed, mark `indexed:yes` (passive). If body has a `[[wikilink]]` to an existing skill, mark `linked:<skill>` (already partially mechanized).
@@ -323,8 +306,8 @@ Then say: **"GC sweep 完了。Phase 2 會把每個 proposal 變成 yes/no/defer
 WEEK_NUM=$(date +%V)
 YEAR=$(date +%Y)
 TODAY=$(date +%Y-%m-%d)
-# Cron writes prep to Inbox/cron-reports/$DATE-retro-week-prep.md (most recent Sunday)
-PREP=$(ls -t "<personal-vault>/Inbox/cron-reports/"*-retro-week-prep.md 2>/dev/null | head -1)
+# Engine (and any Hermes cron) writes prep to brain/inbox/retros/$DATE-retro-week-prep.md
+PREP=$(ls -t "$HOME/site/knowledge/brain/inbox/retros/"*-retro-week-prep.md 2>/dev/null | head -1)
 ```
 
 If prep file exists: read and print a compressed summary (Traditional Chinese, max 30 lines):
@@ -387,7 +370,7 @@ Ask exactly once at the end of the interview:
 
 ## Phase 3: Write final retro
 
-After interview, write `docs/retros/weekly/$YEAR-W$WEEK_NUM.md`:
+After interview, write `brain/reflections/weekly/$YEAR-W$WEEK_NUM.md` (brain, not vault):
 
 ```markdown
 ---
@@ -439,17 +422,17 @@ scan_data: true
 > Empty if 7d window had no recent corrections.
 ```
 
-Ensure `docs/retros/weekly/` directory exists before writing:
+Ensure `brain/reflections/weekly/` directory exists before writing:
 
 ```bash
-mkdir -p "<personal-vault>/docs/retros/weekly"
+mkdir -p "$HOME/site/knowledge/brain/reflections/weekly"
 ```
 
 ### Step 3b: Updates to other files
 
 - Update `feedback-log.md` for any pattern counter changes or status changes (use `Edit` tool, don't rewrite the file)
 - Update prep brief frontmatter `status: complete` if prep file exists
-- `git add + commit "chore(personal): weekly retro $YEAR-W$WEEK_NUM (interactive)" + push`
+- Do NOT manually git commit/push — the brain's `com.pbrain.autocommit` (every 15 min) commits, pushes, and embeds. Just write the file.
 
 ---
 

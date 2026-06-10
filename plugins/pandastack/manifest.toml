@@ -14,7 +14,7 @@
 #
 # v2.2 dropped the personal tier from this manifest. Personal-tier skills (those
 # requiring private CLIs like gog / bird / feed-server) live exclusively in the
-# `pandastack-private` overlay repo. The public package is now self-contained:
+# personal overlay (now `~/.agents/skills/`). The public package is now self-contained:
 # clone + install gives you everything in this manifest.
 #
 # Requires syntax:
@@ -41,7 +41,7 @@ updated = "2026-05-09"
 #     (folded into /ship knowledge as decision-note variant).
 #   - Deleted (use MCP): notion, slack — Claude.ai Notion/Slack MCP via OAuth
 #     replaces local-CLI-with-keychain-token model.
-#   - Moved to pandastack-private overlay: bird, brief-morning, evening-distill,
+#   - Moved to the personal overlay (~/.agents/skills/): bird, brief-morning, evening-distill,
 #     curate-feeds — all required private CLIs that cannot ship in a public
 #     package; the overlay is now their canonical home.
 #   - Deleted: plugins/pandastack/flows/ (7 .md specs). Lifecycle docs collapse
@@ -57,7 +57,7 @@ updated = "2026-05-09"
 # now also accept AGENTS.md (Codex parity).
 # v2.1.0: cut gbq / gbrain dependency. deep-research removed (gbrain-core skill).
 # brief-morning + evening-distill drop gbq vault-focus seed (use file scan instead).
-# Sommet skills + work-sommet-abyss-po context removed from pandastack-private.
+# Sommet skills + work-sommet-abyss-po context removed from the personal overlay.
 # v2.0.1: cut env var requirement (PANDASTACK_VAULT / PANDASTACK_USER_EMAIL /
 # PANDASTACK_HOME). Skills derive vault from cwd; gog uses default account; persona
 # dispatch uses plugin-relative path resolution.
@@ -195,7 +195,7 @@ description = "GitHub repo docs + Mermaid diagrams via deepwiki."
 # ============================================================================
 #
 # Personal-tier skills (private CLI dependencies) are NOT listed here. They
-# live exclusively in the `pandastack-private` overlay repo:
+# live exclusively in the personal overlay (`~/.agents/skills/`):
 #   - bird                     (private:bird) — X/Twitter read/write
 #   - brief-morning            (private:gog)  — daily 8am briefing
 #   - evening-distill          (private:gog)  — daily 10pm distill

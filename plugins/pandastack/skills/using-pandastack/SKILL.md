@@ -118,7 +118,7 @@ These thoughts mean you are about to skip a skill that applies. Stop and check.
 
 A personal / org overlay may be appended to this contract by the SessionStart hook. Resolution order:
 
-1. Sibling overlay: `<pandastack-private>/overlays/using-pandastack.md` if a `pandastack-private/` directory sits next to `pandastack/` on disk
+1. Personal overlay: `~/.agents/overlays/using-pandastack.md` (override with env `PANDASTACK_OVERLAY`)
 2. `${PANDASTACK_OVERLAY}` env var if explicitly set (escape hatch for non-standard layouts)
 3. (no overlay loaded — public contract is self-contained)
 
