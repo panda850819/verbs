@@ -101,11 +101,24 @@ Run `skills/grill/SKILL.md` in default (adversarial) mode with **3-question cap*
 
 When no plan file is present, execute conversationally as before (this block is a no-op).
 
-**Codex delegation (only when `--delegate codex` is passed):** instead of executing the batch with Claude, hand it to Codex via the `/handover` invocation, keeping planning / review / git on Claude. OFF by default, never auto-triggered. A batch of ≥3 mechanical units is the threshold at which it's worth *surfacing* the flag to the user, but the switch is always explicit. Read `references/codex-delegation.md` for the gate, batching, and the circuit breaker; it delegates each batch via `skills/handover/references/codex-invocation.md`. This is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async` instead.
+**Execution mode (default: architect + subagent build — Panda directive 2026-06-12):** the main session is the ARCHITECT, not the typist. For each non-trivial build unit:
+
+1. Main session writes a tight spec: files in scope, seams/interfaces, hard constraints, style anchor (which existing file to imitate), and a checkable acceptance condition per unit.
+2. Dispatch the unit to a runtime-native subagent (Claude Code: `Agent` tool; one unit = one agent; parallel dispatch ONLY when units are file-disjoint). The subagent gets the spec, not the persona file.
+3. Main session reviews the returned diff against the spec, re-verifies acceptance itself (build/test — subagent-reported green is never trusted), fixes integration seams, and owns all git operations.
+
+Carve-outs:
+- **Trivial unit** (single-file, mechanical, ~20 lines or less): main session edits directly — dispatch overhead exceeds the work.
+- **Interface-discovery work** (the seam itself is unknown until you write it): main session may execute the seam-defining unit, then dispatch the rest against the now-fixed interface.
+- **Runtime without a subagent mechanism** (e.g. plain `codex exec`): degrade to main-session execution and say so in the narrate line.
+
+Rationale: the architect's context window and judgment are the scarce resource; spend them on spec, review, and integration, not keystrokes. "Faster if I just write it myself" is the failure mode this default exists to prevent — it was true for the single unit and false for the sprint.
+
+**Codex delegation (only when `--delegate codex` is passed):** instead of dispatching units to free runtime subagents, hand a batch of mechanical units to Codex (burns Codex quota) via the `/handover` invocation, keeping planning / review / git on Claude. OFF by default, never auto-triggered. A batch of ≥3 mechanical units is the threshold at which it's worth *surfacing* the flag to the user, but the switch is always explicit. Read `references/codex-delegation.md` for the gate, batching, and the circuit breaker; it delegates each batch via `skills/handover/references/codex-invocation.md`. This is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async` instead.
 
 @../../lib/skill-decision-tree.md applies — read the persona routing table.
 
-Detect task shape from grill output (Stage 2) and load the matching persona skill as **in-session cognitive lens** (NOT subagent dispatch — sprint is single-track main-session-executor).
+Detect task shape from grill output (Stage 2) and load the matching persona skill as **in-session cognitive lens** for the ARCHITECT (the persona shapes spec + review judgment; it is NOT shipped to implementation subagents — they get the spec).
 
 Routing (read `lib/skill-decision-tree.md` § "Persona routing table"):
 
@@ -117,7 +130,7 @@ Routing (read `lib/skill-decision-tree.md` § "Persona routing table"):
 | Feature scoping / metric / PMF / pricing / user research | `skills/product-lead/SKILL.md` |
 | Kill / pivot / scope cut / strategic frame | `skills/ceo/SKILL.md` |
 
-Apply the loaded persona's Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns to all Stage 3 work in this same context. Persona is a lens, not a subagent — main session stays the executor.
+Apply the loaded persona's Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns to all Stage 3 work in this same context. Persona is a lens, not a subagent — it rides the architect (spec + review), while implementation runs per the Execution mode block above.
 
 **Single-persona discipline**: load ONE persona for the whole sprint. If the topic genuinely spans 2+ personas, split into multiple sequential sprints. Mixing personas mid-sprint dilutes the cognitive frame and produces inconsistent output.
 
