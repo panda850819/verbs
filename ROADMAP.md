@@ -60,3 +60,5 @@ Full reasoning, alternatives considered, and gate log live in the office-hours b
 - v1.x = stable, iterate the补丁 layer, lock the three primitives
 - v2 = explicit re-cut for public-readiness, not a free version bump
 - Open questions = not decisions; they get resolved as data arrives, not on a schedule
+
+- [ ] 2026-06-12 (PR #7 deferred): dojo SKILL.md still greps `Blog/_daily/` in its past-case scan path — dead dir post write-mode retirement, harmless but should be dropped next time dojo is touched.
