@@ -59,14 +59,47 @@ mkdir -p "$OUT_DIR"
   done
   echo
 
+  # NOTE on recency: brain file mtimes are rewritten by a post-commit process,
+  # so find -mtime is unreliable there. Git history (brain autocommits every
+  # 15 min) is the only valid recency signal for brain content. Bulk commits
+  # (>100 files, e.g. frontmatter migrations) are metadata churn, not content
+  # activity, so they are excluded from the recency signal.
+  BRAIN_GIT=0
+  [ -d "$BRAIN/.git" ] && BRAIN_GIT=1
+  # brain_recent_md <since>: .md paths from non-bulk commits, dupes preserved.
+  brain_recent_md() {
+    git -C "$BRAIN" log --since="$1" --pretty=format:'@@commit' --name-only 2>/dev/null \
+      | awk '
+        function flush(){ if (cnt > 0 && cnt <= 100) for (i = 0; i < n; i++) print buf[i]; n = 0; cnt = 0 }
+        /^@@commit/ { flush(); next }
+        /^$/ { next }
+        { cnt++; if ($0 ~ /\.md$/) buf[n++] = $0 }
+        END { flush() }'
+  }
+  # One git call for the window (used by sections 2+3+4).
+  RECENT_MD_STREAM=""
+  RECENT_MD=""
+  if [ "$BRAIN_GIT" -eq 1 ]; then
+    RECENT_MD_STREAM=$(brain_recent_md "$SINCE")
+    RECENT_MD=$(echo "$RECENT_MD_STREAM" | sort -u)
+  fi
+
   # ---- 2. Learnings health (brain/learnings) ----
   echo "## Learnings health"
   LDIR="$BRAIN/learnings"
   if [ -d "$LDIR" ]; then
     total=$(find "$LDIR" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-    fresh=$(find "$LDIR" -name '*.md' -mtime -"${DAYS}" 2>/dev/null | wc -l | tr -d ' ')
-    stale=$(find "$LDIR" -name '*.md' -mtime +90 2>/dev/null | wc -l | tr -d ' ')
-    echo "- Total: ${total} | New this ${MODE}: ${fresh} | Stale (90d+): ${stale}"
+    if [ "$BRAIN_GIT" -eq 1 ]; then
+      fresh=$(echo "$RECENT_MD" | grep -c '^learnings/')
+      touched90=$(brain_recent_md "90 days ago" | sort -u | grep -c '^learnings/')
+      stale=$(( total - touched90 ))
+      [ "$stale" -lt 0 ] && stale=0
+      echo "- Total: ${total} | New this ${MODE}: ${fresh} | Stale (90d+): ${stale}"
+    else
+      fresh=$(find "$LDIR" -name '*.md' -mtime -"${DAYS}" 2>/dev/null | wc -l | tr -d ' ')
+      stale=$(find "$LDIR" -name '*.md' -mtime +90 2>/dev/null | wc -l | tr -d ' ')
+      echo "- Total: ${total} | New this ${MODE}: ${fresh} | Stale (90d+): ${stale} (mtime fallback — unreliable after bulk rewrites)"
+    fi
   else
     echo "- learnings/ not found — skip"
   fi
@@ -76,7 +109,11 @@ mkdir -p "$OUT_DIR"
   echo "## Recent brain pages (past ${DAYS}d, by dir)"
   for sub in sessions decisions reflections/daily plans projects; do
     [ -d "$BRAIN/$sub" ] || continue
-    files=$(find "$BRAIN/$sub" -name '*.md' -mtime -"${DAYS}" 2>/dev/null | sort)
+    if [ "$BRAIN_GIT" -eq 1 ]; then
+      files=$(echo "$RECENT_MD" | grep "^$sub/" | sort)
+    else
+      files=$(find "$BRAIN/$sub" -name '*.md' -mtime -"${DAYS}" 2>/dev/null | sort)
+    fi
     cnt=$(echo "$files" | grep -c . )
     [ "${cnt:-0}" -eq 0 ] && continue
     echo "### $sub (${cnt})"
@@ -84,13 +121,18 @@ mkdir -p "$OUT_DIR"
     echo
   done
 
-  # ---- 4. gbrain synthesis (if available) ----
-  echo "## Brain synthesis (gbrain)"
-  if command -v gbrain >/dev/null 2>&1; then
-    echo "_Salient pages updated since ${SINCE_DATE}:_"
-    gbrain query "salient pages updated since ${SINCE_DATE}" 2>/dev/null | head -12 | sed 's/^/- /'
+  # ---- 4. Brain activity hotspots (git-derived) ----
+  # The old `gbrain query "salient pages updated since <date>"` asked the
+  # embedding index a temporal meta-question it cannot answer. Salience here
+  # is activity-derived from git; semantic synthesis happens in the interview
+  # layer via gbrain.
+  echo "## Brain activity hotspots (git-derived)"
+  if [ "$BRAIN_GIT" -eq 1 ]; then
+    echo "_Top brain pages by commit frequency in window (semantic synthesis happens in the interview layer via gbrain):_"
+    echo "$RECENT_MD_STREAM" | grep -v '^inbox/' | grep '\.md$' | sort | uniq -c | sort -rn | head -10 \
+      | awk '{printf "- %d× %s\n", $1, $2}'
   else
-    echo "- gbrain not on PATH — synthesis skipped"
+    echo "- brain is not a git repo — hotspots skipped"
   fi
   echo
 
