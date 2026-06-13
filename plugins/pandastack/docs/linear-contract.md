@@ -44,8 +44,11 @@ the issue. The scheduler treats EITHER signal (state `Needs Decision` OR label
 
 ## acceptance-format
 
-Each issue's machine-checkable success condition lives in the issue description
-as a fenced block the scheduler can parse:
+The full issue description follows the **work-order schema** (Goal / Project /
+Epic / Task / Context / Owner / Priority / Blocked-by / Acceptance / Needs-human /
+Deliverable) — canonical definition in brain
+`principles/goal-project-epic-task-ai-workflow.md`. The `Acceptance` field is a
+machine-checkable success condition, written as a fenced block the scheduler can parse:
 
 ````
 ```acceptance

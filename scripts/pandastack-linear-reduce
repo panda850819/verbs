@@ -23,17 +23,21 @@ import json
 import sys
 
 TERMINAL_STATES = {"Done", "Canceled", "Cancelled"}
+TERMINAL_TYPES = {"completed", "canceled", "cancelled"}
 GATE_STATE = "Needs Decision"
 GATE_LABEL = "needs-human"
-# states the scheduler fetches as candidates (everything not terminal); the
-# gate is applied on top of these, not as a separate fetch.
-ACTIVE_STATES = {"Backlog", "Planning", "Building", "Verifying", "In Review",
-                 # stock-Linear fallback names
-                 "Todo", "In Progress"}
+# active = anything not terminal (symphony model); the gate is applied on top.
+# No active-state allowlist: live Linear teams use custom state names, so we
+# classify by terminality + gate, not by a fixed name set.
 
 
-def is_terminal(state):
-    return state in TERMINAL_STATES
+def is_terminal(issue):
+    # accept a normalized issue dict (live Linear carries state_type) or a bare
+    # state string (fixtures, back-compat).
+    if isinstance(issue, dict):
+        return (issue.get("state") in TERMINAL_STATES
+                or issue.get("state_type") in TERMINAL_TYPES)
+    return issue in TERMINAL_STATES
 
 
 def is_gated(issue):
@@ -53,17 +57,14 @@ def reduce_issues(issues):
             blk = by_id.get(bid)
             # blocker not in the set → assume resolved/terminal (non-blocking);
             # present and non-terminal → still blocking.
-            if blk is not None and not is_terminal(blk.get("state", "")):
+            if blk is not None and not is_terminal(blk):
                 return True
         return False
 
     dispatchable, gated, blocked = [], [], []
     for i in issues:
-        state = i.get("state", "")
-        if is_terminal(state):
+        if is_terminal(i):
             continue                      # terminal: skipped entirely
-        if state not in ACTIVE_STATES and not is_gated(i):
-            continue                      # unknown non-active state, not gated
         if is_gated(i):
             gated.append(i)               # hard gate: surface, never dispatch
         elif blocker_open(i):
@@ -82,11 +83,49 @@ def load_fixture(path):
     return data["issues"] if isinstance(data, dict) and "issues" in data else data
 
 
-def load_linear(project_id):
-    # T03: pull active issues via Linear GraphQL using LINEAR_API_KEY, normalize
-    # into the issue shape above, hand to reduce_issues. Not implemented until the
-    # personal key exists (~/.config/pandastack/secrets.env).
-    sys.exit("error: --source linear not implemented yet (T03, needs LINEAR_API_KEY)")
+def load_linear(project_id=None):
+    import os
+    import urllib.request
+    key = os.environ.get("LINEAR_API_KEY")
+    if not key:
+        sys.exit("error: LINEAR_API_KEY not set (source ~/.config/pandastack/secrets.env)")
+    # pull non-terminal issues; blocked_by derived from inverse "blocks" relations.
+    flt = '{state: {type: {nin: ["completed","canceled"]}}}'
+    if project_id:
+        flt = '{and: [%s, {project: {id: {eq: "%s"}}}]}' % (flt, project_id)
+    query = ('{ issues(first: 100, filter: %s) { nodes { '
+             'identifier title priority createdAt '
+             'state { name type } '
+             'labels { nodes { name } } '
+             'inverseRelations { nodes { type issue { identifier } } } '
+             '} } }') % flt
+    req = urllib.request.Request(
+        "https://api.linear.app/graphql",
+        data=json.dumps({"query": query}).encode("utf-8"),
+        headers={"Authorization": key, "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            payload = json.loads(r.read().decode("utf-8"))
+    except Exception as e:
+        sys.exit(f"Linear API request failed: {e}")
+    if "errors" in payload:
+        sys.exit("Linear API error: " + json.dumps(payload["errors"], ensure_ascii=False))
+    out = []
+    for n in payload["data"]["issues"]["nodes"]:
+        blocked_by = [rel["issue"]["identifier"]
+                      for rel in n.get("inverseRelations", {}).get("nodes", [])
+                      if rel.get("type") == "blocks" and rel.get("issue")]
+        out.append({
+            "identifier": n["identifier"],
+            "title": n.get("title", ""),
+            "priority": n.get("priority", 0),
+            "state": n["state"]["name"],
+            "state_type": n["state"]["type"],
+            "labels": [l["name"] for l in n.get("labels", {}).get("nodes", [])],
+            "blocked_by": blocked_by,
+            "created_at": n.get("createdAt", ""),
+        })
+    return out
 
 
 def main():
