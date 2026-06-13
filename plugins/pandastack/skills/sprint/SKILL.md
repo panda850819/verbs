@@ -207,6 +207,22 @@ Print computed state to user. User can override (e.g. "actually let's pause this
 
 ### Stage 6: Terminal state handling
 
+**State emission (loop-in-agent).** At each terminal state, append one event to
+the machine-readable lifecycle store so a scheduler can see where this item
+landed (schema: `plugins/pandastack/docs/state-schema.md`). Best-effort: if the
+binary is absent or the runtime can't reach it, skip silently — the log is
+gap-tolerant. `slug` = repo basename, `item` = sprint slug.
+
+```
+scripts/pandastack-state append --slug {repo} --item {slug} \
+  --event {shipped|paused|failed|aborted} --phase {last phase} \
+  --skill sprint --runtime {claude-code|codex} [--ref {session-note}]
+```
+
+Emit AFTER the per-state handling below (so `--ref` can point at the written
+checkpoint / session note). SHIPPED emits `shipped`; PAUSED emits `paused` with
+the phase it parked in; FAILED/ABORTED emit `failed`/`aborted`.
+
 #### SHIPPED
 1. Invoke `skills/ship/SKILL.md` — runs commit + push + PR if applicable
 2. Trigger Extract + Backflow (writes to docs/sessions/, docs/learnings/,

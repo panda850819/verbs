@@ -86,6 +86,24 @@ Write ONE self-contained handoff to `docs/handoffs/{YYYY-MM-DD}-{slug}-codex.md`
 
 Async mode NEVER spawns codex and NEVER touches git — it only emits the artifact (vault-only, like ship's knowledge mode).
 
+## State emission (loop-in-agent)
+
+After the delegation actually happens — sync: once the codex result is collected
+(any status); async: once the handoff file is written — append one `delegated`
+event to the lifecycle store so a scheduler can see this item is being executed
+by Codex (schema: `plugins/pandastack/docs/state-schema.md`). Best-effort: skip
+silently if the binary is absent. `slug` = repo basename, `item` = handover slug.
+
+```
+scripts/pandastack-state append --slug {repo} --item {slug} \
+  --event delegated --skill handover --runtime codex \
+  --ref {commit-or-handoff-path}
+```
+
+This reduces to `status: in_progress, owner: codex` — the loop's Claude-orchestrates /
+Codex-executes split becomes visible in the state file. A later `/review` or
+`/ship` event (if the work continues on Claude) supersedes it.
+
 ## Boundaries
 
 - `docs/plans/{slug}.md` stays the source of truth for WHAT. The handoff is a derived snapshot — do not copy the brief's rationale into it.
