@@ -102,12 +102,7 @@ Log detected scopes: "Scope signals: {list}" (or "none" if only base code change
 
 Launch review passes in parallel using `context: fork` (isolated subagents — results flow back, intermediate work stays out of main context). Each reviews the same diff with a different lens.
 
-**Model routing** — pass `model: <name>` when spawning each Agent. Don't pay Opus tokens for mechanical checks; don't starve architecture with Haiku.
-
-| Pass | Model | Why |
-|---|---|---|
-| Correctness, Security, Migration, API, Auth, Infra | sonnet | Pattern-match against known bug shapes |
-| Architecture | opus | Deep reasoning about coupling and long-term trade-offs |
+**Model routing** — when spawning each Agent, the orchestrator judges which model fits that lens by its demands: a mechanical pattern-match pass and a deep architectural-reasoning pass have different needs. Pass `model:` per pass based on that judgment; decide by task nature at dispatch time rather than from a fixed model-name table.
 
 **Always-on passes (run every time):**
 

@@ -93,7 +93,7 @@ Agent({
   subagent_type: "general-purpose",
   prompt: "{persona block + hard rules + branch 1 brief}",
   isolation: "worktree",
-  model: "{per heuristic — sonnet default, opus for ceo strategic depth, haiku for pure read}",
+  model: "{conductor picks per branch by task nature — deeper reasoning for strategic / architectural branches, lighter for mechanical or read-only}",
 })
 Agent({
   description: "Branch 2 — {title}",
