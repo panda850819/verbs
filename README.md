@@ -4,7 +4,7 @@ Personal context-aware AI operator OS — one substrate, four runtimes, no vendo
 
 I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Personas are replaceable. Context recipes ship as TOML. Same content runs across Claude Code, Codex CLI, Gemini CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
-The stack is **27 skills** focused on dev, writing, and knowledge workflows, tiered into 24 core (markdown-only, fresh-clone runnable) and 3 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
+The stack is **26 skills** focused on dev, writing, and knowledge workflows, tiered into 24 core (markdown-only, fresh-clone runnable) and 2 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
 
 **v2.2 philosophy**: pandastack ships verbs. The brain (gbrain or your own knowledge store) keeps state. Lifecycle discipline is your job, not the package's. v2.2 dropped the `flows/` directory (7 spec files) and moved all personal-tier cadence skills (brief-morning, evening-distill, bird, curate-feeds) to the `pandastack-private` overlay. The public package is now self-contained: clone + install gives you everything in the manifest.
 
@@ -15,7 +15,7 @@ v2 is **personal-substrate stable**: API, schema, and skill content are stable f
 What this means for you:
 
 - If you are the author or a fork-and-learn power user, v2.2 is stable for daily use.
-- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (23 skills) should run on a clean clone.
+- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (24 skills) should run on a clean clone.
 - If you use Logseq / Roam / Notion instead of Obsidian, skills will reference Panda's vault conventions (`Blog/_daily/`, `Inbox/ship-log/`, etc.) — these are prompt defaults, not hard-coded interfaces. You'd adapt them per session or by editing skill text. There's no built-in adapter layer; whether that matters depends on your tolerance for hand-tuning conventions.
 
 **Who this is for:**
@@ -33,8 +33,8 @@ bash pandastack/scripts/bootstrap.sh --claude    # or --codex
 
 `bootstrap.sh` reports:
 - substrate state (`~/.agents/AGENTS.md` only)
-- 23 core skills runnable on this clone with no external CLI
-- 3 extension skills with the exact `brew install` / `npm install -g` to enable each
+- 24 core skills runnable on this clone with no external CLI
+- 2 extension skills with the exact `brew install` / `npm install -g` to enable each
 - Personal-tier skills are no longer in this manifest — they live in the `pandastack-private` overlay (private CLIs: gog, bird, feed-server)
 
 After install:
@@ -83,7 +83,7 @@ Cross-flow router (start here when you're not sure which composition applies):
 | Turn a draft into a published post | `/write` then manual publish | writing |
 | Make a raw note durable | `/ship knowledge <path>` | knowledge |
 | Close out a work topic / decision | `/ship knowledge <decisions/path>` | knowledge (decision-note variant) |
-| End a session / week / month | `/done` · `/retro-week` · `/retro-month` | (independent skills, no flow) |
+| End a session / week / month | `/checkpoint` · `/retro-week` · `/retro-month` | (independent skills, no flow) |
 
 **Express path for dev work**: `/sprint` chains DEFINE → SHIP internally for 1-2h focused tasks. Use sprint when one skill should drive the whole arc; use the manual phase-by-phase progression when stages need user gates between them (e.g. `/careful` for prod) or when the work spans multiple sessions.
 
@@ -281,7 +281,7 @@ Context recipes live in `plugins/pandastack/contexts/*.toml`. Each recipe binds 
 
 ## Skills
 
-27 skills grouped by lifecycle (24 core / 3 ext — see `plugins/pandastack/manifest.toml`). Persona names follow the gstack convention — each skill is "your specialist" for that step.
+26 skills grouped by lifecycle (24 core / 2 ext — see `plugins/pandastack/manifest.toml`). Persona names follow the gstack convention — each skill is "your specialist" for that step.
 
 ### Think / intake
 
@@ -345,8 +345,9 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 | Skill | Your specialist | What they do |
 |---|---|---|
 | `/init` | The Initializer | One-time pandastack init per project. Detects project type, writes config to CLAUDE.md. |
-| `/done` | Session Closer | Save context, summarize work, persist memory at session end. |
 | `/checkpoint` | The Bookmarker | Save / resume working state snapshots. |
+
+`/done` was cut (session close folded into `/checkpoint` + brain session pages; skill deleted in PR #5).
 
 ### Writing
 
@@ -358,22 +359,23 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 
 | Skill | Wraps |
 |---|---|
-| `/agent-browser` | Browser automation (npm `agent-browser`) |
 | `/deepwiki` | DeepWiki repo docs + Mermaid diagrams |
+
+`/agent-browser` was archived 2026-06-08 — the npm `agent-browser` CLI carries its own docs; `/qa` still uses the CLI directly.
 
 Other CLI wrappers (`bird` for X/Twitter) live in the `pandastack-private` overlay because their CLIs aren't open-source. `summarize`, `notion`, `slack`, `scout`, `inbox-triage`, `work-ship`, `think-like-*` were cut in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
 
 ## Personas
 
-5 replaceable personas in `plugins/pandastack/agents/`. Replace any persona file; all skills referencing it pick up the change after `/reload-plugins`.
+5 persona skills under `plugins/pandastack/skills/{ceo,eng-lead,ops-lead,product-lead,design-lead}/`, sharing the frame in `lib/persona-frame.md`. pandastack is skill-only — no separate agent dispatch layer. Edit any persona SKILL.md; the change picks up after `/reload-plugins`.
 
-| Persona | Role |
+| Persona skill | Role |
 |---|---|
-| `eng` | Staff engineer — build, review, debug, ship |
-| `design` | Senior designer — UI/UX, accessibility, anti-slop |
+| `eng-lead` | Staff engineer — build, review, debug, ship |
+| `design-lead` | Senior designer — UI/UX, accessibility, anti-slop |
 | `ceo` | Strategic advisor — scope decisions, kill/pivot |
-| `ops` | COO — systems that run without you, process design |
-| `product` | VP Product — requirements, scope, metrics |
+| `ops-lead` | COO — systems that run without you, process design |
+| `product-lead` | VP Product — requirements, scope, metrics |
 
 ## Lifecycle compositions
 

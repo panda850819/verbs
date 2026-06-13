@@ -68,7 +68,7 @@ updated = "2026-05-09"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (23) — markdown-only, fresh-clone runnable
+# CORE (24) — markdown-only, fresh-clone runnable
 # ============================================================================
 
 [skill.boardroom]
@@ -94,10 +94,6 @@ description = "Senior designer persona — anti-slop, accessibility-first."
 [skill.dojo]
 tier = "core"
 description = "Pre-action prep, surfaces gotchas before a work session."
-
-[skill.done]
-tier = "core"
-description = "Save session context, persist memory at session end."
 
 [skill.eng-lead]
 tier = "core"
@@ -154,6 +150,10 @@ tier = "core"
 requires = ["cli:git", "cli:codex"]
 description = "Hand unfinished work to Codex to DO (not /ship, which closes finished work): sync (spawn codex exec now) or --async (write payload for Hermes). Codex runs on ChatGPT-subscription quota, conserving the Claude session."
 
+[skill.skill-creator]
+tier = "core"
+description = "Create new pandastack skills, MECE-checked against RESOLVER, trigger-first evolution."
+
 [skill.sprint]
 tier = "core"
 description = "1-2h focused execution: dojo, grill-lite, execute, review, ship."
@@ -172,18 +172,13 @@ tier = "core"
 description = "Voice-aware drafting + slop detection."
 
 # ============================================================================
-# EXT (3) — public CLI dependencies
+# EXT (2) — public CLI dependencies
 # ============================================================================
 
 [skill.qa]
 tier = "ext"
 requires = ["npm:agent-browser"]
 description = "Browser-based UI QA, real pages, real flows."
-
-[skill.agent-browser]
-tier = "ext"
-requires = ["npm:agent-browser"]
-description = "Browser automation: open, fill, click, screenshot, scrape."
 
 [skill.deepwiki]
 tier = "ext"

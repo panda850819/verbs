@@ -45,7 +45,7 @@ ls -la ~/.codex/skills/pandastack
 codex exec --skip-git-repo-check 'List the pandastack skills you can see.'
 ```
 
-You should see a symlink pointing to your pandastack skills directory, and Codex should enumerate 38 skills as `pandastack:<name>`.
+You should see a symlink pointing to your pandastack skills directory, and Codex should enumerate 26 skills as `pandastack:<name>`.
 
 ## Updating
 
@@ -67,9 +67,9 @@ Optionally delete the clone: `rm -rf ~/.codex/pandastack`.
 
 Pandastack is designed Claude-Code-first but the lifecycle skills are CLI-agnostic. Compatibility breakdown:
 
-- **Fully portable** (no CLI-specific tools): `careful`, `ship` (all modes: git / knowledge incl. decision-note variant / write), `review`, `checkpoint`, `write`, `grill`, `init`, `freeze`, `done`, `office-hours`, `dojo`, `sprint`, `boardroom`, `gatekeeper`, plus the 5 personas (`ceo`, `eng-lead`, `design-lead`, `ops-lead`, `product-lead`)
+- **Fully portable** (no CLI-specific tools): `careful`, `ship` (git / knowledge modes incl. decision-note variant), `review`, `checkpoint`, `write`, `grill`, `init`, `freeze`, `office-hours`, `dojo`, `sprint`, `boardroom`, `gatekeeper`, plus the 5 personas (`ceo`, `eng-lead`, `design-lead`, `ops-lead`, `product-lead`)
 - **Needs Codex tool mapping** (uses `Skill` / `Agent` / subagent dispatch): see `skills/using-pandastack/references/codex-tools.md`
-- **Local-environment-bound** (depends on Panda's local CLIs): `agent-browser`, `qa` (npm `agent-browser`), `deepwiki` (curl + jq). These will fail with clear "command not found" errors if dependencies are missing — that's intentional, not a bug.
+- **Local-environment-bound** (depends on local CLIs): `qa` (npm `agent-browser`), `deepwiki` (curl + jq). These will fail with clear "command not found" errors if dependencies are missing — that's intentional, not a bug.
 
 Personal-tier skills (`bird`, `brief-morning`, `evening-distill`, `curate-feeds`) and Notion / Slack ops moved to the personal overlay (`~/.agents/skills/`) or to Claude.ai MCP servers in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
 

@@ -1,41 +1,13 @@
 #!/usr/bin/env bash
 # SessionStart hook for pandastack plugin.
 # Inspired by superpowers v5.0.7 hook structure (obra/superpowers).
-# Injects the using-pandastack SKILL.md content as additionalContext so the
-# model is reminded to check pandastack skills BEFORE acting.
-#
-# Two-tier content:
-#   1. Public contract: ${PLUGIN_ROOT}/skills/using-pandastack/SKILL.md
-#   2. Optional private overlay: ${PANDASTACK_OVERLAY:-$HOME/.agents/overlays/using-pandastack.md}
-#
-# Overlay is appended to the public contract before injection. If the overlay
-# file is missing, the public contract is injected on its own.
+# Injects only the small brain-first startup rule. Full skill bodies should be
+# loaded on demand by the runtime skill mechanism, not injected into every
+# session context.
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-
-public_file="${PLUGIN_ROOT}/skills/using-pandastack/SKILL.md"
-overlay_file="${PANDASTACK_OVERLAY:-$HOME/.agents/overlays/using-pandastack.md}"
-
-if [ ! -f "$public_file" ]; then
-  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":""}}\n'
-  exit 0
-fi
-
-skill_content=$(cat "$public_file")
-
-if [ -f "$overlay_file" ]; then
-  overlay_content=$(cat "$overlay_file")
-  skill_content="${skill_content}
-
----
-
-# Personal overlay (appended by hook)
-
-${overlay_content}"
-fi
+brain_first_rule="Use brain first: before any factual, knowledge, or decision answer, query the brain. If the brain is empty, say so plainly. Do not preload full skill bodies at session start; load skills on demand when the task clearly matches them."
 
 escape_for_json() {
   local s="$1"
@@ -47,9 +19,19 @@ escape_for_json() {
   printf '%s' "$s"
 }
 
-skill_escaped=$(escape_for_json "$skill_content")
+rule_escaped=$(escape_for_json "$brain_first_rule")
 
-session_context="<EXTREMELY_IMPORTANT>\nYou have pandastack.\n\n**Below is the full content of the 'pandastack:using-pandastack' skill — your introduction to the pandastack skill contract. For all other pandastack skills, use the 'Skill' tool:**\n\n${skill_escaped}\n</EXTREMELY_IMPORTANT>"
+session_context="<IMPORTANT>\n${rule_escaped}\n</IMPORTANT>"
+
+# Append the dispatch table (single source: plugins/pandastack/DISPATCH.md).
+# Strip the HTML maintenance comment to keep the injected payload compact.
+plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+dispatch_file="${plugin_root}/DISPATCH.md"
+if [ -f "$dispatch_file" ]; then
+  dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"
+  dispatch_escaped=$(escape_for_json "$dispatch_content")
+  session_context="${session_context}\n<IMPORTANT>\n${dispatch_escaped}\n</IMPORTANT>"
+fi
 
 # Platform-specific JSON output. Same content, different envelope per CLI.
 # - Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT)

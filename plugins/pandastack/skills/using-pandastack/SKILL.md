@@ -15,7 +15,7 @@ This is not negotiable. Skills override default behavior. Rationalizing your way
 
 ## Why this file exists
 
-pandastack ships 38 skills, 5 personas, 7 lifecycle flows. The surface area is too large for ad-hoc invocation. Without a forcing function, the model defaults to "I'll just answer directly" and the skills never run. This file is the forcing function.
+pandastack ships 26 skills (5 of them persona lenses) and 3 documented lifecycle compositions. The surface area is too large for ad-hoc invocation. Without a forcing function, the model defaults to "I'll just answer directly" and the skills never run. This file is the forcing function.
 
 The failure mode this exists to prevent (observed across many sessions): writing code without running `careful` for prod paths, shipping without `review`, finishing a knowledge note without `/ship knowledge`. The skills exist; they just don't get invoked unless something pressures the check.
 

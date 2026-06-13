@@ -1,6 +1,6 @@
 # pandastack (plugin internal)
 
-Personal AI operator OS for Claude Code, with Codex CLI compatibility. 38 skills (27 core / 5 ext / 6 personal), 5 personas, 7 lifecycle flows, 7 context recipes.
+Personal AI operator OS for Claude Code, with Codex CLI compatibility. 26 skills (24 core / 2 ext — see `manifest.toml`), 5 persona skills, 3 documented lifecycle compositions, 7 context recipes.
 
 This file is the plugin-internal contract read by skill content. The user-facing README lives at the repo root.
 

@@ -6,7 +6,7 @@
 
 ## Why this file exists
 
-pandastack v2.2 ships **27 skills** (24 core + 3 ext), 5 personas, and 7 context recipes. **Lifecycle flows are no longer first-class constructs** — what used to live in `plugins/pandastack/flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
+pandastack v2.2 ships **26 skills** (24 core + 2 ext), 5 personas, and 7 context recipes. **Lifecycle flows are no longer first-class constructs** — what used to live in `plugins/pandastack/flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
 
 This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md beats multi-repo split, because the categorization lives next to the content.
 
@@ -63,7 +63,8 @@ For greenfield design (DB schema / service topology / ADRs), use `eng-lead` pers
 | Skill | Wraps |
 |---|---|
 | `pandastack:deepwiki` | DeepWiki repo docs |
-| `pandastack:agent-browser` | Browser automation (npm `agent-browser`) |
+
+`agent-browser` skill archived 2026-06-08 (duplicate of the npm CLI's own docs); `qa` still drives the CLI directly.
 
 Private CLI wrappers (`bird` for X/Twitter, plus `notion` and `slack` ops) live in `pandastack-private` overlay or are replaced by Claude.ai MCP servers. v2.2.0 deleted the public `notion` and `slack` skills — use the Notion / Slack MCP via OAuth instead (token doesn't sit on disk).
 
