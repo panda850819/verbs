@@ -37,3 +37,27 @@ status: done
 - depends-on: scheduler-wbs-linear-T02
 - status: done
 - verified: 2026-06-14 against live personal Linear (Product team, temp test project, 8 issues). reduce 6/6 assertions green: priority sort, none-last, needs-human label gate, blocked-by-active, terminal exclusion, terminal-blocker-not-blocking. Custom-state `Needs Decision` gate NOT exercised live (Free plan blocks a dedicated Murmur team; same code path as label gate, covered by T02 fixture). Test data torn down after.
+
+## Phase 1 (alpha) — shipped 2026-06-14: propose-only loop on Murmur dogfood
+
+Smallest end-to-end slice that closes the loop with Panda as the dispatcher. No
+unattended executor yet: the codex-invocation SSOT needs a foreground human confirm
+for sandbox-escape, so auto-Codex is deferred to slice 2.
+
+- **Linear Flow**: added `Needs Decision` (GATE) + `Verifying` (VERIFY) workflow
+  states and the `needs-human` label to the Product team, so the hard gate is
+  expressible live (the custom-state gate is now exercised, not just the label).
+- **Murmur dogfood staged**: PRO-9 (dispatchable, has an `acceptance` block),
+  PRO-10 (gated via Needs Decision), PRO-11 (blocked_by PRO-9). `reduce --source
+  linear` buckets them correctly on the live project.
+- **dispatcher** `~/.hermes/scripts/murmur_scheduler.sh` (read-only, zero LLM
+  tokens): poll → reduce → surface the top dispatchable item + gated count as a
+  Telegram proposal; empty → silent. Hosted as Hermes cron `murmur-scheduler`
+  (no_agent, deliver=telegram, daily 09:00). Source backed up in `hermes-vault`.
+- **writeback** `scripts/pandastack-linear-advance` — the ONE human-invoked Linear
+  write: moves an issue forward one workflow state and appends a pandastack-state
+  `phase_enter` event. Refuses a gated issue without `--force`.
+
+Deferred to slice 2: auto-executor (foreground Claude `/handover` → `codex exec`),
+aging/starvation guard, acceptance-block auto-verify. Promote trigger: carry one
+Murmur issue Todo→Review by hand first.

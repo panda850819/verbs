@@ -85,15 +85,19 @@ def load_fixture(path):
 
 def load_linear(project_id=None):
     import os
+    import re
     import urllib.request
     key = os.environ.get("LINEAR_API_KEY")
     if not key:
         sys.exit("error: LINEAR_API_KEY not set (source ~/.config/pandastack/secrets.env)")
 
-    def post(query):
+    def post(query, variables=None):
+        body = {"query": query}
+        if variables is not None:
+            body["variables"] = variables
         req = urllib.request.Request(
             "https://api.linear.app/graphql",
-            data=json.dumps({"query": query}).encode("utf-8"),
+            data=json.dumps(body).encode("utf-8"),
             headers={"Authorization": key, "Content-Type": "application/json"})
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
@@ -104,24 +108,34 @@ def load_linear(project_id=None):
             sys.exit("Linear API error: " + json.dumps(payload["errors"], ensure_ascii=False))
         return payload["data"]
 
+    # project_id is a self-provided Linear UUID; validate its shape so it can never
+    # rewrite a query, then pass it as a GraphQL variable (not interpolated).
+    if project_id and not re.fullmatch(r'[0-9a-fA-F-]{8,}', project_id):
+        sys.exit(f"error: invalid Linear project id {project_id!r}")
+
     # guard: resolve the project id before filtering on it. A typo'd / deleted id
     # would otherwise pass through and return an empty set that reads as "nothing
     # urgent today" — a silent mis-config in an unattended loop. Fail loud instead.
-    if project_id and not post('{ project(id: "%s") { id } }' % project_id).get("project"):
+    if project_id and not post('query($pid:String!){project(id:$pid){id}}',
+                               {"pid": project_id}).get("project"):
         sys.exit(f"error: Linear project {project_id} not found")
 
     # pull non-terminal issues; blocked_by derived from inverse "blocks" relations.
     flt = '{state: {type: {nin: ["completed","canceled"]}}}'
+    variables = None
+    qhead = "query"
     if project_id:
-        flt = '{and: [%s, {project: {id: {eq: "%s"}}}]}' % (flt, project_id)
-    query = ('{ issues(first: 100, filter: %s) { nodes { '
+        flt = '{and: [%s, {project: {id: {eq: $pid}}}]}' % flt
+        variables = {"pid": project_id}
+        qhead = "query($pid:ID!)"
+    query = (qhead + '{ issues(first: 100, filter: %s) { nodes { '
              'identifier title priority createdAt '
              'state { name type } '
              'labels { nodes { name } } '
              'inverseRelations { nodes { type issue { identifier } } } '
              '} } }') % flt
     out = []
-    for n in post(query)["issues"]["nodes"]:
+    for n in post(query, variables)["issues"]["nodes"]:
         blocked_by = [rel["issue"]["identifier"]
                       for rel in n.get("inverseRelations", {}).get("nodes", [])
                       if rel.get("type") == "blocks" and rel.get("issue")]
