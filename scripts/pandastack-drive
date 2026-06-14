@@ -23,6 +23,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -42,6 +43,58 @@ GATE_PHASES = {"GATE", "BUILD", "SHIP"}      # decision / mutation / publish —
 GATE_REASON = {"GATE": "決策(kill/pivot/scope/approach)",
                "BUILD": "改碼 — 會 land",
                "SHIP": "發佈 / push"}
+
+# --execute may only spawn these reversible skills (the standard's auto set).
+SAFE_SKILLS = {"verify", "review", "grill", "plan", "simplify"}
+# project slug -> repo dir the headless skill runs in
+SLUG_REPO = {
+    "murmur": "~/site/apps/murmur", "pandastack": "~/site/skills/pandastack",
+    "shawn-trade": "~/site/trading/shawn-trade",
+    "equity-research-desk": "~/site/trading/equity-research-desk",
+    "hermes-vault": "~/site/hermes-vault",
+}
+# read-only executor prompt — mutation/publish is impossible by instruction; the
+# phase classifier already keeps BUILD/SHIP out, this is the second wall.
+EXEC_PROMPT = (
+    "You are the pandastack scheduler's headless executor running the {nxt} step for "
+    "work-item '{item}' in project '{slug}' (repo: {repo}).\n"
+    "Task note: {note}\n"
+    "This step is READ-ONLY: investigate / verify / review and report only. Do NOT "
+    "edit files, commit, push, publish, send messages, or change any state. If doing "
+    "the step properly would need any of those, STOP and report BLOCKED.\n"
+    "Reply with EXACTLY one final line:\n"
+    "RESULT: <PASS|FAIL|BLOCKED> — <one sentence>"
+)
+
+
+def exec_item(x):
+    """Spawn the mapped skill headlessly (read-only) and advance on PASS."""
+    if x["skill"] not in SAFE_SKILLS:
+        return {"ran": False, "why": f"skill '{x['skill']}' 不在可逆白名單"}
+    repo = SLUG_REPO.get(x["slug"])
+    if not repo or not os.path.isdir(os.path.expanduser(repo)):
+        return {"ran": False, "why": f"{x['slug']} 無對應 repo"}
+    prompt = EXEC_PROMPT.format(nxt=x["next"], item=x["item"], slug=x["slug"],
+                                repo=repo, note=x.get("note") or "-")
+    try:
+        p = subprocess.run(["claude", "-p", prompt, "--output-format", "json"],
+                           cwd=os.path.expanduser(repo), capture_output=True,
+                           text=True, timeout=600)
+        d = json.loads(p.stdout)
+    except Exception as e:
+        return {"ran": True, "ok": False, "verdict": "ERROR", "summary": str(e)[:120], "cost": 0.0}
+    cost = d.get("total_cost_usd") or 0.0
+    m = re.search(r"RESULT:\s*(PASS|FAIL|BLOCKED)\s*[—-]?\s*(.*)", d.get("result", ""))
+    verdict = m.group(1) if m else "UNKNOWN"
+    summary = ((m.group(2) if m else d.get("result", "")).strip())[:160]
+    advanced = verdict == "PASS" and not d.get("is_error")
+    if advanced:
+        subprocess.run([sys.executable, STATE, "append", "--slug", x["slug"], "--item",
+                        x["item"], "--event", "phase_enter", "--phase", x["next"],
+                        "--skill", x["skill"], "--runtime", "claude-code",
+                        "--note", f"auto: {summary}"], check=False)
+    return {"ran": True, "ok": advanced, "verdict": verdict, "summary": summary,
+            "cost": cost, "advanced": advanced}
 
 
 def slugs():
@@ -83,8 +136,12 @@ def build_queue():
 def main():
     ap = argparse.ArgumentParser(prog="pandastack-drive")
     ap.add_argument("--json", action="store_true")
-    ap.add_argument("--run", action="store_true",
-                    help="Stage 2: run the AUTO skills (currently DRY — prints commands)")
+    ap.add_argument("--run", action="store_true", help="DRY preview: print what --execute would run")
+    ap.add_argument("--execute", action="store_true",
+                    help="REAL: spawn the AUTO skills headlessly (read-only), advance on PASS")
+    ap.add_argument("--budget", type=float, default=2.0, help="USD cap for --execute (default 2.0)")
+    ap.add_argument("--max", type=int, default=1, help="max items to execute (default 1)")
+    ap.add_argument("--only", help="restrict --execute to one project slug")
     args = ap.parse_args()
     q = build_queue()
 
@@ -108,10 +165,33 @@ def main():
             print(f"  {x['slug']}/{x['item']}")
 
     if args.run:
-        print("\n--run (DRY — Stage 2 autonomy not yet enabled):")
+        print("\n--run (DRY preview):")
         for x in q["AUTO"]:
-            print(f"  would run: {x['skill']} on {x['slug']}/{x['item']}  (next: {x['next']})")
-        print("  GATE items are never auto-run; they wait for you.")
+            ok = x["skill"] in SAFE_SKILLS
+            print(f"  {'would run' if ok else 'WOULD GATE'}: {x['skill']} on {x['slug']}/{x['item']}"
+                  + ("" if ok else "  (skill not in safe allowlist)"))
+        print("  GATE / BUILD / SHIP items are never auto-run; they wait for you.")
+
+    if args.execute:
+        print(f"\n--execute (budget ${args.budget}, max {args.max}, read-only):")
+        spent, n = 0.0, 0
+        for x in q["AUTO"]:
+            if args.only and x["slug"] != args.only:
+                continue
+            if n >= args.max:
+                print("  (max reached — rerun for more)"); break
+            if spent >= args.budget:
+                print("  (budget reached)"); break
+            print(f"  ▶ {x['slug']}/{x['item']} via {x['skill']} …")
+            r = exec_item(x)
+            spent += r.get("cost", 0.0)
+            n += 1
+            if not r["ran"]:
+                print(f"    gated: {r['why']}")
+            else:
+                tag = "→ advanced" if r["advanced"] else "(surfaced, not advanced — needs you)"
+                print(f"    {r['verdict']} (${r.get('cost', 0):.3f}) {tag}: {r['summary']}")
+        print(f"  spent ${spent:.3f}")
     return 0
 
 
