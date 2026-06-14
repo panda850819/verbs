@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-"""pandastack-drive — the scheduler's daily driver (executor).
+"""pandastack-drive — the scheduler's daily driver, sourced from Linear (the WBS).
 
-Reduces EVERY project's pandastack-state to its active work-items, decides the
-next step, and classifies it:
+Reads the personal Linear workspace via pandastack-linear-reduce — the single WBS
+source of truth (docs/linear-contract.md) — and, for each dispatchable issue,
+decides the next step and classifies it:
 
-  AUTO  — next phase is reversible analysis (PLAN / VERIFY / REVIEW). Safe to run
-          unattended; produces plans/reports, no commits/pushes.
-  GATE  — next phase needs a human: GATE (a decision), BUILD (writes code), or
-          SHIP (publishes). Surfaced, never auto-run.
-  PAUSED— item is frozen/parked. Skipped.
+  AUTO  — next phase is reversible analysis (PLAN / VERIFY / REVIEW). The driver
+          runs it headless (Codex, read-only sandbox) and PROPOSES the advance.
+  GATE  — next phase needs a human: GATE (decision), BUILD (writes code), SHIP
+          (publishes); or the issue itself sits in the hard human-gate state.
+  BLOCKED — waiting on a non-terminal blocker. Shown, never run.
 
-This encodes Panda's rule directly: reversible -> auto-advance, irreversible /
-decision -> human gate. The driver NEVER auto-runs a mutating or publishing phase.
+Linear is the single source of truth: the driver NEVER writes Linear or any local
+state. --execute runs read-only and, on PASS, prints the one human-invoked write
+(pandastack-linear-advance). reversible -> propose; decision / mutation / publish
+-> human gate (docs/driver-autonomy.md).
 
-  pandastack-drive                 # surface today's queue (default; read-only)
+  pandastack-drive                 # surface today's queue (read-only)
   pandastack-drive --json
-  pandastack-drive --run           # Stage 2: spawn the AUTO skills. Currently DRY
-                                   # (prints the command it would run) until Panda
-                                   # sets the autonomy envelope + headless wiring.
+  pandastack-drive --execute       # run AUTO skills on Codex (read-only), propose advance
 """
 import argparse
-import glob
 import json
 import os
 import re
@@ -29,38 +29,44 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-STATE = os.path.join(HERE, "pandastack-state")
-PROJECTS_DIR = os.path.expanduser("~/.pandastack/projects")
+REDUCE = os.path.join(HERE, "pandastack-linear-reduce")
+SECRETS = os.path.expanduser("~/.config/pandastack/secrets.env")
 
+# Linear workflow state -> pandastack 7-phase (docs/linear-contract.md lifecycle-map),
+# incl. the stock-state fallback (Todo / In Progress) for teams without custom states.
+STATE_PHASE = {
+    "Backlog": "DEFINE", "Planning": "PLAN", "Needs Decision": "GATE",
+    "Building": "BUILD", "Verifying": "VERIFY", "In Review": "REVIEW", "Done": "SHIP",
+    "Todo": "PLAN", "In Progress": "BUILD",   # stock fallback
+}
 NEXT_PHASE = {"DEFINE": "PLAN", "PLAN": "GATE", "GATE": "BUILD", "BUILD": "VERIFY",
               "VERIFY": "REVIEW", "REVIEW": "SHIP", "SHIP": "(done)"}
-# next phase -> the skill that performs it (DISPATCH.md is the human-facing source;
-# this is the machine map the driver uses to pick what to run).
+# the Linear workflow state a phase lands in (for the advance proposal).
+PHASE_STATE = {"PLAN": "Planning", "GATE": "Needs Decision", "BUILD": "Building",
+               "VERIFY": "Verifying", "REVIEW": "In Review", "SHIP": "Done"}
 PHASE_SKILL = {"PLAN": "grill", "GATE": "(human decision)", "BUILD": "sprint",
                "VERIFY": "verify", "REVIEW": "review", "SHIP": "ship"}
 AUTO_PHASES = {"PLAN", "VERIFY", "REVIEW"}   # reversible — driver may run these
 GATE_PHASES = {"GATE", "BUILD", "SHIP"}      # decision / mutation / publish — human
-# why a GATE item needs Panda (the standard, docs/driver-autonomy.md)
-GATE_REASON = {"GATE": "決策(kill/pivot/scope/approach)",
-               "BUILD": "改碼 — 會 land",
+GATE_REASON = {"GATE": "決策(kill/pivot/scope/approach)", "BUILD": "改碼 — 會 land",
                "SHIP": "發佈 / push"}
 
 # --execute may only spawn these reversible skills (the standard's auto set).
 SAFE_SKILLS = {"verify", "review", "grill", "plan", "simplify"}
-# project slug -> repo dir the headless skill runs in
-SLUG_REPO = {
+# Linear project name -> repo dir the headless skill runs in.
+PROJECT_REPO = {
     "murmur": "~/site/apps/murmur", "pandastack": "~/site/skills/pandastack",
     "shawn-trade": "~/site/trading/shawn-trade",
     "equity-research-desk": "~/site/trading/equity-research-desk",
     "hermes-vault": "~/site/hermes-vault",
 }
-# read-only executor prompt. Mutation is blocked TWO ways: codex `-s read-only`
-# (sandbox-enforced) + this instruction. The phase classifier is the third wall
-# (BUILD/SHIP never reach here).
+# read-only executor prompt. Mutation is blocked THREE ways: the phase classifier
+# (BUILD/SHIP never reach here) + codex `-s read-only` (sandbox-enforced) + this
+# instruction. The driver itself writes nothing — Linear stays the single truth.
 EXEC_PROMPT = (
     "You are the pandastack scheduler's headless executor running the {nxt} step for "
-    "work-item '{item}' in project '{slug}' (repo: {repo}).\n"
-    "Task note: {note}\n"
+    "Linear issue {item} (project '{project}', repo: {repo}).\n"
+    "Issue: {note}\n"
     "This step is READ-ONLY: investigate / verify / review and report only. Do NOT "
     "edit files, commit, push, publish, send messages, or change any state. If doing "
     "the step properly would need any of those, STOP and report BLOCKED.\n"
@@ -69,19 +75,69 @@ EXEC_PROMPT = (
 )
 
 
-def exec_item(x):
-    """Delegate the step to Codex headless (read-only sandbox); advance on PASS.
+def load_secrets():
+    """Load LINEAR_API_KEY (and friends) so the reduce subprocess can reach Linear."""
+    if not os.path.isfile(SECRETS):
+        return
+    for ln in open(SECRETS, encoding="utf-8"):
+        ln = ln.strip()
+        if ln.startswith("export "):
+            ln = ln[7:]
+        if "=" in ln and not ln.startswith("#"):
+            k, v = ln.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 
-    Runtime is Codex, not `claude -p`: claude print-mode retires 2026-06-15, and
-    Codex runs on Panda's subscription (no per-call $). `-s read-only` enforces
-    no-mutation at the sandbox layer."""
+
+def linear_reduce():
+    """The WBS read: pandastack-linear-reduce over the whole workspace (single source)."""
+    out = subprocess.run([sys.executable, REDUCE, "--source", "linear", "--json"],
+                         capture_output=True, text=True)
+    if out.returncode != 0:
+        sys.exit("linear reduce failed: " + (out.stderr or out.stdout or "").strip())
+    return json.loads(out.stdout or "{}")
+
+
+def entry(issue, nxt, skill, reason):
+    return {"id": issue["identifier"], "project": issue.get("project"),
+            "title": issue.get("title", ""), "state": issue.get("state"),
+            "phase": STATE_PHASE.get(issue.get("state"), "?"),
+            "next": nxt, "skill": skill, "reason": reason,
+            "to_state": PHASE_STATE.get(nxt), "repo": PROJECT_REPO.get(issue.get("project") or "")}
+
+
+def build_queue():
+    red = linear_reduce()
+    q = {"AUTO": [], "GATE": [], "BLOCKED": []}
+    # reduce already split off the hard human-gate + blocked issues.
+    for i in red.get("gated", []):
+        q["GATE"].append(entry(i, None, "(human decision)", "needs-human (硬 gate)"))
+    for i in red.get("blocked", []):
+        q["BLOCKED"].append(entry(i, None, None, "blocked_by"))
+    # dispatchable: classify by whether the NEXT phase is reversible (AUTO) or a gate.
+    for i in red.get("dispatchable", []):
+        phase = STATE_PHASE.get(i.get("state"), "?")
+        nxt = NEXT_PHASE.get(phase, "?")
+        skill = PHASE_SKILL.get(nxt, "?")
+        if nxt in AUTO_PHASES:
+            q["AUTO"].append(entry(i, nxt, skill, None))
+        else:
+            q["GATE"].append(entry(i, nxt, skill, GATE_REASON.get(nxt, "需 Panda")))
+    return q
+
+
+def exec_item(x):
+    """Run the reversible step on Codex headless (read-only sandbox); propose the advance.
+
+    Runtime is Codex: it runs on Panda's subscription (no per-call $) and `-s
+    read-only` enforces no-mutation at the sandbox layer. The driver writes nothing
+    — on PASS it returns the one human-invoked Linear write to run by hand."""
     if x["skill"] not in SAFE_SKILLS:
         return {"ran": False, "why": f"skill '{x['skill']}' 不在可逆白名單"}
-    repo = SLUG_REPO.get(x["slug"])
+    repo = x.get("repo")
     if not repo or not os.path.isdir(os.path.expanduser(repo)):
-        return {"ran": False, "why": f"{x['slug']} 無對應 repo"}
-    prompt = EXEC_PROMPT.format(nxt=x["next"], item=x["item"], slug=x["slug"],
-                                repo=repo, note=x.get("note") or "-")
+        return {"ran": False, "why": f"{x['id']} ({x.get('project')}) 無對應 repo"}
+    prompt = EXEC_PROMPT.format(nxt=x["next"], item=x["id"], project=x.get("project"),
+                                repo=repo, note=x.get("title") or "-")
     rd = os.path.expanduser(repo)
     fd, out_file = tempfile.mkstemp(prefix="psdrive-", suffix=".txt")
     os.close(fd)
@@ -101,61 +157,23 @@ def exec_item(x):
     m = re.search(r"RESULT:\s*(PASS|FAIL|BLOCKED)\s*[—-]?\s*(.*)", last)
     verdict = m.group(1) if m else "UNKNOWN"
     summary = ((m.group(2) if m else last).strip())[:160]
-    advanced = verdict == "PASS"
-    if advanced:
-        subprocess.run([sys.executable, STATE, "append", "--slug", x["slug"], "--item",
-                        x["item"], "--event", "phase_enter", "--phase", x["next"],
-                        "--skill", x["skill"], "--runtime", "codex",
-                        "--note", f"auto: {summary}"], check=False)
-    return {"ran": True, "ok": advanced, "verdict": verdict, "summary": summary,
-            "advanced": advanced}
-
-
-def slugs():
-    return sorted(os.path.basename(os.path.dirname(p))
-                  for p in glob.glob(os.path.join(PROJECTS_DIR, "*", "")))
-
-
-def active_items(slug):
-    out = subprocess.run([sys.executable, STATE, "reduce", "--slug", slug, "--json"],
-                         capture_output=True, text=True)
-    if out.returncode != 0:
-        return []
-    items = json.loads(out.stdout or "[]")
-    return [i for i in items if i.get("status") not in ("shipped", "aborted")]
-
-
-def classify(item):
-    if item.get("status") == "paused":
-        return "PAUSED", None, None, "凍結"
-    nxt = NEXT_PHASE.get(item.get("phase"), "?")
-    if nxt in AUTO_PHASES:
-        return "AUTO", nxt, PHASE_SKILL.get(nxt, "?"), None
-    if nxt in GATE_PHASES:
-        return "GATE", nxt, PHASE_SKILL.get(nxt, "?"), GATE_REASON.get(nxt, "需 Panda")
-    return "DONE", nxt, None, None
-
-
-def build_queue():
-    q = {"AUTO": [], "GATE": [], "PAUSED": [], "DONE": []}
-    for slug in slugs():
-        for item in active_items(slug):
-            kind, nxt, skill, reason = classify(item)
-            q[kind].append({"slug": slug, "item": item["item"], "phase": item.get("phase"),
-                            "next": nxt, "skill": skill, "reason": reason,
-                            "note": item.get("note")})
-    return q
+    passed = verdict == "PASS"
+    # Linear is the single truth; the driver NEVER writes it. On PASS, surface the
+    # one human-invoked advance (pandastack-linear-advance) — do not auto-write.
+    advance = (f'pandastack-linear-advance --issue {x["id"]} --to "{x["to_state"]}"'
+               if passed and x.get("to_state") else None)
+    return {"ran": True, "ok": passed, "verdict": verdict, "summary": summary, "advance": advance}
 
 
 def main():
     ap = argparse.ArgumentParser(prog="pandastack-drive")
     ap.add_argument("--json", action="store_true")
-    ap.add_argument("--run", action="store_true", help="DRY preview: print what --execute would run")
     ap.add_argument("--execute", action="store_true",
-                    help="REAL: delegate AUTO skills to Codex headless (read-only), advance on PASS")
+                    help="run AUTO skills on Codex headless (read-only); on PASS, propose the Linear advance")
     ap.add_argument("--max", type=int, default=1, help="max items to execute per run (default 1)")
-    ap.add_argument("--only", help="restrict --execute to one project slug")
+    ap.add_argument("--only", help="restrict --execute to one Linear project")
     args = ap.parse_args()
+    load_secrets()
     q = build_queue()
 
     if args.json:
@@ -163,44 +181,40 @@ def main():
         return 0
 
     def line(x):
-        return f"  {x['slug']}/{x['item']:<24} {str(x['phase']):<7}→{str(x['next']):<7} {x['skill'] or ''}"
+        return (f"  {x['id']:<8} {(x.get('project') or '?'):<10} {str(x['state']):<14} "
+                f"{str(x['phase']):<6}→{str(x['next'] or '')}")
 
-    print("TODAY'S QUEUE — pandastack-drive\n")
-    print(f"▶ AUTO (reversible, driver may run):  {len(q['AUTO'])}")
+    print("TODAY'S QUEUE — pandastack-drive (source: Linear)\n")
+    print(f"▶ AUTO (reversible — driver runs read-only, proposes advance):  {len(q['AUTO'])}")
     for x in q["AUTO"]:
-        print(line(x))
-    print(f"\n⏸ GATE (needs you — decision/mutation/publish):  {len(q['GATE'])}")
+        print(line(x) + f"  {x['skill'] or ''}")
+    print(f"\n⏸ GATE (needs you — decision / mutation / publish):  {len(q['GATE'])}")
     for x in q["GATE"]:
         print(line(x) + f"   ← {x['reason']}")
-    if q["PAUSED"]:
-        print(f"\n🧊 PAUSED:  {len(q['PAUSED'])}")
-        for x in q["PAUSED"]:
-            print(f"  {x['slug']}/{x['item']}")
-
-    if args.run:
-        print("\n--run (DRY preview):")
-        for x in q["AUTO"]:
-            ok = x["skill"] in SAFE_SKILLS
-            print(f"  {'would run' if ok else 'WOULD GATE'}: {x['skill']} on {x['slug']}/{x['item']}"
-                  + ("" if ok else "  (skill not in safe allowlist)"))
-        print("  GATE / BUILD / SHIP items are never auto-run; they wait for you.")
+    if q["BLOCKED"]:
+        print(f"\n⛔ BLOCKED:  {len(q['BLOCKED'])}")
+        for x in q["BLOCKED"]:
+            print(line(x))
 
     if args.execute:
         print(f"\n--execute (Codex headless, read-only sandbox, max {args.max}):")
         n = 0
         for x in q["AUTO"]:
-            if args.only and x["slug"] != args.only:
+            if args.only and x.get("project") != args.only:
                 continue
             if n >= args.max:
                 print("  (max reached — rerun for more)"); break
-            print(f"  ▶ {x['slug']}/{x['item']} → codex {x['skill']} …")
+            print(f"  ▶ {x['id']} ({x.get('project')}) → codex {x['skill']} …")
             r = exec_item(x)
             n += 1
             if not r["ran"]:
-                print(f"    gated: {r['why']}")
+                print(f"    skipped: {r['why']}")
             else:
-                tag = "→ advanced" if r["advanced"] else "(surfaced, not advanced — needs you)"
-                print(f"    {r['verdict']} {tag}: {r['summary']}")
+                print(f"    {r['verdict']}: {r['summary']}")
+                if r.get("advance"):
+                    print(f"    → ready to advance (run it yourself): {r['advance']}")
+        if n == 0:
+            print("  (no AUTO items to run)")
     return 0
 
 

@@ -131,6 +131,7 @@ def load_linear(project_id=None):
     query = (qhead + '{ issues(first: 100, filter: %s) { nodes { '
              'identifier title priority createdAt '
              'state { name type } '
+             'project { name } '
              'labels { nodes { name } } '
              'inverseRelations { nodes { type issue { identifier } } } '
              '} } }') % flt
@@ -141,6 +142,7 @@ def load_linear(project_id=None):
                       if rel.get("type") == "blocks" and rel.get("issue")]
         out.append({
             "identifier": n["identifier"],
+            "project": (n.get("project") or {}).get("name"),
             "title": n.get("title", ""),
             "priority": n.get("priority", 0),
             "state": n["state"]["name"],
