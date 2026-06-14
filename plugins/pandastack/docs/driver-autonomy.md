@@ -38,6 +38,19 @@ draft-and-ask / escalate.**
   run. A skill that *starts* AUTO but mid-run needs to mutate/publish/spend must
   stop and surface, not push through.
 
+## Execution runtime — Codex, not `claude -p`
+
+The driver delegates an AUTO step to **Codex** (`codex exec -s read-only -C <repo>`),
+never `claude -p`:
+
+- `claude` print-mode retires **2026-06-15** — anything built on it breaks.
+- Codex runs on Panda's **subscription** (no per-call $). Throttle by `--max`, not a $ budget.
+- `-s read-only` enforces no-mutation **at the sandbox layer** — a third wall on top
+  of the phase classifier (BUILD/SHIP never reach here) and the read-only prompt.
+
+General rule: for development / delegated execution, prefer spawning **Codex** over
+metered or soon-retired paths.
+
 ## Notify cadence
 
 - **New gate appears** → ping Panda now (telegram, async nudge).

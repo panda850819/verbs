@@ -26,6 +26,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.join(HERE, "pandastack-state")
@@ -53,8 +54,9 @@ SLUG_REPO = {
     "equity-research-desk": "~/site/trading/equity-research-desk",
     "hermes-vault": "~/site/hermes-vault",
 }
-# read-only executor prompt — mutation/publish is impossible by instruction; the
-# phase classifier already keeps BUILD/SHIP out, this is the second wall.
+# read-only executor prompt. Mutation is blocked TWO ways: codex `-s read-only`
+# (sandbox-enforced) + this instruction. The phase classifier is the third wall
+# (BUILD/SHIP never reach here).
 EXEC_PROMPT = (
     "You are the pandastack scheduler's headless executor running the {nxt} step for "
     "work-item '{item}' in project '{slug}' (repo: {repo}).\n"
@@ -68,7 +70,11 @@ EXEC_PROMPT = (
 
 
 def exec_item(x):
-    """Spawn the mapped skill headlessly (read-only) and advance on PASS."""
+    """Delegate the step to Codex headless (read-only sandbox); advance on PASS.
+
+    Runtime is Codex, not `claude -p`: claude print-mode retires 2026-06-15, and
+    Codex runs on Panda's subscription (no per-call $). `-s read-only` enforces
+    no-mutation at the sandbox layer."""
     if x["skill"] not in SAFE_SKILLS:
         return {"ran": False, "why": f"skill '{x['skill']}' 不在可逆白名單"}
     repo = SLUG_REPO.get(x["slug"])
@@ -76,25 +82,33 @@ def exec_item(x):
         return {"ran": False, "why": f"{x['slug']} 無對應 repo"}
     prompt = EXEC_PROMPT.format(nxt=x["next"], item=x["item"], slug=x["slug"],
                                 repo=repo, note=x.get("note") or "-")
+    rd = os.path.expanduser(repo)
+    fd, out_file = tempfile.mkstemp(prefix="psdrive-", suffix=".txt")
+    os.close(fd)
     try:
-        p = subprocess.run(["claude", "-p", prompt, "--output-format", "json"],
-                           cwd=os.path.expanduser(repo), capture_output=True,
-                           text=True, timeout=600)
-        d = json.loads(p.stdout)
+        subprocess.run(["codex", "exec", "-s", "read-only", "-C", rd,
+                        "--skip-git-repo-check", "-o", out_file, prompt],
+                       capture_output=True, text=True, timeout=1200)
+        with open(out_file, encoding="utf-8") as f:
+            last = f.read()
     except Exception as e:
-        return {"ran": True, "ok": False, "verdict": "ERROR", "summary": str(e)[:120], "cost": 0.0}
-    cost = d.get("total_cost_usd") or 0.0
-    m = re.search(r"RESULT:\s*(PASS|FAIL|BLOCKED)\s*[—-]?\s*(.*)", d.get("result", ""))
+        return {"ran": True, "ok": False, "verdict": "ERROR", "summary": str(e)[:120]}
+    finally:
+        try:
+            os.unlink(out_file)
+        except OSError:
+            pass
+    m = re.search(r"RESULT:\s*(PASS|FAIL|BLOCKED)\s*[—-]?\s*(.*)", last)
     verdict = m.group(1) if m else "UNKNOWN"
-    summary = ((m.group(2) if m else d.get("result", "")).strip())[:160]
-    advanced = verdict == "PASS" and not d.get("is_error")
+    summary = ((m.group(2) if m else last).strip())[:160]
+    advanced = verdict == "PASS"
     if advanced:
         subprocess.run([sys.executable, STATE, "append", "--slug", x["slug"], "--item",
                         x["item"], "--event", "phase_enter", "--phase", x["next"],
-                        "--skill", x["skill"], "--runtime", "claude-code",
+                        "--skill", x["skill"], "--runtime", "codex",
                         "--note", f"auto: {summary}"], check=False)
     return {"ran": True, "ok": advanced, "verdict": verdict, "summary": summary,
-            "cost": cost, "advanced": advanced}
+            "advanced": advanced}
 
 
 def slugs():
@@ -138,9 +152,8 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--run", action="store_true", help="DRY preview: print what --execute would run")
     ap.add_argument("--execute", action="store_true",
-                    help="REAL: spawn the AUTO skills headlessly (read-only), advance on PASS")
-    ap.add_argument("--budget", type=float, default=2.0, help="USD cap for --execute (default 2.0)")
-    ap.add_argument("--max", type=int, default=1, help="max items to execute (default 1)")
+                    help="REAL: delegate AUTO skills to Codex headless (read-only), advance on PASS")
+    ap.add_argument("--max", type=int, default=1, help="max items to execute per run (default 1)")
     ap.add_argument("--only", help="restrict --execute to one project slug")
     args = ap.parse_args()
     q = build_queue()
@@ -173,25 +186,21 @@ def main():
         print("  GATE / BUILD / SHIP items are never auto-run; they wait for you.")
 
     if args.execute:
-        print(f"\n--execute (budget ${args.budget}, max {args.max}, read-only):")
-        spent, n = 0.0, 0
+        print(f"\n--execute (Codex headless, read-only sandbox, max {args.max}):")
+        n = 0
         for x in q["AUTO"]:
             if args.only and x["slug"] != args.only:
                 continue
             if n >= args.max:
                 print("  (max reached — rerun for more)"); break
-            if spent >= args.budget:
-                print("  (budget reached)"); break
-            print(f"  ▶ {x['slug']}/{x['item']} via {x['skill']} …")
+            print(f"  ▶ {x['slug']}/{x['item']} → codex {x['skill']} …")
             r = exec_item(x)
-            spent += r.get("cost", 0.0)
             n += 1
             if not r["ran"]:
                 print(f"    gated: {r['why']}")
             else:
                 tag = "→ advanced" if r["advanced"] else "(surfaced, not advanced — needs you)"
-                print(f"    {r['verdict']} (${r.get('cost', 0):.3f}) {tag}: {r['summary']}")
-        print(f"  spent ${spent:.3f}")
+                print(f"    {r['verdict']} {tag}: {r['summary']}")
     return 0
 
 
