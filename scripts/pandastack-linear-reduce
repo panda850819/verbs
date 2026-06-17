@@ -140,7 +140,7 @@ def load_linear(project_id=None):
         variables = {"pid": project_id}
         qhead = "query($pid:ID!)"
     query = (qhead + '{ issues(first: 100, filter: %s) { nodes { '
-             'identifier title description priority createdAt '
+             'identifier title description priority createdAt updatedAt '
              'state { name type } '
              'project { name } '
              'labels { nodes { name } } '
@@ -162,6 +162,7 @@ def load_linear(project_id=None):
             "labels": [l["name"] for l in n.get("labels", {}).get("nodes", [])],
             "blocked_by": blocked_by,
             "created_at": n.get("createdAt", ""),
+            "updated_at": n.get("updatedAt", ""),
         })
     return out
 

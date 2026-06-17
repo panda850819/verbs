@@ -11,16 +11,19 @@ decides the next step and classifies it:
           (publishes); or the issue itself sits in the hard human-gate state.
   BLOCKED — waiting on a non-terminal blocker. Shown, never run.
 
-Linear is the single source of truth: the driver NEVER writes Linear or any local
-state. --execute runs read-only and, on PASS, prints the one human-invoked write
-(pandastack-linear-advance). reversible -> propose; decision / mutation / publish
--> human gate (docs/driver-autonomy.md).
+Linear is the single source of truth: the driver NEVER writes Linear/WBS state.
+--execute may write bounded local executor retry metadata; on PASS it prints the
+one human-invoked Linear write (pandastack-linear-advance). reversible ->
+propose; decision / mutation / publish -> human gate (docs/driver-autonomy.md).
 
   pandastack-drive                 # surface today's queue (read-only)
   pandastack-drive --json
   pandastack-drive --execute       # run AUTO skills on Codex (read-only), propose advance
 """
 import argparse
+import contextlib
+import fcntl
+import hashlib
 import json
 import os
 import re
@@ -28,6 +31,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -86,7 +90,189 @@ BUILD_PROMPT = (
 
 # Test seams (PSDRIVE_FIXTURE / PSDRIVE_BUILD_STUB) are honored ONLY under PSDRIVE_TEST=1,
 # so a stray env export can never divert or stub a real run (review finding L).
-TEST_MODE = bool(os.environ.get("PSDRIVE_TEST"))
+TEST_MODE = os.environ.get("PSDRIVE_TEST") == "1"
+
+
+def positive_int_env(name, default):
+    try:
+        value = int(os.environ.get(name, str(default)))
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+RETRY_BASE_MS = positive_int_env("PSDRIVE_RETRY_BASE_MS", 10000)
+RETRY_CAP_MS = max(RETRY_BASE_MS, positive_int_env("PSDRIVE_RETRY_CAP_MS", 300000))
+RETRY_MAX_ATTEMPTS = positive_int_env("PSDRIVE_RETRY_MAX_ATTEMPTS", 3)
+# Drop a retry record this long after its last update so the store cannot grow
+# unbounded with orphans from advanced / edited / abandoned issues (30 days).
+RETRY_TTL_MS = positive_int_env("PSDRIVE_RETRY_TTL_MS", 30 * 24 * 60 * 60 * 1000)
+
+
+def source_fingerprint(issue):
+    """Material source revision for clearing stale retry gates after issue edits.
+
+    Fingerprints only the work-order-material fields, NOT Linear's updated_at: a
+    label tweak, sub-issue, or (once the linkback loop is wired) an appended ledger
+    comment bumps updated_at without changing the work order, and must NOT silently
+    reset a backoff/exhaustion gate. A real edit to title/description/state/priority/
+    labels still rotates the fingerprint and re-queues the item."""
+    material = {k: issue.get(k) for k in ("title", "description", "state", "priority", "labels")}
+    raw = json.dumps(material, ensure_ascii=False, sort_keys=True)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def retry_state_path():
+    """Append-adjacent retry state for the stateless-per-tick driver.
+
+    Linear stays the WBS source of truth. This file only remembers failed executor
+    attempts between ticks so a flaky run gets bounded backoff instead of immediate
+    retry-spam or silent one-shot failure. Tests may override it only in PSDRIVE_TEST.
+    """
+    if TEST_MODE and os.environ.get("PSDRIVE_RETRY_STATE"):
+        return os.environ["PSDRIVE_RETRY_STATE"]
+    root = os.environ.get("PANDASTACK_STATE_HOME", os.path.expanduser("~/.pandastack"))
+    return os.path.join(root, "projects", "_driver", "retry.json")
+
+
+def now_ms():
+    if TEST_MODE and os.environ.get("PSDRIVE_NOW_MS"):
+        return int(os.environ["PSDRIVE_NOW_MS"])
+    return int(time.time() * 1000)
+
+
+@contextlib.contextmanager
+def retry_lock():
+    """Serialize the retry-state read-modify-write so an interactive --execute that
+    overlaps the launchd tick cannot drop an attempt increment or a PASS-clear (the
+    per-file os.replace is atomic, but the load->mutate->save sequence is not)."""
+    p = retry_state_path()
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    f = open(p + ".lock", "w")
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        f.close()
+
+
+def iso_ms(ms):
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ms / 1000))
+
+
+def retry_key(x):
+    return ":".join([str(x.get("id")), str(x.get("project") or ""), str(x.get("next") or "")])
+
+
+def load_retry_state():
+    p = retry_state_path()
+    if not os.path.exists(p):
+        return {}
+    try:
+        with open(p, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_retry_state(state):
+    cutoff = now_ms() - RETRY_TTL_MS
+    state = {k: v for k, v in state.items()
+             if isinstance(v, dict) and int(v.get("updated_ms") or 0) >= cutoff}
+    p = retry_state_path()
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix="retry-", suffix=".json", dir=os.path.dirname(p))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False, indent=2, sort_keys=True)
+            f.write("\n")
+        os.replace(tmp, p)
+    finally:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
+def retry_gate(x):
+    state = load_retry_state()
+    key = retry_key(x)
+    rec = state.get(key)
+    if not rec:
+        return None
+    if rec.get("source_rev") != (x.get("source_rev") or ""):
+        return None
+    if rec.get("blocked"):
+        return "executor reported BLOCKED — manual review needed"
+    if rec.get("exhausted"):
+        return f"retry exhausted after {rec.get('attempts', 0)} attempts — manual review needed"
+    wait_until = int(rec.get("next_allowed_ms") or 0)
+    remaining = wait_until - now_ms()
+    if remaining > 0:
+        return (f"backoff until {iso_ms(wait_until)} "
+                f"(attempts={rec.get('attempts', 0)}, wait_ms={remaining})")
+    return None
+
+
+def record_retry(x, result):
+    """Update bounded retry state after one executor attempt.
+
+    PASS clears the item's retry record. FAIL/ERROR/UNKNOWN schedule exponential
+    backoff until RETRY_MAX_ATTEMPTS, then stop. BLOCKED becomes a durable
+    manual-review gate until the Linear/source issue changes. The whole
+    read-modify-write runs under retry_lock so an overlapping tick cannot race.
+    """
+    with retry_lock():
+        return _record_retry_locked(x, result)
+
+
+def _record_retry_locked(x, result):
+    key = retry_key(x)
+    state = load_retry_state()
+    # An edited issue rotates source_rev: retry_gate already ignores the stale gate,
+    # so the attempt counter must restart here too — otherwise the first post-edit
+    # failure inherits the old (possibly exhausted) count and re-exhausts at once.
+    existing = state.get(key)
+    if existing and existing.get("source_rev") != (x.get("source_rev") or ""):
+        state.pop(key, None)
+    verdict = result.get("verdict")
+    if result.get("ok"):
+        if key in state:
+            del state[key]
+            save_retry_state(state)
+            return "retry state cleared after PASS"
+        return None
+    if verdict == "BLOCKED":
+        old = state.get(key, {})
+        state[key] = {"id": x.get("id"), "project": x.get("project"),
+                      "next": x.get("next"), "attempts": int(old.get("attempts") or 0),
+                      "last_verdict": verdict,
+                      "last_summary": (result.get("summary") or "")[:200],
+                      "updated_ms": now_ms(), "source_rev": x.get("source_rev") or "",
+                      "blocked": True, "exhausted": True}
+        save_retry_state(state)
+        return "executor reported BLOCKED — manual review needed (no retry scheduled)"
+    if verdict not in {"FAIL", "ERROR", "UNKNOWN"}:
+        return None
+    old = state.get(key, {})
+    attempts = int(old.get("attempts") or 0) + 1
+    rec = {"id": x.get("id"), "project": x.get("project"), "next": x.get("next"),
+           "attempts": attempts, "last_verdict": verdict,
+           "last_summary": (result.get("summary") or "")[:200], "updated_ms": now_ms(),
+           "source_rev": x.get("source_rev") or ""}
+    if attempts >= RETRY_MAX_ATTEMPTS:
+        rec["exhausted"] = True
+        state[key] = rec
+        save_retry_state(state)
+        return f"retry exhausted after {attempts} attempts — manual review needed"
+    delay = min(RETRY_BASE_MS * (2 ** (attempts - 1)), RETRY_CAP_MS)
+    rec["next_allowed_ms"] = now_ms() + delay
+    state[key] = rec
+    save_retry_state(state)
+    return (f"retry scheduled: attempt {attempts + 1}/{RETRY_MAX_ATTEMPTS} "
+            f"after {delay}ms at {iso_ms(rec['next_allowed_ms'])}")
 
 
 def load_secrets():
@@ -118,7 +304,17 @@ def entry(issue, nxt, skill, reason):
             "title": issue.get("title", ""), "state": issue.get("state"),
             "phase": pslib.phase_of(issue.get("state")) or "?",
             "next": nxt, "skill": skill, "reason": reason,
-            "to_state": PHASE_STATE.get(nxt), "repo": PROJECT_REPO.get(issue.get("project") or "")}
+            "to_state": PHASE_STATE.get(nxt), "repo": PROJECT_REPO.get(issue.get("project") or ""),
+            "source_rev": source_fingerprint(issue)}
+
+
+def enqueue_auto_or_retry_gate(q, e):
+    gate = retry_gate(e)
+    if gate:
+        e["reason"] = "retry-gate (" + gate + ")"
+        q["GATE"].append(e)
+    else:
+        q["AUTO"].append(e)
 
 
 def build_queue(build_auto=False, only=None):
@@ -145,7 +341,7 @@ def build_queue(build_auto=False, only=None):
                 e["build"] = True
                 e["to_state"] = PHASE_STATE["VERIFY"]   # build done -> propose Verifying
                 e["desc"] = i.get("description", "")     # work-order for the build prompt
-                q["AUTO"].append(e)
+                enqueue_auto_or_retry_gate(q, e)
             else:
                 q["GATE"].append(entry(i, "BUILD", PHASE_SKILL["BUILD"],
                                        "needs-spec (work-order/acceptance 不完整)"))
@@ -153,7 +349,7 @@ def build_queue(build_auto=False, only=None):
         nxt = pslib.NEXT_PHASE.get(phase, "?")
         skill = PHASE_SKILL.get(nxt, "?")
         if nxt in AUTO_PHASES:
-            q["AUTO"].append(entry(i, nxt, skill, None))
+            enqueue_auto_or_retry_gate(q, entry(i, nxt, skill, None))
         else:
             q["GATE"].append(entry(i, nxt, skill, GATE_REASON.get(nxt, "需 Panda")))
     return q
@@ -224,7 +420,8 @@ def exec_build(x):
         r = subprocess.run(["git", "-C", rd, "worktree", "add", "-b", branch, wt],
                            capture_output=True, text=True)
         if r.returncode != 0:
-            return {"ran": False, "why": "worktree add failed: " + (r.stderr or "").strip()[:140]}
+            return {"ran": True, "ok": False, "verdict": "ERROR",
+                    "summary": "worktree add failed: " + (r.stderr or "").strip()[:140]}
         made_wt = True
         stub = os.environ.get("PSDRIVE_BUILD_STUB") if TEST_MODE else None  # test seam (guarded)
         if stub:
@@ -335,6 +532,10 @@ def main():
                 continue
             if n >= args.max:
                 print("  (max reached — rerun for more)"); break
+            gate = retry_gate(x)
+            if gate:
+                print(f"  ▶ {x['id']} ({x.get('project')}) → skipped: {gate}")
+                continue                      # backoff/exhausted skips do not consume --max
             print(f"  ▶ {x['id']} ({x.get('project')}) → codex {x['skill']} …")
             r = exec_build(x) if x.get("build") else exec_item(x)
             if not r["ran"]:
@@ -342,6 +543,9 @@ def main():
                 continue                      # a skip does not consume a --max slot (finding N)
             n += 1
             print(f"    {r['verdict']}: {r['summary']}")
+            retry_note = record_retry(x, r)
+            if retry_note:
+                print(f"    → {retry_note}")
             if r.get("staged"):
                 print("    staged:\n      " + r["staged"].replace("\n", "\n      "))
             if r.get("pr_hint"):

@@ -57,13 +57,13 @@ A workstream separate from the v1/v2 public-readiness arc. WBS = Linear; schedul
 
 High priority (next):
 
-- [ ] **Readiness checks in `pandastack-linear-reduce`** — per-phase inputs-present gate; generalize the acceptance rule (`linear-contract.md`) from VERIFY to every phase. An under-specified issue surfaces for Panda instead of auto-running a plausible-but-empty plan. This is the core eligibility question — what is allowed into the auto-loop. Gate: `reduce` re-classifies a not-ready dispatchable issue as gated.
-- [ ] **Per-issue workspace isolation** — port symphony's sanitized-key + reuse-across-runs + path-containment model. Today AUTO steps run in the live repo dir (`codex exec -C <repo>`); isolation is the prerequisite for auto-BUILD and for any `--max > 1`. Gate: a run cannot touch the project's working tree.
-- [ ] **Retry + exponential backoff** — port symphony's `RetryEntry` + `delay = min(10000 * 2^(attempt-1), cap)`. Today a flaky Codex run fails with no re-attempt (single `subprocess timeout(1200)`). Gate: a transient FAIL re-queues with backoff; a persistent one stops after N.
+- [x] **Readiness checks in `pandastack-linear-reduce`** — per-phase inputs-present gate; generalize the acceptance rule (`linear-contract.md`) from VERIFY to every phase. An under-specified issue surfaces for Panda instead of auto-running a plausible-but-empty plan. This is the core eligibility question — what is allowed into the auto-loop. Gate: `reduce` re-classifies a not-ready dispatchable issue as gated. Shipped on the scheduler branch; covered by `tests/linear-reduce.sh`.
+- [x] **Per-issue workspace isolation** — port symphony's sanitized-key + reuse-across-runs + path-containment model. AUTO BUILD runs in an isolated git worktree/branch, not the live repo, with Codex network access pinned off. Gate: a run cannot touch the project's working tree. Covered by `tests/drive-build.sh`.
+- [x] **Retry + exponential backoff** — port symphony's `RetryEntry` + `delay = min(10000 * 2^(attempt-1), cap)`. A transient FAIL re-queues with backoff; after N attempts the item stops retrying and surfaces for manual review. Covered by `tests/drive-retry.sh`.
 
 Medium (after the high tier):
 
-- [ ] **BUILD autonomy (opt-in, default OFF)** — the 5-condition gate in `driver-autonomy.md` (plan approved + prompt-ified work-order + machine-checkable acceptance + isolated workspace + stops at SHIP). Depends on readiness + workspace above. Enable per-project via `--only` first, never globally.
+- [x] **BUILD autonomy (opt-in, default OFF)** — the 5-condition gate in `driver-autonomy.md` (plan approved + prompt-ified work-order + machine-checkable acceptance + isolated workspace + stops at SHIP). Enable per-project via `--build-auto --only <project>` first, never globally. Covered by `tests/drive-build.sh`.
 - [ ] **Stall detection / turn timeout** — replace the blunt `subprocess timeout(1200)` with symphony-style `stall_timeout` (kill unresponsive worker, schedule retry) + a turn cap.
 - [ ] **Bounded concurrency (global + per-state)** — symphony's `max_concurrent_agents` + per-state override; needed before any fan-out past `--max 1`.
 - [ ] **Read-only status surface** — a `/api/v1/state` analogue over `drive-log.jsonl` + `state.jsonl`: what is the loop doing now, token spend, last verdicts.

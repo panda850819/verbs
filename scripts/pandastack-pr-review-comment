@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""pandastack-pr-review-comment — post PandaStack review output as a GitHub PR artifact.
+
+A PR body saying "reviewed" is not enough. This helper posts the review text as a
+GitHub PR comment and prints the resulting comment URL so it can be linked back to
+Linear with pandastack-linear-comment.
+"""
+import argparse
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import urllib.error
+import urllib.request
+
+# owner/repo is interpolated into the GitHub API URL; reject anything that could
+# rewrite the request path (extra slashes, '..', '?', '#') before it is used.
+REPO_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
+
+
+def read_body(path):
+    body = pathlib.Path(path).read_text(encoding="utf-8")
+    if not body.strip():
+        sys.exit(f"error: body file {path!r} is empty")
+    return body
+
+
+def github_token():
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        return token
+    try:
+        cp = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True)
+    except FileNotFoundError:
+        sys.exit("error: no GITHUB_TOKEN/GH_TOKEN and `gh` is not installed/on PATH")
+    if cp.returncode != 0 or not cp.stdout.strip():
+        sys.exit("error: no GITHUB_TOKEN/GH_TOKEN and `gh auth token` failed")
+    return cp.stdout.strip()
+
+
+def request_json(token, method, url, body=None):
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8") if body is not None else None,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Content-Type": "application/json",
+        },
+        method=method,
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", errors="replace")[:300]
+        sys.exit(f"GitHub API error: HTTP {e.code} {e.reason}: {detail}")
+    except urllib.error.URLError as e:
+        sys.exit(f"GitHub API request failed: {e.reason}")
+
+
+def post_comment(repo, pr_number, body):
+    token = github_token()
+    # Issues and PRs share the comments endpoint. Verify the target is a PR first,
+    # otherwise a mistaken issue number would receive a misleading review artifact.
+    request_json(token, "GET", f"https://api.github.com/repos/{repo}/pulls/{pr_number}")
+    return request_json(
+        token,
+        "POST",
+        f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments",
+        {"body": body},
+    )
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="pandastack-pr-review-comment")
+    ap.add_argument("--repo", required=True, help="owner/repo")
+    ap.add_argument("--pr", required=True, type=int, help="pull request number")
+    ap.add_argument("--body-file", required=True, help="markdown review body to post")
+    ap.add_argument("--dry-run", action="store_true", help="print target/body, write nothing")
+    ap.add_argument("--json", action="store_true", help="emit machine-readable result")
+    args = ap.parse_args()
+
+    if not REPO_RE.match(args.repo):
+        sys.exit(f"error: bad --repo {args.repo!r} (expected owner/repo)")
+    body = read_body(args.body_file)
+    if args.dry_run:
+        result = {"dry_run": True, "repo": args.repo, "pr": args.pr, "url": None, "body": body}
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+        else:
+            print(f"DRY RUN: would post PandaStack review comment to {args.repo} PR #{args.pr}")
+            print(body, end="" if body.endswith("\n") else "\n")
+        return 0
+
+    if args.pr <= 0:
+        sys.exit("error: --pr must be a positive PR number unless --dry-run")
+    comment = post_comment(args.repo, args.pr, body)
+    result = {"dry_run": False, "repo": args.repo, "pr": args.pr, "url": comment.get("html_url"), "body": comment.get("body")}
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print("GitHub PR review comment posted: " + (comment.get("html_url") or comment.get("url") or "<no-url>"))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

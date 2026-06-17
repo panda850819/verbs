@@ -72,12 +72,12 @@ def work_order_complete(desc):
 
 
 def parse_result(output, returncode=0):
-    """Parse a codex RESULT verdict robustly: a nonzero exit forces BLOCKED; otherwise
-    take the LAST RESULT line (a model may restate it while reasoning), word-boundaried
-    so 'PASSED' never reads as PASS, and only from a line-start RESULT: token so an echoed
-    prompt/description string cannot spoof it."""
+    """Parse a codex RESULT verdict robustly: a nonzero exit is an executor ERROR;
+    otherwise take the LAST RESULT line (a model may restate it while reasoning),
+    word-boundaried so 'PASSED' never reads as PASS, and only from a line-start
+    RESULT: token so an echoed prompt/description string cannot spoof it."""
     if returncode != 0:
-        return "BLOCKED", f"codex exited {returncode}"
+        return "ERROR", f"codex exited {returncode}"
     ms = list(_RESULT_RE.finditer(output or ""))
     if not ms:
         return "UNKNOWN", (output or "").strip()[-160:]

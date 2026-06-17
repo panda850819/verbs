@@ -102,7 +102,7 @@ straight to dev." BUILD may auto-run for an issue ONLY when ALL hold:
    DRIVER commits unsandboxed with hooks disabled (`--no-verify` + empty `core.hooksPath`)
    so a codex-written tracked hook can't execute outside the sandbox. PASS keeps the
    branch for a human PR (a kept branch is not rebuilt on later ticks); FAIL discards
-   worktree + branch. <!-- upgrade: backoff + retry caps -->
+   worktree + branch.
 5. **Stops at SHIP** — produces a branch / PR proposal; never auto-merges, pushes to
    main, or publishes. SHIP stays a hard gate (Gate #3).
 
@@ -110,6 +110,37 @@ Enable per-project via `--only <project>` first, never globally. Without (1)-(3)
 issue is not BUILD-ready and stays gated. This is the ONLY path by which a mutation
 phase becomes auto-eligible, and only because the irreversible decision (the plan)
 was human-approved upstream.
+
+## Retry + exponential backoff (wired 2026-06-17)
+
+`pandastack-drive --execute` now carries bounded retry state across stateless ticks:
+
+- State file: `~/.pandastack/projects/_driver/retry.json` (override root with
+  `PANDASTACK_STATE_HOME`; tests use `PSDRIVE_RETRY_STATE` only under
+  `PSDRIVE_TEST=1`). Linear remains the WBS source of truth; this file only tracks
+  executor attempts/backoff.
+- On `PASS`, the issue's retry record is cleared.
+- On `FAIL`, `ERROR`, or `UNKNOWN`, the driver schedules exponential backoff:
+  `delay = min(10000 * 2^(attempt-1), 300000)` milliseconds.
+- After 3 failed attempts, the item stops retrying and is surfaced as manual-review
+  required.
+- `BLOCKED` is stored as a manual-review gate and is not retried because it usually
+  means missing authority/context rather than executor flakiness.
+- Retry/manual gates are keyed to a **material** source fingerprint (title, description,
+  state, priority, labels) — NOT Linear's `updated_at`, so a label tweak or an appended
+  ledger comment does not silently reset a backoff/exhaustion gate. Editing the work
+  order rotates the fingerprint: the stale gate is ignored AND the attempt counter
+  restarts, so a re-spec gets a fresh budget rather than re-exhausting on the first try.
+- Queue rendering (`pandastack-drive` / `--json`) applies retry gates before execution,
+  so an exhausted or cooling-down item appears under GATE rather than AUTO.
+- The read-modify-write of `retry.json` runs under an exclusive `flock`, so an
+  interactive `--execute` overlapping the launchd tick cannot drop an attempt
+  increment or a PASS-clear. Records are TTL-pruned (default 30 days since last update,
+  `PSDRIVE_RETRY_TTL_MS`) so the store cannot grow unbounded with orphans.
+
+Environment overrides for operators/tests: `PSDRIVE_RETRY_BASE_MS`,
+`PSDRIVE_RETRY_CAP_MS`, `PSDRIVE_RETRY_MAX_ATTEMPTS`, `PSDRIVE_RETRY_TTL_MS`. Test
+coverage: `tests/drive-retry.sh`.
 
 ## Execution runtime — Codex, not `claude -p`
 
