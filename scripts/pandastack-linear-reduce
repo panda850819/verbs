@@ -20,8 +20,11 @@ Linear priority: 0=None 1=Urgent 2=High 3=Medium 4=Low.
 """
 import argparse
 import json
-import re
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pslib  # shared lifecycle / readiness (single source, review finding K)
 
 TERMINAL_STATES = {"Done", "Canceled", "Cancelled"}
 TERMINAL_TYPES = {"completed", "canceled", "cancelled"}
@@ -30,18 +33,6 @@ GATE_LABEL = "needs-human"
 # active = anything not terminal (symphony model); the gate is applied on top.
 # No active-state allowlist: live Linear teams use custom state names, so we
 # classify by terminality + gate, not by a fixed name set.
-
-# lifecycle-map (linear-contract.md): Linear workflow state -> pandastack phase.
-# Used for per-phase readiness gating: a VERIFY issue with no machine-checkable
-# acceptance is ready-blocked, not safe-blocked -> surfaced as needs-spec.
-STATE_PHASE = {"Backlog": "DEFINE", "Planning": "PLAN", "Needs Decision": "GATE",
-               "Building": "BUILD", "Verifying": "VERIFY", "In Review": "REVIEW",
-               "Done": "SHIP"}
-STOCK_FALLBACK = {"Todo": "PLAN", "In Progress": "BUILD"}  # degraded stock-state map
-_ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
-_GOAL_RE = re.compile(r"(?im)^\s*goal\b")
-_CONTEXT_RE = re.compile(r"(?im)^\s*context\b")
-_ARTIFACT_RE = re.compile(r"(/pull/\d+|/merge_requests/\d+|psdrive/\S+|\bPR\s*#?\d+)", re.I)
 
 
 def is_terminal(issue):
@@ -60,33 +51,6 @@ def is_gated(issue):
 def prio_rank(p):
     # Linear: 1=Urgent..4=Low are real; 0=None sorts LAST (symphony "null last").
     return p if isinstance(p, int) and 1 <= p <= 4 else 99
-
-
-def phase_of(issue):
-    s = issue.get("state", "")
-    return STATE_PHASE.get(s) or STOCK_FALLBACK.get(s)
-
-
-def acceptance_present(desc):
-    # machine-checkable acceptance = a non-empty ```acceptance fenced block
-    # (linear-contract.md acceptance-format). Absent -> VERIFY can only guess.
-    m = _ACC_RE.search(desc or "")
-    return bool(m and m.group(1).strip())
-
-
-def readiness_gap(issue):
-    """Per-phase readiness (driver-autonomy.md Readiness): an under-specified issue
-    surfaces as needs-spec instead of auto-running and guessing. Keyed by the issue's
-    current phase. DEFINE (Backlog) is exempt — the PLAN/grill step creates the spec."""
-    phase = phase_of(issue)
-    desc = issue.get("description") or ""
-    if phase == "PLAN" and not (_GOAL_RE.search(desc) and _CONTEXT_RE.search(desc)):
-        return "PLAN: 缺 Goal/Context"
-    if phase == "VERIFY" and not acceptance_present(desc):
-        return "VERIFY: 缺 acceptance"
-    if phase == "REVIEW" and not _ARTIFACT_RE.search(desc):
-        return "REVIEW: 缺 diff/artifact"   # upgrade: use Linear PR/branch attachments, not desc regex
-    return None
 
 
 def reduce_issues(issues):
@@ -111,10 +75,10 @@ def reduce_issues(issues):
         elif blocker_open(i):
             blocked.append(i)             # waiting on a non-terminal blocker
         else:
-            gap = readiness_gap(i)        # PLAN/VERIFY/REVIEW per-phase readiness
-            if gap:
-                i["reason"] = "needs-spec"  # ready != safe: under-specified for its phase
-                i["gap"] = gap              # which input is missing (surface to Panda)
+            gap = pslib.readiness_gap(i.get("state", ""), i.get("description"))
+            if gap:                         # readiness keyed on the TO-RUN phase (finding D)
+                i["reason"] = "needs-spec"
+                i["gap"] = gap
                 gated.append(i)
             else:
                 dispatchable.append(i)

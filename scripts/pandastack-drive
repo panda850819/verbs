@@ -24,24 +24,19 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import pslib  # shared lifecycle / readiness (single source, review finding K)
+
 REDUCE = os.path.join(HERE, "pandastack-linear-reduce")
 SECRETS = os.path.expanduser("~/.config/pandastack/secrets.env")
 
-# Linear workflow state -> pandastack 7-phase (docs/linear-contract.md lifecycle-map),
-# incl. the stock-state fallback (Todo / In Progress) for teams without custom states.
-STATE_PHASE = {
-    "Backlog": "DEFINE", "Planning": "PLAN", "Needs Decision": "GATE",
-    "Building": "BUILD", "Verifying": "VERIFY", "In Review": "REVIEW", "Done": "SHIP",
-    "Todo": "PLAN", "In Progress": "BUILD",   # stock fallback
-}
-NEXT_PHASE = {"DEFINE": "PLAN", "PLAN": "GATE", "GATE": "BUILD", "BUILD": "VERIFY",
-              "VERIFY": "REVIEW", "REVIEW": "SHIP", "SHIP": "(done)"}
-# the Linear workflow state a phase lands in (for the advance proposal).
+# Driver-side phase maps (the lifecycle state<->phase + NEXT_PHASE live in pslib).
 PHASE_STATE = {"PLAN": "Planning", "GATE": "Needs Decision", "BUILD": "Building",
                "VERIFY": "Verifying", "REVIEW": "In Review", "SHIP": "Done"}
 PHASE_SKILL = {"PLAN": "grill", "GATE": "(human decision)", "BUILD": "sprint",
@@ -81,26 +76,17 @@ BUILD_PROMPT = (
     "Work-order:\n{desc}\n\n"
     "Implement the work-order in THIS worktree and self-verify it against the issue's "
     "```acceptance``` check. Do NOT commit — leave the files in the worktree; the driver "
-    "commits. Hard rules: do NOT push, merge, open a PR, touch any path outside this "
-    "worktree, or call external services — SHIP stays a human gate. If the acceptance "
-    "check cannot pass, STOP and report FAIL.\n"
+    "commits. Remove any scratch / temp files you created so only intended changes remain. "
+    "Hard rules: do NOT push, merge, open a PR, touch any path outside this worktree, or "
+    "call external services — SHIP stays a human gate. If the acceptance check cannot "
+    "pass, STOP and report FAIL.\n"
     "Reply with EXACTLY one final line:\n"
     "RESULT: <PASS|FAIL|BLOCKED> — <one sentence>"
 )
 
-_ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
-
-
-def build_ready(issue):
-    """BUILD autonomy conditions 2+3 (driver-autonomy.md): a prompt-ified work-order
-    with a machine-checkable acceptance block. Condition 1 (plan-approved) is the
-    Building state itself (moved out of Needs Decision). Missing -> needs-spec,
-    never auto-built."""
-    desc = issue.get("description") or ""
-    m = _ACC_RE.search(desc)
-    has_acceptance = bool(m and m.group(1).strip())
-    has_work_order = bool(re.search(r"(?im)^\s*(goal|context)\b", desc))
-    return has_acceptance and has_work_order
+# Test seams (PSDRIVE_FIXTURE / PSDRIVE_BUILD_STUB) are honored ONLY under PSDRIVE_TEST=1,
+# so a stray env export can never divert or stub a real run (review finding L).
+TEST_MODE = bool(os.environ.get("PSDRIVE_TEST"))
 
 
 def load_secrets():
@@ -118,7 +104,7 @@ def load_secrets():
 
 def linear_reduce():
     """The WBS read: pandastack-linear-reduce over the whole workspace (single source)."""
-    fixture = os.environ.get("PSDRIVE_FIXTURE")  # test seam: reduce a fixture, not live Linear
+    fixture = os.environ.get("PSDRIVE_FIXTURE") if TEST_MODE else None  # test seam (guarded)
     src = ["--source", "fixture", "--file", fixture] if fixture else ["--source", "linear"]
     out = subprocess.run([sys.executable, REDUCE, *src, "--json"],
                          capture_output=True, text=True)
@@ -130,7 +116,7 @@ def linear_reduce():
 def entry(issue, nxt, skill, reason):
     return {"id": issue["identifier"], "project": issue.get("project"),
             "title": issue.get("title", ""), "state": issue.get("state"),
-            "phase": STATE_PHASE.get(issue.get("state"), "?"),
+            "phase": pslib.phase_of(issue.get("state")) or "?",
             "next": nxt, "skill": skill, "reason": reason,
             "to_state": PHASE_STATE.get(nxt), "repo": PROJECT_REPO.get(issue.get("project") or "")}
 
@@ -138,7 +124,7 @@ def entry(issue, nxt, skill, reason):
 def build_queue(build_auto=False, only=None):
     red = linear_reduce()
     q = {"AUTO": [], "GATE": [], "BLOCKED": []}
-    # reduce already split off the hard human-gate + blocked issues.
+    # reduce already split off the hard human-gate + readiness + blocked issues.
     for i in red.get("gated", []):
         if i.get("reason") == "needs-spec":
             reason = "needs-spec (" + (i.get("gap") or "underspecified") + ")"
@@ -149,22 +135,22 @@ def build_queue(build_auto=False, only=None):
         q["BLOCKED"].append(entry(i, None, None, "blocked_by"))
     # dispatchable: classify by whether the NEXT phase is reversible (AUTO) or a gate.
     for i in red.get("dispatchable", []):
-        phase = STATE_PHASE.get(i.get("state"), "?")
+        phase = pslib.phase_of(i.get("state")) or "?"
         # BUILD autonomy (default OFF, --only scoped): a Building issue routes to an
         # auto-build instead of assuming code was already written. Without the flag,
         # behavior is unchanged (Building -> auto-verify).
         if build_auto and phase == "BUILD" and (only is None or i.get("project") == only):
-            if build_ready(i):
+            if pslib.work_order_complete(i.get("description")):
                 e = entry(i, "BUILD", PHASE_SKILL["BUILD"], None)
                 e["build"] = True
                 e["to_state"] = PHASE_STATE["VERIFY"]   # build done -> propose Verifying
-                e["desc"] = i.get("description", "")    # work-order for the build prompt
+                e["desc"] = i.get("description", "")     # work-order for the build prompt
                 q["AUTO"].append(e)
             else:
                 q["GATE"].append(entry(i, "BUILD", PHASE_SKILL["BUILD"],
-                                       "needs-spec (無 work-order/acceptance)"))
+                                       "needs-spec (work-order/acceptance 不完整)"))
             continue
-        nxt = NEXT_PHASE.get(phase, "?")
+        nxt = pslib.NEXT_PHASE.get(phase, "?")
         skill = PHASE_SKILL.get(nxt, "?")
         if nxt in AUTO_PHASES:
             q["AUTO"].append(entry(i, nxt, skill, None))
@@ -190,11 +176,12 @@ def exec_item(x):
     fd, out_file = tempfile.mkstemp(prefix="psdrive-", suffix=".txt")
     os.close(fd)
     try:
-        subprocess.run(["codex", "exec", "-s", "read-only", "-C", rd,
-                        "--skip-git-repo-check", "-o", out_file, prompt],
-                       capture_output=True, text=True, timeout=1200)
+        cp = subprocess.run(["codex", "exec", "-s", "read-only", "-C", rd,
+                             "--skip-git-repo-check", "-o", out_file, prompt],
+                            capture_output=True, text=True, timeout=1200)
         with open(out_file, encoding="utf-8") as f:
             last = f.read()
+        rc = cp.returncode
     except Exception as e:
         return {"ran": True, "ok": False, "verdict": "ERROR", "summary": str(e)[:120]}
     finally:
@@ -202,9 +189,7 @@ def exec_item(x):
             os.unlink(out_file)
         except OSError:
             pass
-    m = re.search(r"RESULT:\s*(PASS|FAIL|BLOCKED)\s*[—-]?\s*(.*)", last)
-    verdict = m.group(1) if m else "UNKNOWN"
-    summary = ((m.group(2) if m else last).strip())[:160]
+    verdict, summary = pslib.parse_result(last, rc)
     passed = verdict == "PASS"
     # Linear is the single truth; the driver NEVER writes it. On PASS, surface the
     # one human-invoked advance (pandastack-linear-advance) — do not auto-write.
@@ -215,24 +200,33 @@ def exec_item(x):
 
 def exec_build(x):
     """Run the BUILD skill in an ISOLATED git worktree, sandboxed to `workspace-write`
-    (no network -> codex physically cannot push). The live working tree is never
-    touched. On PASS the branch is kept for Panda to open a PR (the driver never
-    pushes); on FAIL the branch is discarded. SHIP stays a human gate
-    (driver-autonomy condition 5). Test seam: PSDRIVE_BUILD_STUB skips codex."""
+    with network pinned OFF (codex physically cannot push, regardless of ~/.codex
+    config). The live working tree is never touched. The model only writes files; the
+    DRIVER commits (the worktree .git is outside the sandbox) with hooks disabled, so a
+    codex-written tracked hook cannot execute outside the sandbox. PASS keeps the branch
+    for a human PR; FAIL discards worktree + branch. SHIP stays a human gate. A kept PASS
+    branch is left alone on later ticks (not rebuilt). Test seam: PSDRIVE_BUILD_STUB
+    (under PSDRIVE_TEST) skips codex."""
     repo = x.get("repo")
     if not repo or not os.path.isdir(os.path.expanduser(repo)):
         return {"ran": False, "why": f"{x['id']} ({x.get('project')}) 無對應 repo"}
     rd = os.path.expanduser(repo)
     branch = "psdrive/" + re.sub(r"[^A-Za-z0-9._-]", "-", str(x["id"]))
+    # a kept PASS branch means this issue was already built and is awaiting a human PR /
+    # advance — do NOT rebuild it every tick (review finding C). Surface, don't retry.
+    if subprocess.run(["git", "-C", rd, "rev-parse", "--verify", "--quiet", branch],
+                      capture_output=True, text=True).returncode == 0:
+        return {"ran": False, "why": f"branch {branch} 已存在(已 build,待 review/advance)"}
     wt = tempfile.mkdtemp(prefix=f"psdrive-wt-{x['id']}-")
     made_wt = False
+    keep_branch = False
     try:
         r = subprocess.run(["git", "-C", rd, "worktree", "add", "-b", branch, wt],
                            capture_output=True, text=True)
         if r.returncode != 0:
             return {"ran": False, "why": "worktree add failed: " + (r.stderr or "").strip()[:140]}
         made_wt = True
-        stub = os.environ.get("PSDRIVE_BUILD_STUB")   # test seam: skip the codex build
+        stub = os.environ.get("PSDRIVE_BUILD_STUB") if TEST_MODE else None  # test seam (guarded)
         if stub:
             verdict, summary = stub.upper(), "stubbed"
             if verdict == "PASS":   # simulate codex leaving a file for the driver to commit
@@ -244,52 +238,57 @@ def exec_build(x):
             fd, out_file = tempfile.mkstemp(prefix="psbuild-", suffix=".txt")
             os.close(fd)
             try:
-                # workspace-write: codex may write inside the worktree, network is off
-                # at the sandbox layer, so push/merge/publish are impossible.
-                subprocess.run(["codex", "exec", "-s", "workspace-write", "-C", wt,
-                                "--skip-git-repo-check", "-o", out_file, prompt],
-                               capture_output=True, text=True, timeout=1800)
+                # workspace-write + network pinned off on the command line (not just the
+                # config default) -> push/merge/publish impossible regardless of config.
+                cp = subprocess.run(["codex", "exec", "-s", "workspace-write",
+                                     "-c", "sandbox_workspace_write.network_access=false",
+                                     "-C", wt, "--skip-git-repo-check", "-o", out_file, prompt],
+                                    capture_output=True, text=True, timeout=1800)
                 with open(out_file, encoding="utf-8") as f:
                     last = f.read()
+                rc = cp.returncode
             except Exception as e:
-                last = f"RESULT: BLOCKED — executor error: {str(e)[:100]}"
+                last, rc = f"executor error: {str(e)[:100]}", 1
             finally:
                 try:
                     os.unlink(out_file)
                 except OSError:
                     pass
-            m = re.search(r"RESULT:\s*(PASS|FAIL|BLOCKED)\s*[—-]?\s*(.*)", last)
-            verdict = m.group(1) if m else "UNKNOWN"
-            summary = ((m.group(2) if m else last).strip())[:160]
+            verdict, summary = pslib.parse_result(last, rc)
         passed = verdict == "PASS"
         committed = False
+        staged = ""
         if passed:
-            # driver commits (unsandboxed): a worktree's git index/refs live in the main
-            # repo .git, which codex's workspace-write sandbox cannot write — so the model
-            # only writes files; the driver makes the commit.
+            # log the staged file list so the human PR step can catch stray/sensitive
+            # paths (review finding E); commit with hooks DISABLED (--no-verify + empty
+            # hooksPath) so a codex-written tracked hook can't run unsandboxed (finding B).
+            staged = subprocess.run(["git", "-C", wt, "status", "--porcelain"],
+                                    capture_output=True, text=True).stdout.strip()
             subprocess.run(["git", "-C", wt, "add", "-A"], capture_output=True, text=True)
-            cm = subprocess.run(["git", "-C", wt, "commit", "-m",
+            cm = subprocess.run(["git", "-C", wt, "-c", "core.hooksPath=/dev/null",
+                                 "commit", "--no-verify", "-m",
                                  f"feat({x['id']}): {x.get('title') or 'auto-build'}"],
                                 capture_output=True, text=True)
             committed = cm.returncode == 0
-        # remove the worktree dir either way; keep the branch only on a committed PASS.
-        subprocess.run(["git", "-C", rd, "worktree", "remove", "--force", wt],
-                       capture_output=True, text=True)
-        made_wt = False
         if passed and committed:
+            keep_branch = True
             return {"ran": True, "ok": True, "verdict": "PASS", "summary": summary,
-                    "branch": branch,
+                    "branch": branch, "staged": staged,
                     "pr_hint": f"review local branch {branch} and open a PR (driver never pushes)",
                     "advance": f'pandastack-linear-advance --issue {x["id"]} --to "{x.get("to_state", "Verifying")}"'}
-        subprocess.run(["git", "-C", rd, "branch", "-D", branch], capture_output=True, text=True)
         if passed and not committed:
             return {"ran": True, "ok": False, "verdict": "FAIL",
                     "summary": "acceptance passed but no changes to commit: " + (cm.stderr or cm.stdout or "").strip()[:120]}
         return {"ran": True, "ok": False, "verdict": verdict, "summary": summary}
     finally:
-        if made_wt:   # exception path: never leave a stray worktree / branch behind
+        # single cleanup path (review finding I): always remove the worktree dir; delete
+        # the branch unless a committed PASS is keeping it. prune handles a stuck remove.
+        if made_wt:
             subprocess.run(["git", "-C", rd, "worktree", "remove", "--force", wt],
                            capture_output=True, text=True)
+            subprocess.run(["git", "-C", rd, "worktree", "prune"], capture_output=True, text=True)
+        shutil.rmtree(wt, ignore_errors=True)
+        if not keep_branch:
             subprocess.run(["git", "-C", rd, "branch", "-D", branch], capture_output=True, text=True)
 
 
@@ -329,7 +328,7 @@ def main():
             print(line(x))
 
     if args.execute:
-        print(f"\n--execute (Codex headless, read-only sandbox, max {args.max}):")
+        print(f"\n--execute (Codex headless, sandboxed, max {args.max}):")
         n = 0
         for x in q["AUTO"]:
             if args.only and x.get("project") != args.only:
@@ -338,17 +337,19 @@ def main():
                 print("  (max reached — rerun for more)"); break
             print(f"  ▶ {x['id']} ({x.get('project')}) → codex {x['skill']} …")
             r = exec_build(x) if x.get("build") else exec_item(x)
-            n += 1
             if not r["ran"]:
                 print(f"    skipped: {r['why']}")
-            else:
-                print(f"    {r['verdict']}: {r['summary']}")
-                if r.get("pr_hint"):
-                    print(f"    → {r['pr_hint']}")
-                if r.get("advance"):
-                    print(f"    → ready to advance (run it yourself): {r['advance']}")
+                continue                      # a skip does not consume a --max slot (finding N)
+            n += 1
+            print(f"    {r['verdict']}: {r['summary']}")
+            if r.get("staged"):
+                print("    staged:\n      " + r["staged"].replace("\n", "\n      "))
+            if r.get("pr_hint"):
+                print(f"    → {r['pr_hint']}")
+            if r.get("advance"):
+                print(f"    → ready to advance (run it yourself): {r['advance']}")
         if n == 0:
-            print("  (no AUTO items to run)")
+            print("  (no AUTO items ran)")
     return 0
 
 

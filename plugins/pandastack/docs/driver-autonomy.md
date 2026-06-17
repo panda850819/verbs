@@ -63,11 +63,14 @@ This generalizes the acceptance-format rule (`linear-contract.md`) from VERIFY t
 every phase: an under-specified issue never auto-runs, it surfaces for Panda to spec.
 Reversibility and locality decide *safe*; readiness decides *ready*. Both gate.
 
-Status: VERIFY-acceptance readiness **wired** (2026-06-17). `pandastack-linear-reduce`
-now gates a VERIFY-phase issue with no machine-checkable `acceptance` block as
-`needs-spec` (distinct from the `needs-decision` hard gate), test-covered in
-`tests/linear-reduce.sh`. Still pending: PLAN (Goal+Context) and REVIEW (diff/artifact)
-readiness, and BUILD autonomy below.
+Status: per-phase readiness **wired** (2026-06-17), keyed on the TO-RUN (next) phase in
+`pslib.readiness_gap` so the input checked is the input the driver actually consumes:
+Building→VERIFY needs a machine-runnable `acceptance`; Verifying→REVIEW needs a
+diff/artifact ref; Backlog→PLAN is not gated (grill bootstraps and self-reports BLOCKED
+if it can't plan). Under-specified → `needs-spec` (distinct from the `needs-decision` hard
+gate). An `acceptance` block that reads as human prose (not a runnable check) is treated
+as human-only and gated. Lifecycle + readiness logic is the single source in
+`scripts/pslib.py` (shared by reduce + drive). Test-covered in `tests/linear-reduce.sh`.
 
 ## BUILD autonomy (wired 2026-06-17 — default OFF)
 
@@ -83,15 +86,23 @@ straight to dev." BUILD may auto-run for an issue ONLY when ALL hold:
 
 1. **Plan approved** — the issue already passed GATE (Panda moved it out of
    `Needs Decision`). The one-way-door decision is already a human's.
-2. **Prompt-ified work-order** — the description is a complete work-order
-   (Goal / Project / Epic / Task / Context / Acceptance / Deliverable) that renders
-   straight into the executor prompt; no missing field.
+2. **Prompt-ified work-order** — the implemented gate (`pslib.work_order_complete`) is
+   the **Goal AND Context AND a machine-runnable `acceptance`** minimum (matching the PLAN
+   gate's AND); the fuller schema (Goal / Project / Epic / Task / Context / Acceptance /
+   Deliverable) is the ideal but only the minimum is enforced. Acceptance prose that is
+   not runnable does not count.
 3. **Machine-checkable acceptance** — a runnable `acceptance` block the build
-   self-verifies against before proposing REVIEW.
+   self-verifies against before proposing REVIEW (the model self-checks; the driver does
+   not re-run it).
 4. **Isolated workspace** — built: each build runs in a per-issue `git worktree`
    (branch `psdrive/<ISSUE>`), never the live working tree; codex is sandboxed to
-   `-s workspace-write`, so network (push / merge / publish) is impossible. PASS
-   keeps the branch for a human PR; FAIL discards it. <!-- upgrade: backoff + retry caps -->
+   `-s workspace-write` with `-c sandbox_workspace_write.network_access=false` pinned on
+   the command line (not just the config default), so push / merge / publish are
+   impossible regardless of `~/.codex/config.toml`. The model only writes files; the
+   DRIVER commits unsandboxed with hooks disabled (`--no-verify` + empty `core.hooksPath`)
+   so a codex-written tracked hook can't execute outside the sandbox. PASS keeps the
+   branch for a human PR (a kept branch is not rebuilt on later ticks); FAIL discards
+   worktree + branch. <!-- upgrade: backoff + retry caps -->
 5. **Stops at SHIP** — produces a branch / PR proposal; never auto-merges, pushes to
    main, or publishes. SHIP stays a hard gate (Gate #3).
 
