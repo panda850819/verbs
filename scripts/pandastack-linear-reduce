@@ -20,6 +20,7 @@ Linear priority: 0=None 1=Urgent 2=High 3=Medium 4=Low.
 """
 import argparse
 import json
+import re
 import sys
 
 TERMINAL_STATES = {"Done", "Canceled", "Cancelled"}
@@ -29,6 +30,15 @@ GATE_LABEL = "needs-human"
 # active = anything not terminal (symphony model); the gate is applied on top.
 # No active-state allowlist: live Linear teams use custom state names, so we
 # classify by terminality + gate, not by a fixed name set.
+
+# lifecycle-map (linear-contract.md): Linear workflow state -> pandastack phase.
+# Used for per-phase readiness gating: a VERIFY issue with no machine-checkable
+# acceptance is ready-blocked, not safe-blocked -> surfaced as needs-spec.
+STATE_PHASE = {"Backlog": "DEFINE", "Planning": "PLAN", "Needs Decision": "GATE",
+               "Building": "BUILD", "Verifying": "VERIFY", "In Review": "REVIEW",
+               "Done": "SHIP"}
+STOCK_FALLBACK = {"Todo": "PLAN", "In Progress": "BUILD"}  # degraded stock-state map
+_ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
 
 
 def is_terminal(issue):
@@ -49,6 +59,18 @@ def prio_rank(p):
     return p if isinstance(p, int) and 1 <= p <= 4 else 99
 
 
+def phase_of(issue):
+    s = issue.get("state", "")
+    return STATE_PHASE.get(s) or STOCK_FALLBACK.get(s)
+
+
+def acceptance_present(desc):
+    # machine-checkable acceptance = a non-empty ```acceptance fenced block
+    # (linear-contract.md acceptance-format). Absent -> VERIFY can only guess.
+    m = _ACC_RE.search(desc or "")
+    return bool(m and m.group(1).strip())
+
+
 def reduce_issues(issues):
     by_id = {i.get("identifier"): i for i in issues}
 
@@ -66,9 +88,14 @@ def reduce_issues(issues):
         if is_terminal(i):
             continue                      # terminal: skipped entirely
         if is_gated(i):
+            i["reason"] = "needs-decision"
             gated.append(i)               # hard gate: surface, never dispatch
         elif blocker_open(i):
             blocked.append(i)             # waiting on a non-terminal blocker
+        elif phase_of(i) == "VERIFY" and not acceptance_present(i.get("description")):
+            i["reason"] = "needs-spec"    # ready != safe: no checkable acceptance
+            gated.append(i)               # surface for Panda to spec, don't guess
+            # upgrade: PLAN needs Goal+Context work-order; REVIEW needs a diff/PR artifact
         else:
             dispatchable.append(i)
 
@@ -129,7 +156,7 @@ def load_linear(project_id=None):
         variables = {"pid": project_id}
         qhead = "query($pid:ID!)"
     query = (qhead + '{ issues(first: 100, filter: %s) { nodes { '
-             'identifier title priority createdAt '
+             'identifier title description priority createdAt '
              'state { name type } '
              'project { name } '
              'labels { nodes { name } } '
@@ -144,6 +171,7 @@ def load_linear(project_id=None):
             "identifier": n["identifier"],
             "project": (n.get("project") or {}).get("name"),
             "title": n.get("title", ""),
+            "description": n.get("description") or "",
             "priority": n.get("priority", 0),
             "state": n["state"]["name"],
             "state_type": n["state"]["type"],
@@ -180,7 +208,7 @@ def main():
             print(line(i))
         print("GATED (needs human, not dispatched):")
         for i in result["gated"]:
-            print(line(i))
+            print(line(i) + f"  [{i.get('reason', 'needs-decision')}]")
         print("BLOCKED (waiting on a blocker):")
         for i in result["blocked"]:
             print(line(i))

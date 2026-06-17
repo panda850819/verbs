@@ -63,9 +63,11 @@ This generalizes the acceptance-format rule (`linear-contract.md`) from VERIFY t
 every phase: an under-specified issue never auto-runs, it surfaces for Panda to spec.
 Reversibility and locality decide *safe*; readiness decides *ready*. Both gate.
 
-Status: not yet wired. `pandastack-linear-reduce` currently classifies by
-terminal / gate / blocker only; the per-phase readiness checks (and BUILD autonomy
-below) are the next build step, not shipped behavior.
+Status: VERIFY-acceptance readiness **wired** (2026-06-17). `pandastack-linear-reduce`
+now gates a VERIFY-phase issue with no machine-checkable `acceptance` block as
+`needs-spec` (distinct from the `needs-decision` hard gate), test-covered in
+`tests/linear-reduce.sh`. Still pending: PLAN (Goal+Context) and REVIEW (diff/artifact)
+readiness, and BUILD autonomy below.
 
 ## BUILD autonomy (proposed — default OFF)
 
@@ -98,7 +100,10 @@ was human-approved upstream.
 The driver delegates an AUTO step to **Codex** (`codex exec -s read-only -C <repo>`),
 never `claude -p`:
 
-- `claude` print-mode retires **2026-06-15** — anything built on it breaks.
+- (Superseded 2026-06-16: `claude -p` was slated to move off subscription rate
+  limits on 2026-06-15, but Anthropic deferred it. It stays on subscription, with
+  advance notice before any future change. So this is no longer a reason to avoid
+  `claude -p`; the quota-split and sandbox points below are what keep Codex the runtime.)
 - Codex runs on Panda's **subscription** (no per-call $). Throttle by `--max`, not a $ budget.
 - `-s read-only` enforces no-mutation **at the sandbox layer** — a third wall on top
   of the phase classifier (BUILD/SHIP never reach here) and the read-only prompt.
