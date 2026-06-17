@@ -79,10 +79,11 @@ BUILD_PROMPT = (
     "{item} (project '{project}'). You are in an ISOLATED git worktree at {wt} on "
     "branch {branch}; the live working tree is untouched.\n"
     "Work-order:\n{desc}\n\n"
-    "Implement the work-order in THIS worktree, then make ONE local commit. Hard "
-    "rules: do NOT push, merge, open a PR, touch any path outside this worktree, or "
-    "call external services — SHIP stays a human gate. If the issue's ```acceptance``` "
-    "check cannot pass, STOP and report FAIL; never commit broken work.\n"
+    "Implement the work-order in THIS worktree and self-verify it against the issue's "
+    "```acceptance``` check. Do NOT commit — leave the files in the worktree; the driver "
+    "commits. Hard rules: do NOT push, merge, open a PR, touch any path outside this "
+    "worktree, or call external services — SHIP stays a human gate. If the acceptance "
+    "check cannot pass, STOP and report FAIL.\n"
     "Reply with EXACTLY one final line:\n"
     "RESULT: <PASS|FAIL|BLOCKED> — <one sentence>"
 )
@@ -232,6 +233,9 @@ def exec_build(x):
         stub = os.environ.get("PSDRIVE_BUILD_STUB")   # test seam: skip the codex build
         if stub:
             verdict, summary = stub.upper(), "stubbed"
+            if verdict == "PASS":   # simulate codex leaving a file for the driver to commit
+                with open(os.path.join(wt, ".psdrive-stub"), "w") as f:
+                    f.write("stub build artifact\n")
         else:
             prompt = BUILD_PROMPT.format(item=x["id"], project=x.get("project"), wt=wt,
                                          branch=branch, desc=x.get("desc") or x.get("title") or "-")
@@ -256,16 +260,29 @@ def exec_build(x):
             verdict = m.group(1) if m else "UNKNOWN"
             summary = ((m.group(2) if m else last).strip())[:160]
         passed = verdict == "PASS"
-        # remove the worktree dir either way; keep the branch only on PASS (for the PR).
+        committed = False
+        if passed:
+            # driver commits (unsandboxed): a worktree's git index/refs live in the main
+            # repo .git, which codex's workspace-write sandbox cannot write — so the model
+            # only writes files; the driver makes the commit.
+            subprocess.run(["git", "-C", wt, "add", "-A"], capture_output=True, text=True)
+            cm = subprocess.run(["git", "-C", wt, "commit", "-m",
+                                 f"feat({x['id']}): {x.get('title') or 'auto-build'}"],
+                                capture_output=True, text=True)
+            committed = cm.returncode == 0
+        # remove the worktree dir either way; keep the branch only on a committed PASS.
         subprocess.run(["git", "-C", rd, "worktree", "remove", "--force", wt],
                        capture_output=True, text=True)
         made_wt = False
-        if passed:
+        if passed and committed:
             return {"ran": True, "ok": True, "verdict": "PASS", "summary": summary,
                     "branch": branch,
                     "pr_hint": f"review local branch {branch} and open a PR (driver never pushes)",
                     "advance": f'pandastack-linear-advance --issue {x["id"]} --to "{x.get("to_state", "Verifying")}"'}
         subprocess.run(["git", "-C", rd, "branch", "-D", branch], capture_output=True, text=True)
+        if passed and not committed:
+            return {"ran": True, "ok": False, "verdict": "FAIL",
+                    "summary": "acceptance passed but no changes to commit: " + (cm.stderr or cm.stdout or "").strip()[:120]}
         return {"ran": True, "ok": False, "verdict": verdict, "summary": summary}
     finally:
         if made_wt:   # exception path: never leave a stray worktree / branch behind
