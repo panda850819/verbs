@@ -9,7 +9,10 @@ A PR is not enough evidence by itself. The loop must leave an audit trail in bot
 systems:
 
 1. **Linear comment as append-only ledger**
-   - Append one comment for each loop/build/review/ship iteration.
+   - Append one comment whenever the agent learns or changes material state:
+     kickoff/context read, plan decision, build attempt, verification result,
+     review finding, content/doc update, PR update, blocked state, and final
+     retrospective.
    - Include run id if present, Linear issue id, repo, branch, commit SHA, PR URL,
      CI/check result, PandaStack review comment URL, and verdict.
    - Do not use the issue description as the running log. Keep the description as
@@ -19,6 +22,8 @@ systems:
    - Post PandaStack review output as a GitHub PR comment or review.
    - Capture the resulting comment/review URL.
    - Link that URL back to Linear in the ledger comment.
+   - Final review, retrospective, or content/doc updates must be mirrored to both
+     places: a PR comment/update and a Linear ledger comment.
 
 3. **Autonomy boundary**
    - Auto loops may open PRs only when the repo/project is allowlisted for branch
