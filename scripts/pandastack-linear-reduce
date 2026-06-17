@@ -39,6 +39,9 @@ STATE_PHASE = {"Backlog": "DEFINE", "Planning": "PLAN", "Needs Decision": "GATE"
                "Done": "SHIP"}
 STOCK_FALLBACK = {"Todo": "PLAN", "In Progress": "BUILD"}  # degraded stock-state map
 _ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
+_GOAL_RE = re.compile(r"(?im)^\s*goal\b")
+_CONTEXT_RE = re.compile(r"(?im)^\s*context\b")
+_ARTIFACT_RE = re.compile(r"(/pull/\d+|/merge_requests/\d+|psdrive/\S+|\bPR\s*#?\d+)", re.I)
 
 
 def is_terminal(issue):
@@ -71,6 +74,21 @@ def acceptance_present(desc):
     return bool(m and m.group(1).strip())
 
 
+def readiness_gap(issue):
+    """Per-phase readiness (driver-autonomy.md Readiness): an under-specified issue
+    surfaces as needs-spec instead of auto-running and guessing. Keyed by the issue's
+    current phase. DEFINE (Backlog) is exempt — the PLAN/grill step creates the spec."""
+    phase = phase_of(issue)
+    desc = issue.get("description") or ""
+    if phase == "PLAN" and not (_GOAL_RE.search(desc) and _CONTEXT_RE.search(desc)):
+        return "PLAN: 缺 Goal/Context"
+    if phase == "VERIFY" and not acceptance_present(desc):
+        return "VERIFY: 缺 acceptance"
+    if phase == "REVIEW" and not _ARTIFACT_RE.search(desc):
+        return "REVIEW: 缺 diff/artifact"   # upgrade: use Linear PR/branch attachments, not desc regex
+    return None
+
+
 def reduce_issues(issues):
     by_id = {i.get("identifier"): i for i in issues}
 
@@ -92,12 +110,14 @@ def reduce_issues(issues):
             gated.append(i)               # hard gate: surface, never dispatch
         elif blocker_open(i):
             blocked.append(i)             # waiting on a non-terminal blocker
-        elif phase_of(i) == "VERIFY" and not acceptance_present(i.get("description")):
-            i["reason"] = "needs-spec"    # ready != safe: no checkable acceptance
-            gated.append(i)               # surface for Panda to spec, don't guess
-            # upgrade: PLAN needs Goal+Context work-order; REVIEW needs a diff/PR artifact
         else:
-            dispatchable.append(i)
+            gap = readiness_gap(i)        # PLAN/VERIFY/REVIEW per-phase readiness
+            if gap:
+                i["reason"] = "needs-spec"  # ready != safe: under-specified for its phase
+                i["gap"] = gap              # which input is missing (surface to Panda)
+                gated.append(i)
+            else:
+                dispatchable.append(i)
 
     dispatchable.sort(key=lambda i: (prio_rank(i.get("priority", 0)),
                                      i.get("created_at", "")))

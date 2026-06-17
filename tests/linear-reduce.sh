@@ -44,5 +44,21 @@ check "none-priority sorts last among dispatchable"          "$disp[-1] == 'MUR-
 check "VERIFY with no acceptance is gated as needs-spec"     "'MUR-H' not in $disp and any(i['identifier']=='MUR-H' and i.get('reason')=='needs-spec' for i in r['gated'])"
 check "VERIFY with a machine-checkable acceptance dispatches" "'MUR-I' in $disp"
 
+# ---- PLAN / REVIEW readiness (step 3, second fixture) ----
+fx2="$(mktemp)"
+cat > "$fx2" <<'JSON'
+{"issues":[
+  {"identifier":"P-1","title":"plan ok","state":"Planning","priority":2,"description":"Goal: ship x\nContext: because y","created_at":"2026-06-10T00:00:00Z"},
+  {"identifier":"P-2","title":"plan bare","state":"Planning","priority":2,"description":"a one-line blurb, no fields","created_at":"2026-06-11T00:00:00Z"},
+  {"identifier":"R-1","title":"review w/ PR","state":"In Review","priority":2,"description":"Deliverable: github.com/x/y/pull/5","created_at":"2026-06-12T00:00:00Z"},
+  {"identifier":"R-2","title":"review no artifact","state":"In Review","priority":2,"description":"please take a look","created_at":"2026-06-13T00:00:00Z"}
+]}
+JSON
+out="$("$S" --source fixture --file "$fx2" --json)"
+check "PLAN with Goal+Context dispatches"        "'P-1' in $disp"
+check "PLAN bare gated as needs-spec (PLAN gap)" "'P-2' in $gated and any(i['identifier']=='P-2' and 'PLAN' in (i.get('gap') or '') for i in r['gated'])"
+check "REVIEW with PR artifact dispatches"       "'R-1' in $disp"
+check "REVIEW no artifact gated (REVIEW gap)"    "'R-2' in $gated and any(i['identifier']=='R-2' and 'REVIEW' in (i.get('gap') or '') for i in r['gated'])"
+
 [ "$fail" -eq 0 ] && echo "OK: linear-reduce all green" || echo "FAILURES present"
 exit "$fail"

@@ -140,8 +140,10 @@ def build_queue(build_auto=False, only=None):
     q = {"AUTO": [], "GATE": [], "BLOCKED": []}
     # reduce already split off the hard human-gate + blocked issues.
     for i in red.get("gated", []):
-        reason = ("needs-spec (無 acceptance)" if i.get("reason") == "needs-spec"
-                  else "needs-human (硬 gate)")
+        if i.get("reason") == "needs-spec":
+            reason = "needs-spec (" + (i.get("gap") or "underspecified") + ")"
+        else:
+            reason = "needs-human (硬 gate)"
         q["GATE"].append(entry(i, None, "(human decision)", reason))
     for i in red.get("blocked", []):
         q["BLOCKED"].append(entry(i, None, None, "blocked_by"))
