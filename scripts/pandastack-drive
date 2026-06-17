@@ -74,6 +74,20 @@ EXEC_PROMPT = (
     "RESULT: <PASS|FAIL|BLOCKED> — <one sentence>"
 )
 
+_ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
+
+
+def build_ready(issue):
+    """BUILD autonomy conditions 2+3 (driver-autonomy.md): a prompt-ified work-order
+    with a machine-checkable acceptance block. Condition 1 (plan-approved) is the
+    Building state itself (moved out of Needs Decision). Missing -> needs-spec,
+    never auto-built."""
+    desc = issue.get("description") or ""
+    m = _ACC_RE.search(desc)
+    has_acceptance = bool(m and m.group(1).strip())
+    has_work_order = bool(re.search(r"(?im)^\s*(goal|context)\b", desc))
+    return has_acceptance and has_work_order
+
 
 def load_secrets():
     """Load LINEAR_API_KEY (and friends) so the reduce subprocess can reach Linear."""
@@ -90,7 +104,9 @@ def load_secrets():
 
 def linear_reduce():
     """The WBS read: pandastack-linear-reduce over the whole workspace (single source)."""
-    out = subprocess.run([sys.executable, REDUCE, "--source", "linear", "--json"],
+    fixture = os.environ.get("PSDRIVE_FIXTURE")  # test seam: reduce a fixture, not live Linear
+    src = ["--source", "fixture", "--file", fixture] if fixture else ["--source", "linear"]
+    out = subprocess.run([sys.executable, REDUCE, *src, "--json"],
                          capture_output=True, text=True)
     if out.returncode != 0:
         sys.exit("linear reduce failed: " + (out.stderr or out.stdout or "").strip())
@@ -105,17 +121,32 @@ def entry(issue, nxt, skill, reason):
             "to_state": PHASE_STATE.get(nxt), "repo": PROJECT_REPO.get(issue.get("project") or "")}
 
 
-def build_queue():
+def build_queue(build_auto=False, only=None):
     red = linear_reduce()
     q = {"AUTO": [], "GATE": [], "BLOCKED": []}
     # reduce already split off the hard human-gate + blocked issues.
     for i in red.get("gated", []):
-        q["GATE"].append(entry(i, None, "(human decision)", "needs-human (硬 gate)"))
+        reason = ("needs-spec (無 acceptance)" if i.get("reason") == "needs-spec"
+                  else "needs-human (硬 gate)")
+        q["GATE"].append(entry(i, None, "(human decision)", reason))
     for i in red.get("blocked", []):
         q["BLOCKED"].append(entry(i, None, None, "blocked_by"))
     # dispatchable: classify by whether the NEXT phase is reversible (AUTO) or a gate.
     for i in red.get("dispatchable", []):
         phase = STATE_PHASE.get(i.get("state"), "?")
+        # BUILD autonomy (default OFF, --only scoped): a Building issue routes to an
+        # auto-build instead of assuming code was already written. Without the flag,
+        # behavior is unchanged (Building -> auto-verify).
+        if build_auto and phase == "BUILD" and (only is None or i.get("project") == only):
+            if build_ready(i):
+                e = entry(i, "BUILD", PHASE_SKILL["BUILD"], None)
+                e["build"] = True
+                e["to_state"] = PHASE_STATE["VERIFY"]   # build done -> propose Verifying
+                q["AUTO"].append(e)
+            else:
+                q["GATE"].append(entry(i, "BUILD", PHASE_SKILL["BUILD"],
+                                       "needs-spec (無 work-order/acceptance)"))
+            continue
         nxt = NEXT_PHASE.get(phase, "?")
         skill = PHASE_SKILL.get(nxt, "?")
         if nxt in AUTO_PHASES:
@@ -165,6 +196,13 @@ def exec_item(x):
     return {"ran": True, "ok": passed, "verdict": verdict, "summary": summary, "advance": advance}
 
 
+def exec_build(x):
+    """BUILD execution — runs the build skill in an ISOLATED git worktree (2b).
+    Until isolation lands, hard-disabled: the driver must never write a live repo."""
+    return {"ran": False,
+            "why": "isolated workspace not implemented (driver-autonomy condition 4) — BUILD auto-execution disabled"}
+
+
 def main():
     ap = argparse.ArgumentParser(prog="pandastack-drive")
     ap.add_argument("--json", action="store_true")
@@ -172,9 +210,13 @@ def main():
                     help="run AUTO skills on Codex headless (read-only); on PASS, propose the Linear advance")
     ap.add_argument("--max", type=int, default=1, help="max items to execute per run (default 1)")
     ap.add_argument("--only", help="restrict --execute to one Linear project")
+    ap.add_argument("--build-auto", action="store_true",
+                    help="(default OFF) route a build-ready Building issue to auto-build in an isolated worktree; requires --only")
     args = ap.parse_args()
+    if args.build_auto and not args.only:
+        ap.error("--build-auto requires --only <project> (never global)")
     load_secrets()
-    q = build_queue()
+    q = build_queue(build_auto=args.build_auto, only=args.only)
 
     if args.json:
         print(json.dumps(q, ensure_ascii=False, indent=2))
@@ -205,7 +247,7 @@ def main():
             if n >= args.max:
                 print("  (max reached — rerun for more)"); break
             print(f"  ▶ {x['id']} ({x.get('project')}) → codex {x['skill']} …")
-            r = exec_item(x)
+            r = exec_build(x) if x.get("build") else exec_item(x)
             n += 1
             if not r["ran"]:
                 print(f"    skipped: {r['why']}")
