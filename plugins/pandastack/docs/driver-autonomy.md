@@ -142,29 +142,49 @@ Environment overrides for operators/tests: `PSDRIVE_RETRY_BASE_MS`,
 `PSDRIVE_RETRY_CAP_MS`, `PSDRIVE_RETRY_MAX_ATTEMPTS`, `PSDRIVE_RETRY_TTL_MS`. Test
 coverage: `tests/drive-retry.sh`.
 
-## Execution runtime — Codex, not `claude -p`
+## Execution runtime — agent-worker protocol, Codex backend first
 
-The driver delegates an AUTO step to **Codex** (`codex exec -s read-only -C <repo>`),
-never `claude -p`:
+The driver delegates AUTO/BUILD executor steps through `scripts/agent-worker`:
+
+```bash
+scripts/agent-worker run \
+  --backend codex \
+  --job-dir <path> \
+  --worktree <path> \
+  --prompt <path> \
+  --out <path>
+```
+
+`pandastack-drive` owns queue semantics and phase policy. The adapter owns concrete
+runtime invocation details: `codex exec`, sandbox flags, network-off build mode,
+allowlisted worker environments, output capture, RESULT parsing, changed-file
+reporting, durable `result.json` / `diff.patch` artifacts, verification, and logs.
+See `agent-worker.md` for the command, job-dir contract, and normalized result
+schema.
+
+Codex remains the first production backend:
 
 - (Superseded 2026-06-16: `claude -p` was slated to move off subscription rate
   limits on 2026-06-15, but Anthropic deferred it. It stays on subscription, with
   advance notice before any future change. So this is no longer a reason to avoid
-  `claude -p`; the quota-split and sandbox points below are what keep Codex the runtime.)
+  `claude -p`; the quota-split and sandbox points below are what keep Codex first.)
 - Codex runs on Panda's **subscription** (no per-call $). Throttle by `--max`, not a $ budget.
-- `-s read-only` enforces no-mutation **at the sandbox layer** — a third wall on top
-  of the phase classifier (BUILD/SHIP never reach here) and the read-only prompt.
+- Codex sandbox flags are generated inside `agent-worker`, not in flow code. Read-only
+  mode enforces no-mutation at the sandbox layer; BUILD mode pins network access off
+  inside the adapter.
 
-General rule: for development / delegated execution, prefer spawning **Codex** over
-metered or soon-retired paths.
+General rule: future Claude, Hermes, Omnigent, ACP, MCP, or remote-worker execution
+must be added as an `agent-worker` backend, not as direct CLI calls scattered through
+skills or driver code.
 
 ## Execution model — ephemeral, stateless per tick
 
-Each AUTO step is a one-shot CLI process: open `codex exec`, run one prompt, capture
-the verdict, exit. The next issue gets a fresh process. No daemon holds state — the
-WBS lives in Linear, lifecycle in `state.jsonl`; every tick re-polls from zero. This
-is crash-safe by construction and platform-portable: the same CLI call runs under
-launchd, a cloud cron, Hermes, or CronCreate. No bespoke control-plane to build.
+Each AUTO step is a one-shot worker job: create a durable job directory under
+`~/.local/state/pandastack/worker-jobs`, call `agent-worker`, capture the normalized
+verdict, exit. The next issue gets a fresh process. No daemon holds state — the WBS
+lives in Linear, lifecycle in `state.jsonl`; every tick re-polls from zero. This is
+crash-safe by construction and platform-portable: the same adapter boundary can run
+under launchd, a cloud cron, Hermes, or CronCreate. No bespoke control-plane to build.
 
 ## Notify cadence
 
