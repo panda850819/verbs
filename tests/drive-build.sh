@@ -7,6 +7,7 @@ export PSDRIVE_TEST=1
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 D="$repo_root/scripts/pandastack-drive"
 fx="$(mktemp)"
+export PSDRIVE_WORKER_JOB_ROOT="$(mktemp -d)"
 fail=0
 
 cat > "$fx" <<'JSON'
@@ -18,7 +19,7 @@ cat > "$fx" <<'JSON'
 JSON
 
 check() { # check <desc> <python-expr-bool> <json>
-  if python3 -c "import json,sys; r=json.load(sys.stdin); sys.exit(0 if ($2) else 1)" <<<"$3"; then
+  if python3 -c "import json,os,sys; r=json.load(sys.stdin); sys.exit(0 if ($2) else 1)" <<<"$3"; then
     echo "PASS: $1"
   else
     echo "FAIL: $1"; fail=1
@@ -64,6 +65,8 @@ PY
 pass_out="$(wt_build PASS TST-1)"
 check "build PASS -> ok + verdict + branch"   "r['ok'] and r['verdict']=='PASS' and r.get('branch')=='psdrive/TST-1'" "$pass_out"
 check "build PASS logs staged files"          "'psdrive-stub' in (r.get('staged') or '')" "$pass_out"
+check "build PASS preserves worker artifacts" "os.path.exists(r['worker']['artifacts']['diff_patch']) and os.path.exists(r['worker']['artifacts']['stdout_jsonl'])" "$pass_out"
+check "build PASS writes acceptance artifact"  "os.path.exists(os.path.join(r['worker']['artifacts']['job_dir'], 'acceptance.md'))" "$pass_out"
 git -C "$tmprepo" rev-parse --verify -q psdrive/TST-1 >/dev/null \
   && echo "PASS: PASS branch kept (driver committed) for PR" || { echo "FAIL: PASS branch missing"; fail=1; }
 git -C "$tmprepo" log --oneline -1 psdrive/TST-1 | grep -q "feat(TST-1)" \
