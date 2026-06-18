@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """pandastack CLI — doctor and init front-door. Python stdlib only."""
 import argparse
+import datetime
 import json
 import os
 import shutil
@@ -229,6 +230,178 @@ def derive_roles(runtimes):
 
 
 # ---------------------------------------------------------------------------
+# Capability-map helpers
+# ---------------------------------------------------------------------------
+
+def _get_now():
+    """Return ISO UTC timestamp. Respects PANDASTACK_NOW for deterministic tests."""
+    ts = os.environ.get("PANDASTACK_NOW")
+    if ts:
+        return ts
+    return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def load_pandastack_toml():
+    """Return (ok, error, data) for pandastack.toml."""
+    toml_path = REPO_ROOT / "pandastack.toml"
+    if not toml_path.exists():
+        return False, f"pandastack.toml not found at {toml_path}", {}
+    try:
+        text = toml_path.read_text()
+    except OSError as exc:
+        return False, f"Cannot read pandastack.toml: {exc}", {}
+    try:
+        try:
+            import tomllib
+            data = tomllib.loads(text)
+        except ImportError:
+            data = _parse_toml_minimal(text)
+    except Exception as exc:
+        return False, f"Failed to parse pandastack.toml: {exc}", {}
+    return True, None, data
+
+
+def _capabilities_local_path():
+    """Local capabilities.json path. PANDASTACK_LOCAL_STATE overrides for tests."""
+    override = os.environ.get("PANDASTACK_LOCAL_STATE")
+    if override:
+        return Path(override)
+    return REPO_ROOT / ".pandastack" / "local" / "capabilities.json"
+
+
+def _runtimes_global_path():
+    """Global runtimes.json path under HOME."""
+    return Path.home() / ".pandastack" / "runtimes.json"
+
+
+def build_auth_map(runtimes):
+    """Auth status map — presence only, no token values."""
+    def _status(cmd):
+        return "unknown" if runtimes.get(cmd, False) else "unsupported"
+    return {
+        "claude": {"status": _status("claude")},
+        "codex": {"status": _status("codex")},
+        "hermes": {"status": _status("hermes")},
+    }
+
+
+def build_capabilities_map(runtimes, roles, manifest_check, recommendation, now=None):
+    """Build the full capability-map JSON dict from live detection state."""
+    if now is None:
+        now = _get_now()
+    skill_counts = manifest_check.get("skill_counts", {})
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": now,
+        "repo": str(REPO_ROOT),
+        "source": "scripts/pandastack doctor",
+        "roles": {
+            "host": {k: {} for k in roles["host"]},
+            "worker": roles["worker"],
+            "operator": roles["operator"],
+        },
+        "runtimes": runtimes,
+        "skills": {
+            "counts": {
+                "core": skill_counts.get("core", 0),
+                "ext": skill_counts.get("ext", 0),
+                "total": skill_counts.get("total", 0),
+            },
+            "available": [],
+        },
+        "auth": build_auth_map(runtimes),
+        "limits": {
+            "network": "unknown",
+            "write_scope": "unknown",
+        },
+        "next_actions": recommendation.get("next_actions", []),
+    }
+
+
+def build_runtimes_file_map(runtimes, now=None):
+    """Build global runtimes.json dict — no secret values."""
+    if now is None:
+        now = _get_now()
+    ai_runtimes = ["claude", "codex", "hermes"]
+    result = {}
+    for name in ai_runtimes:
+        present = runtimes.get(name, False)
+        path = shutil.which(name) if present else None
+        auth = "unknown" if present else "unsupported"
+        result[name] = {"present": present, "path": path, "auth": auth}
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": now,
+        "runtimes": result,
+    }
+
+
+def read_or_build_capabilities(runtimes, roles, manifest_check, recommendation):
+    """Merge capabilities from files, fall back to live detection.
+
+    Priority: local capabilities.json > global runtimes.json overlay > live detection.
+    Always returns valid JSON; missing files produce entries in 'warnings'.
+    """
+    now = _get_now()
+    warnings = []
+    local_path = _capabilities_local_path()
+    global_path = _runtimes_global_path()
+
+    local_data = None
+    if local_path.exists():
+        try:
+            local_data = json.loads(local_path.read_text())
+        except Exception as exc:
+            warnings.append(f"Failed to parse {local_path}: {exc}")
+    else:
+        warnings.append(
+            f"Local capabilities not found: {local_path} — "
+            "run: scripts/pandastack doctor --write-capabilities"
+        )
+
+    global_data = None
+    if global_path.exists():
+        try:
+            global_data = json.loads(global_path.read_text())
+        except Exception as exc:
+            warnings.append(f"Failed to parse {global_path}: {exc}")
+    else:
+        warnings.append(
+            f"Global runtimes not found: {global_path} — "
+            "run: scripts/pandastack doctor --write-capabilities"
+        )
+
+    if local_data is not None:
+        cap = dict(local_data)
+    else:
+        cap = build_capabilities_map(
+            runtimes, roles, manifest_check, recommendation, now=now
+        )
+
+    if global_data is not None:
+        # global_data["runtimes"] uses {name: {present,path,auth}} schema;
+        # cap["runtimes"] uses {cmd: bool}. Convert and propagate auth.
+        global_rts = global_data.get("runtimes", {})
+        updated_runtimes = dict(cap.get("runtimes", {}))
+        updated_auth = {k: dict(v) for k, v in cap.get("auth", {}).items()}
+        for name, info in global_rts.items():
+            if isinstance(info, dict):
+                updated_runtimes[name] = info.get("present", False)
+                if name in updated_auth and info.get("auth"):
+                    updated_auth[name]["status"] = info["auth"]
+        cap = dict(cap)
+        cap["runtimes"] = updated_runtimes
+        if updated_auth:
+            cap["auth"] = updated_auth
+
+    if warnings:
+        cap = dict(cap)
+        cap["warnings"] = warnings
+
+    return cap, warnings
+
+
+# ---------------------------------------------------------------------------
 # Recommendation engine
 # ---------------------------------------------------------------------------
 
@@ -319,6 +492,38 @@ def run_doctor(args):
     roles = derive_roles(runtimes)
     recommendation = derive_recommendation(runtimes)
 
+    local_path = _capabilities_local_path()
+    global_path = _runtimes_global_path()
+    now = _get_now()
+
+    # --write-capabilities: build from live detection and write both files
+    if getattr(args, "write_capabilities", False):
+        cap = build_capabilities_map(
+            runtimes, roles, manifest_check, recommendation, now=now
+        )
+        runtimes_map = build_runtimes_file_map(runtimes, now=now)
+
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        local_path.write_text(json.dumps(cap, indent=2))
+
+        global_path.parent.mkdir(parents=True, exist_ok=True)
+        global_path.write_text(json.dumps(runtimes_map, indent=2))
+
+        if getattr(args, "json", False):
+            print(json.dumps(cap, indent=2))
+        else:
+            print(f"Wrote: {local_path}")
+            print(f"Wrote: {global_path}")
+        return
+
+    # --capabilities-json: read from files with live detection fallback
+    if getattr(args, "capabilities_json", False):
+        cap, _ = read_or_build_capabilities(
+            runtimes, roles, manifest_check, recommendation
+        )
+        print(json.dumps(cap, indent=2))
+        return
+
     output = {
         "schema_version": SCHEMA_VERSION,
         "repo": str(REPO_ROOT),
@@ -331,6 +536,12 @@ def run_doctor(args):
         },
         "recommendation": recommendation,
         "next_actions": recommendation["next_actions"],
+        "capabilities_paths": {
+            "local_state": str(local_path),
+            "global_runtimes": str(global_path),
+            "local_state_exists": local_path.exists(),
+            "global_runtimes_exists": global_path.exists(),
+        },
     }
 
     if args.json:
@@ -518,6 +729,18 @@ def main():
         choices=["claude", "codex", "hermes", "auto"],
         default="auto",
         help="Host runtime context (default: auto)",
+    )
+    doc.add_argument(
+        "--capabilities-json",
+        dest="capabilities_json",
+        action="store_true",
+        help="Emit merged capability-map JSON (reads files, falls back to live detection)",
+    )
+    doc.add_argument(
+        "--write-capabilities",
+        dest="write_capabilities",
+        action="store_true",
+        help="Write .pandastack/local/capabilities.json and ~/.pandastack/runtimes.json",
     )
 
     ini = sub.add_parser("init", help="Print or run host install commands")

@@ -6,3 +6,6 @@
 *.env
 secrets.env
 .env.local
+
+# local capability-map state (machine-generated, host-specific)
+.pandastack/local/
