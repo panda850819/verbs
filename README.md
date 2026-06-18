@@ -28,7 +28,9 @@ What this means for you:
 
 ```bash
 git clone https://github.com/panda850819/pandastack.git
-bash pandastack/scripts/bootstrap.sh --claude    # or --codex
+cd pandastack
+scripts/pandastack doctor          # detect runtimes and print next actions
+bash scripts/bootstrap.sh --claude    # or --codex
 ```
 
 `bootstrap.sh` reports:
