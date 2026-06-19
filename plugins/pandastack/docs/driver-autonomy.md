@@ -91,9 +91,9 @@ straight to dev." BUILD may auto-run for an issue ONLY when ALL hold:
    gate's AND); the fuller schema (Goal / Project / Epic / Task / Context / Acceptance /
    Deliverable) is the ideal but only the minimum is enforced. Acceptance prose that is
    not runnable does not count.
-3. **Machine-checkable acceptance** — a runnable `acceptance` block the build
-   self-verifies against before proposing REVIEW (the model self-checks; the driver does
-   not re-run it).
+3. **Machine-checkable acceptance** — a runnable `acceptance` block the driver
+   materializes as the job-dir `verify.sh` and re-runs via host-verify after the
+   build. A model `PASS` is demoted when that command exits red.
 4. **Isolated workspace** — built: each build runs in a per-issue `git worktree`
    (branch `psdrive/<ISSUE>`), never the live working tree; codex is sandboxed to
    `-s workspace-write` with `-c sandbox_workspace_write.network_access=false` pinned on
