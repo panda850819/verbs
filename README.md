@@ -28,7 +28,9 @@ What this means for you:
 
 ```bash
 git clone https://github.com/panda850819/pandastack.git
-bash pandastack/scripts/bootstrap.sh --claude    # or --codex
+cd pandastack
+scripts/pandastack doctor          # detect runtimes and print next actions
+bash scripts/bootstrap.sh --claude    # or --codex
 ```
 
 `bootstrap.sh` reports:
@@ -36,6 +38,8 @@ bash pandastack/scripts/bootstrap.sh --claude    # or --codex
 - 24 core skills runnable on this clone with no external CLI
 - 2 extension skills with the exact `brew install` / `npm install -g` to enable each
 - Personal-tier skills are no longer in this manifest — they live in the `pandastack-private` overlay (private CLIs: gog, bird, feed-server)
+
+For programmatic use, `scripts/pandastack doctor --capabilities-json` emits a stable JSON capability map (schema in `plugins/pandastack/docs/capabilities.md`).
 
 After install:
 

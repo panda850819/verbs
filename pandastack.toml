@@ -1,0 +1,15 @@
+[capabilities]
+schema_version = 1
+
+[capabilities.roles.host]
+runtimes = ["claude", "codex", "hermes"]
+
+[capabilities.roles.worker]
+backends = ["codex", "test"]
+
+[capabilities.roles.operator]
+runtimes = ["shell", "launchd", "hermes"]
+
+[capabilities.paths]
+local_state = ".pandastack/local/capabilities.json"
+global_runtimes = "~/.pandastack/runtimes.json"
