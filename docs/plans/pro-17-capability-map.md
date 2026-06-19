@@ -164,8 +164,8 @@ Minimum shape:
 - scope: `scripts/pandastack` or new stdlib module `scripts/pscapabilities.py`.
 - behavior:
   - provide one stable CLI read path: `scripts/pandastack capabilities --json` or `scripts/pandastack doctor --capabilities-json` is acceptable if documented.
-  - merge data in priority order: committed defaults from `pandastack.toml`, local `.pandastack/local/capabilities.json`, global `~/.pandastack/runtimes.json`, live PRO-15 detection as fallback.
-  - missing local/global files should produce explicit actionable status, not a crash.
+  - merge data in priority order: local `.pandastack/local/capabilities.json` (base), global `~/.pandastack/runtimes.json` overlay (runtime presence + auth only), live PRO-15 detection as the base when no local file exists. NOTE: `pandastack.toml` is declared-intent config for humans and is intentionally NOT merged into the read path; PRO-18 may consume it directly.
+  - missing, unparseable, wrong-shape, or schema-mismatched local/global files should produce explicit actionable warnings, not a crash.
 - acceptance:
   - With no generated files, command still emits valid JSON with missing-state warnings.
   - With generated fixture files, command reflects fixture state.

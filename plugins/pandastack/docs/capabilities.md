@@ -29,13 +29,18 @@ Fields:
 - `generated_at` — ISO-8601 UTC timestamp
 - `repo` — absolute path to this repo
 - `source` — `"scripts/pandastack doctor"`
-- `roles.host` — detected host runtime entries (claude, codex, hermes)
+- `roles.host` — per-host runtime entries (claude, codex, hermes) carrying the
+  detected `ready`/`status` state
 - `roles.worker` — worker role state
 - `roles.operator` — operator role state
 - `runtimes` — `{cmd: bool}` presence map for all tracked commands
 - `skills.counts` — `{core, ext, total}` from manifest.toml
-- `auth` — auth status per AI runtime (`unknown|present|missing|unsupported`)
-- `limits` — network and write-scope detected bounds
+- `auth` — auth status per AI runtime. Detection emits only `unknown` (runtime
+  on PATH; PRO-17 does no auth probe) or `unsupported` (runtime absent).
+  `present`/`missing` are reserved for a future probe and appear only if an
+  external file supplies them.
+- `limits` — reserved for network and write-scope bounds; currently always
+  `unknown` (no probe in PRO-17)
 - `next_actions` — actionable items based on detected state
 
 Secret hygiene: auth states are boolean/enum only. No tokens, no env var
@@ -72,13 +77,19 @@ scripts/pandastack doctor --capabilities-json | jq .
 ```
 
 Priority order for `--capabilities-json`:
-1. Committed defaults from `pandastack.toml`
-2. Local `.pandastack/local/capabilities.json` if it exists
-3. Global `~/.pandastack/runtimes.json` override on top
-4. Live PRO-15 detection as fallback when no generated files exist
+1. Local `.pandastack/local/capabilities.json` if it exists — the base document
+2. Global `~/.pandastack/runtimes.json` overlays **only** the runtime-presence
+   map and per-runtime auth status onto that base; all other fields stay local
+3. Live PRO-15 detection as the base when no local file exists
 
-If local/global files are missing, the output includes a `warnings` array with
-actionable messages. The command never crashes on missing files.
+`pandastack.toml` declares the intended default roles and paths for humans. It is
+**not** merged into `--capabilities-json` output (PRO-18 may consume it directly).
+
+State files whose JSON is not an object, or whose `schema_version` does not match
+the current schema, are ignored with a `warnings` entry. If local/global files
+are missing, the output includes a `warnings` array with actionable messages.
+The command never crashes on a missing, unparseable, wrong-shape, or
+wrong-version file.
 
 ## Runtime support boundaries
 

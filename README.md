@@ -39,6 +39,8 @@ bash scripts/bootstrap.sh --claude    # or --codex
 - 2 extension skills with the exact `brew install` / `npm install -g` to enable each
 - Personal-tier skills are no longer in this manifest — they live in the `pandastack-private` overlay (private CLIs: gog, bird, feed-server)
 
+For programmatic use, `scripts/pandastack doctor --capabilities-json` emits a stable JSON capability map (schema in `plugins/pandastack/docs/capabilities.md`).
+
 After install:
 
 1. `/pandastack:init` once inside your project
