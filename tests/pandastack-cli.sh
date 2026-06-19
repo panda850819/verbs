@@ -53,22 +53,27 @@ if missing:
 # ---------------------------------------------------------------------------
 # T02 -- manifest counts
 # ---------------------------------------------------------------------------
+# Assert structural invariants, not literal counts: manifest.ok is the real
+# drift guard (manifest <-> skills/ in sync). Hardcoding core==24/ext==2 would
+# break on every legitimate skill addition while manifest.ok stays True.
 core_count="$(echo "$json_out" | "$PY3" -c \
   "import json,sys; r=json.load(sys.stdin); print(r['checks']['manifest']['skill_counts']['core'])")"
 ext_count="$(echo "$json_out" | "$PY3" -c \
   "import json,sys; r=json.load(sys.stdin); print(r['checks']['manifest']['skill_counts']['ext'])")"
+total_count="$(echo "$json_out" | "$PY3" -c \
+  "import json,sys; r=json.load(sys.stdin); print(r['checks']['manifest']['skill_counts']['total'])")"
 manifest_ok_val="$(echo "$json_out" | "$PY3" -c \
   "import json,sys; r=json.load(sys.stdin); print(r['checks']['manifest']['ok'])")"
 
-[ "$core_count" = "24" ] \
-  && pass "manifest skill_counts.core=24" \
-  || fail_t "manifest skill_counts.core expected 24, got $core_count"
-[ "$ext_count" = "2" ] \
-  && pass "manifest skill_counts.ext=2" \
-  || fail_t "manifest skill_counts.ext expected 2, got $ext_count"
 [ "$manifest_ok_val" = "True" ] \
-  && pass "manifest.ok=True" \
+  && pass "manifest.ok=True (manifest <-> skills/ in sync)" \
   || fail_t "manifest.ok expected True, got $manifest_ok_val"
+{ [ "$core_count" -gt 0 ] 2>/dev/null; } \
+  && pass "manifest skill_counts.core > 0 ($core_count)" \
+  || fail_t "manifest skill_counts.core should be > 0, got $core_count"
+[ "$total_count" = "$((core_count + ext_count))" ] \
+  && pass "manifest total == core + ext ($total_count)" \
+  || fail_t "manifest total ($total_count) != core+ext ($core_count+$ext_count)"
 
 # T02 -- missing manifest exits nonzero with error, no traceback
 bad_manifest="$tmp/nonexistent-manifest.toml"
@@ -243,15 +248,56 @@ for bad_host in claude hermes; do
   fi
 done
 
-# T05 -- non-dry-run never touches ~/.claude or ~/.hermes
-for watch_dir in "$HOME/.claude" "$HOME/.hermes"; do
-  before="$(ls -la "$watch_dir" 2>/dev/null | md5 2>/dev/null || echo absent)"
-  "$PY3" "$CLI" init --host claude >/dev/null 2>&1 || true
-  after="$(ls -la "$watch_dir" 2>/dev/null | md5 2>/dev/null || echo absent)"
+# T05 -- non-dry-run never touches ~/.claude or ~/.hermes.
+# Use an isolated fake HOME with sentinel files and a portable hash (cksum is
+# POSIX; bare `md5` is macOS-only and a missing binary would pass vacuously).
+guard_home="$tmp/guard_home"
+mkdir -p "$guard_home/.claude" "$guard_home/.hermes"
+echo sentinel > "$guard_home/.claude/keep"
+echo sentinel > "$guard_home/.hermes/keep"
+hash_dir() { find "$1" -type f -exec cksum {} \; 2>/dev/null | sort | cksum; }
+for watch_dir in "$guard_home/.claude" "$guard_home/.hermes"; do
+  before="$(hash_dir "$watch_dir")"
+  HOME="$guard_home" "$PY3" "$CLI" init --host claude >/dev/null 2>&1 || true
+  after="$(hash_dir "$watch_dir")"
   [ "$before" = "$after" ] \
     && pass "init --host claude did not mutate $watch_dir" \
     || fail_t "init --host claude mutated $watch_dir"
 done
+
+# ---------------------------------------------------------------------------
+# T06 -- init --host codex (non-dry-run) is the only fs-mutating path: assert it
+# creates a symlink, is idempotent, and fails gracefully on a real-dir target.
+# ---------------------------------------------------------------------------
+codex_home="$tmp/codex_home"
+mkdir -p "$codex_home"
+HOME="$codex_home" "$PY3" "$CLI" init --host codex >/dev/null 2>&1
+codex_link="$codex_home/.codex/skills/pandastack"
+[ -L "$codex_link" ] \
+  && pass "init --host codex creates a symlink" \
+  || fail_t "init --host codex should create a symlink at $codex_link"
+
+if HOME="$codex_home" "$PY3" "$CLI" init --host codex >/dev/null 2>&1 \
+   && [ -L "$codex_link" ]; then
+  pass "init --host codex is idempotent (re-run over existing symlink)"
+else
+  fail_t "init --host codex second run should be idempotent"
+fi
+
+# Real (non-symlink) directory at the target: must refuse cleanly, no traceback.
+codex_home_dir="$tmp/codex_home_dir"
+mkdir -p "$codex_home_dir/.codex/skills/pandastack"
+HOME="$codex_home_dir" "$PY3" "$CLI" init --host codex >/dev/null 2>"$tmp/codex_err.txt"
+if [ $? -ne 0 ]; then
+  pass "init --host codex on real-dir target exits nonzero"
+else
+  fail_t "init --host codex on real-dir target should exit nonzero"
+fi
+if grep -q "Traceback" "$tmp/codex_err.txt" 2>/dev/null; then
+  fail_t "init --host codex on real-dir target should not print a traceback"
+else
+  pass "init --host codex on real-dir target shows no traceback"
+fi
 
 # ---------------------------------------------------------------------------
 # Summary

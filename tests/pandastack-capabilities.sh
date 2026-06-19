@@ -15,6 +15,8 @@ fail_t() { echo "FAIL: $1"; fail=1; }
 
 fake_empty="$tmp/path_empty"
 mkdir -p "$fake_empty"
+fake_home_caps="$tmp/home_caps"
+mkdir -p "$fake_home_caps"
 
 # ---------------------------------------------------------------------------
 # T01 — pandastack.toml exists and is parseable with schema_version = 1
@@ -55,7 +57,11 @@ git -C "$repo_root" check-ignore "pandastack.toml" >/dev/null 2>&1 \
 # ---------------------------------------------------------------------------
 # T03/T04 — --capabilities-json emits valid JSON with all required fields
 # ---------------------------------------------------------------------------
-caps_out="$(PATH="$fake_empty" "$PY3" "$CLI" doctor --capabilities-json 2>/dev/null)"
+# Isolate: pin HOME and PANDASTACK_LOCAL_STATE so the auth=unsupported assertions
+# below are deterministic regardless of the developer's real ~/.pandastack state.
+caps_out="$(HOME="$fake_home_caps" \
+  PANDASTACK_LOCAL_STATE="$tmp/caps_out_none.json" \
+  PATH="$fake_empty" "$PY3" "$CLI" doctor --capabilities-json 2>/dev/null)"
 
 echo "$caps_out" | "$PY3" -m json.tool >/dev/null 2>&1 \
   && pass "--capabilities-json emits valid JSON" \
@@ -275,6 +281,73 @@ assert r['auth']['claude']['status'] == 'present', 'expected fixture auth=presen
 " 2>/dev/null \
   && pass "--capabilities-json reflects fixture state when local file exists" \
   || fail_t "--capabilities-json should reflect fixture state"
+
+# ---------------------------------------------------------------------------
+# T04b — global runtimes.json overlay is applied and worker state re-derived
+# ---------------------------------------------------------------------------
+fake_home_global="$tmp/home_global"
+mkdir -p "$fake_home_global/.pandastack"
+
+"$PY3" - "$fake_home_global/.pandastack/runtimes.json" <<'PY'
+import json, sys
+data = {
+    "schema_version": 1,
+    "generated_at": "2026-02-02T00:00:00Z",
+    "runtimes": {
+        "claude": {"present": True, "path": "/fake/claude", "auth": "present"},
+        "codex": {"present": True, "path": "/fake/codex", "auth": "present"},
+        "hermes": {"present": False, "path": None, "auth": "unsupported"},
+    },
+}
+json.dump(data, open(sys.argv[1], "w"), indent=2)
+PY
+
+# No local file + empty PATH: without the overlay these would be False/unsupported.
+caps_global="$(HOME="$fake_home_global" \
+  PANDASTACK_LOCAL_STATE="$tmp/global_overlay_none.json" \
+  PATH="$fake_empty" \
+  "$PY3" "$CLI" doctor --capabilities-json 2>/dev/null)"
+
+echo "$caps_global" | "$PY3" -c "
+import json, sys
+r = json.load(sys.stdin)
+assert r['runtimes'].get('codex') is True, 'global overlay should set runtimes.codex=True'
+assert r['auth']['codex']['status'] == 'present', 'global overlay should set auth.codex=present'
+assert r['roles']['worker']['codex_backend_ready'] is True, \
+    'worker.codex_backend_ready must be re-derived from the merged runtimes map'
+" 2>/dev/null \
+  && pass "global runtimes.json overlay applied and worker re-derived" \
+  || fail_t "global overlay not applied or worker not re-derived"
+
+# A schema-mismatched state file is ignored with a warning, not merged or crashed.
+fake_home_badver="$tmp/home_badver"
+mkdir -p "$fake_home_badver/.pandastack"
+printf '{"schema_version": 99, "runtimes": {}}' \
+  > "$fake_home_badver/.pandastack/runtimes.json"
+caps_badver="$(HOME="$fake_home_badver" \
+  PANDASTACK_LOCAL_STATE="$tmp/badver_none.json" \
+  PATH="$fake_empty" \
+  "$PY3" "$CLI" doctor --capabilities-json 2>/dev/null)"
+echo "$caps_badver" | "$PY3" -c "
+import json, sys
+r = json.load(sys.stdin)
+assert any('schema_version' in w for w in r.get('warnings', [])), \
+    'schema-mismatched file should be ignored with a warning'
+" 2>/dev/null \
+  && pass "schema-mismatched state file ignored with warning" \
+  || fail_t "schema-mismatched state file should be ignored with warning"
+
+# A valid-JSON-but-wrong-shape file (top-level list) must not crash the command.
+fake_home_badshape="$tmp/home_badshape"
+mkdir -p "$fake_home_badshape/.pandastack"
+printf '[1, 2, 3]' > "$fake_home_badshape/.pandastack/runtimes.json"
+HOME="$fake_home_badshape" \
+  PANDASTACK_LOCAL_STATE="$tmp/badshape_none.json" \
+  PATH="$fake_empty" \
+  "$PY3" "$CLI" doctor --capabilities-json 2>/dev/null \
+  | "$PY3" -m json.tool >/dev/null 2>&1 \
+  && pass "wrong-shape (JSON list) state file does not crash --capabilities-json" \
+  || fail_t "wrong-shape state file should not crash --capabilities-json"
 
 # ---------------------------------------------------------------------------
 # T06 — docs file exists and contains required content
