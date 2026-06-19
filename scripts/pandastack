@@ -15,6 +15,8 @@ DISPATCH_PATH = REPO_ROOT / "plugins/pandastack/DISPATCH.md"
 SKILLS_DIR = REPO_ROOT / "plugins/pandastack/skills"
 AGENT_WORKER_PATH = REPO_ROOT / "scripts/agent-worker"
 
+# Schema version for capabilities.json / runtimes.json. Mirrored in pandastack.toml
+# ([capabilities] schema_version) and the test suites; bump all sites together.
 SCHEMA_VERSION = 1
 
 _DETECT_CMDS = [
@@ -30,8 +32,10 @@ _DETECT_CMDS = [
 def _parse_toml_minimal(text):
     """Parse a subset of TOML sufficient for manifest.toml.
 
-    Handles: [section], [section.key], key = "string", key = ["list"].
-    Limitation: no multi-line values, no inline tables, no dotted keys.
+    Handles: [section], [section.key], key = "string", key = ["list"], bool,
+    int, and a trailing inline comment (# ...) after a scalar value.
+    Limitation: no multi-line values, no inline tables, no dotted keys, and
+    commas inside quoted list items are not respected.
     """
     result = {}
     current = result
@@ -54,22 +58,31 @@ def _parse_toml_minimal(text):
             key, _, val = line.partition("=")
             key = key.strip()
             val = val.strip()
-            if val.startswith('"') and val.endswith('"'):
-                current[key] = val[1:-1]
-            elif val.startswith("[") and val.endswith("]"):
+            if val.startswith('"'):
+                # Quoted string: value ends at the closing quote; ignore any
+                # trailing inline comment.
+                end = val.find('"', 1)
+                current[key] = val[1:end] if end != -1 else val[1:]
+            elif val.startswith("["):
+                # Single-line list: value ends at the closing bracket.
+                end = val.find("]")
+                inner = val[1:end] if end != -1 else val[1:]
                 items = [
                     v.strip().strip('"')
-                    for v in val[1:-1].split(",")
+                    for v in inner.split(",")
                     if v.strip().strip('"')
                 ]
                 current[key] = items
-            elif val in ("true", "false"):
-                current[key] = val == "true"
             else:
-                try:
-                    current[key] = int(val)
-                except ValueError:
-                    current[key] = val
+                # Bareword / int / bool: strip any trailing inline comment.
+                val = val.split("#", 1)[0].strip()
+                if val in ("true", "false"):
+                    current[key] = val == "true"
+                else:
+                    try:
+                        current[key] = int(val)
+                    except ValueError:
+                        current[key] = val
 
     return result
 
@@ -161,6 +174,13 @@ def detect_runtimes():
     return {cmd: shutil.which(cmd) is not None for cmd in _DETECT_CMDS}
 
 
+def _worker_status(agent_worker_present, codex_ready):
+    """Derive worker role status from agent-worker + codex backend presence."""
+    if agent_worker_present and codex_ready:
+        return "ready"
+    return "degraded" if agent_worker_present else "missing"
+
+
 def derive_roles(runtimes):
     """Return roles dict with host/worker/operator sub-dicts."""
     agent_worker_present = AGENT_WORKER_PATH.exists()
@@ -206,10 +226,7 @@ def derive_roles(runtimes):
             f"scripts/agent-worker not found at {AGENT_WORKER_PATH}"
         )
 
-    worker_status = (
-        "ready" if (agent_worker_present and codex_ready)
-        else ("degraded" if agent_worker_present else "missing")
-    )
+    worker_status = _worker_status(agent_worker_present, codex_ready)
 
     worker = {
         "agent_worker_present": agent_worker_present,
@@ -219,11 +236,12 @@ def derive_roles(runtimes):
         "warnings": worker_warnings,
     }
 
+    operator_launchd = runtimes.get("launchctl", False) and sys.platform == "darwin"
     operator = {
         "shell_manual": True,
-        "launchd": runtimes.get("launchctl", False) and sys.platform == "darwin",
+        "launchd": operator_launchd,
         "hermes_cron": pdctx_ready,
-        "status": "ready",
+        "status": "scheduled" if (operator_launchd or pdctx_ready) else "shell-only",
     }
 
     return {"host": host, "worker": worker, "operator": operator}
@@ -238,27 +256,25 @@ def _get_now():
     ts = os.environ.get("PANDASTACK_NOW")
     if ts:
         return ts
-    return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def load_pandastack_toml():
-    """Return (ok, error, data) for pandastack.toml."""
-    toml_path = REPO_ROOT / "pandastack.toml"
-    if not toml_path.exists():
-        return False, f"pandastack.toml not found at {toml_path}", {}
-    try:
-        text = toml_path.read_text()
-    except OSError as exc:
-        return False, f"Cannot read pandastack.toml: {exc}", {}
-    try:
-        try:
-            import tomllib
-            data = tomllib.loads(text)
-        except ImportError:
-            data = _parse_toml_minimal(text)
-    except Exception as exc:
-        return False, f"Failed to parse pandastack.toml: {exc}", {}
-    return True, None, data
+def _safe_write_json(path, data):
+    """Write JSON to path, refusing to follow a pre-existing symlink.
+
+    Guards against a symlink-attack where another process pre-creates the
+    target as a symlink so a privileged write lands on an arbitrary file.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise OSError(f"refusing to write through symlink: {path}")
+    fd = os.open(
+        str(path),
+        os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW,
+        0o600,
+    )
+    with os.fdopen(fd, "w") as fh:
+        fh.write(json.dumps(data, indent=2))
 
 
 def _capabilities_local_path():
@@ -296,7 +312,7 @@ def build_capabilities_map(runtimes, roles, manifest_check, recommendation, now=
         "repo": str(REPO_ROOT),
         "source": "scripts/pandastack doctor",
         "roles": {
-            "host": {k: {} for k in roles["host"]},
+            "host": roles["host"],
             "worker": roles["worker"],
             "operator": roles["operator"],
         },
@@ -336,11 +352,27 @@ def build_runtimes_file_map(runtimes, now=None):
     }
 
 
+def _validate_state_file(data):
+    """Return (data_or_None, reason). Reject non-object or schema-mismatched files."""
+    if not isinstance(data, dict):
+        return None, f"expected a JSON object, got {type(data).__name__}"
+    version = data.get("schema_version")
+    if version != SCHEMA_VERSION:
+        return None, (
+            f"schema_version {version} != {SCHEMA_VERSION} — "
+            "run: scripts/pandastack doctor --write-capabilities"
+        )
+    return data, None
+
+
 def read_or_build_capabilities(runtimes, roles, manifest_check, recommendation):
     """Merge capabilities from files, fall back to live detection.
 
     Priority: local capabilities.json > global runtimes.json overlay > live detection.
-    Always returns valid JSON; missing files produce entries in 'warnings'.
+    pandastack.toml declares intended defaults for humans and is not merged here.
+    Files that are not JSON objects or whose schema_version does not match are
+    ignored with a warning. Always returns valid JSON; missing/ignored files
+    produce entries in 'warnings'.
     """
     now = _get_now()
     warnings = []
@@ -353,6 +385,10 @@ def read_or_build_capabilities(runtimes, roles, manifest_check, recommendation):
             local_data = json.loads(local_path.read_text())
         except Exception as exc:
             warnings.append(f"Failed to parse {local_path}: {exc}")
+        else:
+            local_data, why = _validate_state_file(local_data)
+            if why:
+                warnings.append(f"Ignoring {local_path}: {why}")
     else:
         warnings.append(
             f"Local capabilities not found: {local_path} — "
@@ -365,6 +401,10 @@ def read_or_build_capabilities(runtimes, roles, manifest_check, recommendation):
             global_data = json.loads(global_path.read_text())
         except Exception as exc:
             warnings.append(f"Failed to parse {global_path}: {exc}")
+        else:
+            global_data, why = _validate_state_file(global_data)
+            if why:
+                warnings.append(f"Ignoring {global_path}: {why}")
     else:
         warnings.append(
             f"Global runtimes not found: {global_path} — "
@@ -386,13 +426,34 @@ def read_or_build_capabilities(runtimes, roles, manifest_check, recommendation):
         updated_auth = {k: dict(v) for k, v in cap.get("auth", {}).items()}
         for name, info in global_rts.items():
             if isinstance(info, dict):
-                updated_runtimes[name] = info.get("present", False)
-                if name in updated_auth and info.get("auth"):
+                present = info.get("present", False)
+                updated_runtimes[name] = present
+                # Keep the auth keyset aligned with the runtimes keyset so a
+                # consumer iterating either map sees the same runtimes.
+                if name not in updated_auth:
+                    updated_auth[name] = {
+                        "status": "unknown" if present else "unsupported"
+                    }
+                if info.get("auth"):
                     updated_auth[name]["status"] = info["auth"]
         cap = dict(cap)
         cap["runtimes"] = updated_runtimes
-        if updated_auth:
-            cap["auth"] = updated_auth
+        cap["auth"] = updated_auth
+        # Re-derive worker.codex_backend_ready/status from the merged runtime
+        # map so the document cannot say codex absent yet codex_backend_ready.
+        roles_out = cap.get("roles")
+        worker = roles_out.get("worker") if isinstance(roles_out, dict) else None
+        if isinstance(worker, dict) and "codex" in updated_runtimes:
+            worker = dict(worker)
+            worker["codex_backend_ready"] = updated_runtimes["codex"]
+            if "status" in worker:
+                worker["status"] = _worker_status(
+                    worker.get("agent_worker_present", False),
+                    updated_runtimes["codex"],
+                )
+            roles_out = dict(roles_out)
+            roles_out["worker"] = worker
+            cap["roles"] = roles_out
 
     if warnings:
         cap = dict(cap)
@@ -503,11 +564,12 @@ def run_doctor(args):
         )
         runtimes_map = build_runtimes_file_map(runtimes, now=now)
 
-        local_path.parent.mkdir(parents=True, exist_ok=True)
-        local_path.write_text(json.dumps(cap, indent=2))
-
-        global_path.parent.mkdir(parents=True, exist_ok=True)
-        global_path.write_text(json.dumps(runtimes_map, indent=2))
+        try:
+            _safe_write_json(local_path, cap)
+            _safe_write_json(global_path, runtimes_map)
+        except OSError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            sys.exit(1)
 
         if getattr(args, "json", False):
             print(json.dumps(cap, indent=2))
@@ -660,9 +722,16 @@ def run_init(args):
             skills_target = REPO_ROOT / "plugins/pandastack/skills"
             codex_skills = Path.home() / ".codex" / "skills"
             link_path = codex_skills / "pandastack"
+            if link_path.is_dir() and not link_path.is_symlink():
+                print(
+                    f"ERROR: {link_path} is a real directory, not a symlink. "
+                    "Remove or back it up manually, then re-run.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
             print(f"Creating Codex symlink: {link_path} -> {skills_target}")
             codex_skills.mkdir(parents=True, exist_ok=True)
-            if link_path.exists() or link_path.is_symlink():
+            if link_path.is_symlink() or link_path.is_file():
                 link_path.unlink()
             link_path.symlink_to(skills_target)
             print("Done. Restart Codex CLI to pick up pandastack skills.")
