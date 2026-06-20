@@ -29,6 +29,23 @@ draft-and-ask / escalate.**
 | 6 | **Ambiguity** | multiple valid paths, unclear signal, conflicting evidence |
 | 7 | **Shared infra / harness / secrets** | `~/.agents`, `~/.claude`, `~/.codex`, launchd, `~/.hermes`, `.env` |
 
+## Kill-switch — out-of-band stop (PRO-36)
+
+A flag file halts ALL autonomous dispatch on the next tick. This is the human's
+out-of-band override; it sits above every per-decision gate and is independent of
+the router. Stopping the loop has nothing to do with whether a change would auto-merge.
+
+- **Stop:** `touch ~/.config/pandastack/STOP`
+- **Resume:** `rm ~/.config/pandastack/STOP`
+- Path override (tests): `PSDRIVE_STOP_FLAG`.
+
+Checked UNCONDITIONALLY at every loop boundary, in two places so a direct invocation
+is covered too: the `drive-cron.py` launchd wrapper (records `suppressed:true` to
+`drive-log.jsonl` and exits 0, never invoking the driver) and `pandastack-drive
+--execute` (prints the marker and exits 0 before any dispatch). The loop never decides
+whether to obey the stop. Read-only views (`pandastack-drive`, `--json`) stay visible
+while stopped — the switch kills dispatch, not visibility. Test: `tests/drive-killswitch.sh`.
+
 ## Two enforcement layers
 
 - **Classification (Stage 1, live):** by phase. `GATE / BUILD / SHIP` and `paused`

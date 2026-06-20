@@ -4,6 +4,7 @@ Single source for the Linear state<->phase map, per-phase readiness, acceptance
 parsing, work-order completeness, and the codex RESULT parser — so the reduce
 (decision core) and drive (executor) cannot drift (review finding K).
 """
+import os
 import re
 
 # Linear workflow state -> pandastack 7-phase (docs/linear-contract.md lifecycle-map),
@@ -103,3 +104,17 @@ def parse_result(output, returncode=0):
         return "UNKNOWN", (output or "").strip()[-160:]
     m = ms[-1]
     return m.group(1), m.group(2).strip()[:160]
+
+
+def stop_flag_path():
+    """Kill-switch flag path. `touch` it to halt autonomous dispatch on the next
+    tick; `rm` it to resume. Env override (PSDRIVE_STOP_FLAG) for tests. (PRO-36)"""
+    return os.environ.get("PSDRIVE_STOP_FLAG",
+                          os.path.expanduser("~/.config/pandastack/STOP"))
+
+
+def drive_suppressed():
+    """True when the kill-switch flag is present — the driver must do zero dispatch.
+    Checked UNCONDITIONALLY at every loop boundary (the drive-cron launchd tick and
+    a direct `--execute`); the loop never decides whether to obey the stop."""
+    return os.path.exists(stop_flag_path())

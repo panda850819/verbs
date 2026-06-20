@@ -626,6 +626,11 @@ def main():
     args = ap.parse_args()
     if args.build_auto and not args.only:
         ap.error("--build-auto requires --only <project> (never global)")
+    # Kill-switch: only DISPATCH is suppressed; read-only queue views stay visible
+    # so you can still see what is parked while stopped (PRO-36, boundary #12).
+    if args.execute and pslib.drive_suppressed():
+        print(f"⛔ kill-switch present ({pslib.stop_flag_path()}) — zero dispatch.")
+        return 0
     load_secrets()
     q = build_queue(build_auto=args.build_auto, only=args.only)
 

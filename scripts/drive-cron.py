@@ -23,9 +23,16 @@ import re
 import subprocess
 import sys
 
-DRIVE = os.path.expanduser("~/site/skills/pandastack/scripts/pandastack-drive")
-AUDIT = os.path.expanduser(
-    "~/site/knowledge/brain/_automation/portfolio-status/drive-log.jsonl")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import pslib  # kill-switch predicate (single source, shared with pandastack-drive)
+
+DRIVE = os.environ.get(
+    "PSDRIVE_DRIVE_BIN",
+    os.path.expanduser("~/site/skills/pandastack/scripts/pandastack-drive"))
+AUDIT = os.environ.get(
+    "PSDRIVE_AUDIT",
+    os.path.expanduser("~/site/knowledge/brain/_automation/portfolio-status/drive-log.jsonl"))
 DETAIL_DIR = os.path.expanduser("~/Library/Logs/pandastack-drive")
 MAX = os.environ.get("PSDRIVE_MAX", "1")
 
@@ -50,8 +57,17 @@ def parse(out):
 
 def main():
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    os.makedirs(DETAIL_DIR, exist_ok=True)
     os.makedirs(os.path.dirname(AUDIT), exist_ok=True)
+    # Kill-switch: halt before invoking the driver. Record the suppression to the
+    # audit trail and exit clean — zero dispatch this tick (PRO-36, boundary #12).
+    if pslib.drive_suppressed():
+        rec = {"ts": ts, "suppressed": True, "auto": 0, "gate": 0, "blocked": 0,
+               "gate_ids": [], "executed": [], "error": None}
+        with open(AUDIT, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        print(f"{ts}  suppressed — kill-switch at {pslib.stop_flag_path()} (zero dispatch)")
+        return 0
+    os.makedirs(DETAIL_DIR, exist_ok=True)
     try:
         out = subprocess.run([sys.executable, DRIVE, "--execute", "--max", MAX],
                              capture_output=True, text=True, timeout=3000)
