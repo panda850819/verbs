@@ -12,7 +12,7 @@ description: |
 
 Parse the user's input:
 
-- `/checkpoint` (no arguments) → **Save**
+- `/checkpoint` or `/checkpoint "{next-session focus}"` → **Save** (the optional focus arg tailors Remaining Work, Suggested Skills, and Resume Hint toward that goal)
 - `/checkpoint resume` → **Resume**
 - `/checkpoint list` → **List**
 
@@ -54,9 +54,26 @@ Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project us
    ## Blockers
    {Any blockers encountered. "None" if clear.}
 
+   ## Suggested Skills
+   {Which pandastack skills the resuming agent should invoke first, and why —
+   one line each. e.g. `/sprint --continue {project-slug}` if this maps to a
+   project; otherwise name the resume step directly, e.g. `/review` before
+   ship. Routes the resume agent instead of forcing it to re-derive the next
+   move.}
+
    ## Resume Hint
-   {One sentence: what to do first when resuming.}
+   {One sentence: what to do first when resuming. If a focus arg was passed,
+   anchor the hint to it.}
    ```
+
+   **Reference, don't duplicate.** In Decisions / Remaining / Suggested Skills,
+   cite brain page paths, commit hashes, PR URLs, or plan/brief file paths —
+   never re-summarize content that already lives in those artifacts. A
+   checkpoint that restates a plan drifts from it; one that points to it stays
+   correct.
+
+   **Redact secrets.** Never write API keys, passwords, tokens, or PII into the
+   checkpoint file.
 
 3. If this maps to a brain project page (`projects/{slug}.md` exists), record the EVL datapoint deterministically (idempotent per-day; auto-skips METRICS for repo-backed projects, refreshing only `next`):
    ```bash
