@@ -9,3 +9,7 @@ secrets.env
 
 # local capability-map state (machine-generated, host-specific)
 .pandastack/local/
+
+# Python bytecode caches (e.g. scripts/__pycache__ from running tests)
+__pycache__/
+*.py[cod]
