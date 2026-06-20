@@ -200,6 +200,13 @@ RECENT_CONTINUE_EVENTS=$(SINCE=$(date -v-7d +%Y-%m-%d); \
 DRIVE_LOG="$HOME/site/knowledge/brain/_automation/portfolio-status/drive-log.jsonl"
 DRIVE_DISTILL=$([ -f "$DRIVE_LOG" ] && \
   "$HOME/site/skills/pandastack/scripts/drive-log-distill" "$DRIVE_LOG" 2>/dev/null)
+
+# Compound-loop GC fuel (PRO-42): the feedback_*.md tables are nearly empty, so the
+# converter would run on air. Pull two streams that already carry signal — the
+# dispatch miss log (a skill that should have fired but didn't) and the week's fresh
+# pitfalls (recorded but not yet promoted to a rule / test / skill edit).
+DISPATCH_MISSES=$(tail -n 50 "$HOME/.agents/memory/dispatch-miss.log" 2>/dev/null)
+RECENT_PITFALLS=$(find "$HOME/site/knowledge/brain/learnings/pitfalls" -name "*.md" -mtime -7 2>/dev/null)
 ```
 
 ### 1h. Build GC proposal table
@@ -251,6 +258,23 @@ unknown            → flag as Lopopolo failure mode — skill-gap
 ```
 
 Output rows for the GC table use this column shape: `[continue-log] | <question pattern> (<count>x) | <propose>`.
+
+### 1h-3. Process compound-loop GC fuel (PRO-42 / PRO-40)
+
+The dispatch log, fresh pitfalls, and the driver ledger are the routing + record +
+autonomous halves of the same "a forcing function did not fire" signal. Feed them
+into the same table:
+
+1. **`DISPATCH_MISSES`** — each line (`date | runtime | signal | skill`) is a task where a
+   skill should have fired but didn't. Group by `skill`; `count >= 2` for the same skill →
+   propose tightening that skill's trigger / its dispatch-table row.
+2. **`RECENT_PITFALLS`** — a pitfall recorded this week with `recurrence >= 2` but still no
+   rule / test / skill edit → propose the promotion (the un-ratcheted record). A fresh 1x
+   pitfall stays as record.
+3. **`DRIVE_DISTILL`** — stuck-PASS ids → propose auto-advance; persistent-gate ids →
+   propose an issue naming the blocker (already shaped by drive-log-distill).
+
+Same recurrence gate and propose-only discipline apply.
 
 Format:
 
