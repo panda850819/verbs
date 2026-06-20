@@ -362,6 +362,18 @@ def extract_acceptance(desc):
     return acceptance_block(desc) or "No explicit acceptance block supplied.\n"
 
 
+def harden_verify(script):
+    """Force strict mode on a materialized verify script (review F-B). Without
+    `set -euo pipefail`, a real assertion that fails mid-script is masked by a
+    trailing success (e.g. `grep -q X` then `echo done` exits 0), so host-verify
+    reports a false green. Inject strict mode right after any author shebang."""
+    body = script or ""
+    if body.lstrip().startswith("#!"):
+        first, _, rest = body.partition("\n")
+        return f"{first}\nset -euo pipefail\n{rest}"
+    return "#!/usr/bin/env bash\nset -euo pipefail\n" + body
+
+
 def run_worker_job(backend, worktree, prompt, request, spec=None, acceptance=None,
                    verify_script=None, job_name=None, metadata=None, test_options=None):
     """Run one bounded worker job through the repo-local agent-worker protocol.
@@ -388,7 +400,7 @@ def run_worker_job(backend, worktree, prompt, request, spec=None, acceptance=Non
         if verify_script:
             verify_path = os.path.join(job, "verify.sh")
             with open(verify_path, "w", encoding="utf-8") as f:
-                f.write(verify_script)
+                f.write(harden_verify(verify_script))   # F-B: force set -euo pipefail
             os.chmod(verify_path, 0o700)
         if metadata:
             with open(os.path.join(job, "metadata.json"), "w", encoding="utf-8") as f:
