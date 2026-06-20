@@ -50,6 +50,8 @@ cat > "$fx2" <<'JSON'
   {"identifier":"B-1","title":"build->verify ok","state":"Building","priority":2,"description":"Goal: x\n```acceptance\nbun test x green\n```","created_at":"2026-06-10T00:00:00Z"},
   {"identifier":"B-2","title":"build no acceptance","state":"Building","priority":2,"description":"just build it","created_at":"2026-06-11T00:00:00Z"},
   {"identifier":"B-3","title":"acceptance is prose","state":"Building","priority":2,"description":"```acceptance\nit should feel polished and human\n```","created_at":"2026-06-12T00:00:00Z"},
+  {"identifier":"B-4","title":"build no declared lane","state":"Building","priority":2,"description":"Goal: x\nContext: y\nAcceptance: visually done","created_at":"2026-06-12T12:00:00Z"},
+  {"identifier":"B-5","title":"build evidence lane","state":"Building","priority":2,"description":"Goal: x\n```evidence\nscreenshot of settings panel\n```","created_at":"2026-06-12T13:00:00Z"},
   {"identifier":"V-1","title":"verify->review ok","state":"Verifying","priority":2,"description":"Deliverable: branch psdrive/V-1 (/pull/5)","created_at":"2026-06-13T00:00:00Z"},
   {"identifier":"V-2","title":"verify no artifact","state":"Verifying","priority":2,"description":"please review this","created_at":"2026-06-14T00:00:00Z"},
   {"identifier":"BL-1","title":"bare backlog","state":"Backlog","priority":2,"description":"","created_at":"2026-06-15T00:00:00Z"}
@@ -59,6 +61,8 @@ out="$("$S" --source fixture --file "$fx2" --json)"
 check "Building w/ runnable acceptance dispatches (next VERIFY)"   "'B-1' in $disp"
 check "Building w/o acceptance gated needs-spec (VERIFY gap)"      "'B-2' in $gated and any(i['identifier']=='B-2' and 'VERIFY' in (i.get('gap') or '') for i in r['gated'])"
 check "Building w/ PROSE acceptance gated (not machine-checkable)" "'B-3' in $gated and 'B-3' not in $disp"
+check "Building w/ neither runnable acceptance nor evidence gated (VERIFY gap)" "'B-4' in $gated and any(i['identifier']=='B-4' and 'VERIFY' in (i.get('gap') or '') for i in r['gated'])"
+check "Building w/ named evidence dispatches (human-merge lane)"    "'B-5' in $disp"
 check "Verifying w/ artifact dispatches (next REVIEW)"             "'V-1' in $disp"
 check "Verifying w/o artifact gated needs-spec (REVIEW gap)"       "'V-2' in $gated and any(i['identifier']=='V-2' and 'REVIEW' in (i.get('gap') or '') for i in r['gated'])"
 check "bare Backlog dispatches (next PLAN not gated; grill bootstraps)" "'BL-1' in $disp"

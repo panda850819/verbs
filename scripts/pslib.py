@@ -15,6 +15,7 @@ NEXT_PHASE = {"DEFINE": "PLAN", "PLAN": "GATE", "GATE": "BUILD", "BUILD": "VERIF
               "VERIFY": "REVIEW", "REVIEW": "SHIP", "SHIP": "(done)"}
 
 _ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
+_EVIDENCE_RE = re.compile(r"```evidence\s*\n(.+?)\n```", re.DOTALL)
 # a machine-checkable acceptance reads like a runnable check, not human prose
 # ("語音聽起來自然"). Heuristic; upgrade: a structured acceptance schema.
 _RUNNABLE_HINT = re.compile(
@@ -49,16 +50,35 @@ def acceptance_runnable(desc):
     return bool(b and _RUNNABLE_HINT.search(b))
 
 
+def evidence_block(desc):
+    m = _EVIDENCE_RE.search(desc or "")
+    return m.group(1).strip() if m else ""
+
+
+def evidence_named(desc):
+    b = evidence_block(desc)
+    return len(b.split()) >= 2
+
+
+def acceptance_lane(desc):
+    if acceptance_runnable(desc):
+        return "machine"
+    if evidence_named(desc):
+        return "evidence"
+    return None
+
+
 def readiness_gap(state, desc):
     """Per-phase readiness keyed on the TO-RUN (next) phase — the input the driver
     actually consumes (review finding D). VERIFY (next, from Building) needs a runnable
-    acceptance; REVIEW (next, from Verifying) needs a diff/artifact. PLAN (next, grill)
-    bootstraps from a title, so it is not gated — grill self-reports BLOCKED if it cannot
-    plan. GATE/SHIP-next are human steps, no machine readiness."""
+    acceptance or named evidence block; REVIEW (next, from Verifying) needs a
+    diff/artifact. PLAN (next, grill) bootstraps from a title, so it is not gated
+    — grill self-reports BLOCKED if it cannot plan. GATE/SHIP-next are human steps,
+    no machine readiness."""
     nxt = next_phase(state)
     desc = desc or ""
-    if nxt == "VERIFY" and not acceptance_runnable(desc):
-        return "next=VERIFY: missing runnable acceptance"
+    if nxt == "VERIFY" and not acceptance_lane(desc):
+        return "next=VERIFY: missing runnable acceptance or named evidence"
     if nxt == "REVIEW" and not _ARTIFACT_RE.search(desc):
         return "next=REVIEW: missing diff/artifact"
     return None

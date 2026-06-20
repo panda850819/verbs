@@ -47,8 +47,11 @@ the issue. The scheduler treats EITHER signal (state `Needs Decision` OR label
 The full issue description follows the **work-order schema** (Goal / Project /
 Epic / Task / Context / Owner / Priority / Blocked-by / Acceptance / Needs-human /
 Deliverable) — canonical definition in brain
-`principles/goal-project-epic-task-ai-workflow.md`. The `Acceptance` field is a
-machine-checkable success condition, written as a fenced block the scheduler can parse:
+`principles/goal-project-epic-task-ai-workflow.md`. Acceptance lane is declared by
+the fenced block the author writes, in priority order.
+
+Machine lane: write a runnable `acceptance` block. This is a machine-checkable
+success condition the scheduler can parse:
 
 ````
 ```acceptance
@@ -56,12 +59,34 @@ machine-checkable success condition, written as a fenced block the scheduler can
 ```
 ````
 
+If the `acceptance` body is runnable, the scheduler may let an executor
+self-verify before proposing REVIEW. Machine-lane cards may be auto-merge-eligible,
+subject to the later merge-time checks.
+
+Evidence lane: write an `evidence` block that names a concrete artifact a human
+can inspect:
+
+````
+```evidence
+<a concrete artifact, e.g. screenshot of settings panel, p95 latency number, before-after output of command Y>
+```
+````
+
+Evidence lane passes reduce dispatch readiness, but it is a human-merge lane. The
+executor can build and collect the named artifact, then a human decides whether
+the evidence is sufficient. Parser floor: the body must be non-empty and at least
+two tokens; it does not keyword-match artifact types.
+
 Rules:
-- If the block is present and the check is machine-runnable → the scheduler may
-  let an executor self-verify before proposing REVIEW.
-- If the block is ABSENT, or the check is inherently human (e.g. "語音聽起來自然"),
+- If a runnable `acceptance` block is present, lane = machine.
+- If no runnable `acceptance` block is present and a non-empty `evidence` block
+  names an artifact, lane = evidence.
+- If neither lane is declared, or the only acceptance is inherently human prose
+  (e.g. "語音聽起來自然"),
   the issue's VERIFY phase is automatically a `needs-human` gate — the scheduler
   will not claim it as auto-verifiable.
+- `blast_radius` is NOT a card field. Authors do not hand-tag it. Blast radius is
+  computed later against the real diff at merge time.
 
 ## append-only linkback ledger
 
