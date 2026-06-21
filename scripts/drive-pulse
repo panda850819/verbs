@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""drive-pulse — the autonomous loop's self vital-signs read (PRO-44 / read-side).
+
+The loop verifies each unit of work green but has no read of its own health: Goal A's
+success signal (auto-merge count, agreement streak, zero fake-green) lives only as prose
+in goals/pandastack-universal-harness.md and nothing computes it over a window. This
+renders a windowed, no-threshold, dated vital-signs report from drive-log.jsonl:
+
+  HEADLINES  — host-verified PASS, advance proposals, gate hits, kill-switch suppressed
+               ticks, executor errors — each with delta vs the prior equal-length window.
+  NO DATA    — signals not instrumented yet (fake-green needs verify_ran; streak needs
+               auto-merge ticks). Rendered, never silently dropped, so the instrumentation
+               deficit is visible every day instead of hidden.
+  VITAL SIGNS— top gated ids, top stuck-PASS ids.
+  FOLLOWUPS  — wraps drive-log-distill (the constraint-proposer); pulse is the reader.
+
+Read-only, judgment-free, never mutates — so the autonomous daemon can consume its own
+pulse with zero human-in-loop ceremony.
+
+  drive-pulse <drive-log.jsonl> [--now YYYY-MM-DD] [--days 7] [--json]
+"""
+import argparse
+import datetime
+import json
+import os
+import subprocess
+import sys
+from collections import Counter
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DISTILL = os.path.join(HERE, "drive-log-distill")
+
+
+def parse_date(ts):
+    return datetime.date.fromisoformat(str(ts)[:10])
+
+
+def window_stats(rows):
+    pass_count, gate_count = Counter(), Counter()
+    passes = advances = suppressed = errors = 0
+    for r in rows:
+        if r.get("suppressed"):
+            suppressed += 1
+            continue
+        for e in r.get("executed", []):
+            if e.get("verdict") == "PASS":
+                passes += 1
+                pass_count[e["id"]] += 1
+            if e.get("advance"):
+                advances += 1
+        for gid in r.get("gate_ids", []):
+            gate_count[gid] += 1
+        if r.get("error"):
+            errors += 1
+    return {"ticks": len(rows), "passes": passes, "advances": advances,
+            "gates": sum(gate_count.values()), "suppressed": suppressed, "errors": errors,
+            "top_gated": gate_count.most_common(3), "top_stuck_pass": pass_count.most_common(3)}
+
+
+NO_DATA = {
+    "fake_green": "no data — needs verify_ran in drive-log (harness F-K/F-L)",
+    "agreement_streak": "no data — needs auto-merge ticks (T03 / Gap-4)",
+}
+
+
+def main(argv):
+    ap = argparse.ArgumentParser(prog="drive-pulse")
+    ap.add_argument("log")
+    ap.add_argument("--now", help="window anchor date YYYY-MM-DD (default today)")
+    ap.add_argument("--days", type=int, default=7)
+    ap.add_argument("--json", action="store_true")
+    a = ap.parse_args(argv)
+
+    now = datetime.date.fromisoformat(a.now) if a.now else datetime.date.today()
+    cur_start = now - datetime.timedelta(days=a.days)
+    prev_start = now - datetime.timedelta(days=2 * a.days)
+    rows = [json.loads(l) for l in open(a.log, encoding="utf-8") if l.strip()]
+    cur = [r for r in rows if cur_start <= parse_date(r["ts"]) < now]
+    prev = [r for r in rows if prev_start <= parse_date(r["ts"]) < cur_start]
+    cs, ps = window_stats(cur), window_stats(prev)
+
+    followups = ""
+    try:
+        fp = subprocess.run([sys.executable, DISTILL, a.log], capture_output=True, text=True, timeout=60)
+        followups = fp.stdout.strip()
+    except Exception as e:  # distill is a convenience wrap; never let it break the pulse
+        followups = f"(drive-log-distill unavailable: {e})"
+
+    if a.json:
+        print(json.dumps({"now": now.isoformat(), "days": a.days, "current": cs, "prior": ps,
+                          "no_data": NO_DATA, "followups": followups}, ensure_ascii=False))
+        return 0
+
+    def sign(n):
+        return f"+{n}" if n > 0 else str(n)
+
+    print(f"=== drive-pulse · {now.isoformat()} · rolling {a.days}d ===\n")
+    print("HEADLINES (Δ vs prior window):")
+    for k, label in [("passes", "host-verified PASS"), ("advances", "advance proposals"),
+                     ("gates", "gate hits"), ("suppressed", "kill-switch suppressed ticks"),
+                     ("errors", "executor errors")]:
+        print(f"  {label:32} {cs[k]:>4}  ({sign(cs[k] - ps[k])})")
+    print("\nNO DATA (instrumentation deficit — rendered, not hidden):")
+    for k, v in NO_DATA.items():
+        print(f"  {k:20} {v}")
+    print("\nVITAL SIGNS:")
+    print("  top gated:      " + (", ".join(f"{i}×{c}" for i, c in cs["top_gated"]) or "—"))
+    print("  top stuck-PASS: " + (", ".join(f"{i}×{c}" for i, c in cs["top_stuck_pass"]) or "—"))
+    print("\nFOLLOWUPS (from drive-log-distill):")
+    print("  " + (followups.replace("\n", "\n  ") if followups else "—"))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
