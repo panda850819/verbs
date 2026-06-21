@@ -80,6 +80,27 @@ check "good build emits advance proposal" "'pandastack-linear-advance --issue VR
 git -C "$tmprepo" rev-parse --verify -q psdrive/VRF-GOOD >/dev/null \
   && echo "PASS: passing verify branch kept" || { echo "FAIL: passing verify branch missing"; fail=1; }
 
+# F-A mutation sentinel (PRO-41): a tautological acceptance passes on the pre-build
+# tree, so a post-build PASS proves nothing -> BLOCKED, never trusted as green.
+taut_out="$(PSDRIVE_TEST=1 PSDRIVE_BUILD_STUB=PASS python3 - "$D" "$tmprepo" <<'PY'
+import importlib.util, json, sys
+from importlib.machinery import SourceFileLoader
+loader = SourceFileLoader("psdrive", sys.argv[1])
+spec = importlib.util.spec_from_loader("psdrive", loader)
+m = importlib.util.module_from_spec(spec); loader.exec_module(m)
+desc = "Goal: x\nContext: y\n\x60\x60\x60acceptance\ntrue\n\x60\x60\x60\n"
+x = {"id":"VRF-TAUT","project":"t","repo":sys.argv[2],"title":"taut","to_state":"Verifying","build":True,"desc":desc}
+print(json.dumps(m.exec_build(x)))
+PY
+)"
+check "tautological acceptance (pre-build green) -> BLOCKED" "r['verdict']=='BLOCKED' and (not r['ok'])" "$taut_out"
+check "tautological acceptance emits no advance" "'advance' not in r" "$taut_out"
+if git -C "$tmprepo" rev-parse --verify -q psdrive/VRF-TAUT >/dev/null; then
+  echo "FAIL: tautological build should keep no branch"; fail=1
+else
+  echo "PASS: tautological build kept no branch"
+fi
+
 [ "$(git -C "$tmprepo" worktree list | wc -l | tr -d ' ')" = "1" ] \
   && echo "PASS: no stray worktrees" || { echo "FAIL: stray worktree left"; fail=1; }
 
