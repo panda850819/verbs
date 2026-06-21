@@ -50,6 +50,15 @@ print(json.dumps({"merged": r.get("merged"), "blast": r.get("blast"), "verdict":
 PY
 }
 
+# ---------- 0. flag gating: --merge-auto triple-gated + capped at --max 1 pre-graduation ----------
+# capture (not pipe) so argparse's exit-2 under `set -o pipefail` doesn't mask the grep
+g0="$(PSDRIVE_TEST=1 "$D" --execute --merge-auto 2>&1)"
+echo "$g0" | grep -q "requires --build-auto" \
+  && ok "--merge-auto alone errors (needs --build-auto --only)" || bad "--merge-auto not gated: $g0"
+g1="$(PSDRIVE_TEST=1 "$D" --execute --merge-auto --build-auto --only t --max 2 2>&1)"
+echo "$g1" | grep -q "caps --max at 1" \
+  && ok "--merge-auto --max 2 errors (one attributable merge per tick)" || bad "max-cap not enforced: $g1"
+
 # ---------- 1. classify_blast: 3 high fixtures + low + default-deny ----------
 PSDRIVE_TEST=1 python3 - "$D" <<'PY'
 import sys, importlib.util

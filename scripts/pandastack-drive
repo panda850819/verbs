@@ -893,6 +893,11 @@ def main():
         ap.error("--build-auto requires --only <project> (never global)")
     if args.merge_auto and not (args.build_auto and args.only):
         ap.error("--merge-auto requires --build-auto --only (never global; integration auto-merge is ratchet-gated)")
+    if args.merge_auto and args.max > 1:
+        # one auto-merge per tick until the streak graduates: pre-graduation the human is
+        # still cold-reading every diff, so a tick that lands several at once destroys the
+        # per-merge attribution the disconfirm/streak depends on. Rerun for the next.
+        ap.error("--merge-auto caps --max at 1 until graduation (one attributable auto-merge per tick)")
     # Kill-switch: only DISPATCH is suppressed; read-only queue views stay visible
     # so you can still see what is parked while stopped (PRO-36, boundary #12).
     if args.execute and pslib.drive_suppressed():

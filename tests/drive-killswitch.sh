@@ -44,6 +44,14 @@ js="$(PSDRIVE_STOP_FLAG="$FLAG" PSDRIVE_FIXTURE="$fx" "$D" --json 2>&1)"
 echo "$js" | python3 -c "import json,sys; r=json.load(sys.stdin); sys.exit(0 if any(x['id']=='KS-1' for x in r['AUTO']) else 1)" 2>/dev/null \
   && pass "flag ON + --json read-only -> visibility preserved (not suppressed)" || fl "read-only got suppressed"
 
+# flag ON + --execute WITH the auto-merge ratchet flags on -> kill-switch still wins:
+# zero dispatch, no @@PSDRIVE_LEDGER@@, nothing built or merged. The one out-of-band
+# control must hold ABOVE the ratchet, not just in read-only mode.
+: > "$FLAG"
+outm="$(PSDRIVE_STOP_FLAG="$FLAG" PSDRIVE_FIXTURE="$fx" "$D" --execute --build-auto --merge-auto --only murmur --max 1 2>&1)"; rc=$?
+{ [ "$rc" -eq 0 ] && grep -q "kill-switch" <<<"$outm" && ! grep -q "@@PSDRIVE_LEDGER@@" <<<"$outm"; } \
+  && pass "flag ON + --merge-auto ratchet -> kill-switch wins, zero dispatch, no merge" || fl "kill-switch lost to the ratchet flags (rc=$rc)"
+
 # flag OFF + --execute (empty fixture) -> normal path, not suppressed, no codex, exit 0
 rm -f "$FLAG"
 out2="$(PSDRIVE_STOP_FLAG="$FLAG" PSDRIVE_FIXTURE="$emptyfx" "$D" --execute 2>&1)"; rc=$?
