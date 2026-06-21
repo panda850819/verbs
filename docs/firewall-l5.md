@@ -1,7 +1,18 @@
 # Layer 5 Firewall
 
-Track D implementation. Consumes `reads`, `writes`, `forbids`, and `classification`
-from skill frontmatter to enforce a per-skill tool-argument allowlist at PreToolUse time.
+> **Status on the public pandastack surface: ADVISORY, not enforced.** The
+> `reads` / `writes` / `forbids` / `classification` skill-frontmatter fields are
+> advisory audit metadata here; nothing in the public stack reads them at
+> PreToolUse time. The enforcing hook described below ships only in the private
+> `pdctx` overlay. So the firewall is **4 enforced layers (L1–L4) + 1 advisory
+> layer (L5)**, not 5 enforced layers. High-blast Bash commands are still hard-
+> blocked, but by the separate global `plugins/pandastack/hooks/pretooluse-destructive-guard.sh`
+> (a different mechanism), not by L5. Driver-side enforcement of these fields in
+> the autonomous path is a tracked follow-on, not part of this advisory surface.
+
+Track D implementation (private `pdctx` overlay). Consumes `reads`, `writes`,
+`forbids`, and `classification` from skill frontmatter to enforce a per-skill
+tool-argument allowlist at PreToolUse time.
 
 ## How it works
 
@@ -53,11 +64,14 @@ Set in shell or as an env override in `settings.json` if you need to bypass duri
 
 ## Layer map
 
+**4 enforced + 1 advisory.** L1–L4 are enforced on the public surface; L5 is
+advisory audit metadata here (enforced only by the private `pdctx` overlay).
+
 | Layer | Mechanism | Status |
 |-------|-----------|--------|
-| L1 | Prompt-level persona / voice / banned-phrases | On |
-| L2 | Filesystem chmod on memory namespace | On |
-| L3 | MCP deny list (`pdctx-mcp-firewall`) | On |
-| L4 | Context recipe (`pdctx use`) | On |
-| L5 | Per-skill allowlist on tool args + paths | **This document** |
+| L1 | Prompt-level persona / voice / banned-phrases | Enforced |
+| L2 | Filesystem chmod on memory namespace | Enforced |
+| L3 | MCP deny list (`pdctx-mcp-firewall`) | Enforced |
+| L4 | Context recipe (`pdctx use`) | Enforced |
+| L5 | Per-skill allowlist on tool args + paths | **Advisory** (audit metadata; enforced only by the private `pdctx` overlay) |
 | L6 | JIT prompt — marginal decision cached | Future |

@@ -56,6 +56,19 @@ type: skill | flow | lib
 
 Other top-level keys are not warned and not blocked. Stacks may extend.
 
+## Advisory firewall fields (audit metadata)
+
+`reads`, `writes`, `forbids`, `domain`, and `classification` are optional
+per-skill fields originally specified for the Layer 5 firewall (see
+[docs/firewall-l5.md](docs/firewall-l5.md)). On the public pandastack surface
+they are **advisory audit metadata only** — nothing in the public stack enforces
+them at PreToolUse time. The enforcing hook ships in the private `pdctx` overlay;
+the public firewall is 4 enforced layers (L1–L4) plus this 1 advisory layer (L5).
+Authors may declare them to document intent and feed the overlay, but must not
+rely on them as a security boundary on the public surface. High-blast Bash
+commands are hard-blocked by the separate global `pretooluse-destructive-guard.sh`,
+not by these fields.
+
 ## HOT / COLD classification
 
 AI runtimes typically build a **skill index** in the system prompt: every available skill's `name` + `description` is loaded into context at session start. The body of `SKILL.md` is loaded only when the skill is invoked.

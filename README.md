@@ -489,7 +489,7 @@ Recommended release loop:
 pdctx skill-validate
 ```
 
-Frontmatter fields `reads`, `writes`, `domain`, and `classification` are optional. They were originally specified for an L5 firewall hook (consumed by the `pdctx` private overlay); the public pandastack surface treats them as audit metadata. See [SKILL-FRONTMATTER.md](SKILL-FRONTMATTER.md) for the schema.
+Frontmatter fields `reads`, `writes`, `domain`, and `classification` are optional. They were originally specified for an L5 firewall hook (consumed by the `pdctx` private overlay); the public pandastack surface treats them as advisory audit metadata, not an enforced boundary. The firewall is **4 enforced + 1 advisory**: L1–L4 enforced, L5 (these per-skill fields) advisory on the public surface. High-blast Bash commands are hard-blocked separately by `plugins/pandastack/hooks/pretooluse-destructive-guard.sh`. See [SKILL-FRONTMATTER.md](SKILL-FRONTMATTER.md) and [docs/firewall-l5.md](docs/firewall-l5.md) for the schema.
 
 ### How to open a PR
 
