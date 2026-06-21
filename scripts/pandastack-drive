@@ -569,6 +569,26 @@ def exec_build(x):
                    "timeout_seconds": 1800}
         if verify_script:
             request["allow_host_verify"] = True
+            # F-A mutation sentinel (PRO-41): a discriminating acceptance must FAIL on
+            # the pre-build tree — the change is not there yet. If it already passes on
+            # unchanged code it is tautological (true / exit 0 / echo) OR it targets an
+            # absolute path and tests the live repo, not this worktree. Either way a
+            # post-build PASS proves nothing, so refuse to auto-build and route to a human
+            # (BLOCKED). Fail-safe: only ever demotes, never auto-passes. Auto-build
+            # acceptances must therefore be worktree-relative. A refactor whose tests pass
+            # pre-build trips this too — accepted: it routes to a human, never a false green.
+            try:
+                pre = subprocess.run(["bash", "-c", harden_verify(verify_script)],
+                                     cwd=wt, capture_output=True, text=True, timeout=600)
+                pre_passed = pre.returncode == 0
+            except subprocess.TimeoutExpired:
+                pre_passed = True   # a hang on unchanged code is not a discriminating check
+            if pre_passed:
+                return {"ran": True, "ok": False, "verdict": "BLOCKED",
+                        "summary": "acceptance passed on pre-build HEAD — tautological, or it "
+                                   "targets an absolute path (tests the live repo, not this "
+                                   "change). Auto-build acceptances must be worktree-relative; "
+                                   "give a discriminating check or verify by hand."}
         stub = os.environ.get("PSDRIVE_BUILD_STUB") if TEST_MODE else None  # test seam (guarded)
         test_options = None
         if stub:
