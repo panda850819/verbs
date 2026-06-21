@@ -15,6 +15,27 @@ Pick by **who executes**:
 
 For multi-step sequential work without parallelism, run multiple sprints in sequence. There is no dedicated "sequential subagent coordinator" skill — that ceremony cost more than it saved.
 
+## Q0: Should this even be a skill? (refuse-to-build escape hatch)
+
+Before routing a workflow to an execution skill — and before `skill-creator` runs
+its MECE check — ask whether the thing should be a skill **at all**. Refusing to
+build is a valid, non-failure outcome; it is the cheapest place to stop skill
+sprawl, upstream of the MECE check.
+
+- **It's knowledge, not a workflow → a brain page, not a skill.** A fact, a
+  decision, a reference, a checklist someone reads once — file it under the brain
+  (`gbrain` / RESOLVER tree). Skills are *executed*; pages are *read*.
+- **It's one deterministic step → a one-line script / alias, not a skill.** If the
+  whole capability is `grep`/`jq`/a single CLI invocation with no judgment, a
+  script (or a `lib/` helper) beats a SKILL.md. A skill's overhead (frontmatter,
+  trigger surface, index slot, resolver row) only pays off when there is real
+  routing + judgment to host.
+- **Only if it survives both** — a multi-step workflow needing in-context judgment
+  or dispatch — continue to the 2-question test below.
+
+This is an outcome, not an error: "this should be a brain page / one-line script,
+not a skill" is a correct answer that keeps the corpus lean.
+
 ## 2-question decision test
 
 Ask in order. First Yes wins.
