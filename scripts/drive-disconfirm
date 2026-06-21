@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""drive-disconfirm — record WHY a human reverted an auto-merge, and do the revert.
+
+When a human cold-reads an auto-merged low-blast change and finds it wrong:
+
+  drive-disconfirm <merge-sha> "<why>" [--class bad-acceptance|subtly-wrong|misclassified-blast|verify-flake]
+
+This (1) reverts the merge on the integration branch in an isolated worktree (so the live
+tree is untouched and a merge commit is reverted relative to its mainline parent, which a
+bare `git revert <merge-sha>` cannot do), and (2) appends a reason row to the disconfirm
+ledger. drive-pulse's reachability/revert check then resets the trust streak, and surfaces
+the reason — so a streak restart carries the lesson instead of re-rolling the same dice.
+
+Nothing is pushed; integration is local and disposable.
+"""
+import argparse
+import datetime
+import json
+import os
+import subprocess
+import sys
+import tempfile
+
+REPO = os.path.expanduser("~/site/skills/pandastack")
+INTEG = "psdrive/integration"
+CLASSES = ["bad-acceptance", "subtly-wrong", "misclassified-blast", "verify-flake", "other"]
+
+
+def disconfirm_log_path():
+    return os.environ.get(
+        "PSDRIVE_DISCONFIRM_LOG",
+        os.path.expanduser("~/site/knowledge/brain/_automation/portfolio-status/disconfirm-log.jsonl"))
+
+
+def is_merge_commit(repo, sha):
+    cp = subprocess.run(["git", "-C", repo, "rev-list", "--parents", "-n", "1", sha],
+                        capture_output=True, text=True)
+    return cp.returncode == 0 and len(cp.stdout.split()) > 2  # sha + 2 parents = a merge
+
+
+def now_iso():
+    return os.environ.get("PSDRIVE_DISCONFIRM_NOW") or \
+        datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def revert_on_branch(repo, branch, sha):
+    """Revert sha on `branch` in an isolated worktree (live tree untouched). -m 1 for a
+    merge commit. Returns (ok, message)."""
+    wt = tempfile.mkdtemp(prefix="psdrive-disc-")
+    try:
+        a = subprocess.run(["git", "-C", repo, "worktree", "add", wt, branch],
+                           capture_output=True, text=True)
+        if a.returncode != 0:
+            return False, "worktree add failed: " + (a.stderr or "").strip()[:140]
+        cmd = ["git", "-C", wt, "revert", "--no-edit"]
+        if is_merge_commit(repo, sha):
+            cmd += ["-m", "1"]
+        cmd.append(sha)
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            subprocess.run(["git", "-C", wt, "revert", "--abort"], capture_output=True, text=True)
+            return False, "revert not clean — aborted: " + (r.stdout or r.stderr or "").strip()[:140]
+        return True, "reverted on " + branch
+    finally:
+        subprocess.run(["git", "-C", repo, "worktree", "remove", "--force", wt],
+                       capture_output=True, text=True)
+        subprocess.run(["git", "-C", repo, "worktree", "prune"], capture_output=True, text=True)
+
+
+def main(argv):
+    ap = argparse.ArgumentParser(prog="drive-disconfirm")
+    ap.add_argument("sha", help="the integration merge commit to disconfirm")
+    ap.add_argument("why", help="one-line root cause")
+    ap.add_argument("--repo", default=REPO)
+    ap.add_argument("--branch", default=INTEG)
+    ap.add_argument("--class", dest="cls", choices=CLASSES, default="other")
+    ap.add_argument("--issue", default=None, help="the Linear issue id this merge came from")
+    ap.add_argument("--no-revert", action="store_true", help="only log the reason; skip the revert")
+    a = ap.parse_args(argv)
+    repo = os.path.expanduser(a.repo)
+
+    if subprocess.run(["git", "-C", repo, "rev-parse", "--verify", "--quiet", a.sha + "^{commit}"],
+                      capture_output=True).returncode != 0:
+        print(f"error: {a.sha} is not a commit in {repo}", file=sys.stderr)
+        return 2
+
+    reverted, msg = (False, "skipped (--no-revert)")
+    if not a.no_revert:
+        reverted, msg = revert_on_branch(repo, a.branch, a.sha)
+        if not reverted:
+            print(f"error: {msg}", file=sys.stderr)
+            return 1
+
+    rec = {"ts": now_iso(), "sha": a.sha, "issue": a.issue, "class": a.cls,
+           "why": a.why, "reverted": reverted}
+    p = disconfirm_log_path()
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    print(f"disconfirmed {a.sha[:12]} [{a.cls}] — {msg}; logged to {p}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
