@@ -37,6 +37,9 @@ AUDIT = os.environ.get(
     os.path.expanduser("~/site/knowledge/brain/_automation/portfolio-status/drive-log.jsonl"))
 DETAIL_DIR = os.path.expanduser("~/Library/Logs/pandastack-drive")
 MAX = os.environ.get("PSDRIVE_MAX", "1")
+CONFIG = os.environ.get(
+    "PSDRIVE_AUTONOMY_CONFIG",
+    os.path.expanduser("~/.config/pandastack/drive-autonomy.json"))
 
 
 def parse(out):
@@ -76,6 +79,84 @@ def parse(out):
             "blocked": count("⛔ BLOCKED"), "gate_ids": gate_ids, "executed": executed}
 
 
+def load_autonomy_config(path=None):
+    """Read the per-project autonomy config. Missing file or malformed JSON →
+    empty dict, so the tick falls back to today's global read-only sweep. Never
+    raises: a broken config must not wedge the scheduler."""
+    path = path or CONFIG
+    try:
+        with open(path, encoding="utf-8") as f:
+            cfg = json.load(f)
+        return cfg if isinstance(cfg, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except (ValueError, OSError) as e:
+        print(f"drive-cron: ignoring unreadable autonomy config {path}: {e}",
+              file=sys.stderr)
+        return {}
+
+
+def build_invocations(cfg, max_):
+    """Pure: map the autonomy config to the pandastack-drive arg lists to run this
+    tick. No build_auto project (incl. empty config) → exactly today's single
+    global read-only sweep, labelled None so its audit/detail lines stay byte-for-
+    byte unchanged. Each build_auto project gets its own `--build-auto --only` run
+    (+ `--merge-auto` when set). merge_auto without build_auto is a config error:
+    warn and build without auto-merge (the driver enforces the same prerequisite).
+    Returns a list of (label, args); label None = the legacy global run."""
+    autonomy = []
+    for proj, opts in (cfg or {}).items():
+        if not isinstance(opts, dict):
+            continue
+        build = bool(opts.get("build_auto"))
+        merge = bool(opts.get("merge_auto"))
+        if merge and not build:
+            print(f"drive-cron: {proj}: merge_auto without build_auto is a config "
+                  f"error; building without auto-merge this tick", file=sys.stderr)
+            build, merge = True, False
+        if not build:
+            continue
+        args = ["--execute", "--build-auto", "--only", proj]
+        if merge:
+            args.append("--merge-auto")
+        args += ["--max", str(max_)]
+        autonomy.append((proj, args))
+    if not autonomy:
+        return [(None, ["--execute", "--max", str(max_)])]
+    return autonomy
+
+
+def run_one(args, ts, label=None):
+    """Run one pandastack-drive invocation and write its detail + audit trails.
+    With label=None the trails are identical to the pre-config single-run path."""
+    tag = f" [{label}]" if label else ""
+    try:
+        out = subprocess.run([sys.executable, DRIVE, *args],
+                             capture_output=True, text=True, timeout=3000)
+        text = (out.stdout or "") + (("\n[stderr]\n" + out.stderr) if out.stderr else "")
+        rec = parse(text)
+        rec["error"] = None if out.returncode == 0 else (out.stderr or "")[:200]
+    except Exception as e:
+        text = f"drive-cron exception: {e}"
+        rec = {"auto": 0, "gate": 0, "blocked": 0, "gate_ids": [], "executed": [],
+               "error": str(e)[:200]}
+
+    detail = os.path.join(DETAIL_DIR, datetime.date.today().isoformat() + ".log")
+    with open(detail, "a", encoding="utf-8") as f:
+        f.write(f"\n===== {ts}{tag} =====\n{text}\n")
+
+    rec = {"ts": ts, **rec, "detail": detail}
+    if label is not None:
+        rec["invocation"] = label
+    with open(AUDIT, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    adv = [e for e in rec["executed"] if e.get("advance")]
+    print(f"{ts}{tag}  auto={rec['auto']} gate={rec['gate']} blocked={rec['blocked']} "
+          f"ran={len(rec['executed'])} proposals={len(adv)}"
+          + (f" ERROR={rec['error']}" if rec.get("error") else ""))
+
+
 def main():
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     os.makedirs(os.path.dirname(AUDIT), exist_ok=True)
@@ -89,29 +170,11 @@ def main():
         print(f"{ts}  suppressed — kill-switch at {pslib.stop_flag_path()} (zero dispatch)")
         return 0
     os.makedirs(DETAIL_DIR, exist_ok=True)
-    try:
-        out = subprocess.run([sys.executable, DRIVE, "--execute", "--max", MAX],
-                             capture_output=True, text=True, timeout=3000)
-        text = (out.stdout or "") + (("\n[stderr]\n" + out.stderr) if out.stderr else "")
-        rec = parse(text)
-        rec["error"] = None if out.returncode == 0 else (out.stderr or "")[:200]
-    except Exception as e:
-        text = f"drive-cron exception: {e}"
-        rec = {"auto": 0, "gate": 0, "blocked": 0, "gate_ids": [], "executed": [],
-               "error": str(e)[:200]}
-
-    detail = os.path.join(DETAIL_DIR, datetime.date.today().isoformat() + ".log")
-    with open(detail, "a", encoding="utf-8") as f:
-        f.write(f"\n===== {ts} =====\n{text}\n")
-
-    rec = {"ts": ts, **rec, "detail": detail}
-    with open(AUDIT, "a", encoding="utf-8") as f:
-        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-
-    adv = [e for e in rec["executed"] if e.get("advance")]
-    print(f"{ts}  auto={rec['auto']} gate={rec['gate']} blocked={rec['blocked']} "
-          f"ran={len(rec['executed'])} proposals={len(adv)}"
-          + (f" ERROR={rec['error']}" if rec.get("error") else ""))
+    # Per-project autonomy: empty/missing config → one global read-only sweep
+    # (label None = today's behavior, byte-for-byte). A build_auto project gets
+    # its own --build-auto --only run (+ --merge-auto when set).
+    for label, args in build_invocations(load_autonomy_config(), MAX):
+        run_one(args, ts, label)
     return 0
 
 
