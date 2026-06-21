@@ -707,6 +707,57 @@ def evidence_body(wr, acceptance, staged):
     return "\n".join(lines)
 
 
+# C5: the secret classes AGENTS.md hard-prohibits. The driver commits with hooks OFF, so
+# the project's own pre-commit secret hook is bypassed on this path; an enabled --merge-auto
+# would then self-land a committed secret into integration unattended. Block it at the commit.
+# unambiguous secret-file shapes (extension / exact name)
+_SECRET_PATH_RE = re.compile(
+    r"(^|/)("
+    r"\.env(\.[\w-]+)?$|"                          # .env, .env.local, .env.prod
+    r"[^/]*\.(key|pem|p12|pfx|keystore|jks|cookie|cookies)$|"
+    r"id_(rsa|dsa|ecdsa|ed25519)$"
+    r")", re.I)
+# secret-ish name tokens, DELIMITED so 'secretary'/'incredible'/'keyboard' don't trip
+_SECRET_TOKEN_RE = re.compile(
+    r"(?:^|[^a-z])(secrets?|creds?|credentials?|passwo?rds?|mnemonics?|api[_-]?keys?)(?:[^a-z]|$)", re.I)
+_SECRET_CONTENT_RE = re.compile(
+    r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|"
+    r"\baws_secret_access_key\b|"
+    r"\b(api[_-]?key|secret[_-]?key|access[_-]?token)\b\s*[:=]\s*['\"]?[A-Za-z0-9/_\-]{16,}|"
+    r"\bxox[baprs]-[A-Za-z0-9-]{10,}|"             # slack token
+    r"\bgh[pousr]_[A-Za-z0-9]{20,}|"               # github token
+    r"\b(mnemonic|seed[ _]?phrase)\b", re.I)
+
+
+def _staged_paths(porcelain):
+    out = []
+    for ln in (porcelain or "").splitlines():
+        p = (ln[3:] if len(ln) > 3 else "").strip().strip('"')
+        if " -> " in p:                            # rename: take the destination
+            p = p.split(" -> ", 1)[1].strip().strip('"')
+        if p:
+            out.append(p)
+    return out
+
+
+def staged_secrets(wt, porcelain):
+    """Staged paths/contents matching the secret classes AGENTS.md forbids (C5). Path match
+    OR a high-confidence content marker. Fails closed: any hit blocks the auto-build commit."""
+    hits = []
+    for p in _staged_paths(porcelain):
+        base = p.rsplit("/", 1)[-1]
+        if _SECRET_PATH_RE.search(p) or _SECRET_TOKEN_RE.search(base):
+            hits.append("path:" + p)
+            continue
+        try:
+            with open(os.path.join(wt, p), encoding="utf-8", errors="ignore") as f:
+                if _SECRET_CONTENT_RE.search(f.read(40000)):
+                    hits.append("content:" + p)
+        except (OSError, ValueError):
+            pass
+    return hits
+
+
 def exec_build(x, merge_auto=False):
     """Run the BUILD skill in an ISOLATED git worktree, sandboxed to `workspace-write`
     with network pinned OFF (codex physically cannot push, regardless of ~/.codex
@@ -801,6 +852,15 @@ def exec_build(x, merge_auto=False):
             # paths (review finding E); commit with hooks DISABLED (--no-verify + empty
             # hooksPath) so a codex-written tracked hook can't run unsandboxed (finding B).
             staged = safe_git(wt, git_dir, ["status", "--porcelain"]).stdout.strip()
+            # scan the FULL untracked list (-uall): plain --porcelain collapses a new dir to
+            # "?? dir/", which would hide a secret file newly created inside it.
+            full = safe_git(wt, git_dir, ["status", "--porcelain", "--untracked-files=all"]).stdout.strip()
+            leaks = staged_secrets(wt, full)     # C5: fail closed BEFORE committing
+            if leaks:
+                return {"ran": True, "ok": False, "verdict": "BLOCKED",
+                        "summary": "refusing to commit — staged secret(s): " + ", ".join(leaks[:5]),
+                        "verification": wr.get("verification") or {}, "worker": wr,
+                        "artifacts": wr.get("artifacts") or {}}
             safe_git(wt, git_dir, ["add", "-A"])
             cm = safe_git(wt, git_dir, ["commit", "--no-verify",
                                         "-m", f"feat({x['id']}): {x.get('title') or 'auto-build'}",
