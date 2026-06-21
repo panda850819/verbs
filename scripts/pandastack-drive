@@ -683,6 +683,30 @@ def exec_item(x):
     return r
 
 
+def evidence_body(wr, acceptance, staged):
+    """A commit-message body that puts the host-verify evidence inline (T04), so a human's
+    30-second pre-graduation stamp is honest: the verify result + command, the acceptance
+    checked, the verify-output tail, and the changed-file count — all from the worker result."""
+    v = wr.get("verification") or {}
+    lines = ["[auto-build evidence]"]
+    if v.get("ran"):
+        cmd = v.get("command")
+        lines.append(f"host-verify: {'PASS' if v.get('ok') else 'FAIL'}" + (f"  ({cmd})" if cmd else ""))
+        tail = (v.get("stdout_tail") or "").strip()
+        if tail:
+            lines.append("verify-output (tail):")
+            lines += ["  " + ln for ln in tail.splitlines()[-6:]]
+    else:
+        lines.append("host-verify: not run")
+    acc = (acceptance or "").strip()
+    if acc and not acc.startswith("No explicit acceptance"):
+        lines.append("acceptance:")
+        lines += ["  " + ln for ln in acc.splitlines()[:8]]
+    n = len([s for s in (staged or "").splitlines() if s.strip()])
+    lines.append(f"changed files: {n}")
+    return "\n".join(lines)
+
+
 def exec_build(x, merge_auto=False):
     """Run the BUILD skill in an ISOLATED git worktree, sandboxed to `workspace-write`
     with network pinned OFF (codex physically cannot push, regardless of ~/.codex
@@ -778,8 +802,9 @@ def exec_build(x, merge_auto=False):
             # hooksPath) so a codex-written tracked hook can't run unsandboxed (finding B).
             staged = safe_git(wt, git_dir, ["status", "--porcelain"]).stdout.strip()
             safe_git(wt, git_dir, ["add", "-A"])
-            cm = safe_git(wt, git_dir, ["commit", "--no-verify", "-m",
-                                        f"feat({x['id']}): {x.get('title') or 'auto-build'}"])
+            cm = safe_git(wt, git_dir, ["commit", "--no-verify",
+                                        "-m", f"feat({x['id']}): {x.get('title') or 'auto-build'}",
+                                        "-m", evidence_body(wr, acc, staged)])  # T04: inline verify evidence
             committed = cm.returncode == 0
         if passed and committed:
             keep_branch = True
