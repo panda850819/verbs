@@ -158,6 +158,34 @@ def retry_lock():
         f.close()
 
 
+def dispatch_lock_path():
+    if TEST_MODE and os.environ.get("PSDRIVE_DISPATCH_LOCK"):
+        return os.environ["PSDRIVE_DISPATCH_LOCK"]
+    root = os.environ.get("PANDASTACK_STATE_HOME", os.path.expanduser("~/.pandastack"))
+    return os.path.join(root, "projects", "_driver", "dispatch.lock")
+
+
+def acquire_dispatch_lock():
+    """Whole-loop dispatch lock (review C1). The branch-exists guard before
+    `git worktree add -b psdrive/<ISSUE>` is check-then-act: an interactive --execute
+    overlapping the launchd tick are two processes (launchd's single-instance guarantee
+    does NOT cover a hand-run driver), so both could pass the check and race the worktree
+    add for one issue. A non-blocking exclusive flock makes dispatch single-writer; a
+    second concurrent driver yields cleanly instead of half-building. Returns the held
+    file handle — keep the reference so the fd (hence the lock) lives for the whole loop;
+    the OS releases it on process exit, matching the stateless-per-tick model — or None if
+    another driver already holds it. Read-only views (--json / queue) never call this."""
+    p = dispatch_lock_path()
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    f = open(p, "w")
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.close()
+        return None
+    return f
+
+
 def iso_ms(ms):
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ms / 1000))
 
@@ -687,6 +715,15 @@ def main():
             print(line(x))
 
     if args.execute:
+        # Whole-loop concurrency lock (review C1): make dispatch single-writer so the
+        # branch-exists / worktree-add critical section can't be raced by an interactive
+        # --execute overlapping the launchd tick. Held for the whole loop (the OS frees it
+        # on process exit). The read-only queue above already printed, so a contended tick
+        # still shows what is parked — only DISPATCH is skipped (mirrors the kill-switch).
+        _dispatch_lock = acquire_dispatch_lock()  # noqa: F841 — ref keeps the fd/lock alive
+        if _dispatch_lock is None:
+            print("⏸ another pandastack-drive --execute is dispatching — skipping this tick (concurrency lock).")
+            return 0
         print(f"\n--execute (Codex headless, sandboxed, max {args.max}):")
         n = 0
         for x in q["AUTO"]:
