@@ -624,6 +624,7 @@ def exec_build(x):
                     "branch": branch, "staged": staged, "verification": wr.get("verification") or {},
                     "worker": wr,
                     "artifacts": wr.get("artifacts") or {},
+                    "verify_cmd": (verify_script or "").strip()[:200] or None,
                     "pr_hint": f"review local branch {branch} and open a PR (driver never pushes)",
                     "advance": f'pandastack-linear-advance --issue {x["id"]} --to "{x.get("to_state", "Verifying")}"'}
         if passed and not committed:
@@ -644,6 +645,40 @@ def exec_build(x):
         shutil.rmtree(wt, ignore_errors=True)
         if not keep_branch:
             subprocess.run(["git", "-C", rd, "branch", "-D", branch], capture_output=True, text=True)
+
+
+def ledger_record(x, r):
+    """Normalize one executed item into a structured ledger record (LG, F-K/F-L).
+
+    The fields that make 'zero fake-green' git-greppable: `verify_required` (does
+    this advance need a real host-verify — True for BUILD/merge, False for a
+    read-only AUTO advisory step, F-M) and `verify_ran` (did host-verify actually
+    run). The success-signal counter-example is one grep:
+
+        verdict == "PASS" AND advance AND verify_required AND NOT verify_ran
+
+    i.e. a PASS that proposed a state advance it was supposed to host-verify, but
+    no host-verify ran. In healthy operation that count is 0 (a BUILD-auto issue
+    always carries a machine-runnable acceptance, so host-verify always runs; a
+    failed host-verify is demoted to FAIL upstream by maybe_apply_verification)."""
+    v = (r.get("verification") or {}) if isinstance(r, dict) else {}
+    ran = bool(v.get("ran"))
+    return {
+        "id": x.get("id"),
+        "project": x.get("project"),
+        "phase": x.get("next"),
+        "verdict": r.get("verdict"),
+        "summary": (r.get("summary") or "")[:200],
+        "advance": (r.get("advance") or None),
+        # BUILD lands code → its advance must be host-verified; read-only AUTO is advisory.
+        "verify_required": bool(x.get("build")),
+        "verify_ran": ran,
+        "verify_ok": v.get("ok"),
+        # prefer the human-meaningful acceptance text (exec_build attaches it); fall
+        # back to the materialized script path the worker actually executed.
+        "verify_cmd": r.get("verify_cmd") or v.get("command"),
+        "verify_tail": ((v.get("stdout_tail") or v.get("stderr_tail") or "").strip()[-400:]) or None,
+    }
 
 
 def main():
@@ -689,6 +724,7 @@ def main():
     if args.execute:
         print(f"\n--execute (Codex headless, sandboxed, max {args.max}):")
         n = 0
+        ledger = []
         for x in q["AUTO"]:
             if args.only and x.get("project") != args.only:
                 continue
@@ -704,6 +740,7 @@ def main():
                 print(f"    skipped: {r['why']}")
                 continue                      # a skip does not consume a --max slot (finding N)
             n += 1
+            ledger.append(ledger_record(x, r))
             print(f"    {r['verdict']}: {r['summary']}")
             retry_note = record_retry(x, r)
             if retry_note:
@@ -716,6 +753,14 @@ def main():
                 print(f"    → ready to advance (run it yourself): {r['advance']}")
         if n == 0:
             print("  (no AUTO items ran)")
+        # Structured ledger handoff (LG, F-K/F-L): one machine-readable line the
+        # drive-cron wrapper appends to drive-log.jsonl verbatim, instead of
+        # regex-parsing this human stdout. Carries verify_ran/verify_ok/verify_cmd
+        # so 'zero fake-green' and the merge streak are git-greppable.
+        blob = {"auto": len(q["AUTO"]), "gate": len(q["GATE"]),
+                "blocked": len(q["BLOCKED"]), "gate_ids": [g["id"] for g in q["GATE"]],
+                "executed": ledger}
+        print(pslib.LEDGER_SENTINEL + " " + json.dumps(blob, ensure_ascii=False))
     return 0
 
 

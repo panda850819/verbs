@@ -5,9 +5,11 @@ Runs pandastack-drive --execute, then writes TWO trails so every autonomous run 
 auditable later:
 
   1. structured  → ~/site/knowledge/brain/_automation/portfolio-status/drive-log.jsonl
-     one JSON line per run {ts, auto, gate, blocked, gate_ids, executed[]}. Lives in
-     the brain so the auto-commit turns it into git history = a tamper-evident,
-     reset-proof audit trail (the "看得見變動" pattern applied to the driver).
+     one JSON line per run {ts, auto, gate, blocked, gate_ids, executed[]}, where each
+     executed[] item carries verify_ran / verify_ok / verify_cmd / verify_required so
+     fake-green is git-greppable (LG, F-K/F-L). Lives in the brain so the auto-commit
+     turns it into git history = a tamper-evident, reset-proof audit trail (the
+     "看得見變動" pattern applied to the driver).
   2. detail      → ~/Library/Logs/pandastack-drive/<date>.log
      full human-readable stdout (queue + each verdict + each proposed advance).
 
@@ -38,7 +40,26 @@ MAX = os.environ.get("PSDRIVE_MAX", "1")
 
 
 def parse(out):
-    """Pull a structured summary out of the driver's text output."""
+    """Pull a structured summary out of the driver's output.
+
+    Primary path (LG, F-K/F-L): the driver emits one machine-readable
+    `@@PSDRIVE_LEDGER@@ {json}` line carrying the per-item ledger with
+    verify_ran / verify_ok / verify_cmd. Append it verbatim — no lossy regex, so
+    'zero fake-green' (verdict==PASS AND advance AND verify_required AND NOT
+    verify_ran) stays git-greppable in drive-log.jsonl. Fallback: an old driver
+    or a non-execute run has no sentinel, so regex the human stdout for back-compat.
+    """
+    for ln in out.splitlines():
+        if ln.startswith(pslib.LEDGER_SENTINEL):
+            try:
+                blob = json.loads(ln[len(pslib.LEDGER_SENTINEL):].strip())
+            except (ValueError, TypeError):
+                break   # malformed sentinel → fall through to the regex fallback
+            return {"auto": blob.get("auto", 0), "gate": blob.get("gate", 0),
+                    "blocked": blob.get("blocked", 0),
+                    "gate_ids": blob.get("gate_ids", []),
+                    "executed": blob.get("executed", [])}
+    # --- fallback: legacy regex over the human stdout (no structured ledger) ---
     def count(label):
         m = re.search(rf"{re.escape(label)}.*?:\s*(\d+)", out)
         return int(m.group(1)) if m else 0

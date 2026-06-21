@@ -15,6 +15,12 @@ STOCK_FALLBACK = {"Todo": "PLAN", "In Progress": "BUILD"}
 NEXT_PHASE = {"DEFINE": "PLAN", "PLAN": "GATE", "GATE": "BUILD", "BUILD": "VERIFY",
               "VERIFY": "REVIEW", "REVIEW": "SHIP", "SHIP": "(done)"}
 
+# Machine-readable ledger handoff: pandastack-drive --execute emits one
+# `@@PSDRIVE_LEDGER@@ {json}` line; drive-cron.py appends it verbatim to
+# drive-log.jsonl instead of regex-parsing the human stdout (LG, F-K/F-L).
+# Single source so the emitter and the consumer cannot drift.
+LEDGER_SENTINEL = "@@PSDRIVE_LEDGER@@"
+
 _ACC_RE = re.compile(r"```acceptance\s*\n(.+?)\n```", re.DOTALL)
 _EVIDENCE_RE = re.compile(r"```evidence\s*\n(.+?)\n```", re.DOTALL)
 # a machine-checkable acceptance reads like a runnable check, not human prose
