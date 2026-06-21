@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: |
-  Create new pandastack skills. MECE-checks against existing skills via RESOLVER.md. Enforces the hot/cold dispatch rule (skills reading >5K tokens dispatch a sub-agent). Triggers: "create a skill", "new pandastack skill", "improve this skill", "扩 skill".
+  Create new pandastack skills. MECE-checks against existing skills via the pandastack RESOLVER.md (plugins/pandastack/RESOLVER.md — the skill-overlap index, NOT the brain filing-tree RESOLVER.md). First applies lib/skill-decision-tree.md Q0 (refuse-to-build: should this be a brain page / one-line script instead). Enforces the hot/cold dispatch rule (skills reading >5K tokens dispatch a sub-agent). Triggers: "create a skill", "new pandastack skill", "improve this skill", "扩 skill".
 version: 1.0.0
 user-invocable: true
 type: skill
@@ -26,6 +26,11 @@ What user intent has no existing skill? Be explicit:
 Default to the smallest durable change: tighten trigger text and inline checklist / rubric first. Do not create lens / persona / rubric registries unless the shared rule's extraction threshold is met.
 
 ### 2. MECE check
+
+**First, Q0 (refuse-to-build):** apply `lib/skill-decision-tree.md` § "Q0" before
+walking the index. If the capability is really knowledge (→ a brain page) or one
+deterministic step (→ a one-line script / `lib/` helper), stop here — "not a skill"
+is a valid outcome, and it kills sprawl upstream of the overlap check below.
 
 Open `pandastack/RESOLVER.md`. Walk every category (Knowledge / Writing / Dev workflow / Retro-session / Tool wrappers / Personas / Multi-lens review / Trust evaluation). For each existing skill in scope, ask: does its trigger surface already cover this intent? If yes, extend that skill instead of adding new.
 
