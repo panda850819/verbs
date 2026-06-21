@@ -124,6 +124,23 @@ def trust_streak(events, reverted):
     return streak
 
 
+def disconfirm_log_path():
+    return os.environ.get(
+        "PSDRIVE_DISCONFIRM_LOG",
+        os.path.expanduser("~/site/knowledge/brain/_automation/portfolio-status/disconfirm-log.jsonl"))
+
+
+def recent_disconfirms(n=3):
+    """The last few human-revert reasons (from drive-disconfirm) so a streak restart
+    carries the lesson instead of re-rolling the same dice."""
+    try:
+        rows = [json.loads(l) for l in open(disconfirm_log_path(), encoding="utf-8") if l.strip()]
+    except OSError:
+        return []
+    return [{"date": str(r.get("ts"))[:10], "class": r.get("class"), "why": r.get("why")}
+            for r in rows[-n:]]
+
+
 def goal_signals(cur_rows, all_rows, repo):
     """Goal A's success signal, computed (no longer NO DATA): zero fake-green over the
     window, and the trust streak (trailing clean auto-merges) across all history."""
@@ -144,6 +161,7 @@ def goal_signals(cur_rows, all_rows, repo):
         "revert_checked": checked,
         "reverts_seen": (len(reverted) if reverted is not None else None),
         "rolled_back": (len(rolled) if rolled is not None else None),
+        "recent_disconfirms": recent_disconfirms(),
     }
 
 
@@ -198,6 +216,8 @@ def main(argv):
     print("\nGOAL SIGNAL (Goal A success criteria):")
     print(f"  fake-green (window)  {fg_line}")
     print(f"  trust streak         {streak_line}")
+    for d in signals.get("recent_disconfirms", []):
+        print(f"  last disconfirm      {d['date']} [{d['class']}] {d['why']}")
     print("\nVITAL SIGNS:")
     print("  top gated:      " + (", ".join(f"{i}×{c}" for i, c in cs["top_gated"]) or "—"))
     print("  top stuck-PASS: " + (", ".join(f"{i}×{c}" for i, c in cs["top_stuck_pass"]) or "—"))
