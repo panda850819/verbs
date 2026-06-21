@@ -81,7 +81,8 @@ def merge_events(rows):
 def reverts_on_branch(repo, branch):
     """Shas a human reverted on `branch` — git revert writes 'This reverts commit <sha>'.
     None = can't tell (no repo / git error), so the streak notes the revert-check was skipped.
-    Limitation: a rollback via reset rewrites history and is not detectable here."""
+    A rollback that rewrites history (reset / branch -f / rebase) leaves no revert message;
+    that disconfirm is caught separately by rolled_back_shas (reachability)."""
     if not repo:
         return None
     cp = subprocess.run(["git", "-C", os.path.expanduser(repo), "log", branch, "--format=%b"],
@@ -89,6 +90,24 @@ def reverts_on_branch(repo, branch):
     if cp.returncode != 0:
         return None
     return set(re.findall(r"[Tt]his reverts commit ([0-9a-f]{7,40})", cp.stdout))
+
+
+def rolled_back_shas(repo, branch, shas):
+    """Auto-merged shas no longer reachable from the branch HEAD — silently rolled back via
+    reset / `git branch -f` / rebase, which a 'This reverts commit' grep cannot see. A real
+    disconfirm: a merge that earned a streak point is no longer in integration. None if no
+    repo (check skipped). This is what stops a phantom 20/20 after a history-rewrite rollback."""
+    if not repo:
+        return None
+    rolled = set()
+    for sha in shas:
+        if not sha:
+            continue
+        cp = subprocess.run(["git", "-C", os.path.expanduser(repo), "merge-base",
+                             "--is-ancestor", sha, branch], capture_output=True, text=True)
+        if cp.returncode == 1:        # 0 = still an ancestor; 1 = gone (rolled back); other = unknown → skip
+            rolled.add(sha)
+    return rolled
 
 
 def trust_streak(events, reverted):
@@ -111,15 +130,20 @@ def goal_signals(cur_rows, all_rows, repo):
     fg = fake_green_rows(cur_rows)
     evs = merge_events(all_rows)
     integ = evs[-1]["merged"] if evs else "psdrive/integration"
-    reverted = reverts_on_branch(repo, integ)
+    reverted = reverts_on_branch(repo, integ)                                  # None if no repo / git error
+    rolled = rolled_back_shas(repo, integ, [e.get("merged_sha") for e in evs])  # None if no repo
+    checked = reverted is not None or rolled is not None
+    # a streak point is disconfirmed by EITHER an explicit revert OR a silent rollback
+    disconfirmed = ((reverted or set()) | (rolled or set())) if checked else None
     return {
         "fake_green": len(fg),
         "fake_green_ids": [e.get("id") for e in fg],
         "merges_total": len(evs),
-        "trust_streak": trust_streak(evs, reverted),
+        "trust_streak": trust_streak(evs, disconfirmed),
         "streak_target": 20,
-        "revert_checked": reverted is not None,
+        "revert_checked": checked,
         "reverts_seen": (len(reverted) if reverted is not None else None),
+        "rolled_back": (len(rolled) if rolled is not None else None),
     }
 
 
@@ -166,7 +190,8 @@ def main(argv):
     fg_line = "0 ✓" if fg == 0 else f"{fg} ✗  {signals['fake_green_ids']}"
     if signals["revert_checked"]:
         streak_line = (f"{signals['trust_streak']}/{signals['streak_target']}"
-                       f"  ({signals['merges_total']} merges, {signals['reverts_seen']} reverts seen)")
+                       f"  ({signals['merges_total']} merges, {signals['reverts_seen']} reverts, "
+                       f"{signals['rolled_back']} rolled-back)")
     else:
         streak_line = (f"{signals['trust_streak']}/{signals['streak_target']} raw"
                        f"  ({signals['merges_total']} merges; revert-check skipped — pass --repo)")
