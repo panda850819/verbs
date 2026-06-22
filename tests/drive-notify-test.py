@@ -50,6 +50,20 @@ check("no gates, contacted today -> silent",
       dc.notify_decision([], COUNTS, SIG,
                          {"seen_gate_ids": [], "last_contact_date": "2026-06-22"}, "2026-06-22") is None)
 
+# --- streak_signals must pass the drive-log positional to drive-pulse (regression: it used
+#     to call `drive-pulse --json` with no log, which errors → the digest always read n/a) ---
+_pulse_stub = tempfile.NamedTemporaryFile("w", suffix=".py", delete=False).name
+with open(_pulse_stub, "w") as f:
+    f.write("import sys, json\n"
+            "if len(sys.argv) < 2 or sys.argv[1].startswith('-'): sys.exit(2)  # require the log positional\n"
+            "print(json.dumps({'goal_signals': {'trust_streak': 3, 'fake_green': 0, 'streak_target': 20}}))\n")
+dc.PULSE = _pulse_stub
+dc.AUDIT = tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False).name
+sig = dc.streak_signals()
+check("streak_signals passes the log → real signals (not n/a)", sig.get("trust_streak") == 3 and sig.get("fake_green") == 0)
+check("go_no_go renders a real streak, not 'n/a'", dc.go_no_go(sig).startswith("GO") and "3/20" in dc.go_no_go(sig))
+os.unlink(_pulse_stub)
+
 # --- notify() integration: state file + delivery shim ---
 dc.streak_signals = lambda: SIG                       # bypass the drive-pulse subprocess
 cap = tempfile.NamedTemporaryFile("w", suffix=".cap", delete=False).name

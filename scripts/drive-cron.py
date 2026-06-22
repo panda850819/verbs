@@ -46,6 +46,10 @@ NOTIFY_STATE = os.environ.get(
 PULSE = os.environ.get(
     "PSDRIVE_PULSE_BIN",
     os.path.expanduser("~/site/skills/pandastack/scripts/drive-pulse"))
+# the repo whose integration branch drive-pulse checks for reverts/rollbacks (the driven
+# project). Without it the streak can't be revert-checked; with the wrong log it can't be
+# computed at all (drive-pulse requires the drive-log as a positional arg).
+PULSE_REPO = os.environ.get("PSDRIVE_PULSE_REPO", os.path.expanduser("~/site/skills/pandastack"))
 
 
 def parse(out):
@@ -203,8 +207,10 @@ def streak_signals():
     """Goal signals (trust streak, fake-green) from drive-pulse, for the digest body.
     Best-effort: any error → {} so notify still fires with queue-only context."""
     try:
-        out = subprocess.run([sys.executable, PULSE, "--json"],
-                             capture_output=True, text=True, timeout=120)
+        args = [sys.executable, PULSE, AUDIT, "--json"]   # drive-pulse needs the log positional
+        if PULSE_REPO:
+            args += ["--repo", PULSE_REPO]
+        out = subprocess.run(args, capture_output=True, text=True, timeout=120)
         return (json.loads(out.stdout or "{}") or {}).get("goal_signals", {}) or {}
     except Exception:
         return {}
