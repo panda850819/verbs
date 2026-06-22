@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""drive-promote — T05a: manually promote psdrive/integration → main, LOCAL, never pushed (PRO-64).
+
+  drive-promote --repo R [--dry-run]
+
+The system's first write to main — and a HUMAN-invoked one (manual-default): the cron driver
+never calls this. It brings main up to the integration branch:
+  - if main already lies behind integration  → fast-forward main to it;
+  - if main has diverged (independent commits) → REFRESH integration toward main first by
+    MERGING main in (a merge commit keeps the earned auto-merge SHAs reachable — never a
+    rebase/reset, which would orphan them so drive-pulse reads the streak as rolled back,
+    PRO-58), then fast-forward.
+
+Nothing is ever pushed; the promote and refresh are entirely local refs. Fails closed: a
+dirty worktree, a missing/empty integration, or a non-clean refresh aborts and changes nothing.
+
+Run it when the cron driver is not mid-tick: it takes no lock, so a concurrent
+merge_to_integration could make the refresh's `worktree add` fail — which fails closed (errors,
+main untouched), never corrupts. Recovery: the pre-promote main SHA is printed; undo with
+`git -C <repo> reset --hard <sha>`. If a crash left a stale integration worktree, the next run
+self-heals via `worktree prune`; force it with `git -C <repo> worktree prune`.
+"""
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+
+INTEG = "psdrive/integration"
+
+
+def git_env():
+    env = os.environ.copy()
+    env.update({"GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
+                "GIT_CONFIG_SYSTEM": os.devnull})
+    return env
+
+
+def git(rd, *args):
+    return subprocess.run(["git", "-C", rd, *args], capture_output=True, text=True, env=git_env())
+
+
+def err(msg):
+    print("drive-promote: " + msg, file=sys.stderr)
+    return 1
+
+
+def refresh_integration(rd, main_branch):
+    """Merge main INTO integration in an isolated worktree (never touch the live main checkout),
+    so the earned auto-merge SHAs stay reachable. Returns None on success, else an error string."""
+    itmp = tempfile.mkdtemp(prefix="psdrive-promote-")
+    try:
+        git(rd, "worktree", "prune")
+        add = git(rd, "worktree", "add", itmp, INTEG)
+        if add.returncode != 0:
+            return "integration worktree add failed: " + (add.stderr or "").strip()[:140]
+        mg = subprocess.run(["git", "-C", itmp, "-c", "core.hooksPath=/dev/null",
+                             "merge", "--no-ff", "--no-edit", main_branch],
+                            capture_output=True, text=True, env=git_env())
+        if mg.returncode != 0:
+            subprocess.run(["git", "-C", itmp, "merge", "--abort"], capture_output=True, text=True, env=git_env())
+            return ("refresh (main → integration) not clean — aborted, no half-merge: "
+                    + (mg.stdout or mg.stderr or "").strip()[:140])
+        return None
+    finally:
+        git(rd, "worktree", "remove", "--force", itmp)
+        git(rd, "worktree", "prune")
+        shutil.rmtree(itmp, ignore_errors=True)
+
+
+def main(argv):
+    ap = argparse.ArgumentParser(prog="drive-promote")
+    ap.add_argument("--repo", required=True)
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args(argv)
+    rd = os.path.expanduser(a.repo)
+    if git(rd, "rev-parse", "--git-dir").returncode != 0:
+        return err(f"not a git repo: {rd}")
+
+    main_branch = git(rd, "symbolic-ref", "--quiet", "--short", "HEAD").stdout.strip() or "main"
+    if git(rd, "rev-parse", "--verify", "--quiet", INTEG).returncode != 0:
+        return err(f"no {INTEG} branch — nothing to promote")
+    if git(rd, "status", "--porcelain").stdout.strip():
+        return err("working tree not clean — commit/stash before promoting (the ff would clobber it)")
+
+    main_sha = git(rd, "rev-parse", main_branch).stdout.strip()
+    integ_sha = git(rd, "rev-parse", INTEG).stdout.strip()
+    if main_sha == integ_sha:
+        print(f"{main_branch} already == {INTEG} ({integ_sha[:9]}) — nothing to promote.")
+        return 0
+
+    diverged = git(rd, "merge-base", "--is-ancestor", main_branch, INTEG).returncode != 0
+    if a.dry_run:
+        how = "refresh (merge main into integration) + fast-forward" if diverged else "fast-forward"
+        print(f"[dry-run] would promote {INTEG} → {main_branch} via {how}; nothing pushed.")
+        return 0
+
+    if diverged:
+        e = refresh_integration(rd, main_branch)
+        if e:
+            return err(e)
+
+    ff = git(rd, "merge", "--ff-only", INTEG)         # main is now an ancestor of integration
+    if ff.returncode != 0:
+        return err("fast-forward of main failed: " + (ff.stderr or ff.stdout or "").strip()[:140])
+    new_sha = git(rd, "rev-parse", main_branch).stdout.strip()
+    print(f"promoted {INTEG} → {main_branch}: {main_sha[:9]} → {new_sha[:9]} (LOCAL, not pushed).")
+    print(f"recovery: git -C {rd} reset --hard {main_sha}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
