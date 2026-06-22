@@ -195,7 +195,7 @@ flowchart TB
 
 ## Multi-runtime arbitrage
 
-Claude Code (Opus) handles foreground reasoning. Codex CLI takes multi-file edits and batch tasks via `pdctx call`, spending OpenAI subscription quota instead of Claude tokens. The conductor picks a runtime per job — a deep-reasoning seam vs a mechanical batch — and dispatches it through the job contract against the same Tier 1 substrate.
+Claude Code (Opus) handles foreground reasoning. Codex CLI takes multi-file edits and batch tasks, spending OpenAI subscription quota instead of Claude tokens. The conductor picks a runtime per job — a deep-reasoning seam vs a mechanical batch — and dispatches it through the job contract against the same Tier 1 substrate.
 
 ## Runtime support
 
