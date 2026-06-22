@@ -59,6 +59,25 @@ The Linear board grouped by workflow state is the human-readable projection of t
 split: AUTO-phase columns (`Planning` / `Verifying` / `In Review`) are the loop's;
 gate-phase columns (`Needs Decision` / `Building` / `Done`) are Panda's.
 
+## Capability fence (C6) — widening what the daemon may touch is a human-gate
+
+What the daemon may do unattended is bounded by a small **capability fence**, and editing
+that fence is itself a privileged act that must never be auto-merged:
+
+- **`SAFE_SKILLS`** — the reversible-skill allowlist (`scripts/pandastack-drive`). Adding a
+  skill widens what AUTO may run.
+- **`config/high-blast-paths`** — the auto-merge deny-list. Narrowing it widens what may
+  auto-land. It is in its own list, so it is **self-protecting**.
+- **`--build-auto` / `--merge-auto` per project** — `~/.config/pandastack/drive-autonomy.json`,
+  outside any repo the driver builds, so the daemon physically cannot edit it; the flip stays
+  a by-hand human action gated on graduation (`drive-graduate --check`).
+
+Enforcement is structural, not convention: every fence file in the repo
+(`pandastack-drive`, `drive-cron.py`, `agent-worker`, `pslib.py`, `config/high-blast-paths`,
+the launchd plist) is in the high-blast policy, so any auto-build that edits one classifies
+high-blast → opens a human PR, never auto-merges. `tests/drive-capability-fence.sh` locks
+this in: it fails if a future edit drops a fence entry.
+
 ## Readiness — inputs present, not just safe-to-run
 
 The Auto-runs list answers "is it safe to run unattended." It does not answer "is
