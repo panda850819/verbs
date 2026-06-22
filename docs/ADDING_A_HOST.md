@@ -101,7 +101,7 @@ Decide:
 
 State explicitly:
 - what works today
-- what works only with pdctx or another bridge
+- what works only with a bridge or adapter
 - what is experimental
 - what is unsupported
 
@@ -195,8 +195,8 @@ Do not start with automation if the boundary is still unclear.
 ### Hermes
 - treat Hermes as two possible integrations:
   - direct skill host
-  - scheduler and dispatch trigger for `pdctx`
-- if a workflow depends on context injection, prefer `pdctx` and document it
+  - scheduler and dispatch trigger
+- if a workflow depends on context injection, document the mechanism
 
 ### OpenClaw
 - decide first whether the host should consume pandastack directly or spawn a companion coding runtime

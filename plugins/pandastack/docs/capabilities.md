@@ -97,7 +97,7 @@ wrong-version file.
 |---|---|---|---|
 | Claude Code | Supported | — | `unknown` (no probe) |
 | Codex CLI | Supported | Supported (primary) | `unknown` (no probe) |
-| Hermes | Supported (via pdctx) | — | `unsupported` if `hermes` not on PATH |
+| Hermes | Supported (direct skill import) | — | `unsupported` if `hermes` not on PATH |
 
 ## PRO-18 handoff
 
