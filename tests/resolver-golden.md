@@ -13,7 +13,7 @@ tags: [resolver, regression, b-test]
 
 For each test case:
 
-1. Inject prompt into a fresh Claude Code or Codex session with pdctx context loaded as specified.
+1. Inject prompt into a fresh Claude Code or Codex session with the context loaded as specified.
 2. Observe which skill fires (via Skill tool invocation log or PreToolUse hook trace).
 3. Compare to expected. Mark pass / fail.
 4. If fail: examine which skill fired instead, decide if it's a description fix, a missing trigger, or an actual regression.
@@ -25,51 +25,51 @@ Automated runner is a follow-up — manual eval acceptable for v1.1 cut.
 ### Direct slash invocation (12 cases)
 
 ```
-T01  /sprint fix hermes cron                    pdctx: personal:developer  → sprint
-T02  /sprint --quick rename one var             pdctx: personal:developer  → sprint (quick mode)
-T03  /office-hours product kill or pivot        pdctx: -                   → office-hours
-T04  /boardroom plans/q2-roadmap.md             pdctx: -                   → boardroom
-T05  /dojo "fix hermes weekly retro cron"       pdctx: personal:developer  → dojo
-T06  /prep "ship the rename batch"              pdctx: personal:developer  → dojo (alias /prep)
-T07  /grill 想做一個 points system              pdctx: -                   → grill (default mode)
-T08  /office-hours --quick points system        pdctx: -                   → office-hours (quick mode)
-T09  /review                                    pdctx: personal:developer  → review
-T10  /ship                                      pdctx: personal:writer     → write-ship (route by context)
-T11  /ship                                      pdctx: personal:developer  → ship (route by context)
-T11b /handover auth-refactor                    pdctx: personal:developer  → handover (sync)
-T11c 把剩下的丟給 codex 做                        pdctx: personal:developer  → handover
-T12  /retro week                                pdctx: -                   → retro-week
+T01  /sprint fix hermes cron                    context: personal:developer  → sprint
+T02  /sprint --quick rename one var             context: personal:developer  → sprint (quick mode)
+T03  /office-hours product kill or pivot        context: -                   → office-hours
+T04  /boardroom plans/q2-roadmap.md             context: -                   → boardroom
+T05  /dojo "fix hermes weekly retro cron"       context: personal:developer  → dojo
+T06  /prep "ship the rename batch"              context: personal:developer  → dojo (alias /prep)
+T07  /grill 想做一個 points system              context: -                   → grill (default mode)
+T08  /office-hours --quick points system        context: -                   → office-hours (quick mode)
+T09  /review                                    context: personal:developer  → review
+T10  /ship                                      context: personal:writer     → write-ship (route by context)
+T11  /ship                                      context: personal:developer  → ship (route by context)
+T11b /handover auth-refactor                    context: personal:developer  → handover (sync)
+T11c 把剩下的丟給 codex 做                        context: personal:developer  → handover
+T12  /retro week                                context: -                   → retro-week
 ```
 
 ### Old-name aliases — 90-day grace (13 cases)
 
 ```
-T13  /morning-briefing                          pdctx: personal:writer     → brief-morning (alias)
-T14  /weekly-retro-prep                         pdctx: personal:writer     → FAIL (retro-prep-week was cut in v2.0.0; expect "skill not found")
-T15  /feed-curator                              pdctx: personal:knowledge-manager  → curate-feeds (alias)
-T16  /content-write                             pdctx: personal:writer     → write (alias)
-T17  /tool-browser open https://example.com     pdctx: -                   → agent-browser (alias, v1.4.0)
-T18  /slowmist-agent-security check this repo   pdctx: -                   → gatekeeper (alias)
-T19  /harness-survey scan public ecosystem      pdctx: -                   → scout (alias)
-T19a /tool-bird read tweet                      pdctx: -                   → bird (alias, v1.4.0)
-T19b /tool-slack search                         pdctx: -                   → slack (alias, v1.4.0)
-T19c /tool-notion get page                      pdctx: -                   → notion (alias, v1.4.0)
-T19d /tool-deepwiki repo                        pdctx: -                   → deepwiki (alias, v1.4.0)
-T19e /tool-summarize https://...                pdctx: -                   → summarize (alias, v1.4.0)
-T19f /agent-browser ...                         pdctx: -                   → agent-browser (no alias; canonical name kept)
+T13  /morning-briefing                          context: personal:writer     → brief-morning (alias)
+T14  /weekly-retro-prep                         context: personal:writer     → FAIL (retro-prep-week was cut in v2.0.0; expect "skill not found")
+T15  /feed-curator                              context: personal:knowledge-manager  → curate-feeds (alias)
+T16  /content-write                             context: personal:writer     → write (alias)
+T17  /tool-browser open https://example.com     context: -                   → agent-browser (alias, v1.4.0)
+T18  /slowmist-agent-security check this repo   context: -                   → gatekeeper (alias)
+T19  /harness-survey scan public ecosystem      context: -                   → scout (alias)
+T19a /tool-bird read tweet                      context: -                   → bird (alias, v1.4.0)
+T19b /tool-slack search                         context: -                   → slack (alias, v1.4.0)
+T19c /tool-notion get page                      context: -                   → notion (alias, v1.4.0)
+T19d /tool-deepwiki repo                        context: -                   → deepwiki (alias, v1.4.0)
+T19e /tool-summarize https://...                context: -                   → summarize (alias, v1.4.0)
+T19f /agent-browser ...                         context: -                   → agent-browser (no alias; canonical name kept)
 ```
 
 ### Natural language triggers (8 cases)
 
 ```
-T20  "is this MCP safe to install"              pdctx: -                   → gatekeeper
-T21  "check this github repo for me"            pdctx: -                   → gatekeeper
-T22  "I want to think out loud about X"         pdctx: -                   → office-hours
-T23  "let me prep before I start"               pdctx: personal:developer  → dojo
-T24  "review this plan with all the leads"      pdctx: -                   → boardroom
-T25  "what would the staff engineer say about"  pdctx: -                   → eng-lead (skill mode)
-T26  "scout other harnesses for ideas"          pdctx: -                   → scout
-T27  "morning briefing into today's note"       pdctx: personal:writer     → brief-morning
+T20  "is this MCP safe to install"              context: -                   → gatekeeper
+T21  "check this github repo for me"            context: -                   → gatekeeper
+T22  "I want to think out loud about X"         context: -                   → office-hours
+T23  "let me prep before I start"               context: personal:developer  → dojo
+T24  "review this plan with all the leads"      context: -                   → boardroom
+T25  "what would the staff engineer say about"  context: -                   → eng-lead (skill mode)
+T26  "scout other harnesses for ideas"          context: -                   → scout
+T27  "morning briefing into today's note"       context: personal:writer     → brief-morning
 ```
 
 ### Capability-probe degradation (3 cases)
