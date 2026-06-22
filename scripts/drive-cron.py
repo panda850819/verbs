@@ -151,9 +151,17 @@ def run_one(args, ts, label=None):
     with open(detail, "a", encoding="utf-8") as f:
         f.write(f"\n===== {ts}{tag} =====\n{text}\n")
 
-    rec = {"ts": ts, **rec, "detail": detail}
+    rec = {"ts": ts, **rec, "detail": detail, "merge_auto": ("--merge-auto" in args)}
     if label is not None:
         rec["invocation"] = label
+    # PRO-61 invariant: with auto-merge OFF, the driver must NEVER land a merge. Stamp
+    # merge_auto on every audit line so a breach is one grep (merge_auto==false AND any
+    # executed[].merged), and surface it loudly the moment it happens.
+    if not rec["merge_auto"]:
+        leaked = [e.get("id") for e in (rec.get("executed") or []) if e.get("merged")]
+        if leaked:
+            rec["invariant_violation"] = "merged with --merge-auto OFF: " + ",".join(map(str, leaked))
+            print(f"{ts}{tag}  INVARIANT VIOLATION — {rec['invariant_violation']}", file=sys.stderr)
     with open(AUDIT, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
@@ -245,7 +253,7 @@ def notify(records, today, state_path=None):
     """Aggregate the tick's invocations, decide, deliver once, persist state. seen_gate_ids
     is rewritten every tick (even when silent) so a resolved-then-reappearing gate re-fires;
     last_contact_date advances only when something was actually sent."""
-    gate_ids, counts = [], {"auto": 0, "gate": 0, "blocked": 0, "proposals": 0}
+    gate_ids, counts, violations = [], {"auto": 0, "gate": 0, "blocked": 0, "proposals": 0}, []
     for r in records:
         if not r:
             continue
@@ -254,8 +262,17 @@ def notify(records, today, state_path=None):
         counts["gate"] += r.get("gate") or 0
         counts["blocked"] += r.get("blocked") or 0
         counts["proposals"] += sum(1 for e in (r.get("executed") or []) if e.get("advance"))
+        if r.get("invariant_violation"):
+            violations.append(r["invariant_violation"])
     gate_ids = sorted(set(gate_ids))
     state = load_notify_state(state_path)
+    # PRO-61: an invariant breach (a merge with auto-merge off) is urgent — alert every tick
+    # it persists, bypassing the gate/digest cadence. A breach must never be silent.
+    if violations:
+        deliver("🚨 drive INVARIANT BREACH: " + " | ".join(violations))
+        state["last_contact_date"], state["seen_gate_ids"] = today, gate_ids
+        save_notify_state(state, state_path)
+        return ("alert", violations)
     decision = notify_decision(gate_ids, counts, streak_signals(), state, today)
     if decision:
         deliver(decision[1])
