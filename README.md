@@ -1,8 +1,8 @@
 # pandastack
 
-Personal context-aware AI operator OS — one substrate, four runtimes, no vendor lock-in.
+Personal context-aware AI operator OS — one substrate, three runtimes, no vendor lock-in.
 
-I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Personas are replaceable. Context recipes ship as TOML. Same content runs across Claude Code, Codex CLI, Gemini CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
+I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Personas are replaceable. Context recipes ship as TOML. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
 The stack is **26 skills** focused on dev, writing, and knowledge workflows, tiered into 24 core (markdown-only, fresh-clone runnable) and 2 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
 
@@ -141,28 +141,35 @@ You said "RSS digest tool". The agent reframed it as "curation system" — liste
 
 ## Architecture
 
-The **Tier 1 substrate** is runtime-agnostic: identity, voice, skill content, knowledge vault, and personal CLI tools live on disk. All runtimes read the same `AGENTS.md` before acting. No vendor lock-in at the data layer.
+pandastack is three tiers: a runtime-agnostic substrate, interchangeable runtimes, and an orchestration layer that drives them as black-box workers — never merging their internal loops.
 
-The **Tier 2 runtimes** (Claude Code, Codex CLI, Gemini CLI) are thin consumers of Tier 1. Each gets a slim shim in its dotdir (`~/.claude/`, `~/.codex/`, `~/.gemini/`). Skills, flows, and context recipes are identical across runtimes; a per-CLI tool-name mapping handles syntax differences.
+The **Tier 1 substrate** is runtime-agnostic: identity, voice, skill content, knowledge vault, worktrees, and the job schema live on disk. All runtimes read the same `AGENTS.md` before acting. No vendor lock-in at the data layer.
 
-The **Tier 3 schedulers** (launchd, Hermes, Claude CronCreate) orchestrate Tier 2. Hermes spawns Codex on OpenAI quota for overnight cron jobs, preserving Claude token budget for foreground work. All three layers share the same Tier 1 substrate — no duplication, no drift.
+The **Tier 2 runtimes** (Claude Code, Codex CLI) are thin, interchangeable consumers of Tier 1. Each gets a slim shim in its dotdir (`~/.claude/`, `~/.codex/`); skills, flows, and context recipes are identical across runtimes, with a per-CLI tool-name mapping for syntax. The orchestrator runs each as a black-box worker behind a job contract (job dir + prompt + output + diff + verifier) — shared substrate, not shared behavior.
+
+The **Tier 3 orchestration** is two layers split by reliability, not feature:
+
+- **launchd** is the bedrock heartbeat — dumb, OS-level, zero-token, reboot-surviving. It fires the deterministic jobs and the watchdog that checks everything above it. The watchdog has to live here: one that depends on the system it watches can't catch a silent wedge.
+- **Hermes** is the conductor — the judgment and conversation a heartbeat can't carry. It reads a personal Linear workspace as the work-breakdown store, reduces it to "today's most urgent" (`pandastack-linear-reduce`), proposes over Telegram, and advances tickets (`pandastack-linear-advance`), with `Needs Decision` as a hard, machine-enforced human gate. Hermes inherits the Codex model. The unattended executor that polls a ready ticket and dispatches a worker is a separate Claude cron (planned), isolated so its failure never takes the conductor down.
+
+Linear is the bus: the conductor writes work in, the executor reads ready work out. Every layer shares the same Tier 1 substrate — no duplication, no drift.
 
 ```mermaid
 flowchart TB
     User((User))
 
-    subgraph T3 [Tier 3 — Schedulers]
-        direction LR
-        launchd[launchd / system cron]
-        hermes[Hermes · OpenAI quota]
-        cron[Claude CronCreate]
+    subgraph T3 [Tier 3 — Orchestration]
+        direction TB
+        launchd[launchd · bedrock heartbeat + watchdog]
+        hermes[Hermes · conductor · reduce then propose · Codex model]
+        exec[Claude cron · unattended executor · planned]
+        linear[(Linear · WBS bus · Needs Decision gate)]
     end
 
-    subgraph T2 [Tier 2 — Runtimes]
+    subgraph T2 [Tier 2 — Runtimes · black-box workers]
         direction LR
         cc[Claude Code]
         cx[Codex CLI]
-        gem[Gemini CLI · not wired]
     end
 
     subgraph T1 [Tier 1 — Substrate]
@@ -170,20 +177,25 @@ flowchart TB
         agents[AGENTS.md · identity / voice / routing]
         skills[pandastack · skills / flows / contexts]
         knowledge[knowledge vault · SSOT]
+        job[worktrees · job schema]
         cli[personal CLI tools · gog · bird · pdctx · ...]
     end
 
-    User --> T3
-    User --> T2
-    T3 --> T2
+    User --> hermes
+    launchd -. fires + watches .-> hermes
+    launchd -. fires + watches .-> exec
+    hermes -- writes work --> linear
+    exec -- reads ready --> linear
+    hermes -- job contract --> T2
+    exec -- job contract --> T2
     T2 --> T1
 
-    style gem stroke-dasharray: 5 5
+    style exec stroke-dasharray: 5 5
 ```
 
 ## Multi-runtime arbitrage
 
-Claude Code (Opus) handles foreground reasoning where depth matters. Codex CLI takes multi-file edits and batch tasks via `pdctx call`, spending OpenAI subscription quota instead of Claude tokens. Hermes schedules overnight Codex jobs against the same Tier 1 substrate. Gemini CLI is in Tier 2 but not yet wired; the planned use case is long-document distill passes requiring 1M-token context.
+Claude Code (Opus) handles foreground reasoning. Codex CLI takes multi-file edits and batch tasks, spending OpenAI subscription quota instead of Claude tokens. The conductor picks a runtime per job — a deep-reasoning seam vs a mechanical batch — and dispatches it through the job contract against the same Tier 1 substrate.
 
 ## Runtime support
 
@@ -195,7 +207,7 @@ Host design notes live in [`docs/ADDING_A_HOST.md`](docs/ADDING_A_HOST.md).
 |---|---|---|
 | Claude Code | First-class | Claude plugin marketplace, local repo or GitHub repo |
 | Codex CLI | Supported | Native skill discovery via clone + symlink |
-| Hermes | Supported as scheduler / host, not as first-class packaged runtime yet | Use `pdctx` for context dispatch, or import/symlink selected skills into `~/.hermes/skills/` |
+| Hermes | Supported as conductor / host, not as first-class packaged runtime yet | Use `pdctx` for context dispatch, or import/symlink selected skills into `~/.hermes/skills/` |
 | OpenClaw | Planned / experimental | Intended shape is a skill package, not shipped as a first-class installer in this repo yet |
 
 ## Install
@@ -415,7 +427,7 @@ Without pdctx, no telemetry runs at all — pandastack public surface emits no e
 
 ## Cron jobs
 
-The public package no longer ships cron-driven skills — `/brief-morning` and `/evening-distill` moved to the `pandastack-private` overlay in v2.2.0 (they require the private `gog` CLI). If you have the overlay installed, schedule them with whichever Tier 3 scheduler you prefer (launchd plist, system crontab, Hermes, Claude CronCreate):
+The public package no longer ships cron-driven skills — `/brief-morning` and `/evening-distill` moved to the `pandastack-private` overlay in v2.2.0 (they require the private `gog` CLI). If you have the overlay installed, schedule them with whichever Tier 3 orchestration mechanism you prefer (launchd plist, system crontab, or Hermes):
 
 | Job | Schedule | Skill (private overlay) |
 |---|---|---|
