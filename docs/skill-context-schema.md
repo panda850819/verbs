@@ -1,8 +1,9 @@
 # Skill Context Schema
 
 Pandastack skills may declare static context metadata in `SKILL.md`
-frontmatter. `pdctx skill-validate` reads this metadata so a later
-PreToolUse firewall can derive a per-skill allowlist before runtime.
+frontmatter. These fields are **advisory audit metadata** documenting a skill's
+intended access. The L5 PreToolUse firewall that would have consumed them was
+retired with the `pdctx` overlay; nothing reads them at runtime.
 
 ## Fields
 
@@ -62,8 +63,8 @@ paths are only allowed for `file:` entries. Quote `**` in YAML when needed:
 
 ## vault: Resolution
 
-`vault:` always resolves against the **primary vault root** of the active
-pdctx context (default: `~/site/knowledge/obsidian-vault`). Patterns are
+`vault:` always resolves against the **primary vault root**
+(default: `~/site/knowledge/obsidian-vault`). Patterns are
 joined with that root at runtime: `vault: Blog/_daily/*.md` expands to
 `<vault-root>/Blog/_daily/*.md`.
 
@@ -76,9 +77,8 @@ forbids:
 ```
 
 Using `vault: work-vault/**` in `forbids` is a common mistake — it expands
-to `<primary-vault>/work-vault/**` which typically matches nothing. `pdctx
-skill-validate` warns when a `vault:` entry carries an absolute path (likely
-the author intended `file:` instead). Quote `**` in YAML when needed:
+to `<primary-vault>/work-vault/**` which typically matches nothing; use `file:`
+with an absolute path instead. Quote `**` in YAML when needed:
 
 ```yaml
 reads:
@@ -88,7 +88,7 @@ reads:
 ## Defaults
 
 All fields are optional for backward compatibility. A skill with no context
-metadata is still valid. `pdctx` treats it as:
+metadata is still valid. The defaults are:
 
 ```yaml
 domain: shared
@@ -98,7 +98,7 @@ writes: []
 forbids: []
 ```
 
-`pdctx skill-validate` warns on missing metadata instead of failing.
+Missing metadata is not an error — these fields are advisory.
 
 ## Migration
 
@@ -107,8 +107,9 @@ body explicitly reads, writes, executes, or forbids. If a resource is unclear,
 omit it and leave the skill in a less restrictive state until the owner
 reviews it.
 
-## Track D Link
+## Status — retired
 
-Track D Layer 5 will consume `SkillFrontmatter.{reads,writes,forbids}` at
-PreToolUse time to enforce tool-argument allowlists. The schema is intentionally
-static so the firewall can decide before the tool call happens.
+The L5 firewall that would have consumed `reads` / `writes` / `forbids` at
+PreToolUse time was implemented in the `pdctx` overlay, now removed. These
+fields remain as advisory documentation of intent; nothing enforces them. See
+[docs/firewall-l5.md](firewall-l5.md).

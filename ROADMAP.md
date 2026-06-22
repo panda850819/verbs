@@ -11,7 +11,7 @@ What v1 is:
 - 38 skills (27 core / 5 ext / 6 personal) covering dev / knowledge / writing / work / research / retro / decision lifecycles
 - 5 personas (eng / design / ceo / ops / product) replaceable per project
 - 4 personal contexts
-- 5-layer firewall (L1 voice / L2 fs chmod / L3 MCP deny / L4 context recipe / L5 per-skill allowlist)
+- advisory skill-frontmatter metadata (`reads` / `writes` / `forbids`); firewall enforcement retired with the pdctx overlay
 - Multi-CLI runtime support: Claude Code first-class, Codex CLI native, Hermes via direct skill import
 
 What v1 is **not**:
@@ -31,8 +31,8 @@ Scope:
 
 - **Onboarding scaffold** `[partial — shipped in v1.3.0 / v1.4.0; env-var requirement removed in v2.0.1; brain-index assumption removed in v2.1.0]`. Bootstrap script (`scripts/bootstrap.sh`) + manifest-driven tier model (`plugins/pandastack/manifest.toml`) replaced the previous 4-section README install dance. Skills derive vault path from cwd and Google account from `gog` defaults — no env vars to set, no brain index to bootstrap. Remaining for v2.x: vault scaffolding (auto-create `Inbox/`, `Blog/_daily/`, `docs/learnings/atoms/` if absent), context picker, first-session walkthrough.
 - **Fresh A-user dogfood criteria** (B-phase entry criterion, not a current-cut gate). When distribution (B) is entered, real-user validation defines readiness: 3 fresh A-class users complete install + 1 week of daily use without author hand-holding; below that, the public cut stays pre-release. Under solo-first this bar does NOT gate the personal-first version — it is the entry criterion for the distribution phase. v1.3.0+ structural fix opens the verification window for when B begins.
-- **Public capability-probe defaults** `[partial — shipped in v1.3.0]`. Manifest tier metadata + bootstrap.sh probe table now route fresh users through "what runs now / what to install / what is private overlay" rather than a "you're on your own" dump. Remaining for v2: capability-probe itself (the in-skill `lib/capability-probe.md` invocation) needs to consume manifest data and emit the same actionable framing rather than the current generic gap dump.
-- **L5 firewall hook**. README v1.4.0 was honest about L5 currently being frontmatter-only metadata with no runtime enforcement. v2 should ship the actual PreToolUse hook that reads `reads` / `writes` / `forbids` / `classification` from each SKILL.md and enforces them — or formally retire L5 as a design choice and update the architecture doc accordingly.
+- **Public capability-probe defaults** `[partial — shipped in v1.3.0]`. Manifest tier metadata + bootstrap.sh probe table now route fresh users through "what runs now / what to install" rather than a "you're on your own" dump. Remaining for v2: capability-probe itself (the in-skill `lib/capability-probe.md` invocation) needs to consume manifest data and emit the same actionable framing rather than the current generic gap dump.
+- **L5 firewall** `[retired]`. L5 was never enforced on the public surface (frontmatter-only metadata); the enforcing hook lived in the now-removed `pdctx` overlay. Formally retired — the fields stay as advisory audit metadata; the only active guard is `pretooluse-destructive-guard.sh`.
 
 Out of v2 scope (deferred or rejected):
 

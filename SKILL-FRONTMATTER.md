@@ -4,7 +4,7 @@
 
 ## Why this exists
 
-Stack content (skills) and stack framework (pdctx) are different layers. The frontmatter is the contract between them: pandastack declares what each skill is, pdctx and downstream runtimes (Claude Code, Codex CLI, future tools) read it to surface, validate, and route.
+The frontmatter is the contract between a skill and the runtimes that consume it: pandastack declares what each skill is, and downstream runtimes (Claude Code, Codex CLI, future tools) read it to surface, validate, and route.
 
 Without a contract, the `name` field drifts (`pandastack:X` / `ps-X` / `X` all coexist in the current corpus) and optional fields multiply ad-hoc. Drift makes the resolver brittle and migration costly.
 
@@ -60,14 +60,12 @@ Other top-level keys are not warned and not blocked. Stacks may extend.
 
 `reads`, `writes`, `forbids`, `domain`, and `classification` are optional
 per-skill fields originally specified for the Layer 5 firewall (see
-[docs/firewall-l5.md](docs/firewall-l5.md)). On the public pandastack surface
-they are **advisory audit metadata only** — nothing in the public stack enforces
-them at PreToolUse time. The enforcing hook ships in the private `pdctx` overlay;
-the public firewall is 4 enforced layers (L1–L4) plus this 1 advisory layer (L5).
-Authors may declare them to document intent and feed the overlay, but must not
-rely on them as a security boundary on the public surface. High-blast Bash
-commands are hard-blocked by the separate global `pretooluse-destructive-guard.sh`,
-not by these fields.
+[docs/firewall-l5.md](docs/firewall-l5.md)). They are **advisory audit metadata
+only** — nothing reads or enforces them at runtime. The firewall that consumed
+them was implemented in the now-retired `pdctx` overlay; no enforcement remains.
+Authors may still declare them to document intent, but must not treat them as a
+security boundary. The only active guard is the separate global
+`pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands.
 
 ## HOT / COLD classification
 
@@ -92,7 +90,7 @@ Validators may emit informational signals on long descriptions but should not wa
 
 ## Validation
 
-`pdctx skill-validate <stack-path>` checks each `skills/*/SKILL.md` and `plugins/*/skills/*/SKILL.md` against this spec.
+`bash scripts/lint-manifest-sync.sh` checks each `skills/*/SKILL.md` and `plugins/*/skills/*/SKILL.md` against this spec.
 
 Status levels:
 
@@ -100,8 +98,8 @@ Status levels:
 - **warn** — known drift (`name` carries `ps-` or `pandastack:` prefix, `name` mismatches folder)
 - **fail** — no frontmatter, or required field missing
 
-`pdctx publish-check` blocks publication when any `fail` is detected. `warn` is reported but does not block.
+A `fail` should block publication; `warn` is reported but does not block. (The `pdctx publish-check` gate that enforced this was retired with the overlay.)
 
 ## Migration
 
-Existing skills are not auto-rewritten. Run `pdctx skill-validate` to see drift, fix when convenient. A future `--fix` mode may auto-rewrite drift; this spec does not require it.
+Existing skills are not auto-rewritten. Run `bash scripts/lint-manifest-sync.sh` to see drift, fix when convenient. A future `--fix` mode may auto-rewrite drift; this spec does not require it.
