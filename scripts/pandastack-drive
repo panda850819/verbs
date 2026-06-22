@@ -509,6 +509,46 @@ def retire_branch(rd, branch):
     subprocess.run(["git", "-C", rd, "branch", "-D", branch], capture_output=True, text=True)
 
 
+def branch_landed(rd, branch):
+    """True if a branch's work already landed — its tip is reachable from the repo's default
+    branch or the integration branch (auto-merge or a human PR). Its commits are preserved
+    elsewhere, so retiring the branch loses nothing. Conservative by design: a SQUASH-merge
+    rewrites the tip, so this reads False and the orphan is KEPT (never a false-positive →
+    never data loss); such a branch is cleaned up by a work-order fingerprint rotation or by
+    hand. The default branch is read from HEAD (the driver runs with rd on it)."""
+    head = subprocess.run(["git", "-C", rd, "symbolic-ref", "--quiet", "--short", "HEAD"],
+                          capture_output=True, text=True).stdout.strip() or "main"
+    for target in (head, "psdrive/integration"):
+        if subprocess.run(["git", "-C", rd, "rev-parse", "--verify", "--quiet", target],
+                          capture_output=True, text=True).returncode != 0:
+            continue
+        if subprocess.run(["git", "-C", rd, "merge-base", "--is-ancestor", branch, target],
+                          capture_output=True, text=True).returncode == 0:
+            return True
+    return False
+
+
+def reconcile_orphan_branches(rd, active_ids):
+    """PRO-67: retire psdrive/<ISSUE> branches whose work already LANDED and whose issue is no
+    longer an active queue item. BOTH are required — landed so deletion loses nothing; inactive
+    so it is not rebuilt this/next tick (retiring a still-active branch would re-merge it). Never
+    touches an unmerged branch (its work isn't preserved → data loss) or an awaiting-review
+    active branch. Returns the retired branch names. This is the queue-aware sweep PRO-56's
+    per-issue guard could not safely do."""
+    out = subprocess.run(["git", "-C", rd, "for-each-ref", "--format=%(refname:short)",
+                          "refs/heads/psdrive/"], capture_output=True, text=True).stdout
+    retired = []
+    for br in out.split():
+        if br == "psdrive/integration":
+            continue
+        if br[len("psdrive/"):] in active_ids:
+            continue                          # still awaiting review / would be rebuilt → keep
+        if branch_landed(rd, br):
+            retire_branch(rd, br)             # work preserved elsewhere → safe to clear the orphan
+            retired.append(br)
+    return retired
+
+
 def stable_green(wt, verify_script, reruns=None):
     """Re-run the acceptance in the build worktree to confirm a green is REPRODUCIBLE, not a
     lucky tick (PRO-57). True only if every extra run is green. Fail-safe: any non-green,
@@ -1115,6 +1155,16 @@ def main():
                 print(f"    → ready to advance (run it yourself): {r['advance']}")
         if n == 0:
             print("  (no AUTO items ran)")
+        # PRO-67: queue-aware orphan sweep on the driven repo. An issue still anywhere in the
+        # queue (any phase) is active → its branch is kept; only a LANDED branch of an issue
+        # that has left the queue (advanced to terminal / gone) is retired. Scoped to --only,
+        # the project whose repo accrues psdrive branches.
+        if args.only and PROJECT_REPO.get(args.only):
+            rd = os.path.expanduser(PROJECT_REPO[args.only])
+            active = {re.sub(r"[^A-Za-z0-9._-]", "-", str(e["id"]))
+                      for e in q["AUTO"] + q["GATE"] + q["BLOCKED"]}
+            for br in reconcile_orphan_branches(rd, active):
+                print(f"    retired orphan branch {br} (work landed, issue inactive)")
         # Structured ledger handoff (LG, F-K/F-L): one machine-readable line the
         # drive-cron wrapper appends to drive-log.jsonl verbatim, instead of
         # regex-parsing this human stdout. Carries verify_ran/verify_ok/verify_cmd
