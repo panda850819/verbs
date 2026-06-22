@@ -25,7 +25,7 @@ status: in-progress
 >   └─ T05a 手動 promote + reset → T05b auto-promote + rollback(棘輪後)
 > T06 defer
 > ```
-> **啟用閘**:auto-merge(T03)/ promote(T05b)出廠 gated OFF;連 20 筆乾淨(host-verified + 零 fake-green + 零事後 revert)棘輪解鎖(boundary #1/#3)。build 維持 `--build-auto --only` opt-in(boundary #2)。
+> **啟用閘**:auto-merge **到 integration**(T03)是賺 streak 的訓練輪——靠 `~/.config/pandastack/drive-autonomy.json` 的 `merge_auto` opt-in 開啟,**不是** gated on the streak(streak 只由 auto-merge 產生,gate 住會死鎖)。它只進 local integration,從不碰 main。真正的棘輪閘是 promote **到 main**(T05b):連 20 筆乾淨(host-verified + 零 fake-green + 零事後 revert + 零 rollback)且 `drive-graduate --check` 過,才解凍遠端寫 default branch(boundary #3)。在那之前 integration→main 是 `drive-promote` 手動(T05a)。build 維持 `--build-auto --only` opt-in(boundary #2)。
 
 ## Phase 0 — done
 
