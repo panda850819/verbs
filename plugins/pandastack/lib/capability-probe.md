@@ -25,7 +25,7 @@ Run all 6 checks. Each returns `ok / missing / broken / unknown`.
 
 ```
 [1] AGENTS substrate    — `~/.agents/AGENTS.md` exists, readable, non-empty
-[2] vault root          — cwd looks like a vault (has Inbox/ or .obsidian/), or vault path from pdctx context exists
+[2] vault root          — cwd looks like a vault (has Inbox/ or .obsidian/)
 [3] lib/ files          — required lib/ refs for THIS skill exist (read frontmatter `reads:` to determine list)
 [4] persona skills      — if skill chains personas, check `skills/{persona}/SKILL.md` exists in plugin
 [5] cli tools           — domain-specific CLIs (gog, slack, bird, notion, defuddle) only if frontmatter `reads: cli: <name>`

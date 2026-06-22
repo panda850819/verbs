@@ -28,7 +28,7 @@ Vault hygiene (orphans / stale / superseded / dead redirects) is a direct file s
 |---|---|---|
 | `pandastack:write` | Voice-aware drafting + slop detection | help me write |
 
-`brief-morning` and `evening-distill` (daily cadence) moved to `pandastack-private` overlay in v2.2.0 — they require private CLIs (gog) and are personal-tier.
+`brief-morning` and `evening-distill` (daily cadence) were cut from the public package in v2.2.0 — they require private CLIs (gog).
 
 ### Dev workflow
 
@@ -66,7 +66,7 @@ For greenfield design (DB schema / service topology / ADRs), use `eng-lead` pers
 
 `agent-browser` skill archived 2026-06-08 (duplicate of the npm CLI's own docs); `qa` still drives the CLI directly.
 
-Private CLI wrappers (`bird` for X/Twitter, plus `notion` and `slack` ops) live in `pandastack-private` overlay or are replaced by Claude.ai MCP servers. v2.2.0 deleted the public `notion` and `slack` skills — use the Notion / Slack MCP via OAuth instead (token doesn't sit on disk).
+Private CLI wrappers (`bird` for X/Twitter) are not in the public package; `notion` and `slack` ops are replaced by Claude.ai MCP servers. v2.2.0 deleted the public `notion` and `slack` skills — use the Notion / Slack MCP via OAuth instead (token doesn't sit on disk).
 
 ### Persona thinking frames
 
@@ -96,9 +96,9 @@ v2.2.0 cut `think-like-naval` and `think-like-alan-chan` — replicating someone
 
 ## Private supplement
 
-Some lifecycles (work alert triage, on-chain trading research, cadence skills like `brief-morning` / `evening-distill` / `bird` / `curate-feeds`) ship as a private overlay outside this index. If you have access to the private stack, its `RESOLVER.md` lists those skills with the same table format. The public index above stays self-contained: anything you can read here, you can install from this repo alone.
+Some lifecycles (work alert triage, on-chain trading research, cadence skills like `brief-morning` / `evening-distill` / `bird` / `curate-feeds`) are not in this public index — they need private CLIs. The public index above stays self-contained: anything you can read here, you can install from this repo alone.
 
-v2.2.0 moved 4 personal-tier skills (bird, brief-morning, evening-distill, curate-feeds) from this manifest to `pandastack-private/skills/`. They require private CLIs and could not run for public users anyway.
+v2.2.0 cut 4 skills (bird, brief-morning, evening-distill, curate-feeds) from this manifest. They require private CLIs and could not run for public users anyway.
 
 ---
 
@@ -184,9 +184,9 @@ What used to be `flows/<name>.md` is gone. Reasons:
 
 ---
 
-## Contexts (8 recipes for pdctx)
+## Contexts (8 recipes)
 
-Each `.toml` file in `contexts/` binds a flow + persona + skill subset to a specific identity. Read by the future pdctx loader.
+Each `.toml` file in `contexts/` binds a flow + persona + skill subset to a specific identity. Loaded via `lib/persona-frame.md`.
 
 | Context | Identity | Private |
 |---|---|---|
@@ -273,4 +273,4 @@ The following skill names were renamed/merged across versions. Old names still r
 | `slowmist-agent-security` | `gatekeeper` | v1.1 | expired 2026-08-04 |
 | `weekly-retro-prep` | `retro-prep-week` (then deleted v2.0.0) | v1.1 → cut v2.0.0 | n/a |
 
-If you have hardcoded old names in cron jobs, launchd plists, Hermes manifests, or pdctx context recipes, update before the grace dates above.
+If you have hardcoded old names in cron jobs, launchd plists, Hermes manifests, or context recipes, update before the grace dates above.
