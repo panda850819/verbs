@@ -40,6 +40,12 @@ MAX = os.environ.get("PSDRIVE_MAX", "1")
 CONFIG = os.environ.get(
     "PSDRIVE_AUTONOMY_CONFIG",
     os.path.expanduser("~/.config/pandastack/drive-autonomy.json"))
+NOTIFY_STATE = os.environ.get(
+    "PSDRIVE_NOTIFY_STATE",
+    os.path.expanduser("~/.local/state/pandastack/drive-notify.json"))
+PULSE = os.environ.get(
+    "PSDRIVE_PULSE_BIN",
+    os.path.expanduser("~/site/skills/pandastack/scripts/drive-pulse"))
 
 
 def parse(out):
@@ -155,6 +161,108 @@ def run_one(args, ts, label=None):
     print(f"{ts}{tag}  auto={rec['auto']} gate={rec['gate']} blocked={rec['blocked']} "
           f"ran={len(rec['executed'])} proposals={len(adv)}"
           + (f" ERROR={rec['error']}" if rec.get("error") else ""))
+    return rec
+
+
+# ---------------------------------------------------------------------------
+# C4 notify: the cron is otherwise silent. Fire immediately on a NEW human-gate;
+# otherwise a once-a-day digest is the floor; otherwise stay silent. Delivery is a
+# thin env-configured shim so the decision stays pure and offline-testable.
+# ---------------------------------------------------------------------------
+
+def load_notify_state(path=None):
+    """Last-tick notify memory: {seen_gate_ids, last_contact_date}. Any failure → {}
+    (a missing/broken state file must not wedge the cron — it just re-pings)."""
+    try:
+        with open(path or NOTIFY_STATE, encoding="utf-8") as f:
+            s = json.load(f)
+        return s if isinstance(s, dict) else {}
+    except (FileNotFoundError, ValueError, OSError):
+        return {}
+
+
+def save_notify_state(state, path=None):
+    path = path or NOTIFY_STATE
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False)
+    except OSError as e:
+        print(f"drive-cron: could not save notify state: {e}", file=sys.stderr)
+
+
+def streak_signals():
+    """Goal signals (trust streak, fake-green) from drive-pulse, for the digest body.
+    Best-effort: any error → {} so notify still fires with queue-only context."""
+    try:
+        out = subprocess.run([sys.executable, PULSE, "--json"],
+                             capture_output=True, text=True, timeout=120)
+        return (json.loads(out.stdout or "{}") or {}).get("goal_signals", {}) or {}
+    except Exception:
+        return {}
+
+
+def go_no_go(signals):
+    """Daily go/no-go: GO only with zero fake-green; always carry streak N/target."""
+    fg = signals.get("fake_green")
+    streak, target = signals.get("trust_streak"), signals.get("streak_target", 20)
+    if fg is None and streak is None:
+        return "streak n/a"
+    return f"{'GO' if fg == 0 else 'NO-GO'} · streak {streak}/{target} · fake-green {fg}"
+
+
+def notify_decision(gate_ids, counts, signals, state, today):
+    """Pure: ('gate'|'digest', body) or None. A gate id present now but not at last
+    contact is NEW → fire immediately. Else, once a day, the digest floor. Else silent."""
+    raw_seen = state.get("seen_gate_ids")
+    seen = set(raw_seen) if isinstance(raw_seen, list) else set()  # tolerate a hand-edited state
+    new_gates = [g for g in gate_ids if g not in seen]
+    q = (f"queue auto={counts['auto']} gate={counts['gate']} blocked={counts['blocked']}")
+    if new_gates:
+        return ("gate", f"🚦 drive: {len(new_gates)} new gate(s) need you: "
+                        f"{', '.join(new_gates)} | {q} | {go_no_go(signals)}")
+    if state.get("last_contact_date") != today:
+        return ("digest", f"drive daily: {go_no_go(signals)} | {q} "
+                          f"proposals={counts.get('proposals', 0)}")
+    return None
+
+
+def deliver(body):
+    """Best-effort delivery shim. PSDRIVE_NOTIFY_CMD (a shell command) receives the body on
+    stdin — point it at your notifier (telegram, push, …). Unset → log to stdout so the cron
+    detail trail still records it. A delivery failure never breaks the tick."""
+    cmd = os.environ.get("PSDRIVE_NOTIFY_CMD")
+    if not cmd:
+        print("[notify] " + body)
+        return
+    try:
+        subprocess.run(cmd, shell=True, input=body, text=True, timeout=30)
+    except Exception as e:
+        print(f"[notify] delivery failed ({e}); body: {body}")
+
+
+def notify(records, today, state_path=None):
+    """Aggregate the tick's invocations, decide, deliver once, persist state. seen_gate_ids
+    is rewritten every tick (even when silent) so a resolved-then-reappearing gate re-fires;
+    last_contact_date advances only when something was actually sent."""
+    gate_ids, counts = [], {"auto": 0, "gate": 0, "blocked": 0, "proposals": 0}
+    for r in records:
+        if not r:
+            continue
+        gate_ids += r.get("gate_ids") or []
+        counts["auto"] += r.get("auto") or 0
+        counts["gate"] += r.get("gate") or 0
+        counts["blocked"] += r.get("blocked") or 0
+        counts["proposals"] += sum(1 for e in (r.get("executed") or []) if e.get("advance"))
+    gate_ids = sorted(set(gate_ids))
+    state = load_notify_state(state_path)
+    decision = notify_decision(gate_ids, counts, streak_signals(), state, today)
+    if decision:
+        deliver(decision[1])
+        state["last_contact_date"] = today
+    state["seen_gate_ids"] = gate_ids
+    save_notify_state(state, state_path)
+    return decision
 
 
 def main():
@@ -173,8 +281,14 @@ def main():
     # Per-project autonomy: empty/missing config → one global read-only sweep
     # (label None = today's behavior, byte-for-byte). A build_auto project gets
     # its own --build-auto --only run (+ --merge-auto when set).
-    for label, args in build_invocations(load_autonomy_config(), MAX):
-        run_one(args, ts, label)
+    records = [run_one(args, ts, label)
+               for label, args in build_invocations(load_autonomy_config(), MAX)]
+    # notify is additive on top of the audit trail — a notify bug must never break the
+    # tick's dispatch or its recorded audit, so it is fully isolated.
+    try:
+        notify(records, datetime.date.today().isoformat())
+    except Exception as e:
+        print(f"drive-cron: notify failed (non-fatal): {e}", file=sys.stderr)
     return 0
 
 
