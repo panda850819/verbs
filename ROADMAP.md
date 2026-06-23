@@ -68,7 +68,7 @@ Medium (after the high tier):
 - [x] **BUILD autonomy (opt-in, default OFF)** — the 5-condition gate in `driver-autonomy.md` (plan approved + prompt-ified work-order + machine-checkable acceptance + isolated workspace + stops at SHIP). Enable per-project via `--build-auto --only <project>` first, never globally. Covered by `tests/drive-build.sh`.
 - [ ] **Stall detection / turn timeout** — replace the blunt `subprocess timeout(1200)` with symphony-style `stall_timeout` (kill unresponsive worker, schedule retry) + a turn cap.
 - [ ] **Bounded concurrency (global + per-state)** — symphony's `max_concurrent_agents` + per-state override; needed before any fan-out past `--max 1`.
-- [ ] **Read-only status surface** — a `/api/v1/state` analogue over `drive-log.jsonl` + `state.jsonl`: what is the loop doing now, token spend, last verdicts.
+- [x] **Read-only status surface** — value scoreboard via `drive-pulse --status` over `drive-log.jsonl`: autonomous BUILD+merge count, promote-to-main, ship count, human-revert tally, external-vs-self split, verdict mix. Token spend is NO DATA (the ledger has no token field) — rendered, never faked. The live "what is the loop doing now" view and the HTTP `/api/v1/state` server remain follow-ons; this MVP is the value-visibility cut that says whether the autonomy produces value or only grooms itself. Covered by `tests/drive-status.sh`. (PRO-70)
 
 Later (logged, not scheduled): hot-reloadable `WORKFLOW.md`-style config, token accounting, Liquid prompt templating with full work-order injection, a `linear_graphql` tool for the executor, SSH remote workers. All from the symphony feature-map A-zone; none blocks the high/medium tiers.
 
