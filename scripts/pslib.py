@@ -315,7 +315,27 @@ def ledger_record(x, r):
         "blast": r.get("blast"),
         "merged": (r.get("merged") or None),
         "merged_sha": (r.get("merged_sha") or None),
+        # PRO-77 (re-auditability): the sensor profile the verify covered (declared
+        # `layers:`) + a one-line judgment rationale, so an autonomous merge can be
+        # re-judged later without re-running. Bounds comprehension debt.
+        "verify_profile": (acceptance_layers(x.get("desc") or "") if isinstance(x, dict) else []),
+        "judgment": ((r.get("judgment") or r.get("summary") or None) if isinstance(r, dict) else None),
     }
+
+
+def trace_complete(rec):
+    """Re-auditability gate (PRO-77): a MERGED build's ledger record must carry enough to
+    re-judge it later without re-running anything — exit evidence (host-verify actually ran),
+    the blast class, a judgment rationale, and the verify-profile field. Non-merge records are
+    always complete (nothing landed to re-audit). The systematization acceptance bar is not
+    "it ran" but "it can be re-judged": a merge you cannot reconstruct is comprehension debt,
+    not an asset (the OpenClaw-while-sleeping risk)."""
+    if not isinstance(rec, dict) or not rec.get("merged"):
+        return True
+    return (rec.get("verify_ran") is True
+            and rec.get("blast") is not None
+            and bool(rec.get("judgment"))
+            and "verify_profile" in rec)
 
 
 def evidence_body(wr, acceptance, staged):
