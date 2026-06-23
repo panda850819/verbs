@@ -4,8 +4,46 @@ Single source for the Linear state<->phase map, per-phase readiness, acceptance
 parsing, work-order completeness, and the codex RESULT parser — so the reduce
 (decision core) and drive (executor) cannot drift (review finding K).
 """
+import json
 import os
 import re
+
+# Linear project name -> repo dir the build runs in (single source; pandastack-drive imports
+# this, drive-pulse resolves each build's repo from it for cross-repo promote checks). An
+# optional ~/.config/pandastack/projects.json (env PSDRIVE_PROJECTS_CONFIG) overrides it.
+PROJECT_REPO = {
+    "murmur": "~/site/apps/murmur",
+    "pandastack": "~/site/skills/pandastack",
+    "shawn-trade": "~/site/trading/shawn-trade",
+    "equity-research-desk": "~/site/trading/equity-research-desk",
+    "hermes-vault": "~/site/hermes-vault",
+}
+
+
+def _projects_map():
+    """The project->repo map. A readable config file is authoritative (so it can extend or
+    correct the built-in map without a code change); the built-in PROJECT_REPO is the fallback
+    ONLY when no config path was explicitly given — an explicit PSDRIVE_PROJECTS_CONFIG that is
+    empty/unreadable yields an empty map, which keeps tests hermetic (no real-repo leak)."""
+    path = os.environ.get("PSDRIVE_PROJECTS_CONFIG")
+    explicit = path is not None
+    path = path or os.path.expanduser("~/.config/pandastack/projects.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = f.read().strip()
+        cfg = json.loads(data) if data else {}
+        if isinstance(cfg, dict):
+            return {k: v for k, v in cfg.items() if isinstance(v, str)}
+    except (OSError, ValueError):
+        pass
+    return {} if explicit else dict(PROJECT_REPO)
+
+
+def repo_for_project(project):
+    """Expanded repo dir for a Linear project name, or None if unknown (see _projects_map)."""
+    p = _projects_map().get(project) if project else None
+    return os.path.expanduser(p) if p else None
+
 
 # Linear workflow state -> pandastack 7-phase (docs/linear-contract.md lifecycle-map),
 # incl. the stock-state fallback (Todo / In Progress) for teams without custom states.

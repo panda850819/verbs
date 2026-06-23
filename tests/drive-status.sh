@@ -12,6 +12,7 @@ fl(){ echo "FAIL: $1"; fail=1; }
 J(){ echo "$2" | python3 -c "import json,sys;r=json.load(sys.stdin);sys.exit(0 if ($1) else 1)"; }
 
 export PSDRIVE_AUTONOMY_CONFIG=/dev/null      # deterministic: no build_auto projects unless a case overrides
+export PSDRIVE_PROJECTS_CONFIG=/dev/null      # hermetic: no project->repo map, so each case resolves via --repo
 export PSDRIVE_HOME_PROJECT=pandastack
 
 mkrepo(){ # $1=dir — git repo with a `main` branch and one base commit
