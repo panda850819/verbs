@@ -867,8 +867,8 @@ def exec_build(x, merge_auto=False):
         backend = "codex"
         desc = x.get("desc") or ""
         acc = extract_acceptance(desc)
-        _acc = pslib.acceptance_block(desc)                 # PRO-78: parsing in pslib
-        verify_script = (_acc + "\n") if _acc else None     # exact old acceptance_block contract
+        _acc = pslib.acceptance_body(desc)                  # PRO-73: strip `layers:` decl from the runnable body
+        verify_script = (_acc + "\n") if _acc else None     # (PRO-78: parsing in pslib)
         request = {"mode": "workspace-write", "network_access": False,
                    "timeout_seconds": VERIFY_TIMEOUT}
         discriminating = True   # no acceptance → not machine-lane; auto-merge never reaches here

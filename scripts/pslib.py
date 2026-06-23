@@ -80,6 +80,11 @@ _RESULT_RE = re.compile(r"^\s*RESULT:\s*(PASS|FAIL|BLOCKED)\b\s*[—-]?\s*(.*)$"
 # first-build trap). Such a block is not yet runnable — it must be rewritten relative
 # to cwd (the repo root). It surfaces for a fix instead of auto-building into a FAIL.
 _ACC_CWD_UNSAFE = re.compile(r"\bBASH_SOURCE\b|\bdirname\s+\"?\$0\"?")
+# PRO-73: an acceptance block may declare the sensor LAYERS its verify covers, as an
+# optional leading `layers: typecheck, test` line (ordered cheapest-first by convention).
+# It is metadata (PRO-74 granularity / PRO-75 coverage read it), stripped from the runnable
+# body before materialization so it never runs as a shell command.
+_LAYERS_RE = re.compile(r"(?i)^\s*layers:\s*(.+?)\s*$")
 
 
 def phase_of(state):
@@ -95,6 +100,27 @@ def acceptance_block(desc):
     return m.group(1).strip() if m else ""
 
 
+def acceptance_layers(desc):
+    """Sensor layers this card's verify declares it covers (PRO-73), from an optional
+    leading `layers: a, b` line in the acceptance block — ordered, lowercased, cheapest
+    -first by convention. [] when undeclared. PRO-74 (granularity) / PRO-75 (coverage)
+    read this to know which layers a verify actually senses."""
+    b = acceptance_block(desc)
+    m = _LAYERS_RE.match(b.split("\n", 1)[0]) if b else None
+    return [s.strip().lower() for s in m.group(1).split(",") if s.strip()] if m else []
+
+
+def acceptance_body(desc):
+    """The runnable acceptance — the acceptance block minus an optional leading `layers:`
+    declaration (PRO-73). This is what gets materialized into verify.sh; the layers line is
+    metadata, never a shell command. No declaration -> the block unchanged."""
+    b = acceptance_block(desc)
+    if not b:
+        return ""
+    head, _, rest = b.partition("\n")
+    return rest.strip() if _LAYERS_RE.match(head) else b
+
+
 def acceptance_cwd_safe(block):
     """True unless the acceptance anchors paths on $BASH_SOURCE/$0 — which break under
     drive's `bash <job_dir>/verify.sh` cwd=worktree invocation (see _ACC_CWD_UNSAFE)."""
@@ -102,9 +128,11 @@ def acceptance_cwd_safe(block):
 
 
 def acceptance_runnable(desc):
-    """Acceptance block present, machine-checkable (not human prose), AND cwd-safe
-    (no $BASH_SOURCE/$0 anchor — it would FAIL a correct build under drive's verify)."""
-    b = acceptance_block(desc)
+    """A machine-checkable acceptance: a runnable BODY present (PRO-73: excluding the
+    `layers:` declaration, so a layers-only card with no real check is NOT runnable and
+    surfaces as needs-spec instead of a silent model-PASS), machine-checkable (not human
+    prose), AND cwd-safe (no $BASH_SOURCE/$0 anchor — it would FAIL under drive's verify)."""
+    b = acceptance_body(desc)
     return bool(b and _RUNNABLE_HINT.search(b) and acceptance_cwd_safe(b))
 
 
