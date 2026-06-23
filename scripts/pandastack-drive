@@ -53,13 +53,9 @@ GATE_REASON = {"GATE": "決策(kill/pivot/scope/approach)", "BUILD": "改碼 —
 
 # --execute may only spawn these reversible skills (the standard's auto set).
 SAFE_SKILLS = {"verify", "review", "grill", "plan", "simplify"}
-# Linear project name -> repo dir the headless skill runs in.
-PROJECT_REPO = {
-    "murmur": "~/site/apps/murmur", "pandastack": "~/site/skills/pandastack",
-    "shawn-trade": "~/site/trading/shawn-trade",
-    "equity-research-desk": "~/site/trading/equity-research-desk",
-    "hermes-vault": "~/site/hermes-vault",
-}
+# Linear project name -> repo dir the headless skill runs in. Single source in pslib
+# (PRO-72) so drive and drive-pulse resolve the same map; config-overridable there.
+PROJECT_REPO = pslib.PROJECT_REPO
 # read-only executor prompt. Mutation is blocked THREE ways: the phase classifier
 # (BUILD/SHIP never reach here) + codex `-s read-only` (sandbox-enforced) + this
 # instruction. The driver itself writes nothing — Linear stays the single truth.

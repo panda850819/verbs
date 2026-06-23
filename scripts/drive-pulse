@@ -36,6 +36,8 @@ import subprocess
 import sys
 from collections import Counter
 
+import pslib  # shared project->repo map, single source with pandastack-drive (PRO-72)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DISTILL = os.path.join(HERE, "drive-log-distill")
 
@@ -244,31 +246,44 @@ def ancestors_of(repo, branch, shas):
 
 
 def value_metrics(rows, repo, main_branch="main"):
-    """The value scoreboard (PRO-70), cumulative over the whole ledger. The question is
-    'has the loop ever shipped real value', not a windowed rate."""
+    """The value scoreboard (PRO-70), cumulative over the whole ledger. Each built issue is
+    checked for promotion against ITS OWN project's repo (PRO-72) — the WBS is multi-repo, so
+    a single repo would false-negative every cross-repo build. `repo` (the --repo arg) is the
+    fallback for a project with no configured repo, and for hermetic tests."""
     bm = build_merges(rows)
     built_ids = distinct_ids(bm)
-    shas_by_id = {}
+    shas_by_id, proj_by_id = {}, {}
     for e in bm:
         shas_by_id.setdefault(e["id"], []).append(e.get("merged_sha"))
-    all_shas = [s for ss in shas_by_id.values() for s in ss if s]
-
-    promoted = ancestors_of(repo, main_branch, all_shas)        # None if unchecked
-    checked = promoted is not None
-    promoted_ids = [i for i in built_ids if any(s in promoted for s in shas_by_id[i])] if checked else []
+        proj_by_id.setdefault(e["id"], e.get("project"))
 
     # disconfirm on the value board = a human git-revert of a promoted commit (the original
     # stays on main, so it must be subtracted explicitly). A silent history-rewrite rollback
-    # needs no term here: the commit simply stops being an ancestor of main, so it never
-    # enters promoted_ids. (rolled_back-vs-integration is the pulse/streak's concern, not the
-    # value board — running it against main would false-positive every never-promoted build.)
-    reverted = reverts_on_branch(repo, main_branch) if checked else None
-    disconfirmed = (reverted or set()) if checked else set()
+    # needs no term: the commit simply stops being an ancestor of main, so it never enters
+    # promoted_ids. Reverts are checked per-repo, only where a promotion landed.
+    _rev = {}
 
-    def hit(sha):  # revert messages may abbreviate the sha — match either-way prefix
-        return any(sha.startswith(x) or x.startswith(sha) for x in disconfirmed)
-    net_ids = [i for i in promoted_ids
-               if not any(s and hit(s) for s in shas_by_id[i])]
+    def reverted_in(rd):
+        if rd not in _rev:
+            _rev[rd] = reverts_on_branch(rd, main_branch) or set()
+        return _rev[rd]
+
+    def hit(sha, s):  # revert messages may abbreviate the sha — match either-way prefix
+        return any(sha.startswith(x) or x.startswith(sha) for x in s)
+
+    promoted_ids, net_ids, checked_n = [], [], 0
+    for i in built_ids:
+        rd = pslib.repo_for_project(proj_by_id.get(i)) or repo
+        shas = [s for s in shas_by_id[i] if s]
+        anc = ancestors_of(rd, main_branch, shas)   # None if rd missing / branch unreadable
+        if anc is None:
+            continue                                # this issue's repo unresolved -> unchecked
+        checked_n += 1
+        if any(s in anc for s in shas):
+            promoted_ids.append(i)
+            if not any(hit(s, reverted_in(rd)) for s in shas):
+                net_ids.append(i)
+    checked = checked_n == len(built_ids)
 
     # external = built outside drive's own home project. MVP proxy for self-vs-external.
     # upgrade: a per-issue self/external tag at the drive-cron source would also split
@@ -295,7 +310,7 @@ def value_metrics(rows, repo, main_branch="main"):
         "external_built_ids": external_built,
         "reverts": {
             "checked": checked,
-            "reverted": (len(reverted) if reverted is not None else None),
+            "reverted": sum(len(v) for v in _rev.values()),
         },
         "token_spend": None,
         "token_note": "not instrumented in drive-log (no token field) — NO DATA until the loop emits it",
