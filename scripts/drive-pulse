@@ -17,7 +17,15 @@ renders a windowed, no-threshold, dated vital-signs report from drive-log.jsonl:
 Read-only, judgment-free, never mutates — so the autonomous daemon can consume its own
 pulse with zero human-in-loop ceremony.
 
+--status (PRO-70) renders the *value* scoreboard instead of the health pulse: how many
+real backlog issues the loop autonomously BUILT + merged, how many of those reached main,
+how many shipped, the human-revert tally, and the external-vs-self split — the numbers
+that say whether the autonomy produces value or only grooms itself. Same ledger + git
+helpers; cumulative, not windowed (the question is "has it ever shipped", not a rate).
+Token spend is NO DATA (the ledger has no token field) — rendered, never faked.
+
   drive-pulse <drive-log.jsonl> [--now YYYY-MM-DD] [--days 7] [--json]
+  drive-pulse <drive-log.jsonl> --status [--repo PATH] [--main-branch main] [--json]
 """
 import argparse
 import datetime
@@ -165,12 +173,168 @@ def goal_signals(cur_rows, all_rows, repo):
     }
 
 
+# ── value scoreboard (PRO-70) ───────────────────────────────────────────────
+# pulse reads the loop's *health* (fake-green, trust streak); --status reads its *value*:
+# did the autonomous loop turn real backlog into shipped code, or only improve itself?
+# Same ledger + git helpers, a different question — the scoreboard the human watches to
+# decide continue / freeze. Read-only, no network, no Linear.
+
+HOME_PROJECT = os.environ.get("PSDRIVE_HOME_PROJECT", "pandastack")
+
+
+def autonomy_config_path():
+    return os.environ.get(
+        "PSDRIVE_AUTONOMY_CONFIG",
+        os.path.expanduser("~/.config/pandastack/drive-autonomy.json"))
+
+
+def build_auto_projects():
+    """Projects with build_auto enabled. Missing / malformed config → [] (honest empty,
+    never guessed) — same fail-open posture as drive-cron's config read."""
+    try:
+        cfg = json.load(open(autonomy_config_path(), encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return sorted(p for p, o in (cfg or {}).items()
+                  if isinstance(o, dict) and o.get("build_auto"))
+
+
+def build_merges(rows):
+    """Executed items the loop autonomously BUILT and merged (phase BUILD + merged set) —
+    its actual code output, distinct from read-only PLAN proposals. Pre-config ledger lines
+    carry no phase and are correctly excluded."""
+    return [e for e in executed_rows(rows)
+            if e.get("phase") == "BUILD" and e.get("merged")]
+
+
+def ship_events(rows):
+    return [e for e in executed_rows(rows) if e.get("phase") == "SHIP"]
+
+
+def distinct_ids(events):
+    seen, out = set(), []
+    for e in events:
+        i = e.get("id")
+        if i and i not in seen:
+            seen.add(i)
+            out.append(i)
+    return out
+
+
+def ancestors_of(repo, branch, shas):
+    """Subset of `shas` reachable from `branch` HEAD — i.e. promoted onto it. None = check
+    skipped (no repo, or `branch` itself doesn't resolve), never silently 0. A sha whose
+    object is gone (e.g. an integration commit GC'd after orphan-sweep) is genuinely not on
+    main → counted not-promoted, not a reason to blank the whole board."""
+    if not repo:
+        return None
+    rp = subprocess.run(["git", "-C", os.path.expanduser(repo), "rev-parse", "--verify",
+                         "--quiet", branch + "^{commit}"], capture_output=True, text=True)
+    if rp.returncode != 0:        # branch ref unreadable → check is unreliable, report unchecked
+        return None
+    keep = set()
+    for sha in shas:
+        if not sha:
+            continue
+        cp = subprocess.run(["git", "-C", os.path.expanduser(repo), "merge-base",
+                             "--is-ancestor", sha, branch], capture_output=True, text=True)
+        if cp.returncode == 0:    # 0 = ancestor; 1 = not; 128 = missing object → not-promoted
+            keep.add(sha)
+    return keep
+
+
+def value_metrics(rows, repo, main_branch="main"):
+    """The value scoreboard (PRO-70), cumulative over the whole ledger. The question is
+    'has the loop ever shipped real value', not a windowed rate."""
+    bm = build_merges(rows)
+    built_ids = distinct_ids(bm)
+    shas_by_id = {}
+    for e in bm:
+        shas_by_id.setdefault(e["id"], []).append(e.get("merged_sha"))
+    all_shas = [s for ss in shas_by_id.values() for s in ss if s]
+
+    promoted = ancestors_of(repo, main_branch, all_shas)        # None if unchecked
+    checked = promoted is not None
+    promoted_ids = [i for i in built_ids if any(s in promoted for s in shas_by_id[i])] if checked else []
+
+    # disconfirm on the value board = a human git-revert of a promoted commit (the original
+    # stays on main, so it must be subtracted explicitly). A silent history-rewrite rollback
+    # needs no term here: the commit simply stops being an ancestor of main, so it never
+    # enters promoted_ids. (rolled_back-vs-integration is the pulse/streak's concern, not the
+    # value board — running it against main would false-positive every never-promoted build.)
+    reverted = reverts_on_branch(repo, main_branch) if checked else None
+    disconfirmed = (reverted or set()) if checked else set()
+
+    def hit(sha):  # revert messages may abbreviate the sha — match either-way prefix
+        return any(sha.startswith(x) or x.startswith(sha) for x in disconfirmed)
+    net_ids = [i for i in promoted_ids
+               if not any(s and hit(s) for s in shas_by_id[i])]
+
+    # external = built outside drive's own home project. MVP proxy for self-vs-external.
+    # upgrade: a per-issue self/external tag at the drive-cron source would also split
+    # genuine home-project product issues (skillpack-check, onboarding) from drive's own
+    # plumbing; until then those count as non-external.
+    external_built = distinct_ids([e for e in bm if e.get("project") and e.get("project") != HOME_PROJECT])
+    external_net = [i for i in net_ids if i in external_built]
+
+    verd = Counter(e.get("verdict") for e in executed_rows(rows) if e.get("verdict"))
+
+    return {
+        "main_branch": main_branch,
+        "build_auto_projects": build_auto_projects(),
+        "home_project": HOME_PROJECT,
+        "autonomous_build_merged_distinct": len(built_ids),
+        "autonomous_build_merged_ids": built_ids,
+        "merged_to_main": len(promoted_ids),
+        "merged_to_main_ids": promoted_ids,
+        "merged_to_main_checked": checked,
+        "ship_count": len(ship_events(rows)),
+        "net_shipped": len(net_ids),
+        "net_shipped_ids": net_ids,
+        "external_net_shipped": len(external_net),
+        "external_built_ids": external_built,
+        "reverts": {
+            "checked": checked,
+            "reverted": (len(reverted) if reverted is not None else None),
+        },
+        "token_spend": None,
+        "token_note": "not instrumented in drive-log (no token field) — NO DATA until the loop emits it",
+        "verdicts": dict(verd),
+    }
+
+
+def render_status(now, m):
+    def idl(xs):
+        return ("  " + ", ".join(xs)) if xs else ""
+    promoted = m["merged_to_main"] if m["merged_to_main_checked"] else "?"
+    chk = "" if m["merged_to_main_checked"] else "  (unchecked — pass --repo)"
+    rv = m["reverts"]
+    vd = m["verdicts"]
+    print(f"=== drive-status · {now.isoformat()} · value scoreboard (cumulative) ===\n")
+    print("BUILD-auto projects:  " + (", ".join(m["build_auto_projects"]) or "— (none enabled)"))
+    print("\nAUTONOMOUS OUTPUT:")
+    print(f"  built + merged (distinct):  {m['autonomous_build_merged_distinct']}{idl(m['autonomous_build_merged_ids'])}")
+    print(f"  promoted to {m['main_branch']}:{' ' * max(1, 13 - len(m['main_branch']))}{promoted}{idl(m['merged_to_main_ids'])}{chk}")
+    print(f"  reached SHIP:               {m['ship_count']}")
+    print("\nVALUE:")
+    print(f"  net shipped (on {m['main_branch']}, not reverted):  {m['net_shipped']}{idl(m['net_shipped_ids'])}")
+    print(f"  external net-shipped (excl {m['home_project']}):  {m['external_net_shipped']}{idl(m['external_built_ids'])}")
+    print(f"  reverts (human, on {m['main_branch']}):  checked={rv['checked']}  reverted={rv['reverted']}")
+    print("\nINSTRUMENTATION:")
+    print("  token spend:  NO DATA (ledger has no token field)")
+    print("  verdict mix:  " + (" · ".join(f"{k} {v}" for k, v in sorted(vd.items())) or "—"))
+
+
 def main(argv):
     ap = argparse.ArgumentParser(prog="drive-pulse")
     ap.add_argument("log")
     ap.add_argument("--now", help="window anchor date YYYY-MM-DD (default today)")
     ap.add_argument("--days", type=int, default=7)
     ap.add_argument("--repo", help="repo whose integration branch to check for human-reverts (trust streak)")
+    ap.add_argument("--status", action="store_true",
+                    help="render the value scoreboard (PRO-70) instead of the health pulse")
+    ap.add_argument("--main-branch", default="main",
+                    help="branch that counts as shipped-to-main for the value scoreboard (default main)")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
 
@@ -178,6 +342,15 @@ def main(argv):
     cur_start = now - datetime.timedelta(days=a.days)
     prev_start = now - datetime.timedelta(days=2 * a.days)
     rows = [json.loads(l) for l in open(a.log, encoding="utf-8") if l.strip()]
+
+    if a.status:
+        m = value_metrics(rows, a.repo, a.main_branch)
+        if a.json:
+            print(json.dumps({"now": now.isoformat(), **m}, ensure_ascii=False))
+        else:
+            render_status(now, m)
+        return 0
+
     cur = [r for r in rows if cur_start <= parse_date(r["ts"]) < now]
     prev = [r for r in rows if prev_start <= parse_date(r["ts"]) < cur_start]
     cs, ps = window_stats(cur), window_stats(prev)
