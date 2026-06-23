@@ -179,3 +179,92 @@ def drive_suppressed():
     Checked UNCONDITIONALLY at every loop boundary (the drive-cron launchd tick and
     a direct `--execute`); the loop never decides whether to obey the stop."""
     return os.path.exists(stop_flag_path())
+
+
+# ── verify materialization + ledger/evidence (the trace) — contract surface ──
+# Moved from pandastack-drive (PRO-78, the seam): "what counts as correct" lives
+# in the contract; the daemon re-exports these via `from pslib import ...`.
+# harden_verify materializes a strict verify script; ledger_record defines the
+# append-only drive-log schema (the fake-green grep predicate); evidence_body
+# renders the inline host-verify evidence for the merge commit.
+
+def harden_verify(script):
+    """Force strict mode on a materialized verify script (review F-B). Without
+    `set -euo pipefail`, a real assertion that fails mid-script is masked by a
+    trailing success (e.g. `grep -q X` then `echo done` exits 0), so host-verify
+    reports a false green. Inject strict mode right after any author shebang.
+
+    Also pin cwd to the repo root (PRO-71): verify runs `bash <job_dir>/verify.sh`
+    with cwd=worktree, so cwd-relative paths already resolve, but an acceptance that
+    cd's away mid-script then uses a repo-relative path would break. The explicit cd
+    makes the worktree root the deterministic anchor for every acceptance."""
+    body = script or ""
+    cd = 'cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 2\n'
+    if body.lstrip().startswith("#!"):
+        first, _, rest = body.partition("\n")
+        return f"{first}\nset -euo pipefail\n{cd}{rest}"
+    return "#!/usr/bin/env bash\nset -euo pipefail\n" + cd + body
+
+
+def ledger_record(x, r):
+    """Normalize one executed item into a structured ledger record (LG, F-K/F-L).
+
+    The fields that make 'zero fake-green' git-greppable: `verify_required` (does
+    this advance need a real host-verify — True for BUILD/merge, False for a
+    read-only AUTO advisory step, F-M) and `verify_ran` (did host-verify actually
+    run). The success-signal counter-example is one grep:
+
+        verdict == "PASS" AND advance AND verify_required AND NOT verify_ran
+
+    i.e. a PASS that proposed a state advance it was supposed to host-verify, but
+    no host-verify ran. In healthy operation that count is 0 (a BUILD-auto issue
+    always carries a machine-runnable acceptance, so host-verify always runs; a
+    failed host-verify is demoted to FAIL upstream by maybe_apply_verification)."""
+    v = (r.get("verification") or {}) if isinstance(r, dict) else {}
+    ran = bool(v.get("ran"))
+    return {
+        "id": x.get("id"),
+        "project": x.get("project"),
+        "phase": x.get("next"),
+        "verdict": r.get("verdict"),
+        "summary": (r.get("summary") or "")[:200],
+        "advance": (r.get("advance") or None),
+        # BUILD lands code → its advance must be host-verified; read-only AUTO is advisory.
+        "verify_required": bool(x.get("build")),
+        "verify_ran": ran,
+        "verify_ok": v.get("ok"),
+        # prefer the human-meaningful acceptance text (exec_build attaches it); fall
+        # back to the materialized script path the worker actually executed.
+        "verify_cmd": r.get("verify_cmd") or v.get("command"),
+        "verify_tail": ((v.get("stdout_tail") or v.get("stderr_tail") or "").strip()[-400:]) or None,
+        # T03: blast class + the integration branch this merged into (None = PR-only).
+        # A merge event must be host-verified, so the merge-scoped fake-green grep is
+        # `verdict==PASS AND merged AND verify_required AND NOT verify_ran` → must be 0.
+        "blast": r.get("blast"),
+        "merged": (r.get("merged") or None),
+        "merged_sha": (r.get("merged_sha") or None),
+    }
+
+
+def evidence_body(wr, acceptance, staged):
+    """A commit-message body that puts the host-verify evidence inline (T04), so a human's
+    30-second pre-graduation stamp is honest: the verify result + command, the acceptance
+    checked, the verify-output tail, and the changed-file count — all from the worker result."""
+    v = wr.get("verification") or {}
+    lines = ["[auto-build evidence]"]
+    if v.get("ran"):
+        cmd = v.get("command")
+        lines.append(f"host-verify: {'PASS' if v.get('ok') else 'FAIL'}" + (f"  ({cmd})" if cmd else ""))
+        tail = (v.get("stdout_tail") or "").strip()
+        if tail:
+            lines.append("verify-output (tail):")
+            lines += ["  " + ln for ln in tail.splitlines()[-6:]]
+    else:
+        lines.append("host-verify: not run")
+    acc = (acceptance or "").strip()
+    if acc and not acc.startswith("No explicit acceptance"):
+        lines.append("acceptance:")
+        lines += ["  " + ln for ln in acc.splitlines()[:8]]
+    n = len([s for s in (staged or "").splitlines() if s.strip()])
+    lines.append(f"changed files: {n}")
+    return "\n".join(lines)
