@@ -36,6 +36,12 @@ _CONTEXT_RE = re.compile(r"(?im)^[\s#*\->]*context\b")
 _ARTIFACT_RE = re.compile(r"(https?://\S+|/pull/\d+|/merge_requests/\d+|psdrive/\S+|\b[0-9a-f]{7,40}\b)")
 # verdict: own line, word-boundaried, PASS|FAIL|BLOCKED only (not PASSED)
 _RESULT_RE = re.compile(r"^\s*RESULT:\s*(PASS|FAIL|BLOCKED)\b\s*[—-]?\s*(.*)$", re.M)
+# An acceptance is run as `bash <job_dir>/verify.sh` with cwd = the worktree root;
+# verify.sh lives in the job dir, NOT the worktree. So a path anchored on $BASH_SOURCE
+# /$0 resolves outside the worktree and FAILs a correct build (PRO-71; the PRO-22
+# first-build trap). Such a block is not yet runnable — it must be rewritten relative
+# to cwd (the repo root). It surfaces for a fix instead of auto-building into a FAIL.
+_ACC_CWD_UNSAFE = re.compile(r"\bBASH_SOURCE\b|\bdirname\s+\"?\$0\"?")
 
 
 def phase_of(state):
@@ -51,10 +57,17 @@ def acceptance_block(desc):
     return m.group(1).strip() if m else ""
 
 
+def acceptance_cwd_safe(block):
+    """True unless the acceptance anchors paths on $BASH_SOURCE/$0 — which break under
+    drive's `bash <job_dir>/verify.sh` cwd=worktree invocation (see _ACC_CWD_UNSAFE)."""
+    return not _ACC_CWD_UNSAFE.search(block or "")
+
+
 def acceptance_runnable(desc):
-    """Acceptance block present AND looks machine-checkable (not human prose)."""
+    """Acceptance block present, machine-checkable (not human prose), AND cwd-safe
+    (no $BASH_SOURCE/$0 anchor — it would FAIL a correct build under drive's verify)."""
     b = acceptance_block(desc)
-    return bool(b and _RUNNABLE_HINT.search(b))
+    return bool(b and _RUNNABLE_HINT.search(b) and acceptance_cwd_safe(b))
 
 
 def evidence_block(desc):
@@ -85,6 +98,10 @@ def readiness_gap(state, desc):
     nxt = next_phase(state)
     desc = desc or ""
     if nxt == "VERIFY" and not acceptance_lane(desc):
+        b = acceptance_block(desc)
+        if b and not acceptance_cwd_safe(b):
+            return ("next=VERIFY: acceptance anchors on $BASH_SOURCE/$0; rewrite "
+                    "cwd-relative (verify runs `bash verify.sh` with cwd=worktree)")
         return "next=VERIFY: missing runnable acceptance or named evidence"
     if nxt == "REVIEW" and not _ARTIFACT_RE.search(desc):
         return "next=REVIEW: missing diff/artifact"

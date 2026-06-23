@@ -606,12 +606,18 @@ def harden_verify(script):
     """Force strict mode on a materialized verify script (review F-B). Without
     `set -euo pipefail`, a real assertion that fails mid-script is masked by a
     trailing success (e.g. `grep -q X` then `echo done` exits 0), so host-verify
-    reports a false green. Inject strict mode right after any author shebang."""
+    reports a false green. Inject strict mode right after any author shebang.
+
+    Also pin cwd to the repo root (PRO-71): verify runs `bash <job_dir>/verify.sh`
+    with cwd=worktree, so cwd-relative paths already resolve, but an acceptance that
+    cd's away mid-script then uses a repo-relative path would break. The explicit cd
+    makes the worktree root the deterministic anchor for every acceptance."""
     body = script or ""
+    cd = 'cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" || exit 2\n'
     if body.lstrip().startswith("#!"):
         first, _, rest = body.partition("\n")
-        return f"{first}\nset -euo pipefail\n{rest}"
-    return "#!/usr/bin/env bash\nset -euo pipefail\n" + body
+        return f"{first}\nset -euo pipefail\n{cd}{rest}"
+    return "#!/usr/bin/env bash\nset -euo pipefail\n" + cd + body
 
 
 def run_worker_job(backend, worktree, prompt, request, spec=None, acceptance=None,

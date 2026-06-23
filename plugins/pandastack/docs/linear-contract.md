@@ -63,6 +63,18 @@ If the `acceptance` body is runnable, the scheduler may let an executor
 self-verify before proposing REVIEW. Machine-lane cards may be auto-merge-eligible,
 subject to the later merge-time checks.
 
+**cwd contract (load-bearing).** The acceptance block is materialized as
+`<job_dir>/verify.sh` and run with `bash verify.sh` and **cwd = the build worktree
+root** (which is the repo root). `verify.sh` itself lives in the job dir, NOT the
+worktree. So write every path relative to cwd — `bin/foo`, `tests/fixtures/...` —
+exactly as a command run from the repo root would. Do **not** anchor on
+`$BASH_SOURCE` / `$0` (e.g. `ROOT="$(dirname "${BASH_SOURCE[0]}")/.."`): those
+resolve against the job dir, point outside the worktree, and FAIL a correct build.
+`pslib.acceptance_cwd_safe` enforces this — an anchored block is classed not-runnable
+(needs-spec) so it surfaces for a rewrite instead of auto-building into a guaranteed
+FAIL. An executable the build creates is captured into the diff with its real mode
+(`agent-worker` preserves the exec bit), so `bin/foo` lands runnable on integration.
+
 Evidence lane: write an `evidence` block that names a concrete artifact a human
 can inspect:
 
