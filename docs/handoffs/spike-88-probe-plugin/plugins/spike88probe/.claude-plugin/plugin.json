@@ -1,6 +1,0 @@
-{
-  "name": "spike88probe",
-  "description": "Discovery-scope probe (#88): one real skill in skills/, mirrored as a symlink under a sibling skills-cat/. If Claude loads it twice, plugin discovery scans beyond skills/.",
-  "version": "0.0.1",
-  "author": { "name": "spike-88" }
-}

@@ -38,27 +38,42 @@ Spike skill: `sprint`. Branch: `feat/88-forkb-spike`. Mode: CAREFUL, no push, no
   most likely. Even if it derefs, a symlinked `skills-cat` entry would become a real-dir copy =
   harmless duplicate of an already-real skill. Windows symlinks need privilege (public-repo caveat).
 
-## NOT VERIFIED — the one residual risk (live runtime; blocker before bulk)
-- **Double-discovery (Claude only)**: does Claude plugin discovery scan beyond `<plugin>/skills/`
-  and also pick up `skills-cat/<cat>/<name>/SKILL.md` (via symlink) → loading `sprint` twice?
-  - Low risk by construction: native plugin discovery convention is `<plugin>/skills/`; lint scans
-    `skills/` only; skills-cat is a sibling, not under `skills/`.
-  - Live check = the discovery-scope **probe plugin** (`docs/handoffs/spike-88-probe-plugin/`):
-    Panda installs it, reloads, counts `spike88probe:probe-flat` (1 = safe, 2 = double-load),
-    uninstalls. (Agent must not install; gated on Panda authorization.)
-  - If discovery DOES scan skills-cat → move skills-cat outside the discovered root, or add a
-    discovery ignore. Cheap fix; does not change the B1 verdict.
-- **Codex** — NOT a double-discovery risk (static proof): bootstrap symlinks
-  `plugins/pandastack/skills` (not the plugin root), so `skills-cat/` is invisible to Codex by
-  design. NOTE: `scripts/conformance-smoke.sh codex` only checks that a known skill (`grill`) exists;
-  it does NOT count `sprint` or look at `skills-cat`, so it is NOT a double-discovery confirmation.
-  The `--codex` isolated live check in `spike-88-repro.sh` is currently **NOT VERIFIED**: the
-  throwaway scratch HOME has no Codex auth (a preflight failure, not a discovery result). It does not
-  refute inverted; resolve Codex auth isolation to run it.
+## RESOLVED — double-discovery, via official docs (no probe needed)
+The one residual risk (Claude double-discovery) is now settled by the Claude Code plugin docs,
+so the live probe plugin is obsolete and was removed.
 
-## RECOMMENDATION / next
-1. Inverted layout verified for everything except live double-discovery (#1/#2).
-2. Bulk: because `skills/` is untouched, the full category view (all 26 symlinks under skills-cat/)
-   carries the SAME single risk (double-discovery) as this 1-skill spike — so once #1/#2 confirm no
-   double-load, bulk is a low-risk mechanical add (1 symlink per skill), proposed as a separate issue.
-3. Push branch + open draft PR for review only on Panda's go (push = external action).
+- **Claude discovery is top-level only, no recursion.** Plugin skill discovery scans `<plugin>/skills/`
+  for `<name>/SKILL.md` at the top level, plus any dirs listed in the manifest `skills` field
+  (which only *adds* dirs; no recursion, no exclude). `.claude-plugin/plugin.json` has **no `skills`
+  field**, so only the default `skills/` is scanned. `skills-cat/` is a *sibling* of `skills/`, not
+  under it and not in the manifest → Claude never scans it. **Double-discovery is structurally
+  impossible**, regardless of whether discovery follows symlinks.
+  - Sources: code.claude.com/docs/en/plugins-reference (skill-structure example = `skills/<name>/SKILL.md`
+    only; `skills` field = "Adds to the default `skills/` scan"); multiple open claude-code issues
+    (#18192, #16438, #28266, #39787) requesting recursive nested discovery confirm it is not current
+    behavior.
+- **Codex** — invisible by design (unchanged): bootstrap symlinks `plugins/pandastack/skills` (not the
+  plugin root), so `skills-cat/` is never in Codex's scan path. The `--codex` scratch-HOME live check
+  in `spike-88-repro.sh` stays preflight-blocked (no auth in scratch HOME), but it is no longer
+  load-bearing: skills-cat is out of scope for Codex by construction.
+- Probe plugin (`docs/handoffs/spike-88-probe-plugin/`) **removed** — it existed only to answer the
+  recursion question the docs now answer. Never installed.
+
+→ Acceptance #1 (Claude discovers, single load) and #2 (Codex discovers) are both **closed** by
+doc-grounded reasoning + green lint/hook, without touching the live install.
+
+## VERDICT: PASS → B1 (zero-build native plugin, repo-internal symlinks)
+All acceptance criteria met. No install-time link script (B1). Rollback = `rm -r skills-cat/`.
+
+## BULK ROLLOUT (done in this branch)
+The "bulk = separate issue, gated on spike green" gate was set when the spike outcome was uncertain;
+the docs collapsed that risk to zero, so the 25 remaining skills were folded in here rather than
+spun into a new issue for 25 symlinks (focus-discipline: no ceremony without safety payoff).
+- All **26/26** skills now have exactly one `skills-cat/<category>/<name> → ../../skills/<name>` link.
+- Taxonomy (per #88): thinking 9, doing 8, writing 1, meta 8. MECE verified (`comm -3` empty,
+  0 broken symlinks, every link resolves to a real `SKILL.md`).
+- lint-manifest-sync: green (26 in sync). conformance-smoke hook: PASS (codex/claude/cursor).
+
+## next
+- Push branch + open PR for review only on Panda's go (push = external action).
+- `skills/` stays flat for all runtimes; `skills-cat/` is the additive browsable category view.
