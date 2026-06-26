@@ -29,20 +29,7 @@ If the user says "skip the review, just commit", do that. The contract is not a 
 
 ## Lifecycle → skill map
 
-When the current task matches one of these signals, the corresponding skill must be checked:
-
-| Signal | First skills to check |
-|---|---|
-| About to write/edit code in any production / shared-infra path | `pandastack:careful` (gate), then dev flow |
-| Bug fix / feature / refactor (3+ files OR new abstraction) | `pandastack:grill` or `/plan` first, NOT direct edits |
-| About to commit | `pandastack:review` first, THEN `pandastack:ship` |
-| Finished a knowledge note (`knowledge/<domain>/<note>.md` style) | `pandastack:ship knowledge <path>` to Close + Extract + Backflow |
-| Finished a work topic with a decision to log | `pandastack:ship knowledge <decisions/path>` (decision-note variant; replaces v2.1 `/work-ship`) |
-| Researching an unfamiliar concept | `pandastack:grill` (adversarial scope lock) → ad-hoc fetch (`gh`/`WebFetch`/brain query) → `pandastack:ship knowledge` |
-| Weekly / monthly retrospective time | `pandastack:retro-week` / `pandastack:retro-month` |
-| Don't know which skill | Read `RESOLVER.md` at pandastack repo root |
-
-When a skill applies, announce: "Using `pandastack:<skill>` to <purpose>" — then invoke the `Skill` tool. Do not read `SKILL.md` files directly with the Read tool.
+The routing table is the SINGLE SOURCE in `DISPATCH.md` (pandastack plugin root), injected at SessionStart — it is not duplicated here. Forking it caused drift, and `DISPATCH.md`'s own maintenance note says "do not fork the table." Match the current task against that table; on match, announce "Using `pandastack:<skill>` to <purpose>" then invoke the `Skill` tool. Do not read `SKILL.md` files directly with the Read tool. Don't know which skill → read `RESOLVER.md` at the pandastack repo root.
 
 ## Session opener ritual (5-step, < 5 sec)
 
