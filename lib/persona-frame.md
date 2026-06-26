@@ -2,7 +2,7 @@
 
 > Shared module. Loaded by `boardroom` which switches between 4 voices internally, and by the 5 lead skills (ceo / eng-lead / design-lead / product-lead / ops-lead) for their cognitive model + iron law structure.
 >
-> Origin: pandastack 5 lead personas existed only as agents at `agents/{ceo,design,eng,ops,product}.md`. v1.1 cut: pandastack is **skill-only**, agents/ deleted. Persona content lives in `skills/{persona}/SKILL.md`. This lib defines the shared structure so 5 lead skills + boardroom voices stay aligned.
+> Origin: pandastack 5 lead personas existed only as agents at `agents/{ceo,design,eng,ops,product}.md`. v1.1 cut: pandastack is **skill-only**, agents/ deleted. Persona content lives in `skills/productivity/{persona}/SKILL.md`. This lib defines the shared structure so 5 lead skills + boardroom voices stay aligned.
 
 ## Persona contract (shared structure)
 
@@ -54,8 +54,8 @@ When a flow skill (e.g. `boardroom`, `team-orchestrate`) needs to dispatch a per
 ```
 1. Resolve the persona SKILL.md path. Try in order:
    a. host plugin-resolver lookup of `pandastack:<persona>` (Claude Code / Codex SDK exposes the install path)
-   b. plugin-relative: `<this-skill>/../../thinking/<persona>/SKILL.md` (all 5 personas live in the `thinking` bucket; resolve up to `skills/` then into `thinking/` from any calling bucket)
-   c. fallback: walk up from cwd looking for `skills/thinking/<persona>/SKILL.md`
+   b. plugin-relative: `<this-skill>/../../productivity/<persona>/SKILL.md` (all 5 personas live in the `productivity` bucket; resolve up to `skills/` then into `productivity/` from any calling bucket)
+   c. fallback: walk up from cwd looking for `skills/productivity/<persona>/SKILL.md`
 2. Extract the 6 contract sections (Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns + Apply BAD/GOOD calibration)
 3. Inline them at the TOP of the Agent tool prompt, fenced as a persona block:
 
@@ -106,7 +106,7 @@ Hard rules (Panda's voice / commit style / no em dash / no Co-Authored-By traile
 `boardroom` (B4) is a single skill that switches between 4 voices internally (ceo → product → design → eng — ops not included by default, scope-add when ops decisions are central). Voice switching mechanism:
 
 1. Boardroom loads `lib/persona-frame.md` to know the contract
-2. For each voice, boardroom loads `skills/{voice}/SKILL.md` and reads the 6 sections
+2. For each voice, boardroom loads `skills/productivity/{voice}/SKILL.md` and reads the 6 sections
 3. Boardroom prompts: "Now critiquing as {voice}: {Soul}. Apply Iron Laws {1-N}. Reach for {cognitive models}."
 4. Voice produces critique, returns to boardroom
 5. Repeat for next voice
@@ -147,5 +147,5 @@ With a frame:
 ## Origin
 
 - pandastack `agents/{ceo,design,eng,ops,product}.md` — original agent-only personas (deleted v1.1)
-- v1.1 cut (2026-05-04) — pandastack is skill-only, agents/ deleted, content lives in `skills/{persona}/SKILL.md`
+- v1.1 cut (2026-05-04) — pandastack is skill-only, agents/ deleted, content lives in `skills/productivity/{persona}/SKILL.md`
 - `lib/persona-frame.md` defines the contract for the 5 persona skills

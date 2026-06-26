@@ -162,7 +162,7 @@ Before declaring the skill done, score it against the [`../writing-great-skills/
 ## Output Format
 
 ```
-skills/<bucket>/<name>/   (bucket = thinking | doing | writing | meta)
+skills/<bucket>/<name>/   (bucket = engineering | productivity | writing | meta)
 ├── SKILL.md            ← created
 └── eval.md             ← created by /skill-eval
 .claude-plugin/plugin.json ← "./skills/<bucket>/<name>" added to skills array

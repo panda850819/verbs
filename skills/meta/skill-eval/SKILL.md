@@ -14,13 +14,13 @@ Scope note: this scores the **SKILL.md construction** (predictability, no-ops, c
 
 ## Invoke
 
-`/skill-eval <name>` evaluates one skill. `/skill-eval all` fans out over every skill in `skills/<bucket>/<skill>/` (dispatch one sub-agent per skill; hot/cold rule — never score 26 skills in one hot context).
+`/skill-eval <name>` evaluates one skill. `/skill-eval all` fans out over every skill in `skills/<bucket>/<skill>/` (dispatch one sub-agent per skill; hot/cold rule — never score the whole corpus in one hot context).
 
 ## Steps
 
 ### 1. Load criteria → read the target
 
-Read the writing-great-skills scorecard (the 8 axes). Resolve the target: `skills/<bucket>/<name>/SKILL.md` (bucket = thinking|doing|writing|meta). Read it whole, plus any sibling reference files it points at.
+Read the writing-great-skills scorecard (the 8 axes). Resolve the target: `skills/<bucket>/<name>/SKILL.md` (bucket = engineering|productivity|writing|meta). Read it whole, plus any sibling reference files it points at.
 
 ### 2. Score the 8 axes
 

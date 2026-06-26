@@ -5,7 +5,7 @@
 #   - lib/capability-probe.md (decides degraded-mode messaging)
 #   - your own /pandastack:init flow (sets up config env vars)
 #
-# Tier semantics (v2.2):
+# Tier semantics:
 #   core      — markdown-only. No external CLI required. Runs on a fresh clone after
 #               `git clone && /plugin install`. Personas, lifecycle skills, session
 #               management.
@@ -30,9 +30,9 @@
 # This file is hand-curated. When you add or rename a skill, update here.
 
 [manifest]
-version = "2.2.0"
+version = "3.1.0"
 schema  = "skill-tier-v1"
-updated = "2026-05-09"
+updated = "2026-06-26"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
@@ -69,6 +69,7 @@ updated = "2026-05-09"
 
 # ============================================================================
 # CORE (26) — markdown-only, fresh-clone runnable
+# Buckets on disk: engineering / productivity / writing / meta
 # ============================================================================
 
 [skill.boardroom]
@@ -212,11 +213,12 @@ description = "GitHub repo docs + Mermaid diagrams via deepwiki."
 #   - claude-code              the CLI runtime (or codex / gemini / hermes equivalent)
 #
 # When adding a new skill:
-#   1. Create skills/<bucket>/<name>/SKILL.md (bucket = thinking|doing|writing|meta)
+#   1. Create skills/<bucket>/<name>/SKILL.md (bucket = engineering|productivity|writing|meta)
 #   2. Add a [skill.<name>] entry here with tier + requires + config
 #   3. Add "./skills/<bucket>/<name>" to the "skills" array in .claude-plugin/plugin.json
 #   4. If tier=ext, add the install command in scripts/bootstrap.sh ext-install table
-#   5. Update RESOLVER.md skill catalog
+#   5. Run skill-eval (writes co-located eval.md); lint-eval-fresh.sh enforces freshness
+#   6. Update RESOLVER.md skill catalog
 #
 # Skills cut in v2.2.0 (archived under skills/_archive/<name>-<date>/):
 #   - think-like-naval, think-like-alan-chan

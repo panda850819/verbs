@@ -2,7 +2,7 @@
 
 > Living document for pandastack scope ahead of `main`. Each milestone has a clear gate. CHANGELOG records what shipped; ROADMAP records what is planned and why.
 
-## v1.x, personal-substrate stable (current)
+## v1.x, personal-substrate stable (superseded by v3.1)
 
 Status: stable since 2026-04-29 (`aab8f49`). API, schema, and skill content are stable for the author's daily use. Dogfooded across 4 of 7 lifecycle flows (ship / work / knowledge / review). Three lifecycles unfired during the dogfood window (dev / write / retro / grill) are not v1 cut blockers; personal-substrate stable does not require all 7 lifecycles covered.
 
@@ -29,7 +29,7 @@ Goal: a fresh A-class user can `/plugin install pandastack@pandastack` and reach
 
 Scope:
 
-- **Onboarding scaffold** `[partial — shipped in v1.3.0 / v1.4.0; env-var requirement removed in v2.0.1; brain-index assumption removed in v2.1.0]`. Bootstrap script (`scripts/bootstrap.sh`) + manifest-driven tier model (`plugins/pandastack/manifest.toml`) replaced the previous 4-section README install dance. Skills derive vault path from cwd and Google account from `gog` defaults — no env vars to set, no brain index to bootstrap. Remaining for v2.x: vault scaffolding (auto-create `Inbox/`, `Blog/_daily/`, `docs/learnings/atoms/` if absent), context picker, first-session walkthrough.
+- **Onboarding scaffold** `[partial — shipped in v1.3.0 / v1.4.0; env-var requirement removed in v2.0.1; brain-index assumption removed in v2.1.0]`. Bootstrap script (`scripts/bootstrap.sh`) + manifest-driven tier model (`plugins/pandastack/manifest.toml`) replaced the previous 4-section README install dance. Skills derive vault path from cwd and Google account from `gog` defaults — no env vars to set, no brain index to bootstrap. Remaining for v2.x: vault scaffolding (auto-create `Inbox/`, `Blog/_daily/`, `docs/learnings/atoms/` if absent), first-session walkthrough.
 - **Fresh A-user dogfood criteria** (B-phase entry criterion, not a current-cut gate). When distribution (B) is entered, real-user validation defines readiness: 3 fresh A-class users complete install + 1 week of daily use without author hand-holding; below that, the public cut stays pre-release. Under solo-first this bar does NOT gate the personal-first version — it is the entry criterion for the distribution phase. v1.3.0+ structural fix opens the verification window for when B begins.
 - **Public capability-probe defaults** `[partial — shipped in v1.3.0]`. Manifest tier metadata + bootstrap.sh probe table now route fresh users through "what runs now / what to install" rather than a "you're on your own" dump. Remaining for v2: capability-probe itself (the in-skill `lib/capability-probe.md` invocation) needs to consume manifest data and emit the same actionable framing rather than the current generic gap dump.
 - **L5 firewall** `[retired]`. L5 was never enforced on the public surface (frontmatter-only metadata); the enforcing hook lived in the now-removed `pdctx` overlay. Formally retired — the fields stay as advisory audit metadata; the only active guard is `pretooluse-destructive-guard.sh`.
@@ -53,26 +53,9 @@ These are not yet decided. Each affects v2 priority but does not block v1 cut.
 
 Substrate-agnostic cut. Removed `gbq` / `gbrain` assumption from all skills (was personal-CLI dependency that fresh installs couldn't satisfy without separate brain index). Vault scans now use `rg` / `find` directly. Cut `deep-research` skill (gbrain-core) and `work-sommet-abyss-po` context. Net: 39 → 38 skills, 8 → 7 contexts. See `CHANGELOG.md` v2.1.0.
 
-## Scheduler / driver autonomy — loop-in-agent (active, 2026-06)
+## Scheduler / driver autonomy — SPLIT OUT to a separate product
 
-A workstream separate from the v1/v2 public-readiness arc. WBS = Linear; scheduler = `scripts/pandastack-drive` (symphony pattern, pandastack skills as executor); autonomy contract = `plugins/pandastack/docs/driver-autonomy.md`; Linear mapping = `plugins/pandastack/docs/linear-contract.md`; design lineage + alternatives = `docs/briefs/2026-06-13-scheduler-wbs-linear.md`. Live now: launchd every 4h, read-only, proposes advances (never writes Linear). The build-out below moves classification from the current phase-type proxy to the full auto-loop eligibility predicate (safe **and** ready). Feature gaps benchmarked against `openai/symphony` SPEC.md.
-
-High priority (next):
-
-- [x] **Readiness checks in `pandastack-linear-reduce`** — per-phase inputs-present gate; generalize the acceptance rule (`linear-contract.md`) from VERIFY to every phase. An under-specified issue surfaces for Panda instead of auto-running a plausible-but-empty plan. This is the core eligibility question — what is allowed into the auto-loop. Gate: `reduce` re-classifies a not-ready dispatchable issue as gated. Shipped on the scheduler branch; covered by `tests/linear-reduce.sh`.
-- [x] **Per-issue workspace isolation** — port symphony's sanitized-key + reuse-across-runs + path-containment model. AUTO BUILD runs in an isolated git worktree/branch, not the live repo, with Codex network access pinned off. Gate: a run cannot touch the project's working tree. Covered by `tests/drive-build.sh`.
-- [x] **Retry + exponential backoff** — port symphony's `RetryEntry` + `delay = min(10000 * 2^(attempt-1), cap)`. A transient FAIL re-queues with backoff; after N attempts the item stops retrying and surfaces for manual review. Covered by `tests/drive-retry.sh`.
-
-Medium (after the high tier):
-
-- [x] **BUILD autonomy (opt-in, default OFF)** — the 5-condition gate in `driver-autonomy.md` (plan approved + prompt-ified work-order + machine-checkable acceptance + isolated workspace + stops at SHIP). Enable per-project via `--build-auto --only <project>` first, never globally. Covered by `tests/drive-build.sh`.
-- [ ] **Stall detection / turn timeout** — replace the blunt `subprocess timeout(1200)` with symphony-style `stall_timeout` (kill unresponsive worker, schedule retry) + a turn cap.
-- [ ] **Bounded concurrency (global + per-state)** — symphony's `max_concurrent_agents` + per-state override; needed before any fan-out past `--max 1`.
-- [x] **Read-only status surface** — value scoreboard via `drive-pulse --status` over `drive-log.jsonl`: autonomous BUILD+merge count, promote-to-main, ship count, human-revert tally, external-vs-self split, verdict mix. Token spend is NO DATA (the ledger has no token field) — rendered, never faked. The live "what is the loop doing now" view and the HTTP `/api/v1/state` server remain follow-ons; this MVP is the value-visibility cut that says whether the autonomy produces value or only grooms itself. Covered by `tests/drive-status.sh`. (PRO-70)
-
-Later (logged, not scheduled): hot-reloadable `WORKFLOW.md`-style config, token accounting, Liquid prompt templating with full work-order injection, a `linear_graphql` tool for the executor, SSH remote workers. All from the symphony feature-map A-zone; none blocks the high/medium tiers.
-
-What is deliberately NOT adopted from symphony (conflicts with the co-pilot design): auto-approve / "must not stall" defaults, agents that land code or write the tracker, the Codex-only hardwired executor, and the Todo-only blocker gate (pandastack blocks on any open blocker, any state). See `driver-autonomy.md`.
+This workstream (Linear WBS, the `pandastack-drive` scheduler, BUILD autonomy, auto-merge, the read-only status surface, and the `driver-autonomy.md` / `linear-contract.md` contracts) no longer lives in this repo. It has been split out into a separate autonomous-driver product. None of `scripts/pandastack-drive`, `scripts/drive-*`, `scripts/agent-worker`, the `pandastack-linear-*` scripts, the `config/` dir, `pandastack.toml`, or the `docs/driver-autonomy.md` / `docs/linear-contract.md` plans ship here anymore. This repo is the skill pack and substrate only.
 
 ## Decision rationale
 

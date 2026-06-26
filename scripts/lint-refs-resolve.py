@@ -9,8 +9,9 @@ property directly (does the path exist?) instead of pattern-matching the bug.
 
 Usage: python3 scripts/lint-refs-resolve.py   (exit 0 = clean, 1 = broken refs)
 
-Accepted non-repo tokens (skipped): runtime output dirs the user's vault owns
-(docs/sessions, docs/checkpoints, docs/retros), absolute-path substrings
+Accepted non-repo tokens (skipped): output convention dirs skills create at
+runtime (docs/sessions, docs/checkpoints, docs/retros, docs/plans, docs/briefs,
+docs/handoffs — not tracked when empty), absolute-path substrings
 (skills/pandastack/...), external URLs (skills/tree/main/...), and template
 placeholders containing { or < (verified by shape, not existence).
 """
@@ -22,7 +23,7 @@ import glob
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 
-BUCKETS = {"thinking", "doing", "writing", "meta"}
+BUCKETS = {"engineering", "productivity", "writing", "meta"}
 skill_bucket = {}
 for b in BUCKETS:
     for n in os.listdir(f"skills/{b}"):
@@ -34,7 +35,7 @@ TOKEN = re.compile(r"(?:skills|lib|docs|contexts)/[A-Za-z0-9_./{}<>-]+")
 
 def accepted(t):
     return (
-        t.startswith(("docs/sessions", "docs/checkpoints", "docs/retros"))
+        t.startswith(("docs/sessions", "docs/checkpoints", "docs/retros", "docs/plans", "docs/briefs", "docs/handoffs"))
         or t.startswith("skills/pandastack/scripts")  # abs-path substring of ~/site/skills/pandastack/...
         or t.startswith("skills/tree/main")           # github URL substring
         or t == "skills/SKILL.md"                       # substring of writing-great-skills/SKILL.md
