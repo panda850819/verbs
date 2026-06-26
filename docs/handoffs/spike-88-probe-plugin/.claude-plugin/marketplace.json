@@ -1,0 +1,11 @@
+{
+  "name": "spike88probe",
+  "owner": { "name": "spike-88" },
+  "plugins": [
+    {
+      "name": "spike88probe",
+      "source": "./plugins/spike88probe",
+      "description": "Throwaway discovery-scope probe for issue #88. Uninstall after the one-time test."
+    }
+  ]
+}

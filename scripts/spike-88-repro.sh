@@ -77,23 +77,33 @@ echo "  If discovery is whole-plugin-recursive, the fix is cheap and local; it d
 
 if [ "${1:-}" = "--codex" ]; then
   echo
-  echo "== --codex: isolated Codex live check (throwaway temp HOME, no ~/.codex mutation) =="
+  echo "== --codex: isolated Codex live check (dedicated scratch HOME, NOT macOS /var/folders temp) =="
   if ! command -v codex >/dev/null 2>&1; then
     no "NOT VERIFIED: codex CLI not found (--codex requested but cannot run; does NOT count as pass)"
   else
-    th="$(mktemp -d)"; mkdir -p "$th/.codex/skills"
-    ln -s "$plugin/skills" "$th/.codex/skills/pandastack"
-    echo "  temp HOME=$th ; codex skills -> worktree skills/ (skills-cat NOT linked = matches bootstrap design)"
-    if ! out="$(HOME="$th" codex exec --skip-git-repo-check 'List your available skill names, one per line.' 2>&1)"; then
-      no "codex exec failed: $(printf '%s' "$out" | head -1)"
+    # Dedicated scratch under XDG cache (Codex refuses to create helper binaries under
+    # macOS /var/folders TMPDIR). Cleaned up at the end. Distinct from discovery result.
+    ch="${XDG_CACHE_HOME:-$HOME/.cache}/pandastack/spike-88-codex-home.$$"
+    [ -n "$ch" ] && rm -rf "$ch"
+    mkdir -p "$ch/.codex/skills"
+    ln -s "$plugin/skills" "$ch/.codex/skills/pandastack"
+    echo "  scratch HOME=$ch ; codex skills -> worktree skills/ (skills-cat NOT linked = matches bootstrap design)"
+    # Preflight: can codex even start in this isolated HOME? Env failure != discovery failure.
+    if ! pf="$(printf 'reply with exactly: OK' | HOME="$ch" codex exec --skip-git-repo-check - 2>&1)"; then
+      no "NOT VERIFIED: codex environment (preflight failed, not a discovery result): $(printf '%s' "$pf" | head -1)"
     else
-      n=$(printf '%s\n' "$out" | grep -ci "\b$skill\b" || true)
-      case "$n" in
-        1) ok "codex discovered '$skill' exactly once" ;;
-        0) no "codex did NOT discover '$skill' (n=0)" ;;
-        *) no "codex double-loaded '$skill' (n=$n)" ;;
-      esac
+      if ! out="$(printf 'List your available skill names, one per line.' | HOME="$ch" codex exec --skip-git-repo-check - 2>&1)"; then
+        no "NOT VERIFIED: codex environment (exec failed, not a discovery result): $(printf '%s' "$out" | head -1)"
+      else
+        n=$(printf '%s\n' "$out" | grep -ci "\b$skill\b" || true)
+        case "$n" in
+          1) ok "codex discovered '$skill' exactly once" ;;
+          0) no "codex did NOT discover '$skill' (n=0)" ;;
+          *) no "codex double-loaded '$skill' (n=$n)" ;;
+        esac
+      fi
     fi
+    [ -n "$ch" ] && rm -rf "$ch"   # cleanup scratch
   fi
 fi
 
