@@ -16,7 +16,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-MANIFEST="${REPO_ROOT}/plugins/pandastack/manifest.toml"
+MANIFEST="${REPO_ROOT}/manifest.toml"
 
 if [ ! -f "$MANIFEST" ]; then
   echo "FATAL: manifest.toml not found at $MANIFEST" >&2
@@ -126,7 +126,7 @@ EOF
     cat <<EOF
   Run in shell, then restart Codex CLI:
     mkdir -p \$HOME/.codex/skills
-    ln -sfn $REPO_ROOT/plugins/pandastack/skills \$HOME/.codex/skills/pandastack
+    ln -sfn $REPO_ROOT/skills \$HOME/.codex/skills/pandastack
 EOF
     ;;
   *)

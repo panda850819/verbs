@@ -3,10 +3,10 @@
 
 The scheduler's pure decision core: given a set of issues (from a fixture now, or
 the live Linear API in --source linear later), apply the eligibility predicate
-and stable sort from plugins/pandastack/docs/linear-contract.md, and split them
+and stable sort from docs/linear-contract.md, and split them
 into dispatchable / gated / blocked. The LLM never picks — this is deterministic.
 
-Contract: plugins/pandastack/docs/linear-contract.md (lifecycle-map, needs-human,
+Contract: docs/linear-contract.md (lifecycle-map, needs-human,
 acceptance-format, active-terminal-states).
 
 Usage:

@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# SessionStart hook for pandastack plugin.
+# Inspired by superpowers v5.0.7 hook structure (obra/superpowers).
+# Injects only the small brain-first startup rule. Full skill bodies should be
+# loaded on demand by the runtime skill mechanism, not injected into every
+# session context.
+
+set -euo pipefail
+
+brain_first_rule="Use brain first: before any factual, knowledge, or decision answer, query the brain. If the brain is empty, say so plainly. Do not preload full skill bodies at session start; load skills on demand when the task clearly matches them."
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+rule_escaped=$(escape_for_json "$brain_first_rule")
+
+session_context="<IMPORTANT>\n${rule_escaped}\n</IMPORTANT>"
+
+# Append the dispatch table (single source: DISPATCH.md).
+# Strip the HTML maintenance comment to keep the injected payload compact.
+plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+dispatch_file="${plugin_root}/DISPATCH.md"
+if [ -f "$dispatch_file" ]; then
+  dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"
+  dispatch_escaped=$(escape_for_json "$dispatch_content")
+  session_context="${session_context}\n<IMPORTANT>\n${dispatch_escaped}\n</IMPORTANT>"
+fi
+
+# Platform-specific JSON output. Same content, different envelope per CLI.
+# - Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT)
+# - Claude Code sets CLAUDE_PLUGIN_ROOT without COPILOT_CLI
+# - Copilot CLI (v1.0.11+) sets COPILOT_CLI=1
+# - Codex CLI / unknown — SDK standard format with top-level additionalContext
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
+fi
+
+exit 0

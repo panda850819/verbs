@@ -56,7 +56,7 @@ run_codex() {
 # Hook conformance: session-start must emit valid JSON in every envelope.
 run_hook() {
   ran=1
-  local hook="$repo_root/plugins/pandastack/hooks/session-start"
+  local hook="$repo_root/hooks/session-start"
   local out
   for envelope in codex claude cursor; do
     case "$envelope" in

@@ -9,10 +9,10 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-_DEFAULT_MANIFEST = REPO_ROOT / "plugins/pandastack/manifest.toml"
+_DEFAULT_MANIFEST = REPO_ROOT / "manifest.toml"
 MANIFEST_PATH = Path(os.environ.get("PANDASTACK_MANIFEST", str(_DEFAULT_MANIFEST)))
-DISPATCH_PATH = REPO_ROOT / "plugins/pandastack/DISPATCH.md"
-SKILLS_DIR = REPO_ROOT / "plugins/pandastack/skills"
+DISPATCH_PATH = REPO_ROOT / "DISPATCH.md"
+SKILLS_DIR = REPO_ROOT / "skills"
 AGENT_WORKER_PATH = REPO_ROOT / "scripts/agent-worker"
 
 # Schema version for capabilities.json / runtimes.json. Mirrored in pandastack.toml
@@ -143,9 +143,13 @@ def check_manifest_skills(manifest_data):
 
     disk_skills = set()
     if SKILLS_DIR.is_dir():
-        for entry in SKILLS_DIR.iterdir():
-            if entry.is_dir() and entry.name != ".archive":
-                disk_skills.add(entry.name)
+        # Skills live one level deep under category buckets: skills/<bucket>/<skill>/.
+        for bucket in SKILLS_DIR.iterdir():
+            if not bucket.is_dir() or bucket.name == ".archive":
+                continue
+            for entry in bucket.iterdir():
+                if entry.is_dir():
+                    disk_skills.add(entry.name)
 
     manifest_skills = set(skill_section.keys())
     missing_on_disk = sorted(manifest_skills - disk_skills)
@@ -200,7 +204,7 @@ def derive_roles(runtimes):
             "ready": codex_ready,
             "install_hint": (
                 f"mkdir -p $HOME/.codex/skills\n"
-                f"ln -sfn {REPO_ROOT}/plugins/pandastack/skills"
+                f"ln -sfn {REPO_ROOT}/skills"
                 " $HOME/.codex/skills/pandastack"
             ) if not codex_ready else None,
         },
@@ -511,7 +515,7 @@ def derive_recommendation(runtimes):
                 "/reload-plugins",
                 "# OR Codex CLI:",
                 "mkdir -p $HOME/.codex/skills",
-                f"ln -sfn {REPO_ROOT}/plugins/pandastack/skills"
+                f"ln -sfn {REPO_ROOT}/skills"
                 " $HOME/.codex/skills/pandastack",
             ],
         })
@@ -719,7 +723,7 @@ def run_init(args):
             )
             sys.exit(1)
         elif host == "codex":
-            skills_target = REPO_ROOT / "plugins/pandastack/skills"
+            skills_target = REPO_ROOT / "skills"
             codex_skills = Path.home() / ".codex" / "skills"
             link_path = codex_skills / "pandastack"
             if link_path.is_dir() and not link_path.is_symlink():
@@ -755,7 +759,7 @@ def run_init(args):
         print()
         print("Then run /pandastack:init once inside your project.")
     elif host == "codex":
-        skills_target = REPO_ROOT / "plugins/pandastack/skills"
+        skills_target = REPO_ROOT / "skills"
         print("Commands to install pandastack in Codex CLI:")
         print("  mkdir -p $HOME/.codex/skills")
         print(f"  ln -sfn {skills_target} $HOME/.codex/skills/pandastack")

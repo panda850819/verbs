@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "pandastack",
-      "description": "Personal AI operator OS for Claude Code. 38 skills (27 core / 5 ext / 6 personal), 5 personas, 7 lifecycle flows, 7 context recipes.",
-      "source": "./plugins/pandastack",
+      "description": "Personal AI operator OS for Claude Code. 26 skills in thinking / doing / writing / meta buckets, 5 personas, dev / writing / knowledge lifecycles with a learning loop.",
+      "source": ".",
       "category": "personal-os",
       "homepage": "https://github.com/panda850819/pandastack"
     }

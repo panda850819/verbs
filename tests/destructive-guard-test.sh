@@ -8,7 +8,7 @@
 #  live PreToolUse guard does not false-trigger on the test runner itself.)
 set -uo pipefail
 
-GUARD="$(cd "$(dirname "$0")/.." && pwd)/plugins/pandastack/hooks/pretooluse-destructive-guard.sh"
+GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-destructive-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
 pass=0 fail=0
 

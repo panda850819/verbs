@@ -11,7 +11,7 @@ Design contract (grilled 2026-06-13):
   - timestamps + run_id are produced HERE, not by the model — the model decides
     WHAT happened, the program records WHEN (resume breaks if the model invents ts).
 
-Schema + full reference: plugins/pandastack/docs/state-schema.md
+Schema + full reference: docs/state-schema.md
 
 Usage:
   pandastack-state append --slug <repo> --item <name> --event phase_enter \\

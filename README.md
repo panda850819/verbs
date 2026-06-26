@@ -38,7 +38,7 @@ bash scripts/bootstrap.sh --claude    # or --codex
 - 24 core skills runnable on this clone with no external CLI
 - 2 extension skills with the exact `brew install` / `npm install -g` to enable each
 
-For programmatic use, `scripts/pandastack doctor --capabilities-json` emits a stable JSON capability map (schema in `plugins/pandastack/docs/capabilities.md`).
+For programmatic use, `scripts/pandastack doctor --capabilities-json` emits a stable JSON capability map (schema in `docs/capabilities.md`).
 
 After install:
 
@@ -48,7 +48,7 @@ After install:
 4. `/ship knowledge <path>` on a finished note in your vault
 5. Stop there. You'll know if pandastack fits how you work.
 
-> **Tier model (v2.2)**: Skills are tiered in `plugins/pandastack/manifest.toml`. Core = markdown-only, runs on a fresh clone. Ext = needs a public CLI install. `capability-probe` only ABORTs when substrate is missing, not when ext CLIs are absent.
+> **Tier model (v2.2)**: Skills are tiered in `manifest.toml`. Core = markdown-only, runs on a fresh clone. Ext = needs a public CLI install. `capability-probe` only ABORTs when substrate is missing, not when ext CLIs are absent.
 
 ## Lifecycle map
 
@@ -226,7 +226,7 @@ bash scripts/bootstrap.sh --codex     # also print Codex CLI install steps
 | Host | Install |
 |---|---|
 | Claude Code | `/plugin marketplace add /absolute/path/to/pandastack` then `/plugin install pandastack@pandastack` then `/reload-plugins` |
-| Codex CLI | `ln -sfn /absolute/path/to/pandastack/plugins/pandastack/skills ~/.codex/skills/pandastack` then restart Codex |
+| Codex CLI | `ln -sfn /absolute/path/to/pandastack/skills ~/.codex/skills/pandastack` then restart Codex |
 | Hermes | Import/symlink selected skills into `~/.hermes/skills/` (see `docs/HERMES.md`) |
 | OpenClaw | Skill package experimental, see `docs/OPENCLAW.md` |
 
@@ -265,7 +265,7 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 ## Contexts
 
-Context recipes live in `plugins/pandastack/contexts/*.toml`. Each recipe binds a flow, persona, skill subset, and memory namespace to a specific identity.
+Context recipes live in `contexts/*.toml`. Each recipe binds a flow, persona, skill subset, and memory namespace to a specific identity.
 
 | Context | Purpose |
 |---|---|
@@ -276,7 +276,7 @@ Context recipes live in `plugins/pandastack/contexts/*.toml`. Each recipe binds 
 
 ## Skills
 
-26 skills grouped by lifecycle (24 core / 2 ext — see `plugins/pandastack/manifest.toml`). Persona names follow the gstack convention — each skill is "your specialist" for that step.
+26 skills grouped by lifecycle (24 core / 2 ext — see `manifest.toml`). Persona names follow the gstack convention — each skill is "your specialist" for that step.
 
 ### Think / intake
 
@@ -362,7 +362,7 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 
 ## Personas
 
-5 persona skills under `plugins/pandastack/skills/{ceo,eng-lead,ops-lead,product-lead,design-lead}/`, sharing the frame in `lib/persona-frame.md`. pandastack is skill-only — no separate agent dispatch layer. Edit any persona SKILL.md; the change picks up after `/reload-plugins`.
+5 persona skills under `skills/thinking/{ceo,eng-lead,ops-lead,product-lead,design-lead}/`, sharing the frame in `lib/persona-frame.md`. pandastack is skill-only — no separate agent dispatch layer. Edit any persona SKILL.md; the change picks up after `/reload-plugins`.
 
 | Persona skill | Role |
 |---|---|
@@ -374,7 +374,7 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 
 ## Lifecycle compositions
 
-v2.2.0 cut the `flows/` directory. There are no longer separate flow spec files — what used to live in `plugins/pandastack/flows/*.md` is now either:
+v2.2.0 cut the `flows/` directory. There are no longer separate flow spec files — what used to live in `flows/*.md` is now either:
 
 1. **Inline in the relevant skill**: `/sprint` for dev, `/ship knowledge` (incl. decision-note variant) for knowledge close.
 2. **Documented in the "Lifecycle map" section above**: the 3 first-class compositions (dev / writing / knowledge).
@@ -434,8 +434,8 @@ Recommended release loop:
 2. Update user-facing docs, especially `README.md` and install notes.
 3. Bump visible version markers when behavior changed:
    - `CHANGELOG.md`
-   - `plugins/pandastack/.claude-plugin/plugin.json`
-   - `plugins/pandastack/.codex-plugin/plugin.json`
+   - `.claude-plugin/plugin.json`
+   - `.codex-plugin/plugin.json`
    - `.claude-plugin/marketplace.json`, if marketplace metadata changed
 4. Verify in the real hosts you claim to support:
    - Claude Code local marketplace install
@@ -447,7 +447,7 @@ Recommended release loop:
 
 ### Before opening a PR
 
-- Keep skill content in `plugins/pandastack/skills/<name>/SKILL.md`
+- Keep skill content in `skills/<bucket>/<name>/SKILL.md` (bucket = thinking | doing | writing | meta); add the path to the `skills` array in `.claude-plugin/plugin.json`
 - Keep each skill concise; the current discipline is roughly under 80 lines unless the extra length clearly earns itself
 - Run validation:
 
@@ -455,7 +455,7 @@ Recommended release loop:
 bash scripts/lint-manifest-sync.sh
 ```
 
-Frontmatter fields `reads`, `writes`, `domain`, and `classification` are optional advisory audit metadata — nothing reads or enforces them. The L1–L5 firewall they were specified for was implemented in the now-retired `pdctx` overlay; on the public surface the only active guard is `plugins/pandastack/hooks/pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands. See [SKILL-FRONTMATTER.md](SKILL-FRONTMATTER.md) for the schema.
+Frontmatter fields `reads`, `writes`, `domain`, and `classification` are optional advisory audit metadata — nothing reads or enforces them. The L1–L5 firewall they were specified for was implemented in the now-retired `pdctx` overlay; on the public surface the only active guard is `hooks/pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands. See [SKILL-FRONTMATTER.md](SKILL-FRONTMATTER.md) for the schema.
 
 ### How to open a PR
 

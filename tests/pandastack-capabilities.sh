@@ -352,10 +352,10 @@ HOME="$fake_home_badshape" \
 # ---------------------------------------------------------------------------
 # T06 — docs file exists and contains required content
 # ---------------------------------------------------------------------------
-doc_file="$repo_root/plugins/pandastack/docs/capabilities.md"
+doc_file="$repo_root/docs/capabilities.md"
 [ -f "$doc_file" ] \
   && pass "capabilities.md doc exists" \
-  || fail_t "plugins/pandastack/docs/capabilities.md missing"
+  || fail_t "docs/capabilities.md missing"
 
 grep -q "capabilities.json" "$doc_file" 2>/dev/null \
   && pass "capabilities.md references capabilities.json" \

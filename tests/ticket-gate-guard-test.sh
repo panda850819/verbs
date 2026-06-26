@@ -6,7 +6,7 @@
 # Run: bash tests/ticket-gate-guard-test.sh
 set -uo pipefail
 
-GUARD="$(cd "$(dirname "$0")/.." && pwd)/plugins/pandastack/hooks/pretooluse-ticket-gate-guard.sh"
+GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-ticket-gate-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
 pass=0 fail=0
 
