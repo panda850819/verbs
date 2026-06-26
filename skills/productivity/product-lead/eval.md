@@ -2,37 +2,37 @@
 type: skill-eval
 skill: product-lead
 bucket: productivity
-evaluated_skill_hash: 6be71bc505ca7ca6716f26bb9e9501a15434cc54
+evaluated_skill_hash: e987b6938b7fd001062e1b8b595d279d3f39eee6
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — product-lead
 
-**Verdict: SOLID.** A disciplined persona lens whose Iron Laws and pretrained cognitive anchors (leaky bucket, job-to-be-done) give a sharp, repeatable product-review process — held back only by triple-encoded routing and soft completion criteria in the lens steps.
+**Verdict: WEAK.** A tight, predictable product-lens persona with strong pretrained anchors and clean lib delegation, but it carries three weak axes: the description's invoke/NOT routing is restated wholesale in the body Routing Boundary (description duplication), the Anti-patterns re-encode the Iron Laws (pruning), and the On-Invoke steps frame rather than gate (completion). Three weak with no fail is WEAK under the scorecard arithmetic.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L46 — "On Invoke" fixes the same 4-step process (problem → metric → non-scope → failure mode) every run, the right form of predictability for a lens. |
-| Description / invocation | pass | L4 — front-loads "Product lens for…", lists trigger branches, ends with a tight NOT-clause that discriminates from ceo/eng/design/ops. |
-| Completion criteria | weak | L49 — "Predict the failure mode" has no checkable done-condition (predict from what evidence, against what bar?); a persona step like this can be declared done trivially → premature-completion bait. |
-| Information hierarchy | pass | L16 — the shared 6-section persona contract is pushed behind an `@../../../lib/persona-frame.md` pointer instead of inlined, keeping the top legible. |
-| Leading words | pass | L41 — "Leaky bucket" / "Job-to-be-done" / "Focus through subtraction" anchor behaviour in concepts already in pretraining; no weak "be thorough"-class fillers. |
-| Pruning | weak | L22 — the Routing Boundary NOT-clause restates the description's NOT-clause (L4) verbatim in meaning, and Team protocol (L65-67) encodes the same hand-off routing a third time: one fact, three places. |
-| Granularity | pass | L16 — the cut to `lib/persona-frame.md` earns its context load: the contract is shared by 5 lead skills + boardroom, so the split removes duplication rather than creating reach cost. |
-| pandastack conformance | pass | L5 — frontmatter is valid per SKILL-FRONTMATTER (name+description required; reads/domain/classification are sanctioned advisory fields); lib refs resolve, body ~67 lines (<80), no >5K hot-read so hot/cold is moot. |
+| Predictability | pass | L44 — `On Invoke` fixes the same 4-step lens (problem -> metric -> non-goals -> failure mode) every run, regardless of output. |
+| Description / invocation | weak | L4 — front-loads "Product lens", one `/product-lead` trigger, NOT-clause delimits cleanly, BUT the entire invoke/NOT routing is restated in the body Routing Boundary (L20-22): description "user problem, metric, PMF, MVP scope... NOT for strategy-only / implementation / UI polish / ops cadence / generic planning" ~ L20-22 "user problem, target user, metric, PMF, MVP scope... Do not invoke for `ceo` / `eng-lead` / `design-lead` / `ops-lead` / plan". Body-identity restated, which the scorecard axis 2 calls out ("no duplication, no body-identity"). The body adds only the backticked sibling names; the routing facts are otherwise a second copy. |
+| Completion criteria | weak | L49 — "Predict the failure mode" ends on a framing prompt with no done/not-done check; only L46 ("in 1 sentence") is genuinely checkable, the other three steps invite premature completion. |
+| Information hierarchy | pass | L16 — shared persona structure and L61 BAD/GOOD calibration are pushed to `lib/` behind `@`-pointers, keeping the body legible. |
+| Leading words | pass | L40 — "Job-to-be-done", "Leaky bucket" (L41), "Focus through subtraction" (L42) are compact pretrained concepts that anchor the lens in few tokens. |
+| Pruning | weak | Two duplications, not one. (a) L54 — Anti-patterns restate Iron Laws: "Multi-metric proposals" (L54) ~ "One metric per decision" (L34); "Users want X with no data" (L53) ~ "No feature without a user problem" (L32). (b) L20-22 — the Routing Boundary section restates the L4 description's invoke/NOT routing verbatim in meaning; the same routing facts live in two spots, the exact single-source-of-truth violation the scorecard names. Three meanings each carried twice. |
+| Granularity | pass | L16 — the persona-contract split (shared frame in lib, content in body) earns its load: boardroom and 4 sibling leads reach the same structure. |
+| pandastack conformance | pass | L2 — `name: product-lead` equals folder; both `lib/` refs (L6-7, L16, L61) resolve to repo-root `lib/`; 58-line body under ~80; no >5K hot read so no dispatch owed. |
 
-## Why it's good
-
-The skill earns its keep through five non-negotiable Iron Laws (L32-36) and three pretrained cognitive anchors (L40-42) that let the agent run a product critique the same way every time without a long body. The description (L4) is a model of branch-plus-NOT-clause discrimination, so the router can keep this lens from firing on strategy, code, or UI questions. Progressive disclosure to `lib/persona-frame.md` and `lib/bad-good-calibration.md` keeps the SKILL.md itself under 80 lines while staying load-bearing for boardroom's voice extraction.
+## Leading virtue
+The skill does the one thing a persona lens must: it imposes the same product process (user problem -> single metric -> explicit non-goals -> failure mode) on any input, anchored in three high-recall pretrained models (JTBD, leaky bucket, subtraction). Frontmatter and `@`-pointers are clean — the 6-section persona contract and the BAD/GOOD calibration live in shared `lib/`, so the body stays short. That virtue is real, but it is offset by three weak axes: the routing facts live in two places (description + Routing Boundary), the Anti-patterns re-encode the Iron Laws, and three of the four On-Invoke steps are framing prompts with no done-state. Hence WEAK, not SOLID.
 
 ## Top fixes
-
-1. **Collapse the triple-encoded routing.** The description NOT-clause (L4), the Routing Boundary (L19-22), and Team protocol (L65-67) say the same "this not that / hand off to X" facts three times. Keep the description as the single source for routing-away; cut the Routing Boundary section, leave only the positive hand-off triggers in Team protocol.
-2. **Sharpen the soft On-Invoke criteria.** L49 ("Predict the failure mode") and L48 ("what we are explicitly NOT solving") have no checkable done-bar. Tie each to a concrete artifact, e.g. "name one named failure mode (low retention / wrong segment / replacement) with the signal that would confirm it" so the step can be marked done vs not-done.
-3. **De-no-op the anti-patterns.** Several entries (L56 "Let's ship and iterate" without a signal, L57 adding features because competitors have them) restate the Iron Laws a VP-Product-framed model already obeys; keep the ones that catch real drift (L54 multi-metric, L53 no-user-evidence) and prune the restatements.
+1. L4 vs L20-22 — Kill the routing duplication. The description (L4) and the Routing Boundary (L20-22) carry the same invoke/NOT facts. Pick one source: either drop the prose Routing Boundary and let the description be the single dispatch contract, or strip the routing prose down to only what the description omits (the backticked sibling names `ceo`/`eng-lead`/`design-lead`/`ops-lead`) as a one-line "see also" rather than a re-statement. This is the cheapest path back to SOLID — it clears both the description-axis and one of the two pruning hits.
+2. L51-57 — Collapse the Anti-patterns/Iron-Laws overlap. "Multi-metric" (L54), "no user problem" (L53), and "ship and iterate without a signal" (L56) each re-encode an Iron Law (L32-35). Keep the Iron Laws as the single source; cut anti-patterns to only the ones with no law (e.g. L57 "features because competitors have them").
+3. L47-49 — Make the last three On-Invoke steps checkable like L46. e.g. step 2 -> "name the single metric and its target threshold"; step 4 -> "name the most likely failure mode and the signal that would confirm it" — so each step has a done state and can't be skimmed.
 
 ## Behavioral cases
-
-- trigger `"is this feature worth building? what's the metric?"` → expected process: invoke product-lead, run On Invoke L46-49 — state the user problem in one sentence, name the single proving metric, declare what is NOT in scope, predict the failure mode.
-- anti-trigger `"should we kill this product line or pivot?"` → should NOT fire; that is a strategy-only kill/pivot call and routes to `ceo` per the L4 / L22 NOT-clause.
+- trigger `/product-lead: should we build feature X?` -> expected process: state the user problem in one sentence (L46), pick the one metric (L47), name what we're NOT solving (L48), predict the failure mode (L49).
+- trigger `is this the right metric to optimize for PMF?` -> expected process: product lens fires on "metric"/"PMF" branch (L20), runs the On-Invoke 4-step.
+- anti-trigger `should we kill or pivot this whole line of business?` -> should NOT fire; routes to `ceo` (L22, strategy-only kill/pivot).
+- anti-trigger `what's the cleanest architecture for this feature?` -> should NOT fire; routes to `eng-lead` (L22, technical implementation).
+- anti-trigger `the button states feel off, fix the interaction` -> should NOT fire; routes to `design-lead` (L22, interaction/visual design).

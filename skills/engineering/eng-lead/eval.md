@@ -2,34 +2,33 @@
 type: skill-eval
 skill: eng-lead
 bucket: engineering
-evaluated_skill_hash: 9b2e2724666e7f407a5f8e707115fe3f33102cec
+evaluated_skill_hash: cb52fb8f9c021546e588fc41ea345586347f1f74
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — eng-lead
 
-**Verdict: SOLID.** A disciplined engineering-lens persona with strong pretrained anchors (boil the lake / trace the data flow / 3-strike escalation) and a tight routing boundary, dragged down by Anti-patterns that re-state the Iron Laws and Cognitive Models verbatim.
+**Verdict: SOLID.** Disciplined persona lens with clean lib/ extraction and honest SSOT annotations at every seam; one weak axis — `verify-the-test-loop.md` is both `@`-imported in full and restated inline, leaving two surfaces for the same rules.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L62 — "On Invoke" gives a fixed 4-step ordered process (read learnings → understand → verify → write learning) the agent re-runs every invocation. |
-| Description / invocation | pass | L4 — front-loads "Engineering lens", one trigger per branch, strong explicit NOT-clause routing away from ceo/product/design/ops. Model-invoked is correct (boardroom must reach it). |
-| Completion criteria | weak | L62 — the On Invoke steps end on actions, not checkable done-conditions; the lens output (the review/critique itself) has no completion criterion, so "engineering review done" is undefined. |
-| Information hierarchy | weak | L53 — "Known bug classes" inlines ~7 lines of dense, code-specific reference hot in the body instead of pushing it behind a context pointer like the other lib refs; only matters when actually debugging that class. |
-| Leading words | pass | L41 — "Boil the lake" (paired against "minimal diff" at L40) anchors completeness behaviour in a single pretrained concept; reinforced by "Trace the data flow" (L47) and "Harden the harness" (L51). |
-| Pruning | weak | L70 — Anti-patterns restate Iron Laws/Cognitive Models: "Likely handled" (Law #7 L43 → L70), 4th-variant "escalation" (Law #2 L38 → L74), "BUILD SUCCEEDED" (Law #3 L39 → L75). Same meaning in 2-3 places. |
-| Granularity | pass | L19 — pushing persona-frame + verify-the-test-loop + calibration into shared lib earns the cut: 5 lead skills + boardroom reuse them, so each split buys independent reach. |
-| pandastack conformance | pass | L5 — `reads:` frontmatter valid, all 5 `lib/*.md` refs resolve from repo root, body is 53 non-blank lines (well under ~80), follows the 6-section persona-frame contract. |
+| Predictability | pass | L60 — `On Invoke` fixes the same 4-step sequence (read learnings → understand → verify → write-learning gate) every run; no branch leaves the process underspecified. |
+| Description / invocation | pass | L4 — front-loads "Engineering lens for…", lists model-facing triggers, and a tight NOT-list routing to the four sibling personas; no body-identity leak. |
+| Completion criteria | pass | L65 — write-learning gate is now checkable (matched-by-key against `docs/learnings/` and Known bug classes; bump `recurrence` else write), closing the "non-obvious by judgment" premature-completion bait. |
+| Information hierarchy | pass | L18 — pointer splits the running-lens structure (load now) from dispatch/boardroom/origin mechanics (load only when wiring), genuine progressive disclosure with co-located rationale. |
+| Leading words | pass | L36 — Iron Laws lead with pretrained anchors ("No fix without root cause", "Minimal diff", "Boil the lake", "Search before building"); restatements that would echo a Law are collapsed with explicit notes (L46, L69). |
+| Pruning | weak | L84 — `verify-the-test-loop.md` is `@`-imported whole AND its Rules 1/2/4 are paraphrased inline (L37/L38/L49); the cite-back is honest but the rule text now lives on two surfaces in one skill, inviting drift. |
+| Granularity | pass | L52 — `Known bug classes` is a self-contained block (listener-lifetime / O(N^2) / schema-leak) that earns its load as code-only lore downgraded from AGENTS.md; each split carries distinct weight. |
+| pandastack conformance | pass | L2 — `name: eng-lead` == folder; body ≈80 lines (earned); all four lib/ refs resolve, the two `@`-imported libs total ~2K tokens, under the 5K hot/cold dispatch threshold. |
 
 ## Why it's good
-The routing boundary (L22-25) is exemplary: a positive trigger list plus a same-altitude NOT-list naming the four sibling personas, which is exactly what keeps a multi-persona pack from collapsing into one fuzzy "thinking" skill. Leading words are load-bearing rather than decorative — "boil the lake" vs "minimal diff" (L40-41) is an asymmetric pair the agent reasons *with*, not a slogan. Progressive disclosure is real: the heavy test-loop and calibration content lives in shared lib reached by `@` pointer, so the hot body stays legible.
+The skill is rigorously annotated about its own seams: every place a rule could be a duplicate (Iron Laws vs AGENTS.md baseline at L34, Cognitive Models vs Laws at L46, Anti-patterns vs Laws at L69) carries an explicit SSOT note saying what is new and what is inherited. lib/ extraction is correct — heavy reference (persona structure, calibration, test-loop rules, learning format) lives behind pointers or `@`-imports, keeping the body a running lens. Routing boundary and description agree and both name the exact sibling skill each anti-case belongs to.
 
 ## Top fixes
-1. **Pruning (L70-78):** collapse the Anti-patterns section. Items that merely negate an Iron Law ("Likely handled" L70 = Law #7 L43; "4th variant" L74 = Law #2 L38; "BUILD SUCCEEDED" L75 = Law #3 L39) pay tokens to say nothing new. Keep only anti-patterns that name a drift NOT already covered by a law, or delete the section and let the laws carry it.
-2. **Completion criteria (L62):** add a done-condition to the lens, e.g. "review is complete when every flagged risk has either a root cause named or an explicit `unknown` flag." Right now nothing tells the agent when to stop reviewing.
-3. **Information hierarchy (L53-59):** push "Known bug classes" into a `lib/known-bug-classes.md` reached by pointer. It is on-demand reference, not something every eng-lead invocation needs hot; inlining it bloats the body that L43 progressive-disclosure note says should stay legible.
+1. L84 — `verify-the-test-loop.md` is `@`-imported in full yet Rules 1/2/4 are also restated inline as Laws #2/#3 and the substrate model. Pick one surface: keep the inline compressed laws with `Rule N` pointers and drop the `@`-import (let `reads:` carry it), or keep the `@`-import and shrink the inline laws to bare pointers. Two full surfaces invites drift.
+2. L5-9 vs L80/L84 — the frontmatter `reads:` lists four libs as on-demand references, but two of them (`bad-good-calibration`, `verify-the-test-loop`) are actually `@`-imported (auto-loaded), so the declared manifest understates real load. Reconcile so `reads:` is the accurate manifest of what loads.
 
 ## Behavioral cases
-- trigger `/eng-lead is this watcher leaking?` → expected process: read learnings, read the code, trace data flow before any change (Law #1 L37), match against "Listener owns lifetime" bug class (L57), verify by running with a real `--once` smoke, refuse "likely handled" (L43).
-- anti-trigger `should we even build this feature this quarter?` → should NOT fire (routes to `ceo` for strategy-only scope, per L25), since no technical decision is on the table.
+- trigger `/eng-lead is this DB migration's rollback path safe?` -> expected process: invoke lens, On Invoke 4-step — search `docs/learnings/`, read the migration, run/verify, write-learning gate if a new bug class; apply Law #1 (root cause before fix) and #3 (prove the test ran the real artifact).
+- anti-trigger `should we even build this feature this quarter?` -> should NOT fire (routes to `ceo` for scope or `product-lead` for priority — L24 names both).

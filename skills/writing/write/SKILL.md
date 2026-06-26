@@ -8,17 +8,6 @@ user-invocable: true
 
 # Write
 
-## Routing Boundary
-
-Use this skill as the canonical Panda writing assistant when the task is about shaping Panda's own writing: sparring from an idea, structuring notes or drafts, reviewing a draft, editing with voice/slop checks, postmortem line review, English practice, reference-pattern extraction, distilling writing materials, or idea-gate routing.
-
-Do not use it for:
-- A pure de-AI / de-slop / un-ChatGPT cleanup request where the user only wants already-written text to sound human — use `humanizer`.
-- Final investment or IC memo voice cleanup where the memo must lead with call, sizing, target/stop, source discipline, and analyst-disagreement preservation — use `avoid-ai-writing`.
-- Legacy `/content-write` references as a standalone workflow — load this `write` skill through the alias shim.
-
-Personal writing assistant that preserves Panda's voice while improving structure and depth.
-
 ## Core Principle
 
 **AI touches HOW you say it, never WHAT you say or WHY.**
@@ -62,7 +51,7 @@ When user invokes `/write` without a subcommand, or their request is ambiguous:
 
 User brings raw thoughts or a topic. Your job:
 
-1. **Pattern check** (before sparring questions): Load `references/article-patterns.md` and check if any saved author pattern fits the article type. If a match exists, mention it: "This feels like a [Author] - [Title] type piece -- want to use that structure as reference?" If user confirms, weave that pattern's structure and techniques into the skeleton. If user declines or no match, proceed without.
+1. **Pattern check** (before sparring questions): `references/article-patterns.md` is ~8K tokens — do NOT load it hot. Dispatch a sub-agent to scan the library's `## [Author] - [Title]` entries against the article type and return ONLY the matched entry (or "no match"). If a match comes back, mention it: "This feels like a [Author] - [Title] type piece -- want to use that structure as reference?" If user confirms, weave that pattern's structure and techniques into the skeleton. If user declines or no match, proceed without.
 2. Ask 2-3 sharp questions to surface their actual opinion (not what sounds smart)
 3. Challenge weak points: "This claim needs evidence" / "A reader would push back here because..."
 4. Suggest a one-sentence thesis and skeleton structure
@@ -113,8 +102,8 @@ User brings a structured draft ready for polish. Your job:
 Load matching references in addition to base voice-profile.md. Multiple can fire simultaneously. Order: voice-profile → zh-slop-patterns → conditional references.
 
 1. **Voice + pattern check** (mandatory first step):
-   - Load `references/voice-profile.md` AND `references/article-patterns.md`
-   - Identify the article type (opinion/retrospective, technical, legal/policy, event reflection, project narrative) and auto-select the best matching author pattern from the library. Apply that pattern's "How to Use" checklist alongside voice profile checks. No need to ask -- just use it.
+   - Load `references/voice-profile.md`. For the pattern match, do NOT load `references/article-patterns.md` hot (~8K tokens): dispatch a sub-agent to identify the article type (opinion/retrospective, technical, legal/policy, event reflection, project narrative) and return ONLY the best-matching author pattern's entry, including its "How to Use" checklist.
+   - Apply that pattern's "How to Use" checklist alongside voice profile checks. No need to ask -- just use it.
    - For each paragraph, check against these 3 axes:
      - **Tone**: Does it match the 5 traits table (conversational, self-deprecating, direct, honest, no-BS)? Flag mismatches with the specific trait violated.
      - **Rhythm**: Are thought units short? Any sentence carrying 2+ ideas that should be split? Any padding sentences?
@@ -213,15 +202,7 @@ Rules:
 - For X long posts (>200 words) or essays (>500 words), this mode is the **final pass before ship** -- run AFTER `/write edit` cleans slop.
 - For drafts under 200 words, pick the 3 most relevant categories (typically hook move + save-worthy + weakest) -- short content cannot load all 6.
 
-When to invoke:
-
-- After `/write edit` has cleaned slop and you want a final mechanics check
-- When a draft "looks fine but feels safe" -- postmortem mode forces specificity that exposes safe-but-forgettable writing
-- Before scheduling to publish: postmortem-mode failure = ship-blocking signal
-
-Common failure mode this exists to prevent: a verifier passes a draft with "this is well-structured and has a strong hook" and the post still flops because no one could point at a single line that would survive a screenshot. The Edit mode catches slop; Postmortem catches *safe-but-forgettable*.
-
-Source: Shann Holmberg Content OS essay (2026-05-08) -- the highest-leverage of 4 production prompts in his system. Full origin + 3 other prompts: `[[media/articles/shann-content-os-bookmarkable-personalized]]`. Adapted for Panda voice: Chinese line-quoting, ship-block semantics, integration with existing Edit-mode slop output.
+Origin + Panda adaptation notes: `[[media/articles/shann-content-os-bookmarkable-personalized]]`.
 
 ### 8. Idea Gate (`/write idea-gate`)
 
@@ -289,16 +270,7 @@ This mode is the **upstream gate** for the writing pipeline. It exists to preven
 - If source is someone else's tweet/essay and route is REWRITE, flag the "voice-borrowing risk" in `risks:` explicitly -- writing user's own POV on someone else's frame is the slop trap.
 - Cap packet at 400-900 tokens (Shann's discipline). If you need more, the idea is too broad -- split or downgrade to RESEARCH+IDEATE.
 
-**Common failure mode this exists to prevent**: user has 80+ pages in `originals/` and writes 1-2 posts a week. The bottleneck is not drafting speed -- it's **route decision + brief production**. Without an explicit gate, raw originals stay raw, the brain becomes a one-way warehouse, and `writing/` velocity stalls. Idea-gate makes the route decision a 5-minute step instead of an open-ended question.
-
-**When to invoke**:
-
-- `originals/` is piling up and you don't know which to promote
-- You read someone's tweet/essay and want a quick "rewrite or research-ideate?" call
-- Before starting drafting, to lock route + fill in brief fields
-- Weekly review: batch-run on the last 7 days' `originals/` to triage
-
-Source: Shann Holmberg Content OS essay (2026-05-08) -- the four-route idea gate + writer context packet template. See `[[media/articles/shann-content-os-bookmarkable-personalized]]`. Adapted for Panda: (1) added **暫不寫** as 5th route (avoid duplicate-into-brain), (2) added mandatory Stage-0 brain check (brain-first protocol), (3) voice-borrowing risk flag for REWRITE route (specific to Panda's "我自己踩" voice constraint).
+Origin + Panda adaptation notes: `[[media/articles/shann-content-os-bookmarkable-personalized]]`.
 
 ## Structural Toolkit (Spar & Structure modes)
 
@@ -352,11 +324,7 @@ For every flagged passage, apply this test:
 - If "sort of but more formal" → simplify
 - If no → rewrite or delete
 
-Conditional Chinese refs (load when Edit mode's trigger signals fire — see table above):
-- `references/slop-zh-translation.md` (translation-tone 4 traps)
-- `references/slop-zh-report-tone.md` (report-tone replacement table)
-- `references/slop-zh-residue.md` (10+ round polish residue checklist)
-- `references/prose-zh-structure.md` (bold-period / list-dedensify / paragraph-end summary)
+Conditional Chinese refs load on Edit mode's trigger signals — single source of truth is the "Conditional reference loading" table in Edit mode (above).
 
 ## Article Patterns Library
 

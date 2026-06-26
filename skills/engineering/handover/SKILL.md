@@ -1,7 +1,7 @@
 ---
 name: handover
 description: |
-  Explicit Codex handover workflow for unfinished mechanical build units from an existing plan. This is not /ship: /ship closes finished work; /handover delegates unfinished work to Codex while the orchestrator keeps planning, review, and git ownership.
+  Explicit Codex handover workflow for unfinished mechanical build units from an existing plan.
   - /handover [slug]: sync handoff, spawn `codex exec`, poll, collect structured result.
   - /handover --async [slug]: write a self-contained payload to docs/handoffs/ only; does not spawn Codex or touch git.
   Use when a plan has several rote, file-scoped build units and Panda deliberately wants Codex subscription quota used. NOT for plan writing, generic engine invocation, subagent-driven-development loops, closing finished work, PR/ship flow, or exploratory judgment-heavy work.
@@ -39,14 +39,14 @@ Do not use it for:
 
 `/handover` gives a unit of work to **Codex** to execute. The distinction from `/ship`: ship *closes* work that is already done (commit, PR, file a note); handover *delegates* work that is not done yet to a second runtime.
 
-Codex runs on the ChatGPT subscription (`~/.codex/auth.json`, no API key) — a **separate quota** from Claude. This is the key economics: delegating a batch to Codex conserves the Claude session, it does not double-pay. The `prefer-cc-subagents` rule targets gbrain skills that spin up a *metered Anthropic API* runtime; Codex is not that, so it is a legitimate opt-in here. The default for ordinary single-track work is still Claude — handover is the deliberate verb for batches.
+Codex runs on the ChatGPT subscription (`~/.codex/auth.json`, no API key) — a **separate quota** from Claude, so delegating a batch conserves the Claude session rather than double-paying. The `prefer-cc-subagents` rule targets gbrain skills that spin up a *metered Anthropic API* runtime; Codex is not that, so it is a legitimate opt-in here.
 
 ## When to use
 
 - A plan has **≥3 mechanical build units** (rote, well-specified, file-scoped) and you would rather spend Codex quota than the Claude session on them.
 - You planned + partially built and want the rest done by Codex while you review / move on.
 
-Skip when: the work needs judgment, is a single trivial edit, or is exploratory. Those stay on Claude.
+Skip a single trivial edit — it stays on Claude. (Judgment-heavy / exploratory work is already out of scope per Routing Boundary.)
 
 ## Mode dispatch
 
@@ -91,8 +91,11 @@ Async mode NEVER spawns codex and NEVER touches git — it only emits the artifa
 After the delegation actually happens — sync: once the codex result is collected
 (any status); async: once the handoff file is written — append one `delegated`
 event to the lifecycle store so a scheduler can see this item is being executed
-by Codex (schema: `docs/state-schema.md`). Best-effort: skip
-silently if the binary is absent. `slug` = repo basename, `item` = handover slug.
+by Codex (schema: `docs/state-schema.md`). Done when EITHER the `delegated`
+event is appended OR `scripts/pandastack-state` is confirmed absent (test
+`[ -x scripts/pandastack-state ]` first; if it fails, report "state binary
+absent, event skipped" — never skip silently). `slug` = repo basename,
+`item` = handover slug.
 
 ```
 scripts/pandastack-state append --slug {repo} --item {slug} \

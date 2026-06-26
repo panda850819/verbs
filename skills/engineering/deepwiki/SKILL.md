@@ -6,7 +6,7 @@ description: |
 
   Trigger on: /deepwiki, 'document this repo', github.com URL when summary needed.
   Skip when: code grep/lookup (use gh CLI or grep).
-allowed-tools: Bash, Read, Write, Grep, Glob, Task
+allowed-tools: Bash, Read, Write, Grep, Glob
 version: "1.0.0"
 user-invocable: true
 ---
@@ -28,29 +28,11 @@ Analyze GitHub repos and generate structured documentation with Mermaid architec
 | `repo` | GitHub repo URL or `org/name` format | `<org>/<repo>` |
 | `--output` | Output location (optional) | `notion`, `obsidian`, `./path` |
 
-## Output Options
-
-| Option | Description |
-|--------|-------------|
-| (default) | Display directly in conversation |
-| `--output notion` | Write to Notion (will ask for page ID) |
-| `--output obsidian` | Write to `knowledge/repos/<repo>.md` |
-| `--output <path>` | Write to specified path |
-
 ## Examples
 
 ```bash
-# Default: display in conversation
-/deepwiki <org>/<repo>
-
-# Output to Notion
-/deepwiki <org>/<repo> --output notion
-
-# Output to local file
-/deepwiki <org>/<repo> --output ./docs/<repo>.md
-
-# Output to Obsidian
-/deepwiki <org>/<repo> --output obsidian
+/deepwiki <org>/<repo>                      # display in conversation
+/deepwiki <org>/<repo> --output notion      # routing per the Output Routing Rule below
 ```
 
 ---
@@ -167,55 +149,7 @@ Never ignore the `--output` flag. Never default to conversation display when a f
 
 ### Output Structure
 
-```markdown
-# <Repo Name>
-
-> One-line description
-
-## Tech Stack
-
-- Framework: ...
-- Language: ...
-- Dependencies: ...
-
-## Architecture Diagram
-
-```mermaid
-graph TD
-    ...
-```
-
-## Directory Structure
-
-| Directory | Purpose |
-|-----------|---------|
-| src/ | ... |
-| test/ | ... |
-
-## Core Modules
-
-### Module A
-- Functionality: ...
-- Key APIs: ...
-
-### Module B
-- ...
-
-## Quick Start
-
-```bash
-# Install
-pnpm install
-
-# Run
-pnpm dev
-```
-
-## Related Resources
-
-- [Original README](...)
-- [Notion Docs](...)
-```
+Fill-in template (the 5 mandatory sections + Related Resources): see `skills/engineering/deepwiki/lib/output-and-diagrams.md`.
 
 ---
 
@@ -227,72 +161,27 @@ pnpm dev
 
 **Self-check (code gate, not honor system):** after writing any doc with a mermaid/flow diagram, run `lib/lint-mermaid-grounding.sh <output-file>`. Exit 2 = directional edges without a source citation, or a canonical/likely-layout block smuggling edges back in. On fail, replace the edged diagram with an edgeless inventory or an "insufficient source" note and re-run until exit 0. Two prose re-fixes leaked here; the lint is the backstop.
 
-Generate appropriate diagrams based on project type:
-
-### Module Relationship Diagram (all projects)
-
-```mermaid
-graph TD
-    A[Module A] --> B[Module B]
-    B --> C[Library C]
-```
-
-### Smart Contract Relationship Diagram (Solidity projects)
-
-```mermaid
-graph LR
-    A[Contract A] -->|inherits| B[Contract B]
-    A -->|calls| C[Library C]
-```
-
-### Data Flow Diagram (if applicable)
-
-```mermaid
-sequenceDiagram
-    User->>+Contract: deposit()
-    Contract->>+Pool: addLiquidity()
-    Pool-->>-Contract: lpTokens
-    Contract-->>-User: receipt
-```
+Generate appropriate diagrams based on project type (module relationship for all projects, contract relationship for Solidity, sequence/data-flow for complex pipelines). Syntax templates per type: `skills/engineering/deepwiki/lib/output-and-diagrams.md`.
 
 ---
 
 ## Phase 4: Output
 
-### 4.1 Default (display in conversation)
-
-Directly output the generated markdown content.
-
-### 4.2 Notion Output
-
-```bash
-# Ask user for page ID
-# Write to temp file
-echo "$CONTENT" > /tmp/deepwiki/output.md
-
-# Update page using notion-cli
-notion page update <page-id> --file /tmp/deepwiki/output.md
-```
-
-### 4.3 Local File Output
-
-Use Write tool to write to specified path.
-
-### 4.4 Obsidian Output
-
-Write to `knowledge/repos/<repo-name>.md`.
+Route per the **Output Routing Rule** (Phase 2). Notion is the only target needing a command — ask for the page ID, write the doc to `/tmp/deepwiki/output.md`, then `notion page update <page-id> --file /tmp/deepwiki/output.md`. Default / `<path>` / obsidian use the Write tool to the resolved path.
 
 ---
 
 ## Phase 5: Quality Gate (mandatory before output)
 
-Run these checks before delivering output. **You MUST produce the checklist below (pass/fail per item) in your thinking before outputting the final document.** If any item fails, fix and re-check before delivery.
+Write the doc to `/tmp/deepwiki/output.md` first, then run the checks below against that file. A check passes only when its command exits clean or its grep finds the evidence — producing the checklist is not passing it. Fix and re-run until all pass before delivery.
 
-1. **Mermaid syntax**: Re-read each diagram block. Verify node IDs are unique, arrows use correct syntax (`-->`, `-->|label|`, `->>+`), and no unclosed brackets. If `mmdc` is available, run `echo "$DIAGRAM" | npx -y @mermaid-js/mermaid-cli mmdc -i - -o /dev/null` to validate.
-2. **Directory structure accuracy**: Cross-check table against actual `tree` output — no invented directories.
-3. **Tech stack correctness**: Confirm listed frameworks match what config files actually declare.
-4. **Core modules completeness**: Each listed module must reference at least one concrete function/class/API from the source code read. If a module can't be substantiated, remove it.
-5. **Quick start executability**: Verify commands match the project's actual package manager (`npm`, `pnpm`, `yarn`, `cargo`, `pip`, etc.) and scripts defined in config files.
+1. **Source grounding** (code gate): `lib/lint-mermaid-grounding.sh /tmp/deepwiki/output.md`. Exit 0 required. On exit 2, replace edged diagrams with an edgeless inventory or "insufficient source" note and re-run (per Phase 3).
+2. **Mermaid syntax** (code gate when available): for each diagram block, `echo "$DIAGRAM" | npx -y @mermaid-js/mermaid-cli mmdc -i - -o /dev/null`. Must exit 0 (renders). If `mmdc` is unavailable, fall back to re-reading each block for unique node IDs and correct arrows (`-->`, `-->|label|`, `->>+`), no unclosed brackets.
+3. **Directory accuracy** (cross-check): every row in the Directory Structure table must appear in the captured `tree` output (Phase 1.2). `comm` / grep the table dirs against the tree; no row without a tree match.
+4. **Source-backed modules**: each Core Module must name a concrete function/class/API that is greppable in a source file you read (Source Reading Rule). Drop any module you cannot grep.
+5. **Quick Start executable**: install/run commands must match the package manager and script names actually declared in the config file (e.g. `scripts` in `package.json`, `[tasks]` in config). No invented commands.
+
+Checks 1-3 are falsifiable by command. Checks 4-5 are falsifiable by grep against read source — cite the file, do not self-report. This gate enforces the Mandatory Output Requirements and Source Reading Rule (Phase 2); it does not restate them.
 
 ---
 
@@ -304,7 +193,7 @@ Run these checks before delivering output. **You MUST produce the checklist belo
 
 ## Verification
 
-Covered by Phase 5 Quality Gate above. Additionally verify:
+Beyond the Phase 5 gate:
 1. Output links (README, docs) point to valid URLs
 2. Cleanup: `rm -rf /tmp/deepwiki/<repo-name>` after output is delivered
 

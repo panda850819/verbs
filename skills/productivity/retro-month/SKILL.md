@@ -28,60 +28,7 @@ Run standalone OR after a Hermes cron has pre-generated the brief. Then read it 
 
 ## Phase 1: Auto-scan (raw data, no interpretation)
 
-Run the shared engine (above), then read its output. It covers git activity (brain + ~/site repos, past 30d), learnings health, recent brain pages, gbrain synthesis, and the cross-runtime GC sweep. The sub-sections below document what it gathers.
-
-### 1a. Git activity (past 30 days)
-
-Engine runs `git log` over the brain repo and every `~/site/{skills,apps,cli,trading}/*` repo. Summarize total commits + key deliverables by repo.
-
-### 1b. Learnings health — past 30 days
-
-```bash
-LEARNINGS_DIR="$HOME/site/knowledge/brain/learnings"
-# Count total
-ls "$LEARNINGS_DIR"/*.md 2>/dev/null | wc -l
-# Count new this month
-find "$LEARNINGS_DIR" -name "*.md" -newer <(date -v-30d +%Y-%m-%d) 2>/dev/null | wc -l
-# Stale (90d+ not modified)
-find "$LEARNINGS_DIR" -name "*.md" -not -newer <(date -v-90d +%Y-%m-%d) 2>/dev/null | wc -l
-```
-
-If `$LEARNINGS_DIR` not found: note "learnings/ dir not found — skip" and continue.
-
-### 1c. Reference last 4 retro-week files
-
-```bash
-RETRO_WEEKLY="$HOME/site/knowledge/brain/reflections/weekly"
-ls "$RETRO_WEEKLY"/*.md 2>/dev/null | sort -r | head -4
-```
-
-For each found file, extract:
-- `## Recommendation for Next Week` section (one line)
-- `## Obsolete-yourself Candidate` section (one line)
-- `## What I'm Sitting With` section (one line)
-
-If `brain/reflections/weekly/` is empty (no weekly retros run yet this month), note "no weekly retros to reference, scan-only month" and continue.
-
-### 1d. Print raw scan block
-
-```
-=== MONTH SCAN: $YEAR-$MONTH ===
-
-GIT ACTIVITY (past 30 days)
-[repo: brain]           N commits
-[repo: ...]             N commits
-
-LEARNINGS HEALTH
-Total: N | New this month: N | Stale (90d+): N
-
-LAST 4 WEEKLY RETRO SUMMARIES
-W[N]: Recommendation: ... | Open: ... | Obsolete-candidate: ...
-W[N-1]: ...
-W[N-2]: ...
-W[N-3]: ...
-
-===
-```
+Run the shared engine (above), then read its output. The engine is the single source of truth for what gets gathered: git activity (brain + ~/site repos, past 30d), learnings health, recent brain pages + git-derived hotspots, the cross-runtime GC sweep, and the inbox-drain counts. Print the brief's raw blocks to the user, plus the last-4 weekly-retro summaries. What each block holds, the manual fallback if the engine is unavailable, and the weekly-retro reference commands → [`skills/productivity/retro-month/lib/scan-blocks.md`](skills/productivity/retro-month/lib/scan-blocks.md).
 
 Then say: **"掃完了。要開始月度 interview 嗎？"** — wait for user.
 
@@ -97,20 +44,21 @@ LAST_MONTH=$(date -v-1m +%Y-%m)
 PREP=$(ls -t "$HOME/site/knowledge/brain/inbox/retros/"*-retro-month-prep.md 2>/dev/null | head -1)
 ```
 
-If prep file exists: print compressed summary in Traditional Chinese, max 40 lines:
-- Weekly retros included (with any gaps flagged)
-- me.md goals (verbatim)
-- Drift candidates (top 3)
-- Strategic questions
-- Active feedback patterns
+If prep file exists: print a compressed summary in Traditional Chinese, max 40 lines, of the engine's real sections:
+- Git activity (commits by repo)
+- Learnings health (total / new this month / stale 90d+)
+- Recent brain pages + activity hotspots
+- GC sweep (recent tri-runtime feedback files)
+- Inbox drain (unfiled transcript-ingest distill counts)
+- Last 4 weekly-retro summaries (flag any gaps)
 
-If prep file missing: use Phase 1 raw scan block (git activity + learnings health + 4-week summaries) as the data source. Skip to interview using scan anomalies and weekly-retro patterns as starting questions.
+The engine emits raw data only — me.md goals, drift candidates, and feedback-pattern status are surfaced in the interview, not the brief. If prep file missing: use the Phase 1 raw scan block as the data source, with scan anomalies and weekly-retro patterns as starting questions.
 
-End with: **"準備好做這個月的 retro 嗎？"** — wait.
+End with: **"準備好做這個月的 retro 嗎？"** — wait. Either branch, the interview floor (2b-i) still runs.
 
 ### Step 2b: Interview — strategic, not tactical
 
-Walk through layers ONE QUESTION AT A TIME.
+Walk through layers ONE QUESTION AT A TIME. **Completion floor (every branch, including scan-only and 短版): 2b-i goal-alignment is asked for each me.md goal and the user's verdict captured. A run that produced only the scan with no goal-alignment answers is not done.**
 
 **2b-i. Goal alignment**
 For each goal in me.md:
@@ -156,68 +104,7 @@ Ensure output directory exists:
 mkdir -p "$HOME/site/knowledge/brain/reflections/monthly"
 ```
 
-Write `brain/reflections/monthly/$YEAR-$MONTH.md` (brain, not vault):
-
-```markdown
----
-date: $LAST_DAY
-type: monthly-retro
-month: $YEAR-$MONTH
-range: $FIRST_DAY..$LAST_DAY
-status: complete
-prep_source: $(basename "$PREP")
-scan_data: true
-weekly_retros_referenced: [W$N, W$N-1, W$N-2, W$N-3]
----
-
-# Monthly Retro $YEAR-$MONTH
-
-## Git Activity Summary (30 days)
-- [from Phase 1 scan: repos + commit counts]
-
-## Learnings Health
-- Total: N | New this month: N | Stale (90d+): N
-
-## Weekly Retro Thread
-- W[N]: [one-line recommendation + open question from that week's retro]
-- W[N-1]: ...
-- W[N-2]: ...
-- W[N-3]: ...
-
-## Goal Status (vs me.md)
-- Goal A: [verdict from interview] — evidence + user's words
-- ...
-
-## Strategic Decisions This Month
-- [decision] — context + downstream
-
-## Drift Acknowledged or Rejected
-- Acknowledged: [drift] → action: [修 / 接受]
-- Rejected: [drift] → why user disagreed
-
-## Project Memory Updates Applied
-- `project_X.md`: [updated / superseded / archived] — what changed
-
-## Feedback Patterns Status
-- [pattern]: active (count: N) / resolved / archived
-
-## Operating System Health
-- Vault notes: N (Δ ±M)
-- Cron health: list any failures
-- Intake-to-knowledge promotion rate: P/N
-
-## What Got 2x Better
-> User's answer — verbatim.
-
-## Strategic Shift for Next Month
-> One shift, in user's words. Not a list.
-
-## Commodity-drift Watch
-> Skill or process user named as commoditizing in 6 months, plus whether a replacement is being built. Verbatim. Empty if none.
-
-## Open Strategic Question
-> What user is sitting with going into next month.
-```
+Write `brain/reflections/monthly/$YEAR-$MONTH.md` (brain, not vault). Full output template (frontmatter + every section) → [`skills/productivity/retro-month/lib/retro-template.md`](skills/productivity/retro-month/lib/retro-template.md). Every section traces to interview answers or Phase 1 scan — never invent.
 
 ### Step 3b: Updates to other files
 

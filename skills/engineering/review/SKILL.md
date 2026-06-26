@@ -2,8 +2,6 @@
 name: review
 description: |
   Use when asked to "review", "check my code", or before creating a PR.
-  Parallel 3-pass review (correctness, security, architecture) with
-  cold review, Codex adversarial cross-check, and learning integration.
 reads:
   - repo: "**"
   - repo: CLAUDE.md
@@ -49,7 +47,7 @@ If output for any command is > 30 lines, summarize. Don't dump raw output into t
 
 ## Step 1: Scope
 
-1. Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses).
+1. Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Bind the path variables used below from it: `{main}` = configured main branch (default `main`), `{learnings_dir}` = configured learnings dir (default `docs/learnings`). Use these resolved values everywhere they appear.
 2. Run `git branch --show-current`. If on the main branch, stop: "Nothing to review — you're on main."
 3. Run `git diff origin/{main} --stat`. If no diff, stop.
 4. Get the full diff: `git diff origin/{main}`
@@ -127,37 +125,7 @@ Launch review passes in parallel using `context: fork` (isolated subagents — r
 - API surface changes that break consumers
 - Missing migrations or backwards-incompatible changes
 
-**Conditional passes (only when scope detected):**
-
-**Pass 4 — Migration Safety** (only if SCOPE_MIGRATION):
-- Backwards-incompatible schema changes without migration path
-- Missing rollback strategy (no down migration)
-- Data loss risk (column drops, type changes on populated tables)
-- Lock duration on large tables (ALTER on millions of rows)
-
-**Pass 5 — API Contract** (only if SCOPE_API):
-- Breaking changes to existing endpoints (removed fields, changed types)
-- Missing versioning for breaking changes
-- Inconsistent error response format
-- Missing or wrong HTTP status codes
-
-**Pass 6 — Auth/Permissions** (only if SCOPE_AUTH):
-- Privilege escalation paths (user can access admin resources)
-- Missing auth checks on new endpoints
-- Token/session handling flaws (no expiry, no rotation)
-- Secrets logged or exposed in error messages
-
-**Pass 7 — Infra/CI** (only if SCOPE_INFRA):
-- Secrets hardcoded in config files
-- Missing environment variable validation
-- Docker image using latest tag instead of pinned version
-- CI steps that can silently fail
-
-**Pass 8 — Quality Rubric** (only when diff contains writing or design artifacts, e.g. `.md` in writing/ media/ briefs/ topics/ paths, or `.html`/`.tsx`/`.css` with visual surface changes):
-- Load `lib/quality-rubric.md`. Evaluator-side binding per governance moment #2.
-- Score each changed artifact 1-5 on the 4 axes (coherence / originality / craft / functionality).
-- Any axis < 3 = fail the gate. Include the specific anti-pattern hit (e.g. "Originality 2 — symmetric bullet structure, LLM diversity collapse").
-- Use per-skill weighting table from the rubric when artifact came from `pandastack:write` / `pandastack:design-lead` output.
+**Conditional passes (only when scope detected):** for each `SCOPE_*` signal from Step 4 (and Pass 8 when the diff carries writing/design artifacts), run the matching pass from `skills/engineering/review/lib/conditional-passes.md`. Skip the file entirely when no scope signal fired.
 
 Each pass outputs findings in the same format:
 ```
@@ -259,15 +227,13 @@ If nothing worth recording: skip silently. Not every review produces learnings.
 
 ## Step 7.5: Route caught flaws back to the skill (propose-only)
 
-A confirmed flaw is also a signal about the skill that *should have caught it*. After Step 7, check whether each confirmed flaw maps to an existing pandastack skill — match it against that skill's anti-pattern / checklist table, not just its trigger keywords. Keep the bar tight: the flaw must be the kind of thing that skill's checklist already claims to prevent, otherwise skip. See `lib/trigger-first-skill-evolution.md` — route the catch back to strengthen the skill instead of leaving only a passive pitfall.
-
-For each mapping, emit ONE line into the session-end brain-candidate audit (the candidate list surfaced at session 收尾; skip silently if your setup has no such audit surface):
+After Step 7, for each confirmed flaw, apply the propose-only flaw-routing rule in `lib/trigger-first-skill-evolution.md` (map to the skill whose anti-pattern/checklist table should have caught it; propose only, never edit the target skill, never during an autonomous build). For each mapping, emit ONE line into the session-end brain-candidate audit (skip silently if your setup has no such surface):
 
 ```
 skill-edit candidate: <skill> — <missing check its anti-pattern/checklist table should have had>
 ```
 
-Propose-only. Do NOT edit the target skill here, and never during an autonomous build — the human picks from the audit. No mapping → skip silently.
+No mapping → skip silently.
 
 ## Step 8: Completion Summary
 

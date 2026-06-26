@@ -2,34 +2,35 @@
 type: skill-eval
 skill: ceo
 bucket: productivity
-evaluated_skill_hash: f500916c09a0dfbbb4be49cc8b9d3cf2baded9b1
+evaluated_skill_hash: 07f42ca1c89b5e2b7d33ca67aac6ddcc8f8f677b
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — ceo
 
-**Verdict: SOLID.** A tight persona lens whose value is a fixed, pretrained-anchored decision process (two-way/one-way doors, effort gate, framework tension) bolted to a hard READ-ONLY, recommend-don't-act contract.
+**Verdict: SOLID.** A predictable strategic-lens process anchored in strong pretrained frameworks (Bezos doors, effort gate, framework tension) under a hard recommend-don't-act contract; both lib refs now resolve and import cleanly. Costing points: the recommend-don't-act rule is restated across three sections, and the interior On-Invoke steps (1-3) lean on judgment rather than a checkable done/not-done.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L45 — "## On Invoke" fixes a 4-step process (L47–50: pick frameworks → show tension → recommend → predict pushback) the agent runs the same way every invocation; predictability is process-not-output, and this is process. |
-| Description / invocation | pass | L4 — front-loads the leading concept ("Strategic lens for scope, priority, kill/pivot/continue…"), lists trigger branches, and carries an explicit NOT-clause routing implementation/code-review/planning elsewhere. |
-| Completion criteria | weak | L47 — On Invoke steps 1–3 ("Pick 2-3 frameworks", "Show where they agree and disagree", "Make a recommendation") have no checkable done-gate; only step 4 (L50, "top 3 pushback questions") and the Scope Review GO/ITERATE/KILL (L58) are exhaustive. Soft middle invites premature completion. |
-| Information hierarchy | pass | L70 — BAD/GOOD calibration is pushed to `@../../../lib/bad-good-calibration.md` behind a context pointer (same with persona-frame at L17), so the hot body stays the persona contract and shared rules load on demand. |
-| Leading words | pass | L41 — "Two-way / one-way doors (Bezos)" and "Effort gate (compression ratio)" (L42) anchor whole regions of behaviour in pretrained concepts rather than re-deriving them. |
-| Pruning | weak | L37 — Iron Law 5 "Never act on scope changes" restates the recommend-don't-act meaning already carried by L15 (READ-ONLY), L33 (Iron Law 1 user sovereignty), and the L65 anti-pattern ("Ask first. Always."). Four sources of one truth = duplication that inflates the meaning's rank without adding behaviour. |
-| Granularity | pass | L23 — the Routing Boundary cleanly hands implementation/code/debugging/planning/writing to eng-lead/plan/writing-plans/careful/write, so the ceo split earns its always-loaded description by owning a distinct strategic leading word (L21) rather than overlapping a sibling. |
-| pandastack conformance | weak | L7 — frontmatter declares `reads: lib/escape-hatch.md`, but the body never `@import`s or references escape-hatch (only persona-frame L17 and bad-good-calibration L70 are actually consumed); a declared dependency that never fires is advisory sediment. (Frontmatter is otherwise contract-clean: persona-frame L11–15 requires only `name` + `description`, both present; `version`/`type` are NOT modeled and no sibling persona carries them — the prior eval's claim of "missing version/type" was a fabricated requirement, removed here.) |
+| Predictability | pass | L44 — "## On Invoke" fixes the same 4-step process every run (pick frameworks → show tension → recommend → predict pushback), and L53 forks scope-topic decisions to a separate deterministic GO/ITERATE/KILL template on a clear condition; process-not-output. |
+| Description / invocation | pass | L4 — front-loads the leading word "Strategic lens", enumerates one trigger per branch (scope / priority / kill-pivot-continue / door), and carries a NOT-clause routing implementation, code-review, and generic planning to plan/write/eng; no body-identity bleed. |
+| Completion criteria | weak | L46 — steps 1-3 ("Pick 2-3 frameworks that create tension", "Show where they agree and disagree — that's where the insight is", "Make a recommendation") are judgment calls, not checkable done/not-done; only step 4 (L49, "Predict the top 3 pushback questions") and the GO/ITERATE/KILL gate (L59) give the run a bounded terminal, so the interior invites premature completion. |
+| Information hierarchy | pass | L16 — shared persona structure is behind an `@` context pointer (persona-frame), and the BAD/GOOD pairs likewise (L71), so the hot body stays the ceo-specific contract and shared rules load on demand. |
+| Leading words | pass | L40 — "Two-way / one-way doors (Bezos)", "Effort gate (compression ratio)" (L41), and "Framework tension (multi-lens)" (L42) anchor whole regions of behaviour in pretrained concepts in minimal tokens. |
+| Pruning | weak | L36 — the recommend-don't-act meaning is stated three times: Iron Law 1 "AI recommends, user decides" (L32), Iron Law 5 "Never act on scope changes ... and ask" (L36), and the anti-pattern "I'll make the change and tell the user afterward → Ask first" (L66); one meaning, three slots, inflating its apparent rank. |
+| Granularity | pass | L51 — the Scope Review split earns its load: a distinct branch (scope-as-topic) with its own terminal gate, justified inline ("terminate on its GO/ITERATE/KILL gate instead of the On Invoke loop"); no gratuitous section. |
+| pandastack conformance | pass | L5 — `name: ceo` equals the folder, both declared `reads` (persona-frame, bad-good-calibration) resolve on disk AND are `@`-imported (L16, L71), each lib is well under 5K tokens so no hot/cold dispatch is owed, and the body is 74 lines, inside the ~<80 budget. |
 
 ## Why it's good
-The skill earns its keep on predictability and leading words: a 4-step On-Invoke loop plus three named, pretrained frameworks give the agent the same strategic process every run with almost no token cost. The READ-ONLY / user-sovereignty stance is unambiguous, and progressive disclosure is real — persona-frame and the BAD/GOOD pairs live behind pointers, keeping the hot body to the persona contract. The Routing Boundary (L21–24) is the strongest single section: it explicitly disclaims implementation, code review, and generic planning, so the always-loaded description discriminates cleanly against eng-lead/plan/write.
+The skill is a tight persona lens: a fixed 4-step On-Invoke loop plus a scope-specific GO/ITERATE/KILL template give it a predictable process independent of the decision's content, and three pretrained leading words (Bezos doors, compression-ratio effort gate, framework tension) anchor the reasoning in minimal tokens. The shared persona structure and voice-calibration pairs are correctly extracted to `lib/` behind `@` pointers that resolve and import, keeping the hot body at the ceo-specific contract. The repair landed: the prior phantom `reads: lib/escape-hatch.md` and the never-imported `lib/outside-voice-rule.md` ref are both gone, and the `reads:` list now matches exactly what the body imports.
 
 ## Top fixes
-1. L43 — "Framework tension (multi-lens): used when single framework gives a clean answer (suspect of clean answers)" reads backwards as a trigger. Rewrite to the actual intent: reach for multi-lens *to challenge* a too-clean single-framework answer, e.g. "used to stress-test a clean single-framework answer before trusting it."
-2. L37 — collapse the four restatements of recommend-don't-act (L15 READ-ONLY, L33, L37, L65) to a single source of truth; keep one (Iron Law 1) and let the others reference rather than re-assert.
-3. L7 — either wire `lib/escape-hatch.md` into the body (an `@import` where the escape-hatch behaviour should fire) or drop it from `reads:`; declared-but-unconsumed dependencies are exactly the audit sediment the firewall fields warn about. (Do NOT add `version`/`type`: the persona-frame contract at lib L11–15 requires only `name` + `description`; the prior fix item asking for those fields was wrong.)
+1. L46 — sharpen On-Invoke steps 1-3 into checkable criteria (e.g. "name the 2-3 frameworks and state one disagreement each"); right now only step 4 and the scope gate are checkable, so the lens can declare itself done after a soft recommendation.
+2. L36 — collapse the recommend-don't-act rule to one source of truth. Keep it as Iron Law 1, drop the restatements in Iron Law 5 and the L66 anti-pattern (or cross-reference rather than re-state).
+3. L42 — "Framework tension ... used when single framework gives a clean answer (suspect of clean answers)" reads as a half-inverted condition; tighten to "reach for it when one framework gives a suspiciously clean answer".
 
 ## Behavioral cases
-- trigger `/ceo should we kill this feature or pivot?` → expected process: load persona-frame, pick 2–3 tension-creating frameworks (two-way/one-way door + effort gate), show agree/disagree, recommend GO/ITERATE/KILL with reasoning, predict top 3 pushback questions — never executes the kill, asks first (L37).
-- anti-trigger `review my auth refactor diff` → should NOT fire (routes to eng-lead / review per L23); this is implementation/code-review, explicitly disclaimed in the Routing Boundary.
+- trigger `/ceo should we kill this initiative or keep iterating?` -> expected process: scope-as-topic, so run the Scope Review template (L55) and terminate on the GO/ITERATE/KILL gate, with effort estimate and reversibility called out; never executes the kill, asks first (Iron Law 5, L36).
+- trigger `is this a one-way or two-way door?` -> expected process: On-Invoke loop (L44), reach for the Bezos doors framework (L40), recommend reversible=decide-fast vs irreversible=gather-data (Iron Law 4, L35), draft top-3 pushback.
+- anti-trigger `review this PR diff for correctness` -> should NOT fire (routes to eng-lead / careful per the L22 NOT-clause; implementation and code-review are explicitly disclaimed).

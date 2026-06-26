@@ -1,9 +1,9 @@
 ---
 name: checkpoint
 description: |
-  Save or resume working state snapshots. Captures git state,
+  Save, resume, or list working state snapshots. Captures git state,
   decisions made, remaining work. Use when pausing work, switching
-  context, or before a long session break.
+  context, before a long session break, or to list saved checkpoints.
 ---
 
 # Checkpoint
@@ -91,7 +91,7 @@ Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project us
    ```
    Then look for matching files in `docs/checkpoints/`.
 
-2. If no checkpoint exists for this branch, check all checkpoints and list them.
+2. If no checkpoint exists for this branch, fall through to the **List** branch.
 
 3. Read the checkpoint file and output:
    ```
@@ -103,7 +103,10 @@ Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project us
    Resume hint: {hint}
    ```
 
-4. Delete the checkpoint file after successful resume (it served its purpose).
+4. After a successful resume — the RESUMING block (step 3) has printed AND the
+   checkpoint file's contents are read into context — archive the file by moving
+   it to `docs/checkpoints/archive/`. Archive rather than delete so a mis-fired
+   resume stays recoverable.
 
 ## List
 

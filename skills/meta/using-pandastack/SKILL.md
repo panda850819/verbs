@@ -15,7 +15,7 @@ This is not negotiable. Skills override default behavior. Rationalizing your way
 
 ## Why this file exists
 
-pandastack ships 26 skills (5 of them persona lenses) and 3 documented lifecycle compositions. The surface area is too large for ad-hoc invocation. Without a forcing function, the model defaults to "I'll just answer directly" and the skills never run. This file is the forcing function.
+pandastack ships dozens of skills (including persona lenses and documented lifecycle compositions). The surface area is too large for ad-hoc invocation. Without a forcing function, the model defaults to "I'll just answer directly" and the skills never run. This file is the forcing function.
 
 The failure mode this exists to prevent (observed across many sessions): writing code without running `careful` for prod paths, shipping without `review`, finishing a knowledge note without `/ship knowledge`. The skills exist; they just don't get invoked unless something pressures the check.
 
@@ -29,9 +29,9 @@ If the user says "skip the review, just commit", do that. The contract is not a 
 
 ## Lifecycle → skill map
 
-When the current task matches one of these signals, the corresponding skill must be checked:
+When the current task matches one of these signals, the corresponding skill must be **invoked this turn — or you must record an explicit skip-reason this turn**. "I checked and decided no" is not a done-state; an unrecorded skip is a skipped check.
 
-| Signal | First skills to check |
+| Signal | Invoke (or record an explicit skip-reason this turn) |
 |---|---|
 | About to write/edit code in any production / shared-infra path | `pandastack:careful` (gate), then dev flow |
 | Bug fix / feature / refactor (3+ files OR new abstraction) | `pandastack:grill` or `/plan` first, NOT direct edits |
@@ -63,29 +63,13 @@ Default behavior: run silently, output ONLY on anomaly. Healthy session = zero l
 
 When user explicitly wants a deep state-restore (returning after long absence, post-dream consolidation), route to `gbrain:cold-start` (heavy 506-line version) instead — the 5-step ritual covers warm sessions, not cold revivals.
 
-This ritual does NOT live in its own skill. Folding it here (cognitive contract surface, already loaded at SessionStart) avoids a new `pandastack:cold-start` skill that would duplicate `gbrain:cold-start` and contradict v2.2.0 scope-tightening.
-
 ## Loop guard (3-strike rule)
 
-Same file / same diagnostic / same fix variant tried 3+ times → STOP, do not attempt a 4th. `lib/verify-the-test-loop.md` already hard-gates build/deploy phantom-bug class; this guard covers other loop classes (refactor circling, design back-and-forth, infra-config trial-and-error).
-
-When triggered:
-1. Stop attempting more variants.
-2. Re-grill the premise: is the abstraction wrong? Is the loop verifying the right thing?
-3. Consider `pandastack:checkpoint` to externalize state + restart cold.
-
-Source: Mnilax Rule 6 office-hours 2026-05-24 (`~/site/knowledge/brain/inbox/briefs/2026-05-24-rule6-cross-agent-baton-aware-rituals.md`). Companion to brain-first protocol step 0 (session-start sync) in `~/.agents/AGENTS.md`.
+Same file / same diagnostic / same fix variant tried 3+ times → STOP, do not attempt a 4th. When triggered, load `skills/meta/using-pandastack/lib/loop-guard.md` for the stop-and-re-grill procedure.
 
 ## Harness evolution rule
 
-When creating, improving, splitting, merging, or reviewing skills, load `lib/trigger-first-skill-evolution.md`. Default posture:
-
-- Trigger clarity first.
-- Inline checklist / rubric before extraction.
-- No lens / persona / rubric registry until repeated evidence exists.
-- Extract only after the same checks repeat across 3+ skills, maintenance diverges, or the parent skill becomes hard to scan.
-
-This keeps pandastack as a skill library that evolves from observed use, not a pre-designed role taxonomy.
+When creating, improving, splitting, merging, or reviewing skills, load `skills/meta/using-pandastack/lib/harness-evolution.md` (trigger-first posture; extract only on repeated evidence).
 
 ## Red flags (rationalizations to STOP on)
 
@@ -115,17 +99,4 @@ These thoughts mean you are about to skip a skill that applies. Stop and check.
 
 ## Overlay extension
 
-A personal / org overlay may be appended to this contract by the SessionStart hook. Resolution order:
-
-1. Personal overlay: `~/.agents/overlays/using-pandastack.md` (override with env `PANDASTACK_OVERLAY`)
-2. `${PANDASTACK_OVERLAY}` env var if explicitly set (escape hatch for non-standard layouts)
-3. (no overlay loaded — public contract is self-contained)
-
-The SessionStart hook MUST log explicitly which step matched. Silent fallback to a private path is a bug — fresh users without an overlay get no signal that the lifecycle map is running on public defaults only.
-
-The overlay typically adds:
-- Concrete vault / repo / memory paths bound to abstract slots above
-- Private skill triggers (org-specific alerts, internal SOPs)
-- Active dogfood / experiment windows
-
-If no overlay loads, this public contract still works on its own — the lifecycle map degrades to abstract guidance.
+A personal / org overlay may be appended to this contract by the SessionStart hook. If no overlay loads, this public contract still works on its own — the lifecycle map degrades to abstract guidance. Install-time reference (resolution order, hook-logging contract, what the overlay adds): `skills/meta/using-pandastack/lib/overlay-extension.md`.

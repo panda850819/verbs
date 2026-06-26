@@ -7,6 +7,7 @@ reads:
   - repo: lib/persona-frame.md
   - repo: lib/skill-decision-tree.md
   - repo: lib/gate-contract.md
+  - skill: skills/engineering/team-orchestrate/lib/inbox-template.md
   - vault: knowledge/**
 writes:
   - vault: Inbox/team-orchestrate-*.md
@@ -82,7 +83,7 @@ User can override. Wait for confirmation.
 
 Build N dispatch prompts using inline-from-skill pattern (see `lib/persona-frame.md` § "Inline-from-skill dispatch pattern"):
 
-1. Read each persona's `skills/productivity/{persona}/SKILL.md`
+1. Resolve each persona's SKILL.md via the host plugin-resolver (`pandastack:{persona}`). Personas are NOT all in one bucket: `eng-lead` (the default) lives in `skills/engineering/`, while `ceo / design-lead / product-lead / ops-lead` live in `skills/productivity/`. Do NOT hardcode a single bucket — let the resolver return the install path. Then read that file.
 2. Extract 6 contract sections (Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns / BAD-GOOD)
 3. Inline persona block + hard rules + branch-specific brief at top of subagent prompt
 4. Dispatch ALL branches in **one message** with multiple `Agent` tool calls:
@@ -119,7 +120,7 @@ Subagent results arrive in a single tool-result block but are independently pars
    - Files changed match declared scope (no scope creep into other branches)
    - Subagent's self-reported result matches actual state (read worktree files, don't trust the report)
 
-2. **Per-branch gate** (`lib/gate-contract.md`):
+2. **Per-branch gate** — invoke `AskUserQuestion` per `lib/gate-contract.md` (options `approve | edit | reject | skip`; do NOT print a text menu). Show this context in the prompt, one option per outcome:
    ```
    Branch N returned.
      Done: {what subagent reports}
@@ -127,12 +128,11 @@ Subagent results arrive in a single tool-result block but are independently pars
      Files changed: {list}
      Scope match: PASS / FAIL
      Verification: PASS / FAIL
-
-   [approve] merge to main and continue
-   [edit]    user supplies revision instruction → re-dispatch this branch only
-   [reject]  discard worktree, log as REJECTED, continue
-   [skip]    leave worktree dangling, continue (user merges manually later)
    ```
+   - **approve** → merge to main and continue
+   - **edit** → user supplies revision instruction → re-dispatch this branch only
+   - **reject** → discard worktree, log as REJECTED, continue
+   - **skip** → leave worktree dangling, continue (user merges manually later)
 
 3. On approve → `git worktree add` merge OR rebase branch into main (per user preference, default: merge no-ff)
 4. On edit → re-dispatch only this branch with revision instructions, return to step 1
@@ -153,40 +153,7 @@ Team-orchestrate complete — N branches.
   Open issues: {any deferred via skip}
 ```
 
-Write `Inbox/team-orchestrate-{slug}-{date}.md` with:
-
-```markdown
----
-date: {YYYY-MM-DD}
-type: team-orchestrate
-topic: {topic}
-branches: N
-outcomes: {n_approved, n_rejected, n_skipped}
-tags: [team-orchestrate]
----
-
-# Team-orchestrate — {topic} — {date}
-
-## Branch results
-
-| Branch | Persona | Outcome | Commit / Note |
-|---|---|---|---|
-| 1 {title} | {persona} | APPROVED | {commit} |
-| 2 {title} | {persona} | REJECTED | {reason} |
-| ... | | | |
-
-## Independence audit
-
-PASS / file-overlap details if FAIL
-
-## Gate Log
-
-{per-branch gate decisions}
-
-## OPEN_QUESTIONS
-
-{anything skipped or deferred}
-```
+Write `Inbox/team-orchestrate-{slug}-{date}.md` per the template in `skills/engineering/team-orchestrate/lib/inbox-template.md` (frontmatter + branch-results table + independence audit + gate log + OPEN_QUESTIONS).
 
 Suggest next skill if applicable (typically `/review` for cross-branch coherence check, then `/ship`). Do NOT auto-chain.
 

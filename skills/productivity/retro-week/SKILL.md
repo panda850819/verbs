@@ -1,6 +1,6 @@
 ---
 name: retro-week
-description: Interactive weekly retro — read the prep brief, conduct an interview, write the final retro. Triggers on "/retro-week", "weekly retro", "weekly review".
+description: Five-phase weekly retro that scans the week (git + brain + cross-runtime GC sweep), conducts a gated one-question-at-a-time interview, and writes the final retro to brain/reflections/weekly/. Triggers on "/retro-week" or "weekly retro/review".
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 user-invocable: true
 tags: [retro, weekly, reflection]
@@ -15,7 +15,7 @@ Multi-phase flow:
 - **Phase 1.5 (Brain synthesis)** — auto-generated thesis / contradictions / gaps from gbrain (skipped if gbrain absent)
 - **Phase 1.6 (GC sweep)** — scan past 7d `memory/feedback_*.md` across all `~/.claude/projects/*/memory/`, propose categorical fixes (lint / hook / skill / CLAUDE.md rule). Inspired by Lopopolo OpenAI Garbage Collection Day — convert observed slop into mechanism so it can't recur.
 - **Phase 2 (Interview)** — show raw scan + synthesis + GC proposals to user, conduct interview ONE question at a time
-- **Phase 3 (Write)** — write final retro to docs/retros/
+- **Phase 3 (Write)** — write final retro to brain/reflections/weekly/
 
 **Data source = the BRAIN, not the retired obsidian-vault.** All Phase 1 / 1.5 / 1.6 raw-data gathering is done by the shared, runtime-agnostic engine so Claude / Codex / Hermes all produce the same brief:
 
@@ -30,19 +30,7 @@ Run standalone OR after a Hermes cron has already pre-generated the brief (same 
 
 ## Phase 1: Auto-scan (raw data, no interpretation)
 
-Run the shared engine (above), then read its output. The engine already covers: git activity (brain + ~/site repos), learnings health, recent brain pages (sessions/decisions/reflections), gbrain synthesis, and the cross-runtime GC sweep. Print the brief's raw blocks to the user. The sub-sections below document what the engine gathers (for transparency / manual fallback).
-
-### 1a. Git activity (past 7 days)
-
-Engine runs `git log` over the brain repo and every `~/site/{skills,apps,cli,trading}/*` repo. Summarize: total commits across repos, key deliverables by repo name.
-
-### 1b. Learnings health — `brain/learnings/`
-
-Engine counts total / new-this-week / stale(90d+) under `$HOME/site/knowledge/brain/learnings/`. If missing, it notes "learnings/ not found — skip".
-
-### 1c. Recent brain activity — past 7 days
-
-Engine lists recently-touched pages under `brain/sessions`, `brain/decisions`, `brain/reflections/daily`, `brain/plans`, `brain/projects`. Capture: key decisions, shipped work, open threads.
+Run the shared engine (above), then read its output. The engine already covers: git activity (brain + ~/site repos), learnings health, recent brain pages (sessions/decisions/reflections), gbrain synthesis, and the cross-runtime GC sweep. Print the brief's raw blocks to the user. What each block gathers and the manual fallback if the engine is unavailable → [`skills/productivity/retro-week/lib/scan-blocks.md`](skills/productivity/retro-week/lib/scan-blocks.md).
 
 ### 1d. Print raw scan block
 
@@ -102,46 +90,9 @@ gbrain query "<hotspot topic>"
 
 ### 1f. Generate 4-block synthesis
 
-Print as:
+Print the 4-block synthesis (EMERGING THESIS / CONTRADICTIONS / KNOWLEDGE GAPS / ONE ACTION). Verbatim layout → [`skills/productivity/retro-week/lib/output-formats.md`](skills/productivity/retro-week/lib/output-formats.md) (Phase 1.5 section).
 
-```
-=== BRAIN SYNTHESIS: $YEAR-W$WEEK_NUM (auto · awaiting validation) ===
-
-EMERGING THESIS
-你這週在 build 但還沒明講的觀點是: <one sentence — extract from the salient-pages cluster>
-證據:
-- [[slug-1]] — "<verbatim quote that hints at the thesis>"
-- [[slug-2]] — "<verbatim quote that hints at the thesis>"
-- [[slug-3]] — "<verbatim quote that hints at the thesis>"
-
-CONTRADICTIONS
-<for each contradiction candidate from the 1e query comparison, format as:>
-- 新: [[slug-new, $DATE]] — "<quote>"
-  舊: [[slug-old, $OLDER_DATE]] — "<quote>"
-  衝突點: <one sentence>
-  狀態: 待 user 在 Phase 2 決定 (重新想 / retire 舊的 / 兩者各管一段 context)
-
-(If no anomalies surfaced, print: "沒有 surface 矛盾。可能 brain 還在累積、可能你這週都在同一條軌道上。")
-
-KNOWLEDGE GAPS
-本週 obsess 的 topic distribution: <topic-A: N pages, topic-B: M pages, ...>
-但你 brain 完全沒有: <missing perspective inferred from gap analysis>
-建議下週讀方向 (具體，不是書名): <direction>
-
-(Discipline: do not invent specific books/articles. Just direction. This bar
-applies everywhere a reading source could be named — KNOWLEDGE GAPS here, the
-empty-week block, and every "Recommendation for Next Week". NO reading source
-— book title / author / blog / talk / brain path — may be named unless it has
-a vault basis (a slug/page that actually surfaced in the scan or gbrain
-output). No basis → name a direction only, never a source.)
-
-ONE ACTION
-這週最高槓桿一件事 (從 brain 推，不是憑空):
-<concrete action grounded in the 1e under-linked-hotspot gap>
-槓桿來源: <which slugs / which pattern made this the highest-leverage>
-
-===
-```
+**Reading-source discipline (load-bearing, applies here + every "next week" recommendation):** do not invent specific books/articles. NO reading source — book title / author / blog / talk / brain path — may be named unless it has a vault basis (a slug/page that actually surfaced in the scan or gbrain output). No basis → name a direction only, never a source.
 
 Then say: **"synthesis 出來了。要繼續看 prep brief 還是直接進 interview？"** — wait for user.
 
@@ -160,43 +111,25 @@ User has 3 options:
 
 ### 1g. Pull GC inputs
 
-```bash
-# Single find walks all ~/.claude/projects/*/memory/ dirs in one pass.
-# Use -mtime -7 (BSD-compat). Do NOT use `-newer <(date ...)` because
-# process-sub temp files have mtime = NOW, so the test never matches.
-# Do NOT capture into a var and re-loop with `for d in $VAR` — zsh and bash
-# word-split that expression differently and zsh treats it as one token.
+The engine's GC-sweep block already lists recent tri-runtime feedback. Pull the same inputs here only when running standalone (no engine brief). Shell-portability rationale (`-mtime -7` vs process-sub, zsh/bash word-split) and the dispatch-miss / pitfall fuel lineage → [`skills/productivity/retro-week/lib/gc-inputs.md`](skills/productivity/retro-week/lib/gc-inputs.md).
 
-# TRI-RUNTIME: scan all three runtimes' memory layers, not just Claude Code.
-#   Claude Code → ~/.claude/projects/*/memory/   Substrate (Codex+all) → ~/.agents/memory/
-#   Hermes → ~/.hermes/memories/                 Codex → ~/.codex/memories_*.sqlite (sqlite, inspect separately)
+```bash
+# Tri-runtime feedback files touched in the past 7d (one find per memory layer).
 RECENT_FEEDBACK=$( { \
   find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 -path "*/memory/feedback_*.md" -mtime -7 2>/dev/null; \
   find "$HOME/.agents/memory" -name "feedback_*.md" -mtime -7 2>/dev/null; \
   find "$HOME/.hermes/memories" -name "*.md" -mtime -7 2>/dev/null; } )
 
-ALL_FEEDBACK=$( { \
-  find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 -path "*/memory/feedback_*.md" 2>/dev/null; \
-  find "$HOME/.agents/memory" -name "feedback_*.md" 2>/dev/null; \
-  find "$HOME/.hermes/memories" -name "*.md" 2>/dev/null; } )
-
-# Continue-failure logs (per careful skill "Stopping discipline" — each line
-# is one event where the agent had to ask the user instead of resolving via
-# tool calls. Format: DATE TIME | session | "question" | reason).
+# Continue-failure logs + past-7d events (path prefix preserved).
 CONTINUE_LOGS=$(find "$HOME/.claude/projects" -mindepth 3 -maxdepth 3 \
   -path "*/memory/log_continue-failures.md" 2>/dev/null)
-
-# Past-7d log entries across all logs, with file path prefix preserved.
 RECENT_CONTINUE_EVENTS=$(SINCE=$(date -v-7d +%Y-%m-%d); \
   for log in $CONTINUE_LOGS; do \
     awk -v since="$SINCE" -v src="$log" \
       '$1 >= since { print src ":" $0 }' "$log" 2>/dev/null; \
   done)
 
-# Compound-loop GC fuel (PRO-42): the feedback_*.md tables are nearly empty, so the
-# converter would run on air. Pull two streams that already carry signal — the
-# dispatch miss log (a skill that should have fired but didn't) and the week's fresh
-# pitfalls (recorded but not yet promoted to a rule / test / skill edit).
+# Compound-loop GC fuel: dispatch misses + fresh pitfalls (see skills/productivity/retro-week/lib/gc-inputs.md).
 DISPATCH_MISSES=$(tail -n 50 "$HOME/.agents/memory/dispatch-miss.log" 2>/dev/null)
 RECENT_PITFALLS=$(find "$HOME/site/knowledge/brain/learnings/pitfalls" -name "*.md" -mtime -7 2>/dev/null)
 ```
@@ -265,61 +198,14 @@ The dispatch log and fresh pitfalls are the routing + record halves of the same
 
 Same recurrence gate and propose-only discipline apply.
 
-Format:
-
-```
-=== GC SWEEP: $YEAR-W$WEEK_NUM (auto · awaiting Phase 2) ===
-
-RECENT CORRECTIONS (past 7d): N files
-CONTINUE-FAILURES (past 7d):  N events across N projects
-
-| source                                 | trigger                | count | propose                                  |
-|----------------------------------------|------------------------|-------|------------------------------------------|
-| feedback_no-wikilinks-in-h1            | brain page H1 with [[]]| 3x    | lint: PreToolUse:Write `^# .*\[\[`       |
-| feedback_voice-rules                   | voice/phrasing slop    | 2x    | CLAUDE.md §voice line addition           |
-| feedback_one-off-typo-fix             | single correction      | 1x    | leave (1x — stays as memory feedback)    |
-| feedback_xxx                           | ...                    | 2x    | leave-alone (already linked to [[skill]])|
-| continue-log                           | "commit now?" (5x)     | 5x    | CLAUDE.md default: auto-commit unless flag |
-| continue-log                           | <unknown reason 3x>    | 3x    | investigate — Lopopolo failure mode      |
-
-(count < 2 → propose cell MUST read `leave (1x — stays as memory feedback)`; never a mechanism.)
-
-PATTERN ACROSS FILES
-- N feedback files this week mention "<keyword>" → candidate new skill: <name>
-  (or: no cross-file pattern detected)
-
-ALREADY-MECHANIZED (no proposal needed)
-- <list of files matching "second time" / "Nth time" rule — already covered>
-
-===
-```
-
-Empty-week handling:
-
-```
-=== GC SWEEP: $YEAR-W$WEEK_NUM ===
-
-RECENT CORRECTIONS (past 7d): 0 files
-CONTINUE-FAILURES (past 7d):  0 events
-
-System stable this week — no new corrections fed back, agent didn't have
-to ask for nudges. Either:
-  - Forcing functions are working
-  - You weren't pushing edge cases
-  - You weren't writing down corrections (check: did /done run this week?)
-  - The agent isn't logging continue-failures (check careful skill is active)
-
-(skipping proposal table)
-
-===
-```
+Print the GC sweep table (RECENT CORRECTIONS / CONTINUE-FAILURES counts, the propose table, PATTERN ACROSS FILES, ALREADY-MECHANIZED), or the empty-week block when the 7d window has 0 files / 0 events. Verbatim layouts → [`skills/productivity/retro-week/lib/output-formats.md`](skills/productivity/retro-week/lib/output-formats.md) (Phase 1.6 section). Propose cells obey the 1h step-5 recurrence gate.
 
 Then say: **"GC sweep 完了。Phase 2 會把每個 proposal 變成 yes/no/defer 問題。準備好聊嗎？"** — wait for user.
 
 ### 1j. Discipline — what NOT to do here
 
 - ❌ Do NOT write any lint / hook / skill file in Phase 1.6 — proposals only
-- ❌ Do NOT propose mechanisms for one-off corrections — the recurrence gate (1h step 5) is the enforcement: a `propose` cell is emitted ONLY when `count >= 2`. Single occurrences (count == 1) render as `leave (1x — stays as memory feedback)`, never a lint / hook / skill proposal. Recurrence is the trigger for a forcing function, not a single nag.
+- ❌ Do NOT propose mechanisms for one-off corrections — the 1h step-5 recurrence gate is the enforcement.
 - ❌ Do NOT propose duplicating an already-linked mechanism — check `linked:<skill>` first
 - ❌ Do NOT silently skip the table when 7d window is empty — print empty-week block so user sees the discipline ran
 
@@ -365,9 +251,9 @@ For each candidate observation (from prep OR from Phase 1 scan anomalies):
 - If user disagrees: drop, don't argue
 - If user agrees: ask "這是個 pattern 還是這週的特殊情況？"
 
-For feedback patterns from feedback-log.md:
-- "feedback-log 裡有 [pattern] 從 [date]，這週你覺得有再出現嗎？"
-- If yes: increment counter in feedback-log.md
+For active feedback patterns (from the prep brief's cross-check list / `RECENT_FEEDBACK` files):
+- "feedback 裡有 [pattern] 從 [date]，這週你覺得有再出現嗎？"
+- If yes: note the recurrence for the Phase-3 Feedback Pattern Status section (count is derived from distinct `memory/feedback_*.md` files, not a hand-kept counter)
 - If user thinks pattern resolved: ask if status should change to `resolved`
 
 ### GC proposal review (one pass through Phase 1.6 table)
@@ -397,57 +283,7 @@ Ask exactly once at the end of the interview:
 
 ## Phase 3: Write final retro
 
-After interview, write `brain/reflections/weekly/$YEAR-W$WEEK_NUM.md` (brain, not vault):
-
-```markdown
----
-date: $SUNDAY
-type: weekly-retro
-week: $YEAR-W$WEEK_NUM
-range: $MONDAY..$SUNDAY
-status: complete
-prep_source: $(basename "$PREP")
-scan_data: true
----
-
-# Weekly Retro $YEAR-W$WEEK_NUM ($MONDAY → $SUNDAY)
-
-## Git Activity Summary
-- [from Phase 1 scan: repos + commit counts + key deliverables]
-
-## Learnings Health
-- Total: N | New this week: N | Stale (90d+): N
-
-## Decisions This Week
-- [decision] — context, what was chosen, why (from interview)
-
-## Validated Observations
-- [observations user agreed with, with their nuance]
-
-## Rejected / Reframed Observations
-- [things I surfaced that user pushed back on — useful for next prep]
-
-## Feedback Pattern Status
-- [pattern X]: count N → N+1 / status changed to resolved / no recurrence
-- (only list patterns discussed in interview)
-
-## Recommendation for Next Week
-> One concrete action — from the interview, not invented. Use the user's exact phrasing.
-> No reading source (book / author / blog / talk / brain path) may be named here
-> without a vault basis (a slug/page that surfaced in scan or gbrain). No basis →
-> direction only, never a named source. Same bar as Phase 1.5 KNOWLEDGE GAPS.
-
-## What I'm Sitting With
-> User's open questions or unresolved tensions, in their words.
-
-## Obsolete-yourself Candidate
-> The manual work user named that should be a skill/agent/cron. Verbatim. Empty if none this week.
-
-## GC Decisions (Garbage Collection Sweep)
-> One row per Phase 1.6 proposal that user approved or rejected.
-> Format: `[feedback file] → [mechanism] | decision: yes/no/defer | next: [/sprint topic if yes, reason if no, re-surface date if defer]`
-> Empty if 7d window had no recent corrections.
-```
+After interview, write `brain/reflections/weekly/$YEAR-W$WEEK_NUM.md` (brain, not vault). Full page template (frontmatter + all sections: Git Activity, Learnings Health, Decisions, Validated/Rejected Observations, Feedback Pattern Status, Recommendation, What I'm Sitting With, Obsolete-yourself Candidate, GC Decisions) → [`skills/productivity/retro-week/lib/output-formats.md`](skills/productivity/retro-week/lib/output-formats.md) (Phase 3 section). Recommendation for Next Week obeys the same reading-source discipline as Phase 1.5 (no named source without a vault basis).
 
 Ensure `brain/reflections/weekly/` directory exists before writing:
 
@@ -457,7 +293,7 @@ mkdir -p "$HOME/site/knowledge/brain/reflections/weekly"
 
 ### Step 3b: Updates to other files
 
-- Update `feedback-log.md` for any pattern counter changes or status changes (use `Edit` tool, don't rewrite the file)
+- Pattern recurrence + status changes are recorded in the retro page's Feedback Pattern Status section; if the user marked a pattern `resolved`, update that status in the source `memory/feedback_*.md` file (use `Edit`, don't rewrite)
 - Update prep brief frontmatter `status: complete` if prep file exists
 - Do NOT manually git commit/push — the brain's `com.pbrain.autocommit` (every 15 min) commits, pushes, and embeds. Just write the file.
 

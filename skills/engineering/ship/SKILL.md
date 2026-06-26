@@ -71,7 +71,7 @@ Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses) 
 ### Step 2: Load Learnings
 
 Search `{learnings_dir}` for `type: pitfall` related to the changed files.
-If any match, do a quick sanity check against the diff before proceeding.
+If any matched pitfall touches a changed file, list it and require ack before proceeding; else skip.
 
 Also best-effort search `{brain}/learnings/{pitfalls,patterns,architecture}/` — the auto-sedimented learnings from past sessions (transcript-ingest). Skip silently if `{brain}` is unset or absent (Zero-Dependencies: a brain-less clone just uses `{learnings_dir}`). This is the READ side that closes the compound loop — a learning that sedimented from a past session surfaces here before you ship related work.
 
@@ -106,7 +106,8 @@ If there are uncommitted changes:
 1. Analyze the diff
 2. Generate a conventional commit message (`type(scope): description`)
 3. Stage relevant files (never `git add -A`)
-4. Commit (don't amend, don't skip hooks)
+4. Stop if `git diff --cached` is empty after staging (nothing to commit) — report and skip the commit.
+5. Commit (don't amend, don't skip hooks)
 
 ### Step 6: Branch (mandatory)
 
@@ -146,11 +147,9 @@ If `release: false`: skip.
 
 ### Step 10: Write Learnings (if applicable)
 
-If the ship process itself revealed something useful (a test that caught a subtle bug, a deploy pattern worth remembering, a CI gotcha):
+Write a learning ONLY if a concrete artifact surfaced during this ship: a test that caught a subtle bug, a deploy pattern worth remembering, or a CI gotcha. If none surfaced, skip.
 
-Write a learning to `{learnings_dir}/pitfalls/` or `{learnings_dir}/patterns/`.
-
-**Quote gate (no phantom quotes)**: any verbatim quote (「...」 / "...") or `[Source: <file>]` in the learning MUST be verified greppable in its cited source (`grep -F "<distinctive substring>" <source>`) before writing. No match → paraphrase without quotation marks or drop the attribution. Never reconstruct a quote from memory.
+Write the learning to `{learnings_dir}/pitfalls/` or `{learnings_dir}/patterns/`. Apply the quote gate before writing: `@skills/engineering/ship/lib/quote-gate.md`.
 
 **Route the flaw back (propose-only).** If a flaw surfaced during ship maps to an existing pandastack skill — matched against that skill's anti-pattern / checklist table, not just its trigger keywords — emit one `skill-edit candidate: <skill> — <missing check>` line into the session-end brain-candidate audit (skip silently if absent). See `lib/trigger-first-skill-evolution.md`. Propose-only: never edit the target skill here, and never during an autonomous build — the human picks from the audit. This routes the catch back to strengthen the skill that let it through, instead of leaving only a passive pitfall.
 
@@ -162,19 +161,11 @@ If this work maps to a brain project page (`{brain}/projects/{slug}.md` exists),
 project-state append {slug} --done {N} --open {N} --blocked {N} --next "{one-line next}"
 ```
 
-`project-state` (at `~/.local/bin/project-state`) does the markdown surgery deterministically: refresh the STATE baton + append one dated METRICS row, idempotent per day. It auto-skips the METRICS row for repo-backed projects (page declares its repo as the state SSOT) and only refreshes `next`. Derive done/open/blocked from the project's own tracker (its `## Status` / `## Open`, or the repo if repo-backed). Best-effort: if `project-state` or the page is absent, skip silently — never fail the ship over it.
+Mechanics (how it does the surgery, repo-backed handling, deriving the counts): `@skills/engineering/ship/lib/project-state.md`. Best-effort: if `project-state` or the page is absent, skip silently — never fail the ship over it.
 
 ## Common Rationalizations
 
-| Rationalization | Reality |
-|---|---|
-| "Skip pre-flight, the branch looks clean" | "Looks clean" ≠ `git status` clean. Pre-flight is 2 seconds. Catches the tracked-but-unstaged file you'd otherwise leave behind. |
-| "No CI on this repo, just push" | If there's no CI, ship sets up at minimum a type-check + build gate. "Push and pray" is how broken main happens. |
-| "I'll write the PR description later, push first" | The PR description's draft window is the 60 seconds after commit. Later means cold context — you'll write a worse description that helps no future-you bisect. |
-| "Squash everything into one commit" | Not unless the project config says so. Per-commit history is what `git bisect` needs. Squash on merge is fine; squash before push destroys the working set. |
-| "`--no-verify` because hooks are slow" | Hook bypass is the skin-shed before the real bug ships. If hooks are too slow, fix the hooks, don't bypass them. |
-| "Push to main directly, it's just a docs change" | Trunk-based ≠ main-direct. Even one-line docs go through the PR + CI loop in this stack — the contract is uniform so it's reliable. |
-| "Skip Step 4 review gate, I already reviewed mentally" | If you can't point at the `/review` output, you didn't review. Self-review is fine; undocumented self-review is not. |
+Anti-bypass table tying each ship shortcut to the failure it causes: `@skills/engineering/ship/lib/rationalizations.md`.
 
 ---
 

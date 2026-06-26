@@ -2,34 +2,33 @@
 type: skill-eval
 skill: qa
 bucket: engineering
-evaluated_skill_hash: ce845dfa5c91c52bff57bcd52239b28bbebe993d
+evaluated_skill_hash: d8a50cfdab93681e1ca04561a759f54d67e1d5aa
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — qa
 
-**Verdict: SOLID.** A genuinely repeatable QA process: the three-round test-planning loop plus the rigor-ranked assertion/verification protocol force the same disciplined path every run, which is exactly what predictability buys.
+**Verdict: SOLID.** A deterministic 5-step browser-QA pipeline with a clean model/user trigger split and a now-checkable close criterion; loses points only where Step 4's mechanical-bug example list duplicates the extracted bug-template routing.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L25 — the forced "Re-read Round 1. What did you miss?" adversarial pass makes the planning process reproducible, not just the output |
-| Description / invocation | weak | L3 — front-loads "Browser-based QA" well, but carries no NOT-clause, so it collides with `verify` / `review` / `testing` on overlapping triggers |
-| Completion criteria | weak | L113 — "If a UI pattern... was discovered, write a learning" is conditional with no checkable done-state; premature-completion bait |
-| Information hierarchy | weak | L14 — `{learnings_dir}` / `type: pitfall` is a dangling context pointer; `lib/learning-format.md` exists and defines the format but is never linked |
-| Leading words | pass | L25 — "Adversarial" anchors a whole pretrained region of QA behaviour in one word; "fan out", "rigor" do the same elsewhere |
-| Pruning | weak | L45 — one long line of process narration on per-group model selection ("a trivial smoke check and a group combining... are not the same load"; "don't pin a fixed mapping") restates a no-op the agent already does by default |
-| Granularity | pass | L40 — five sequential steps each end on a real handoff (plan → test → fix → learn); the splits track genuine sequence boundaries, not gratuitous cuts |
-| pandastack conformance | weak | L117 — body is 117 lines, past the ~<80-line writing-great-skills budget with no length-earning reason. Frontmatter itself is valid: SKILL-FRONTMATTER.md requires only `name`+`description` (qa has both, `name` matches folder); `version`/`type` are optional and `reads:` is advisory audit metadata nothing enforces, so their absence is not a conformance fault. Length is the only real signal; hot/cold dispatch does not apply (the skill reads no large reference) |
+| Predictability | pass | L18 — same 3-round plan (Functional -> Adversarial -> Coverage) then Merge runs every time; `{learnings_dir}` is now bound once at L14 ("resolve... default `docs/learnings`") and reused at L98, so both intake and close are reproducible per project. |
+| Description / invocation | pass | L4 — front-loads "Browser-based QA"; model signal ("UI has changed") split from user phrasings ("test this", "QA", "check the page"); two anti-triggers route to `verify` / `review`; no body-identity restatement left. |
+| Completion criteria | pass | L98 — repaired Step 5 terminates only when a `type: pitfall` learning is written OR an explicit "no learning warranted" is recorded ("done only once one of the two is recorded"); Step 3 closes on the summary line (L86) plus STEP_PASS/FAIL/SKIP markers. |
+| Information hierarchy | pass | L79 — bug `[BUG]` template + screenshot path extracted to `skills/engineering/qa/lib/test-output-format.md`; the verification rigor ladder (L72-75) stays inline because it fires every run; progressive disclosure honored. |
+| Leading words | pass | L26 — pretrained anchors carry each branch (Functional / Adversarial / Coverage; Deterministic / Snapshot / Screenshot); no restatement sediment. |
+| Pruning | weak | L91 — the AUTO-FIX mechanical-bug example list ("CSS, missing null check, wrong URL") is duplicated verbatim inside `lib/test-output-format.md`'s `Action` routing line; the same enumeration lives in two places, so neither is the single source. |
+| Granularity | pass | L40 — Step 3's sub-sections (Parallel Execution, Assertion Protocol, Verification, Failure Output, Summary) are distinct mechanics, each earning its load; 5 steps map to a real pipeline with no over-split. |
+| pandastack conformance | pass | L79 — `name: qa` = folder; repo-root `lib/learning-format.md` is intentionally distinct from the explicit skill-local `skills/engineering/qa/lib/test-output-format.md`; all refs resolve, and the 102-line body is earned by browser-QA orchestration plus extracted failure-output detail. |
 
 ## Why it's good
-The skill's spine is its verification ladder (L69-74): four checks ranked by rigor, with screenshot-on-failure ranked weakest, which structurally pushes the agent toward deterministic `eval` evidence over screenshots. The structured markers (`STEP_PASS|STEP_FAIL|STEP_SKIP`, L60-64) and the bug-report format (L86-94) make every test outcome machine-checkable and greppable, so completion of Step 3 is unambiguous. The three-round plan (functional → adversarial → coverage-gaps) is the load-bearing predictability lever.
+The trigger is textbook: leading phrase first, a model-detectable signal ("UI has changed") separated from the literal user phrasings, and two anti-triggers that name the skills they hand off to. The 3-round test-planning protocol (Functional, then an adversarial re-read, then coverage gaps for big changes) makes the *process* identical every run rather than depending on whatever the agent happens to think of, and the assertion-marker + verification-rigor ladder turns "I tested it" into structured, gradeable evidence. The Step 5 repair closed the prior premature-completion bait, and binding `{learnings_dir}` fixed the prior intake/close unpredictability.
 
 ## Top fixes
-1. L14 — resolve the `{learnings_dir}` pointer: either link `lib/learning-format.md` here and at Step 5, or inline the one rule the agent needs. As written it dead-ends.
-2. L3 — add a NOT-clause to the description (e.g. "NOT for non-UI verification — use `verify`; NOT for code-diff review — use `review`") to stop trigger collision.
-3. L113 — give Step 5 a checkable criterion (learning written to `{learnings_dir}` with `type: pitfall`, or explicit "no learning warranted"). Separately, the 117-line body is over the ~<80 budget; trim process narration (L45) and push the screenshot/bug-report mechanics behind a pointer to cut toward budget. (Frontmatter is already spec-valid; no `version`/`reads:` fix is needed for conformance — those are optional/advisory.)
+1. L91 — drop the inline "CSS, missing null check, wrong URL" example list from Step 4 and let `lib/test-output-format.md` (which already carries the identical `Action: AUTO-FIX | ASK` enumeration) be the single source; Step 4 then just says "route per the `Action` field."
+2. L51 — the step budgets ("~25 / ~40 / ~75") are the only soft, non-checkable knob in an otherwise crisp Step 3; tie them to the test-group size class or mark them advisory so they read as guidance, not a completion criterion.
 
 ## Behavioral cases
-- trigger `QA the new checkout page` → expected process: Step 1 load config + UI pitfalls, Step 2 three-round plan, Step 3 browser flows emitting STEP_PASS/FAIL markers with deterministic-eval evidence, Step 4 auto-fix mechanical bugs, Step 5 learning.
-- anti-trigger `verify my refactor didn't break the API` → should NOT fire (no UI surface; routes to `verify`); `review my PR before I push` → routes to `review`, not qa.
+- trigger `the checkout page changed, QA it` -> expected process: Step 1 load config + UI pitfalls + brief, Step 2 run the 3-round plan and merge a numbered list, Step 3 assert with STEP_PASS/FAIL/SKIP plus the verification ladder (parallel sub-agents if 3+ groups), Step 4 AUTO-FIX mechanical bugs / ASK on design, Step 5 record a `type: pitfall` learning or "no learning warranted".
+- anti-trigger `verify this PR's fix actually works` -> should NOT fire (routes to `verify` per L6 — non-UI verification); `review my diff before I push` -> should NOT fire (routes to `review` — code-diff review, not a live browser flow).

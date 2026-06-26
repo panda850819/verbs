@@ -2,35 +2,33 @@
 type: skill-eval
 skill: using-pandastack
 bucket: meta
-evaluated_skill_hash: 28861f70b8d050edcd437b6474f288a373edd2c2
+evaluated_skill_hash: bf99b4211f75618e4a9a18ab89a4a1b2971571f4
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — using-pandastack
 
-**Verdict: SOLID** (low end — 5 of 8 axes weak; held up by one genuinely strong core). A purpose-built router/forcing-function skill: the 1%-threshold contract (L11) reliably pressures a skill-check before any response, which is exactly the predictability job this file exists to do. The body overreaches that core with ~61 lines of inlined on-demand reference (L47–131) that drag hierarchy and conformance down.
+**Verdict: SOLID.** The 1%-threshold forcing function (L11) plus the now-recorded skip-reason done-state (L32) give this router a genuine invariant process; the main point still bleeding is the hot session-opener block that should ride a pointer.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L11 — the "even a 1% chance … you MUST invoke the skill before responding" rule forces the same check-first process every run; that is the root virtue and it is concrete. |
-| Description / invocation | weak | L3 — description front-loads "Use at the start of any session" well, but this is the canonical router skill and frontmatter omits `user-invocable`/`type`/`version`; the one-line description carries no trigger branches and no reach clause for the router role. |
-| Completion criteria | weak | L11 — the core contract ("invoke … before responding") is a posture with no checkable done-state; only the session ritual (L59 "Healthy session = zero lines printed") is genuinely checkable, so the headline step invites premature completion. |
-| Information hierarchy | weak | L47 — two real lib pointers (L70, L81) defer only a fraction; from the session-opener ritual (L47) to end (L131) ~61 content lines of on-demand reference sit hot — session ritual + code block (L47–66), loop guard (L68–77), harness-evolution rule (L79–88), overlay-extension resolution order + hook-logging contract (L116–131). The overlay block especially is reference a router contract rarely needs hot. Sibling `careful`/`handover` evals mark hierarchy weak for a single ~60-line inlined subsystem; this skill inlines four. |
-| Leading words | pass | L16 — "cognitive contract" / "forcing function" (L18) are compact pretrained anchors that name the whole behaviour region in few tokens. |
-| Pruning | weak | L18 — "26 skills (5 of them persona lenses) and 3 documented lifecycle compositions" hardcodes counts that drift the moment a skill is added (sediment); the Red-flags table (L94–107, 12 rows) restates one idea — "don't rationalize past the check" — many times. |
-| Granularity | pass | L66 — explicitly argues the session ritual stays folded here rather than minting a `pandastack:cold-start` skill that would duplicate `gbrain:cold-start`; a cut consciously NOT spent. |
-| pandastack conformance | weak | L1 — frontmatter is valid and lib/ refs resolve, but the body runs 132 lines (>2x the ~80-line budget) and a skill whose body cites v2.1/v2.2.0/v3 behavior (L40, L66) carries no `version` field. |
+| Predictability | pass | L11 — "even a 1% chance a pandastack skill might apply … you MUST invoke the skill via the `Skill` tool before responding" fixes one invariant (check-before-act) that runs identically every turn regardless of task shape. The root virtue, and it is concrete. |
+| Description / invocation | pass | L3 — front-loads the positional leading phrase "Use at the start of any session"; model-invoked (no `user-invocable`) is correct for a SessionStart contract; single trigger, no body-identity restated. |
+| Completion criteria | pass | L32 — repaired: "invoked this turn — or you must record an explicit skip-reason this turn … an unrecorded skip is a skipped check" converts the headline check into a binary done-state and explicitly closes the prior "I checked, decided no" premature-completion bait. The session ritual stays checkable too (L59 "Healthy session = zero lines printed"). |
+| Information hierarchy | weak | L47 — loop-guard (L68), harness-evolution (L72), overlay (L102) are now correctly deferred to lib/, but the 18-line session-opener ritual + fenced code block (L47-64) sits fully hot. It is run-procedure for a sub-mode, not the router's core check; a one-line "run the 5-step opener → `lib/session-opener.md`" pointer would match how the three neighbours were already extracted. |
+| Leading words | pass | L18 — "forcing function" (L18) and "cognitive contract" (description) are compact pretrained anchors that name the whole behaviour region in few tokens; the red-flags table (L74-91) collapses a dozen rationalizations into one reusable STOP-on-this-thought pattern instead of restating the rule per row. |
+| Pruning | pass | L40 — single-source discipline holds: the v2.1 rename is noted once inline ("replaces v2.1 `/work-ship`") rather than carried as a parallel row, the prior version's stale hardcoded skill count is gone, the maintainer-facing design-rationale no-ops are removed, and each lib file is the sole home of its subsystem. No sediment in the body. |
+| Granularity | pass | L68 — the three splits each earn their load: loop-guard (424B), harness-evolution, and overlay-extension are independently-triggered subsystems (loop detection vs skill-authoring vs install-time wiring) gated behind distinct conditions, so each pointer fires only when its condition is live rather than taxing every read. |
+| pandastack conformance | weak | L1 — frontmatter `name: using-pandastack` matches the folder and is valid; body-referenced lib pointers (L68/L72/L102) resolve, and the transitive lib files now mark their repo-root refs explicitly. Weak only because the body is 102 lines, over the ~80 soft cap, with the hot ritual (L47-64) as the main overflow. |
 
 ## Why it's good
-The skill knows exactly what it is — a forcing function against the model's "I'll just answer directly" default (L18) — and spends its whole length serving that one job rather than sprawling into unrelated capability. The instruction-priority ladder (L24–28) and the explicit "When NOT to invoke" list (L109–114) keep the contract from becoming a tyrant, and the granularity reasoning at L66 shows rare self-awareness about not minting redundant skills. The two lib/ pointers (L70, L81) keep the two heaviest references cold — though the body still inlines four other subsystems that should follow them out (see hierarchy axis).
+The repair landed its two highest-value targets: the completion-criteria fix at L32 turns a soft "I checked" into an auditable recorded-skip done-state, and three reference subsystems moved behind resolving lib/ pointers, dropping the body from 131 to 102 lines and clearing the prior pruning/granularity weaks. The 1% contract (L11) remains a real, concrete forcing function, and the red-flags table (L74-91) is the right shape — pattern-collapse over restatement.
 
 ## Top fixes
-1. L18 — replace the hardcoded "26 skills (5 … persona lenses) and 3 … compositions" with a count-free phrasing ("dozens of skills across several lifecycle compositions"); a number that drifts on every skill add is sediment by construction.
-2. L94–107 — collapse the 12-row Red-flags table to the 3–4 distinct rationalization classes (small-change, answer-directly, already-know-it, not-real-work); the rest are synonyms renaming one branch and inflate the file past the length budget.
-3. L1 — add `version:` and `type: skill` to frontmatter; the body gates behavior on versions (v2.1, v2.2.0) yet the skill declares no version of its own, so drift is unauditable.
-4. L116 — drop the overlay-extension subsystem (resolution order + hook-logging contract, ~11 lines) behind a context pointer like the loop-guard/evolution refs already use; it is install-time reference, not hot contract, and removing it from the hot body is the single biggest hierarchy + length win.
+1. L47-64 — extract the 5-step session-opener ritual (incl. the fenced code block and failure-mode list) to `lib/session-opener.md` behind a one-line trigger pointer, matching how loop-guard / harness-evolution / overlay were already handled; this single change pulls hierarchy to pass and the body under ~80 lines.
+2. L100-102 — fold the one-sentence overlay degradation note into `skills/meta/using-pandastack/lib/overlay-extension.md` so the body carries only the trigger, not a partial restatement of the ref.
 
 ## Behavioral cases
-- trigger `"let me start coding the auth refactor"` → expected process: skill-check fires BEFORE any edit (L11), lifecycle map routes to `pandastack:careful` for the prod path then `grill`/`plan` for the 3+-file refactor (L36–37), announced as "Using `pandastack:<skill>` to …" (L45).
-- anti-trigger `"just read me lines 40–60 of config.ts, no edits"` → should NOT fire a lifecycle skill; matches "Reading code or files for orientation only" (L111) and the one-line-factual carve-out (L112), so the contract stays silent and routes to a plain read.
+- trigger `start of a fresh session, about to edit a prod config file` -> expected process: run the 5-step opener silent unless anomaly (L47), then before the edit invoke `pandastack:careful` per L36, recording an explicit skip-reason this turn if declining (L32).
+- anti-trigger `read this file so I understand the layout, no edits planned` -> should NOT fire (routes to the "When NOT to invoke" orientation-only carve-out at L95; no skill invocation and no skip-reason required).

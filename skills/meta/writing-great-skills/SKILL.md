@@ -34,7 +34,7 @@ A model-invoked **description** states what the skill is and lists the **branche
 
 A skill mixes two content types — **steps** and **reference** — placed on the **information hierarchy**, a ladder by how immediately the agent needs the material:
 
-1. **In-skill step** — an ordered action in `SKILL.md`. Each ends on a **completion criterion**: make it _checkable_ (done vs not-done) and, where it matters, _exhaustive_. A vague criterion invites **premature completion**.
+1. **In-skill step** — an ordered action in `SKILL.md`. Each ends on a **completion criterion**: make it _checkable_ (done vs not-done) and, where it matters, _exhaustive_. "Every heading enumerated" is checkable and exhaustive; "reviewed the structure" is neither. A demanding criterion forces the **legwork** that does the real work; a vague one invites **premature completion**.
 2. **In-skill reference** — a rule or fact consulted on demand; often a flat peer-set, which is fine.
 3. **External reference** — pushed out of `SKILL.md` into a linked file, reached by a **context pointer**, loaded only when the pointer fires.
 
@@ -69,15 +69,15 @@ Diagnose a struggling skill against these:
 
 ## The scorecard
 
-`skill-eval` scores a skill on these 8 axes — each **pass / weak / fail** with one cited line. This section is the checkable condensation of the principles above; keep it in sync with them.
+`skill-eval` scores a skill on these 8 axes — each **pass / weak / fail** with one cited line. The criterion for each lives in the section it names above; this is the index, not a second copy.
 
-1. **Predictability** — same _process_ every run?
-2. **Description / invocation** — model vs user chosen right; description front-loads the leading word, one-trigger-per-branch, no duplication, no body-identity.
-3. **Completion criteria** — every step ends checkable; exhaustive where it matters; no premature-completion bait.
-4. **Information hierarchy** — steps vs reference placed by need; progressive disclosure used; co-location held.
-5. **Leading words** — anchors behaviour in pretrained concepts; restatements collapsed.
-6. **Pruning** — single source of truth; relevance; no no-ops; no sediment; no sprawl.
-7. **Granularity** — each split earns its load (independent reach, or anti-premature-completion).
+1. **Predictability** — see [Writing Great Skills](#writing-great-skills) (the root virtue).
+2. **Description / invocation** — see [Invocation](#invocation) + [Writing the description](#writing-the-description).
+3. **Completion criteria** — see [Information hierarchy](#information-hierarchy) (the step tier).
+4. **Information hierarchy** — see [Information hierarchy](#information-hierarchy).
+5. **Leading words** — see [Leading words](#leading-words).
+6. **Pruning** — see [Pruning](#pruning) + [Failure modes](#failure-modes).
+7. **Granularity** — see [When to split](#when-to-split).
 8. **pandastack conformance** — SKILL-FRONTMATTER.md valid; hot/cold dispatch honoured; ~<80 lines unless earned; `lib/` refs resolve.
 
 Verdict shape: the skill's leading virtue (why it is good) + the top 1–3 line-cited fixes.

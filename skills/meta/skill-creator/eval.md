@@ -2,34 +2,34 @@
 type: skill-eval
 skill: skill-creator
 bucket: meta
-evaluated_skill_hash: 74521fb8f5b89dd6612702b262499fd996398d07
+evaluated_skill_hash: af7727ec33ce76afeb429b713678078faf38af79
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — skill-creator
 
-**Verdict: SOLID.** A refuse-to-build-first authoring workflow whose phases fix one process per run and whose hot/cold gate is genuinely load-bearing — held back from STRONG by a 188-line body, two `.5` accretion phases, and an evidence pointer that does not resolve.
+**Verdict: SOLID.** Same checkable process every run: refuse-to-build gated upfront, hot/cold made mandatory, scorecard bound at the generation moment. It loses points on triple-citing the trigger-first rule and body length, not on path resolution.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L12 — "Sized to fit between office-hours and sprint"; the seven numbered phases fix one process every run, not one output |
-| Description / invocation | weak | L4 — front-loads "Create new pandastack skills" well and keeps the load-bearing "NOT the brain filing-tree RESOLVER.md" disambiguator, but double-names the index ("the pandastack RESOLVER.md (RESOLVER.md at the repo root …)") and restates body identity (MECE / hot-cold) instead of pruning to triggers + reach |
-| Completion criteria | pass | L160 — done-gate is checkable and closed: score against the scorecard, revise any weak axis, run `/skill-eval`, `lint-eval-fresh.sh` enforces |
-| Information hierarchy | weak | L136 — Phase 6.5 is a multi-step reference *procedure* (pick 6 confusable pairs → write ~6 prompts → re-check → tighten) kept hot inline; this belongs behind a `lib/` pointer, not the SKILL.md top tier |
-| Leading words | pass | L62 — "non-negotiable" (and L26 "smallest durable change") are crisp pretrained anchors that fix behaviour in few tokens |
-| Pruning | weak | L155 — "the cheap, solo-durable version of yao-meta-skill's route-confusion guard … steal the mechanism, refuse its harness shape" is no-op meta-narration; the body is 188 lines, well over the ~<80 guideline |
-| Granularity | weak | L64 — Phase 3.5 (and L136 Phase 6.5) are bolted-on `.5` sub-phases: accretion / sediment, not splits that earn a load |
-| pandastack conformance | weak | L62 — `learnings/patterns/long-session-evals` does not resolve (no `learnings/` dir in this layout); cited 3× (L62, L179, L188). Frontmatter is clean and `RESOLVER.md` / `SKILL-FRONTMATTER.md` resolve at repo root, so this is a broken evidence pointer, not a structural fail |
+| Predictability | pass | L14 — fixed 7-phase spine (gap → MECE → hot/cold → inline-vs-extract → write → resolver → verify → self-check); every run walks the same ordered process, not an output template. |
+| Description / invocation | pass | L4 — leading verb front-loaded ("Create new pandastack skills"), one-trigger-per-branch list, the RESOLVER aside is a disambiguation reach clause (which RESOLVER), not body identity; no Q0/hot-cold gloss bleeds into the description anymore. |
+| Completion criteria | pass | L106 — Phase 6 is checkable and machine-gated (`git diff --check` + frontmatter linter exits non-zero), L107 names the near-neighbor pass "the gate", L111 closes the done-gate (revise any weak axis, run `/skill-eval`, `lint-eval-fresh.sh` enforces); no premature-completion bait. |
+| Information hierarchy | pass | L105 — the heavy verify + route procedure is pushed behind a context pointer to `lib/verify-and-route-check.md`, while the hot/cold ASCII tree (L41-60) is co-located inline because every branch needs it; progressive disclosure is honoured. |
+| Leading words | pass | L62 "non-negotiable", L26 "smallest durable change", L128 "MECE violation" — each anchors a region of behaviour in a pretrained/repo-shared concept in few tokens; no `be thorough` no-ops. |
+| Pruning | weak | L66 — `lib/trigger-first-skill-evolution.md` is cited at L18 (gap step), again at L66 (inline-vs-extract), and again at L129 (anti-pattern); one SSOT file but the pointer is restated three times where one co-located mention plus a back-reference would do. |
+| Granularity | pass | L64 — the 3.5 inline-vs-extract half-step earns its split (distinct decision from Phase 3's hot/cold), and 6.5 (L107) is an anti-route-confusion guard wedged between the steps that tempt rushing; phases map 1:1 to checkable gates. |
+| pandastack conformance | weak | L30 — frontmatter name=folder=skill-creator, manifest/plugin/RESOLVER rows are present, repo-root `lib/skill-decision-tree.md` and `lib/trigger-first-skill-evolution.md` resolve, and the skill-local verify pointer resolves at L105. Weak only because the body is 138 lines, earned by phase gates + dispatch ASCII but still above the ~80-line guidance. |
 
 ## Why it's good
-The Q0 refuse-to-build gate (L30) plus the trigger-first evolution load (L18) put the cheapest non-skill outcome upstream of every other phase, which is exactly the sprawl defence the rubric asks for. The hot/cold decision (L39-62) is mandatory, diagrammed, and tied to long-session-eval evidence, so the single most consequential authoring choice cannot be silently skipped. Completion is honestly closed: L160 forces a scorecard self-check and a written `eval.md`, binding construction quality at the generation moment rather than as an afterthought.
+The skill enforces its own thesis: Q0 refuse-to-build (L30) runs upstream of the overlap walk so the cheapest non-skill outcome is decided first, the hot/cold dispatch is a mandatory diagrammed binary (L41-60) with the evidence pointer now resolving, and Phase 7 (L109) binds the writing-great-skills scorecard at the generation moment so the author steers toward the axes before declaring done. Verification is real, not aspirational — an inline frontmatter linter that exits non-zero plus the named near-neighbor route gate. The body has been brought to 138 lines, within range of the discipline the skill itself preaches.
 
 ## Top fixes
-1. **L62 / L179 / L188** — the `learnings/patterns/long-session-evals` pointer is dead (no `learnings/` dir in this layout). Repoint it to where the long-session evidence actually lives, or drop the path and keep the prose claim. A skill that cites missing evidence for its single "non-negotiable" rule erodes that rule's authority every time the pointer is followed.
-2. **L136-156** — move Phase 6.5's near-neighbor route-check procedure into a `lib/` reference reached by a context pointer, and delete the L155-156 yao-meta-skill meta-narration (no-op). This pulls the 188-line body toward the ~<80 budget and lifts pruning and information-hierarchy at once.
-3. **L4** — prune the description: drop the self-restating "(RESOLVER.md at the repo root — the skill-overlap index …)" aside and the MECE / hot-cold identity that the body already owns; keep triggers + the "NOT the brain filing-tree RESOLVER.md" reach clause. Fold the two `.5` phases (3.5 → 3, 6.5 → 6/lib) so the phase list reads as clean splits, not sediment.
+1. L66 — collapse the triple citation of `lib/trigger-first-skill-evolution.md` (L18, L66, L129) to one co-located mention plus back-references, so the SSOT is pointed at once per need.
+2. L62 — the provenance parenthetical ("Arize Alyx and Claude Code source, converged solution") is the kind of detail that belongs behind the `evals/` pointer it already cites; inlining it adds context load without changing behaviour.
+3. L4 — trim the description's parenthetical RESOLVER disambiguation if the repo-root wording can move to the first body step; it is useful, but expensive hot context.
 
 ## Behavioral cases
-- trigger `create a new pandastack skill for X` → expected process: Phase 1 gap identification, then Q0 refuse-to-build (L30), MECE-walk `RESOLVER.md` (L35), decide hot/cold (L39), write SKILL.md to the frontmatter contract (L72), update RESOLVER + manifest, self-check against writing-great-skills (L158), then `/skill-eval`.
-- anti-trigger `score this skill / is this skill well-written` → should NOT fire; that is evaluation, routes to `skill-eval` (the generator's evaluator counterpart, not the generator).
+- trigger `create a skill for auditing stale brain pages` -> expected process: Q0 refuse-to-build first (is this a brain page or one-line script?), then MECE-walk RESOLVER against `maintain`, hot/cold-decide (a stale-page scan likely reads >5K tokens → dispatch sub-agent), write to the frontmatter contract, add RESOLVER/manifest rows, verify, scorecard self-check + `/skill-eval`.
+- anti-trigger `score whether this skill is well-written` -> should NOT fire (routes to `skill-eval`, the evaluator counterpart that writes the co-located `eval.md`; skill-creator builds and self-checks, it does not produce the verdict).

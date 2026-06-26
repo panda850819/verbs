@@ -3,7 +3,6 @@ name: freeze
 description: |
   Use when you want to lock editing scope to specific paths.
   Blocks edits outside the allowed directories for this session.
-  Run /unfreeze to remove restrictions.
 ---
 
 # Freeze
@@ -28,9 +27,11 @@ Lock editing scope to prevent accidental changes outside the working area.
    All other files are read-only for this session.
    ```
 4. For the remainder of this session, before any file edit (Edit, Write, NotebookEdit):
-   - Check if the target file falls under an allowed path.
+   - Check if the target falls under an allowed path. "Falls under" means: normalize the target to an absolute path, then a directory arg matches it or any descendant (prefix match on the normalized path), a file arg matches that exact path only, and a symlink that resolves outside every allowed path is rejected (no escape via link).
    - If not: **refuse the edit** and say: "FROZEN: {file} is outside freeze scope. Run /unfreeze to remove restrictions."
    - Never silently skip — always surface the block.
+
+   Enforcement is best-effort agent-side: this is a per-edit self-check, not a hook or state file, so it holds only while this skill stays in context. It is a discipline, not a hard guard.
 
 ## Unfreeze
 

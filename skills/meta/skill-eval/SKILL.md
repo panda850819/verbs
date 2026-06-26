@@ -1,7 +1,7 @@
 ---
 name: skill-eval
 description: |
-  Score a skill's construction quality against the writing-great-skills scorecard and write a co-located eval.md verdict. Use when asked to "eval this skill", "score this skill", "is this skill well-written", "why is this skill good", or to (re)generate a skill's eval after editing it. Evaluator counterpart to skill-creator (which builds) — both bind the same writing-great-skills SSOT.
+  Score a skill's construction quality against the writing-great-skills scorecard and write a co-located eval.md verdict. Use when asked to eval/score a skill, or to regenerate its eval after editing. Evaluator counterpart to skill-creator (which builds) — both bind the same writing-great-skills SSOT.
 version: 1.0.0
 type: skill
 ---
@@ -10,7 +10,7 @@ type: skill
 
 The evaluator half of skill construction. `skill-creator` builds and self-checks; `skill-eval` judges an existing skill and leaves a greppable verdict next to it. Criteria SSOT: [`../writing-great-skills/SKILL.md`](../writing-great-skills/SKILL.md) — load its **scorecard** section; do not invent axes.
 
-Scope note: this scores the **SKILL.md construction** (predictability, no-ops, completion criteria), NOT the artifact a skill produces — that is `lib/quality-rubric.md`.
+Scope note: this scores the **SKILL.md construction** (predictability, no-ops, completion criteria), NOT the artifact a skill produces — that is repo-root [`lib/quality-rubric.md`](../../../lib/quality-rubric.md).
 
 ## Invoke
 
@@ -24,13 +24,11 @@ Read the writing-great-skills scorecard (the 8 axes). Resolve the target: `skill
 
 ### 2. Score the 8 axes
 
-For each axis, return **pass / weak / fail** with exactly one cited line (`L<n>`) as evidence. A verdict with no line is not a verdict — re-read until you can cite. Default to **weak**, not pass, when uncertain; a generous scorecard is a no-op.
+For each axis, return **pass / weak / fail** with exactly one cited line (`L<n>`) as evidence. A verdict with no line is not a verdict — re-read until you can cite. Default to **weak**, not pass, when uncertain; a generous scorecard is a no-op. If you took a second opinion (see below) and the two reads disagree on an axis, downgrade that axis to **weak** and note both reads.
 
-### 3. Second opinion (optional, for first-class skills)
+> Second opinion (reference): for a heavily-used skill, get a cross-model read before scoring — hand the SKILL.md + the 8 axes to Codex (`codex exec`) or `gbrain:cross-modal-review`. Feed any disagreement back into the rule above.
 
-For a heavily-used skill, get a cross-model read: hand the SKILL.md + the 8 axes to Codex (`codex exec`) or `gbrain:cross-modal-review` and reconcile. Disagreement on an axis → downgrade to weak and note both reads.
-
-### 4. Write the verdict → `eval.md`
+### 3. Write the verdict → `eval.md`
 
 Write `skills/<bucket>/<name>/eval.md` using the template below. Stamp `evaluated_skill_hash` with `git hash-object skills/<bucket>/<name>/SKILL.md` so `lint-eval-fresh.sh` can detect when the skill drifts past its eval. Completion criterion: `eval.md` exists, every axis has a cited line, and `bash scripts/lint-eval-fresh.sh <name>` passes.
 

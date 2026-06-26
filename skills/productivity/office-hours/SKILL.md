@@ -2,7 +2,7 @@
 name: office-hours
 mode: skill
 description: |
-  Bring a fuzzy idea to office hours: model challenges, drills, surfaces unknowns, ends with a written brief. Default 30 min; --quick mode skips context-load when already loaded. Triggers on /office-hours, "I have an idea", "let me think out loud", "stress test this", "office hours", "draft a brief", "structured intake".
+  Bring a fuzzy idea to office hours: model challenges, drills, surfaces unknowns, ends with a written brief. Default 30 min; --quick mode skips context-load when already loaded. Triggers on /office-hours, "office hours", "stress test this", "draft a brief".
 reads:
   - repo: lib/capability-probe.md
   - repo: lib/push-once.md
@@ -66,7 +66,7 @@ capability_required:
 
 **Skip this stage entirely if `--quick`** — assumes context + goals already established in-session. Print one line: `Stage 1 skipped (--quick). Using session context: {1-line summary of what's already loaded}.` Then proceed to Stage 2.
 
-@../../../lib/capability-probe.md
+When you reach this stage (full mode only), read `../../../lib/capability-probe.md` and run the probe. Cold pointer, not a hot import — `--quick` runs never pay its tokens.
 
 Then:
 1. Scan vault for the topic (filename + content match across `docs/sessions/`, `docs/learnings/`, `knowledge/`) — surface 3-5 prior hits
@@ -76,7 +76,14 @@ Then:
 
 ### Stage 2: Premise challenge (adversarial)
 
-**Skip guard (check BEFORE drilling)** — mirrors `/grill`'s "Skip for tasks where scope is already concrete". If the scope is already concrete (named deliverable, already tested, reversible / two-way door, no genuine unknowns), DECLINE to grill. Don't reframe settled scope as if it were changing. **Before skipping, print the concrete evidence for each of the four conditions** (deliverable = what exactly; tested = which artifact/run; reversible = why; unknowns = why none). If you cannot name the test artifact and the deliverable, the scope is NOT concrete — do NOT skip. The "no unknowns" judgment is self-confirming; the evidence print is what exposes a fuzzy scope. Only when all four are evidenced, print `Stage 2 skipped — scope already concrete. Routing to ship.` and jump to Stage 5 brief (or recommend `/sprint` / `/ship`). 只在真有未知時才 drill。
+**Skip guard (check BEFORE drilling)** — mirrors `/grill`'s "skip when scope is already concrete". Before declining to grill, print the concrete evidence for each of the four conditions:
+
+1. Deliverable = what exactly
+2. Tested = which artifact/run
+3. Reversible = why (two-way door)
+4. Unknowns = why none
+
+Only when all four are evidenced, print `Stage 2 skipped — scope already concrete. Routing to ship.` and jump to Stage 5 brief (or recommend `/sprint` / `/ship`). The "no unknowns" judgment is self-confirming, so the evidence print is the guard: if you cannot name the test artifact and the deliverable, the scope is NOT concrete — do NOT skip.
 
 The point is to surface **unknown unknowns** by interrogating one angle at a time. Inspired by gstack `/office-hours` rehearsed-answer pattern.
 
@@ -149,79 +156,7 @@ If revised premise is significantly different from original, surface this — us
 
 ### Stage 5: Output brief
 
-Write to `docs/briefs/{YYYY-MM-DD}-{slug}.md`:
-
-```markdown
----
-date: {YYYY-MM-DD}
-type: brief
-source: office-hours
-topic: {topic}
-tags: [brief, office-hours]
----
-
-# {Topic}
-
-## Problem
-
-{user problem, not feature description}
-
-## Original premise
-
-{what user walked in with}
-
-## Revised premise (after grill)
-
-{what holds after Stage 2}
-
-## Alternatives considered
-
-- A: {name} — {summary} — [Add / Defer / Reject]
-- B: {name} — {summary} — [Add / Defer / Reject]
-- C: {name} — {summary} — [Add / Defer / Reject]
-
-## Chosen approach
-
-{A/B/C} — {one-line rationale}
-
-## Scope
-
-In: {what's included}
-Out: {what's explicitly excluded}
-
-## Next skill (recommended)
-
-Apply `lib/skill-decision-tree.md` 2-question test against the chosen approach:
-
-```
-Shape: {single-target-iterative / N-sequential-sprints / N-branch-parallel}
-Reasoning: {one line — which question of Q1/Q2 hit Yes and why}
-
-Recommended skill:
-  → /sprint {topic-slug}                          # if Q1=Yes (single-target, iteration expected; for N-step, run N sprints)
-  → /team-orchestrate (with this brief as input)  # if Q2=Yes (N-branch parallel, independence audit required)
-
-Persona for next skill (per lib/skill-decision-tree.md routing table):
-  → {eng-lead | design-lead | ops-lead | product-lead | ceo}
-  Reason: {dominant task signal — code / UI / process / scope / strategic}
-```
-
-## Gotchas surfaced
-
-{from Stage 1 past cases}
-
-## Gate Log
-
-- Stage 1 (load context): {summary}
-- Stage 2 (premise challenge): {n questions, n pushes via push-once, escape-hatch fired? Y/N}
-- Stage 3 (alternatives): chose {A/B/C}
-- Stage 4 (premise refresh): {premise still load-bearing}
-- Stage 5 (output): brief saved to {path}
-
-## OPEN_QUESTIONS
-
-{any axes not addressed due to escape-hatch or user defer}
-```
+Write to `docs/briefs/{YYYY-MM-DD}-{slug}.md` using the brief scaffold in `skills/productivity/office-hours/lib/output-templates.md`. The brief carries: Problem, original + revised premise, alternatives considered (with each approach's Add/Defer/Reject), chosen approach + rationale, Scope (in/out), the "Next skill (recommended)" routing block (`lib/skill-decision-tree.md` 2-question test), Gotchas, a per-stage Gate Log, and OPEN_QUESTIONS.
 
 Print path. Surface the "Next skill (recommended)" block from the brief verbatim — that's the routing decision per `lib/skill-decision-tree.md`. Do NOT close with "want me to start it for you?" — operator says next skill name directly.
 
@@ -231,37 +166,7 @@ If the chosen approach routes to `/sprint` or `/team-orchestrate` (there is buil
 
 The brief is the **WHY** (problem, premise, rationale). The plan is the **WHAT** (tasks, acceptance, deps). Keep them strictly separate — do NOT copy the brief's rationale into the plan, do NOT put task IDs in the brief. Each fact lives in exactly one file (else the two drift).
 
-```markdown
----
-slug: {slug}
-date: {YYYY-MM-DD}
-type: plan
-source: office-hours
-brief: docs/briefs/{YYYY-MM-DD}-{slug}.md
-execution: {code | knowledge-work}
-status: todo
----
-
-# {Topic} — executable plan
-
-> WHAT only. WHY is in the brief (`brief:` above). Agents read this file; per-task `status:` is DERIVED from git at execute time, never hand-edited mid-sprint.
-
-## Tasks
-
-### {slug}-T01 — {title}
-- scope: {files / paths this task touches}
-- acceptance: {a concrete greppable or runnable check that proves it done}
-- depends-on: {none | U-ID list}
-- status: todo
-
-### {slug}-T02 — {title}
-- scope: ...
-- acceptance: ...
-- depends-on: {slug}-T01
-- status: todo
-```
-
-Then add ONE pointer line to the brief under `## Chosen approach`: `Executable plan: docs/plans/{slug}.md`. Print both paths.
+Write the plan using the plan scaffold in `skills/productivity/office-hours/lib/output-templates.md` (frontmatter + `## Tasks`, each task carrying scope / acceptance / depends-on / status). Then add ONE pointer line to the brief under `## Chosen approach`: `Executable plan: docs/plans/{slug}.md`. Print both paths.
 
 `acceptance:` MUST be a concrete check (a grep, a test/lint command, a file-exists assertion) — `/sprint --plan` derives per-task done/skip from it. A task with no checkable acceptance forces sprint back to the iteration counter, so write checks, not vibes. This plan file is also the cross-session resume checkpoint and the Codex handover payload — one artifact, three jobs.
 
@@ -272,9 +177,3 @@ Then add ONE pointer line to the brief under `## Chosen approach`: `Executable p
 - ❌ Writing brief in Stage 3 — brief comes after alternatives chosen, not before
 - ❌ Re-running office-hours on a topic just office-hours'd — user is procrastinating, push to /sprint
 - ❌ Letting Stage 2 run beyond 7 questions — escape-hatch enforces breadth ceiling
-
-## Origin
-
-- gstack `/office-hours` (943 lines) — flagship inspiration
-- pandastack 2026-05-04 — distilled to ~250 lines + 5 lib refs (push-once / escape-hatch / stop-rule / bad-good-calibration / goal-mapping)
-- Replaces `commands/brainstorm.md` (deleted v1.1)

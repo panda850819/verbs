@@ -2,34 +2,37 @@
 type: skill-eval
 skill: team-orchestrate
 bucket: engineering
-evaluated_skill_hash: 6b943a6ca8445198f31825ae3f8b14b641ec9f98
+evaluated_skill_hash: da78d331efeb3fd6b00c30957d0cf67f5b6bb36e
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — team-orchestrate
 
-**Verdict: SOLID.** The "conductor" leading word anchors a hard isolation invariant (dispatch, never edit), and a non-optional independence audit gates the dangerous N-writer operation before any subagent fires — the right virtue for a skill whose failure mode is silent merge corruption.
+**Verdict: SOLID.** Tightly determinate phase machine with a hard independence gate, a resolver-driven persona path, and checkable per-branch criteria; loses points on a body running ~2x the soft budget and an Origin/intake tail that re-states the decision-tree SSOT.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L51 — `## Protocol` runs the same fixed phases 0 → 0.5 → 1 → 2 → 3 every run, and the per-branch gate loop (verify → approve/edit/reject/skip) is identical across branches; the process is invariant even though outputs differ |
-| Description / invocation | weak | L4 — "run these in parallel", "fan out", "N branches independent" are three near-synonym triggers for one branch (parallel-fanout); the spec says collapse synonyms that rename a single branch |
-| Completion criteria | pass | L130 — the gate block forces "Scope match: PASS / FAIL" + "Verification: PASS / FAIL" before any merge, and L120 demands read-the-worktree proof over the self-report; checkable, not "looks done" |
-| Information hierarchy | weak | L84 — steps 1-3 re-inline the `lib/persona-frame.md` "Inline-from-skill dispatch pattern" (the 6-section extraction) that the very same line already points at; should be a pointer, not a duplicated procedure |
-| Leading words | weak | L96 — the model picker is soft free-text ("conductor picks per branch by task nature") that leans on default judgment rather than a crisp rule, and L137's "`git worktree add` merge" mislabels the merge verb; both blunt the otherwise sharp "conductor" anchor |
-| Pruning | weak | L217 — the `## Origin` narration ("built early because the decision tree's parallel branch had no destination … two-strike doesn't apply") is changelog sediment that changes no runtime behaviour and helps push the body to 218 lines / ~110 prose, over the ~80 budget |
-| Granularity | pass | L28 — the sprint-vs-team-orchestrate table splits by execution locus (main session executes vs N subagents at once), a genuine invocation boundary with a distinct leading word that earns its context load |
-| pandastack conformance | weak | L17 — `capability_required` is an ad-hoc frontmatter key absent from SKILL-FRONTMATTER.md (allowed: "stacks may extend", but undocumented), and the `reads`/`writes`/`domain`/`classification` block (L5-16) is advisory-only metadata nothing enforces (firewall retired) — both are corpus-wide conventions (15 sibling skills carry the same block), so this is house-style drift, not a unique defect; `name` matches folder, all four `lib/` refs resolve, and the absent `version` field is in fact the engineering-bucket norm (none of init/sprint/ship/review/qa/handover carry one) so it is not a miss |
+| Predictability | pass | L52 — fixed Phase 0→0.5→1→2→3 spine; the abort path (L63) is deterministic, persona resolution now goes through the host resolver (L86) instead of a hardcoded bucket, so the same process runs every time regardless of which persona a branch draws. |
+| Description / invocation | pass | L4 — front-loads "Conductor-driven parallel execution"; one trigger per branch (parallel / fan out / N independent); explicit skip→sprint clause; no body-identity restated in the description. |
+| Completion criteria | pass | L118 — every Phase-2 step is checkable (worktree exists + has commits, files match declared scope, self-report vs actual worktree state), and the independence audit (L63) is a hard PASS/ABORT, not "reviewed the structure". |
+| Information hierarchy | pass | L84 — dispatch mechanics deferred behind `lib/persona-frame.md`, gate schema behind `lib/gate-contract.md` (L123), Inbox skeleton behind `lib/inbox-template.md` (L156); steps stay hot, reference loads cold via pointers. |
+| Leading words | pass | L34 — "conductor", "gate per branch as it returns", "fan out" are pretrained anchors carrying the execution model; "wall-clock parallel" (L39) collapses the latency rationale into two words. |
+| Pruning | weak | L181 — Origin block (L181-185) is changelog/provenance sediment that belongs in git history, and the intake locus table (L29-32) re-states `lib/skill-decision-tree.md`'s own locus table (its L7-14), a second source for one meaning. |
+| Granularity | pass | L67 — each phase split earns its load: intake / persona-routing / dispatch / gate / synthesis are distinct user-visible stages each with its own completion criterion, none collapsible without losing a gate. |
+| pandastack conformance | weak | L25 — frontmatter valid (name=folder) and all 5 `lib/` refs resolve, but the body is ~160 lines (185 incl. frontmatter) against the ~80 soft budget, and `lib/capability-probe.md` is declared in `reads:` (L6) yet never consulted in the body — dangling audit metadata. |
 
 ## Why it's good
-The skill makes a genuinely dangerous operation (N parallel writers, silent merge corruption on file overlap) safe by front-loading a non-optional gate: the Phase 0 independence audit ABORTs before dispatch if any two branches share a file (L62), and "conductor does NOT edit during dispatch" (L33) protects worktree isolation. The verify-don't-trust gate ("read worktree files, don't trust the report", L120) is the correct defence against subagent self-report drift, and the When-to-use / When-to-skip pair (L36/L43) plus the contrast table (L28) make the route boundary against `/sprint` legible.
+
+The skill earns its parallelism with a non-negotiable independence audit (L63) that aborts to sequential sprints rather than risk silent merge corruption, so the dangerous default is structurally foreclosed, not merely warned against. The gate-as-they-return loop (L114-140) binds the shared four-option contract from `lib/gate-contract.md` via `AskUserQuestion` and forces verification against actual worktree state (L121), so subagent self-report drift cannot leak into a merge. The persona read path is now resolver-driven (L86, "Do NOT hardcode a single bucket"), closing the prior eval's broken-default-persona defect.
 
 ## Top fixes
-1. L137 — `git worktree add` is the wrong verb in "On approve → `git worktree add` merge OR rebase branch into main"; `git worktree add` *creates* a worktree, it does not merge. Replace with the actual merge command (`git merge --no-ff <branch>` from main). This is a real execution bug, not a phrasing nit.
-2. L84-87 — collapse the inlined steps 1-3 into the existing context pointer to `lib/persona-frame.md` § "Inline-from-skill dispatch pattern"; keep one source of truth, drop the duplicated 6-section procedure.
-3. L216-218 — cut the `## Origin` section to a one-line changelog stub or move it to a CHANGELOG / commit trail; it is sediment the running agent never needs and a main driver of the over-budget body.
+
+1. L181-185 — delete the Origin block; provenance is git's job, not the hot skill body. Cuts ~5 lines of pure sediment.
+2. L29-32 — drop the duplicated locus table and point to `lib/skill-decision-tree.md` for the sprint-vs-team-orchestrate distinction; keep only the one-line conductor framing at L34.
+3. L6 — either wire `lib/capability-probe.md` into a real pre-dispatch capability check or remove it from `reads:`; a declared-but-unread pointer is dangling metadata. With (1) and (2) this also pulls the body back toward the ~80-line budget.
 
 ## Behavioral cases
-- trigger `/team-orchestrate on these 4 independent audit branches, plan is approved` → expected process: Phase 0 intake numbers the branches and runs the independence audit (ABORT on any file overlap, L62), Phase 0.5 routes a persona per branch and waits for confirm (L79), Phase 1 dispatches all in one message with N worktree-isolated Agent calls (L88), Phase 2 gates each return with read-the-worktree verification (L120), Phase 3 writes the Inbox synthesis page (L156).
-- anti-trigger `parallelize this — branch 2 needs branch 1's output` → should NOT fire (the inter-branch dependency fails the independence precondition); routes to N sequential `/sprint` runs per L44 / L199.
+
+- trigger `run these 4 audit branches in parallel, they don't share files` -> expected process: Phase 0 intake + independence audit PASS, Phase 0.5 persona routing per branch, Phase 1 single-message N-Agent worktree dispatch, Phase 2 gate-as-they-return via AskUserQuestion, Phase 3 synthesis + Inbox artifact, suggest /review, no auto-chain.
+- anti-trigger `refactor this module then update its callers` -> should NOT fire (inter-branch dependency; routes to N sequential sprints / `/sprint` per L45, L177).

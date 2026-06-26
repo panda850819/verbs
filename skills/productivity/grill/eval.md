@@ -2,34 +2,34 @@
 type: skill-eval
 skill: grill
 bucket: productivity
-evaluated_skill_hash: 67249cbbdc6d7f54b2d3f7775d30173064244288
+evaluated_skill_hash: f4ed84eb3897ff5a3a76ebf6566ce0f388cf171b
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — grill
 
-**Verdict: SOLID.** A tight, predictable adversarial-interrogation loop: one-question-at-a-time discipline plus a checkable, exhaustive stopping rule make the process repeatable across runs; it loses points to a thrice-stated office-hours boundary and a changelog tail that pushes the body past budget.
+**Verdict: SOLID.** Tight, process-stable adversarial-drill tool with a clean model/user invocation split and a hard-capped stopping rule; loses points on a triple-restated identity line (leading words) and version-archaeology sediment in the relationship section (pruning).
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L48 — `**ONE question at a time.** Wait for the answer.` fixes the core process so every run drives the same loop, not a stochastic Q-dump. |
-| Description / invocation | pass | L4 — front-loads the leading phrase "Adversarial requirement discovery" and the description ends with an explicit anti-trigger handing structured output to `/office-hours`. |
-| Completion criteria | pass | L86 — stopping rule is checkable AND exhaustive: `3 consecutive answers reveal no new unknowns` / `7+ questions` / escape hatch. No premature-completion bait. |
-| Information hierarchy | pass | L52 — the 5-pattern pushback menu is a context pointer to `lib/push-once.md`, not inlined; goal-mapping (L30) is pushed to lib the same way. Progressive disclosure honoured. |
-| Leading words | pass | L26 — "surface **unknown unknowns** by interrogating one angle at a time"; reinforced by "Expect rehearsed first answers" (L50). Strong pretrained anchors, not "be thorough" no-ops. |
-| Pruning | weak | L147 — the Origin changelog re-narrates the `--mode structured` add-then-remove saga; sediment that no longer changes behaviour. Compounded by the office-hours boundary stated 3x (L8-9, L35, L139). |
-| Granularity | pass | L141 — the grill/office-hours/boardroom split is principled (atomic adversarial upstream vs structured brief vs full-plan review); each half has independent reach, so the cut earns its load. |
-| pandastack conformance | weak | L143 — frontmatter is valid (name=folder, advisory `reads/writes` resolve), but `## Origin` plus the triple-stated boundary push the body to ~147 lines, well past the ~<80 guidance, and the over-length is sediment, not earned. |
+| Predictability | pass | L47 — "ONE question at a time. Wait for the answer. Then pick the next question based on what the answer revealed" pins one invariant process every run; the recommended goal-map pre-step (L29) is a soft branch but the drill core is firm. |
+| Description / invocation | pass | L4 — front-loads "Adversarial requirement discovery"; carries explicit user trigger phrases, a skip condition, and a disambiguation pointer to /office-hours. Model-vs-user split is right; one-trigger-per-branch is clean. |
+| Completion criteria | pass | L71 — stopping rule is checkable and exhaustive (3 consecutive no-new-unknowns OR 7+ questions OR escape hatch), with exact log lines (L84) on the hard cap defending against premature continuation. |
+| Information hierarchy | pass | L51 — push-once is correctly deferred to lib/push-once.md (body keeps the trigger, lib holds the 5-pattern menu); the menu re-inlining from the prior version is gone, so progressive disclosure now holds. |
+| Leading words | weak | L23 — "Adversarial requirement discovery" is restated verbatim from the description (L4) at the body opener (L23) and echoed again at L25; the restatements should collapse to one canonical statement. |
+| Pruning | weak | L126 — "(replaces v2.1 /work-ship reference)" and L125 "Replaces the deprecated grill --mode structured" are migration archaeology that change no run behaviour and belong in a changelog, not the load-bearing body. |
+| Granularity | pass | L11 — the two lib splits (goal-mapping, push-once) each earn their load: push-once is genuinely reached by office-hours and boardroom too, so the cut buys cross-skill reach, not just length. |
+| pandastack conformance | pass | L2 — name=grill matches folder; frontmatter valid; both lib/ pointers (and the transitively-referenced lib/gate-contract.md) resolve at repo root; lib reads ~2.1K tokens stay under the 5K hot/cold dispatch line, so inline loading is correct and 127 lines is earned reference. |
 
 ## Why it's good
-The process is genuinely deterministic where it matters: ONE question at a time (L48), push-once-minimum-per-axis (L50), a menu-driven pushback that forbids improvised pushes to keep an audit trail (L65), and a stopping rule that is both checkable and exhaustive (L85-88). The escape hatch is wired to the global "enough" protocol with a hard cap and a written unprocessed-axes line (L97-101), so the skill cannot run away from the user. The anti-pattern list (L131-135) and the drill axes as a "search space, not a checklist" (L67) keep it from degrading into the questionnaire it explicitly is not.
+The skill commits to a single interrogation process — one question, push once via a named menu, drill 8 anchored axes framed as a search space rather than a checklist — so every run looks the same and stays adversarial instead of degrading into a questionnaire. The model/user boundary is handled correctly: the description carries user trigger phrases, a skip condition, and a pointer to the structured-brief sibling, so invocation routing is unambiguous. The repair landed: the previously re-inlined pushback menu and the dead `reads:` glob and the Origin changelog block are all gone, and the remaining reference (axis list, output template, anti-patterns) is appropriately co-located with the tool body while the shared mechanics live behind resolving lib/ pointers.
 
 ## Top fixes
-1. L147 — delete the `--mode structured` add/remove changelog from Origin; it is pure sediment and the deprecation is already stated at L139. Keep only the one-line Matt-Pocock attribution.
-2. L8-9 / L35 / L139 — collapse the office-hours routing from three statements to one. Keep it in the description (HOT, does invocation work) and the "Relationship to other skills" line; cut the restatement inside "When to use".
-3. L143 — trimming fixes 1 and 2 brings the body back toward the ~80-line budget, resolving the conformance ding without losing any load-bearing step.
+1. L23/L25 — collapse the "Adversarial requirement discovery" identity statement to one place; the description (L4) already owns it, so the body opener is a restatement that adds no process.
+2. L125-126 — strip the "replaces v2.1 /work-ship" and "replaces deprecated grill --mode structured" parentheticals; move migration notes to a changelog so the relationship section states only the current routing.
+3. L29 — the recommended goal-mapping pre-step points at a lib written in office-hours shape (it references "Alternatives (Step 4)", the brief's Gate Log, and the four-option gate via lib/gate-contract.md); note or scope the fit so grill's atomic no-brief contract is not silently asked to produce brief-stage artifacts.
 
 ## Behavioral cases
-- trigger `grill me on the points system scope` → expected process: (optional) run goal-mapping (L30), then interrogate ONE axis at a time across Existence/Boundaries/Retroactivity/etc. (L69-76), pushing once per axis via the push-once menu (L52), stopping by the L85 rule, emitting the Grill-log template (L107) to `Inbox/grill-<slug>-<date>.md`.
-- anti-trigger `turn these grilled unknowns into a written brief` → should NOT fire; grill produces a confirmed/open log only. Routes to `/office-hours --quick` (L120, L139) for structured-brief output.
+- trigger `grill me on the points-system scope` -> expected process: optional goal-map pre-step (L29), then ONE question at a time (L47), push-once via the lib menu on a rehearsed reply (L51), drill the 8 axes as a search space (L53), stop per the stopping rule (L71), emit a confirmed/open grill log to Inbox/grill-*.md (L112).
+- anti-trigger `draft me a brief / structured intake on X` -> should NOT fire; routes to /office-hours (default full or --quick) per L8 and L125.

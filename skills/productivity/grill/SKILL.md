@@ -8,7 +8,6 @@ description: |
   is already concrete. For structured-brief output, use `/office-hours` (default
   full mode) or `/office-hours --quick` (when context already loaded).
 reads:
-  - repo: docs/learnings/**
   - repo: lib/goal-mapping.md
   - repo: lib/push-once.md
   - vault: knowledge/**
@@ -49,20 +48,7 @@ If goal mapping has not been done yet (e.g. you are running grill standalone, no
 
 **Expect rehearsed first answers.** First reply on any axis is usually the polished version. Real answer surfaces after the second or third push. Push once minimum on every axis before switching.
 
-**Pushback uses the 5-pattern menu in `lib/push-once.md`.** When a first reply is rehearsed / vague / unsupported, print the menu:
-
-```
-[1] 具體一點    — give me names / numbers / cases
-[2] 證據檢查    — have you seen it? which case?
-[3] 反命題      — what if we remove that assumption?
-[4] 邊界條件    — where does this NOT apply?
-[5] 自由發問    — model writes a sharper one
-[self] I'll push myself
-
-Pattern: __ (or "skip" to accept reply as-is)
-```
-
-User picks; model uses that exact prompt as the next message. Never improvise the push without showing the menu first — that defeats the audit trail. See `lib/push-once.md` for selection rules and anti-patterns.
+**Pushback uses the 5-pattern menu in `lib/push-once.md`.** When a first reply is rehearsed / vague / unsupported, print the menu from `lib/push-once.md` (Output protocol). User picks; model uses that exact prompt as the next message. Never improvise the push without showing the menu first — that defeats the audit trail. See `lib/push-once.md` for the menu, selection rules, and anti-patterns.
 
 Drill across these axes (not as a checklist — as a search space):
 
@@ -139,9 +125,3 @@ Save to:
 - **For structured-brief output** — use `/office-hours` (default full mode) or `/office-hours --quick` (when context already loaded). Replaces the deprecated `grill --mode structured`.
 - **Before `/ship knowledge <decisions/path>` Close stage** — if you're closing a work topic and realize scope was never grilled (replaces v2.1 `/work-ship` reference)
 - **Not a replacement for `/boardroom`** — that's multi-voice review of a complete plan; grill is upstream (problem → grill, plan → boardroom)
-
-## Origin
-
-- Matt Pocock "grill me" prompt — atomic adversarial pressure pattern
-- pandastack v1.1 (2026-05-04) — added `--mode structured` to absorb deprecated `/brief`
-- pandastack 2026-05-05 — `--mode structured` removed; structured-brief role consolidated into `/office-hours --quick`. Grill returns to atomic adversarial-only positioning. Surface area cleanup motivated by overlap between grill --mode structured and office-hours 5-stage flow.

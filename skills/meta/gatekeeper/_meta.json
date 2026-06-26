@@ -1,5 +1,5 @@
 {
-  "name": "slowmist-agent-security",
+  "name": "gatekeeper",
   "version": "0.1.1",
   "description": "Comprehensive security review framework for AI agents. Covers skill/MCP installation, GitHub repos, URLs/documents, on-chain addresses, products/services, and social shares. Built from real-world attack patterns.",
   "author": "evilcos",

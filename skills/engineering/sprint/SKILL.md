@@ -6,9 +6,8 @@ description: |
 reads:
   - repo: lib/capability-probe.md
   - repo: lib/escape-hatch.md
-  - repo: lib/stop-rule.md
   - repo: lib/push-once.md
-  - repo: lib/persona-frame.md
+  - repo: lib/skill-decision-tree.md
   - repo: lib/gate-contract.md
   - repo: skills/productivity/dojo/SKILL.md
   - repo: skills/productivity/grill/SKILL.md
@@ -32,7 +31,6 @@ capability_required:
   - vault
   - lib/capability-probe.md
   - lib/escape-hatch.md
-  - lib/stop-rule.md
   - skills/productivity/dojo
   - skills/productivity/grill
   - skills/engineering/review
@@ -99,7 +97,7 @@ Run `skills/productivity/grill/SKILL.md` in default (adversarial) mode with **3-
 - For `--continue`: load `Inbox/sprint-{slug}-*.md` (PAUSED checkpoint) + the plan, run the idempotency check across all U-IDs, resume at the first non-done task. Skip Stage 1 (dojo) and Stage 2 (grill).
 - If a task has no checkable `acceptance:`, fall back to the `iteration` counter for that task and flag it in the narrate line.
 
-When no plan file is present, execute conversationally as before (this block is a no-op).
+When no plan file is present, execute conversationally. Done-condition for the conversational path: each build unit's acceptance condition (Execution mode step 1) is re-verified by the architect — subagent-reported green is never trusted. Execute is not complete until every unit's acceptance re-verifies, matching the plan-driven path's idempotency check.
 
 **Execution mode (default: architect + subagent build — Panda directive 2026-06-12):** the main session is the ARCHITECT, not the typist. For each non-trivial build unit:
 
@@ -148,7 +146,7 @@ Mirrors background-session protocol (`result:` / `needs input:` / `failed:`) but
 
 **When scope detection is ambiguous**: ask user once with the candidate personas listed; pick the highest-confidence single one based on user reply. Do not silently default to eng-lead when signals point elsewhere — that misroutes architecture / ops / product work.
 
-**Multi-source aggregator dispatch-branch test checklist**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator (e.g. `if (source.name === "X")` ladder, per-source `evaluateX` filter, per-source `_setXClientForTest` mock seam), **handler-level integration test for the new branch is part of Stage 3 implementation**, NOT Stage 4 review iter 2. Cold reviewer empirically catches this as P0 every time the branch is added without the test (companyos sprints 3 / 5 / 6 = Notion / Slack / Linear all hit this same gap). Test shape: drive `createCallToolHandler` (or equivalent) with one denied-input case + one allowed-input case, assert audit emit shape + that deny does NOT consume any cross-source state (pivot window / cache eviction).
+**Multi-source aggregator dispatch-branch test**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator, the handler-level integration test for the new branch is part of Stage 3 implementation, NOT Stage 4 review iter 2. Read `skills/engineering/sprint/lib/aggregator-test-checklist.md` for the trigger shapes and test shape.
 
 ### Stage 4: Review + verify gate (skip if `--quick`)
 
@@ -326,21 +324,6 @@ Save to `Inbox/sprint-{slug}-{date}.md` regardless of terminal state.
 | "My instrumentation didn't show in their screenshot, weird — anyway" | That is the pipeline alarm, not a fluke. Stop, verify the loop (R1/R2). The session this rule exists for lost days exactly here. |
 | "3 lifecycle variants failed, the 4th is my escalation" | Same-shape failure ×3 ⇒ the abstraction/loop is wrong (R4). A 4th variant of the same approach is strike 4, not escalation. Switch primitive or re-verify the loop. |
 | "Re-asking the user to re-test is just one more round" | Each contaminated human round-trip is the expensive unit. If the loop needs repeated round-trips, harden the loop first (R3), then iterate. |
-
-## Anti-patterns
-
-- ❌ Calling sprint with no clear topic ("let's sprint on stuff") — sprint requires a single topic
-- ❌ Auto-shipping on FAILED state ("review found P1 but ship anyway") — terminal state contract is load-bearing
-- ❌ Skipping Stage 0 capability probe ("substrate's fine, let's go") — probe each run, state changes
-- ❌ Running sprint inside another sprint ("sprint within sprint") — flatten or use sub-tasks within stage 3
-- ❌ Iteration > 3 — that's a FAILED state, not "let me try once more"
-- ❌ Marking SHIPPED on human-validated work without deploy-proof (`lib/verify-the-test-loop.md`) — the user may have tested a stale/ghost artifact
-- ❌ 4th variant of the same failing approach billed as "escalation" — switch the abstraction, not the parameters
-- ❌ Treating PAUSED as failure — PAUSED is a legitimate outcome, no extract/backflow
-
-## Origin
-
-- `commands/sprint.md` (deleted v1.1) — replaced by this skill
-- codex Q4 (2026-05-04 review) — flagged abort UX, added 4-state terminal contract
-- codex Q6 (2026-05-04 review) — added Stage 0 capability probe
-- pandastack lifecycle template (B-pre design) — sprint is the canonical Stage 0-7 lifecycle implementation
+| "Let's sprint on stuff" (no single topic) | Sprint requires one concrete topic. No-topic ideation routes to `/office-hours` or `/boardroom`, not sprint. |
+| "Substrate's fine, skip Stage 0 capability probe" | Probe each run — state changes between sessions. The probe block is the opening, not optional. |
+| "Sprint didn't ship, so it failed (PAUSED = failure)" | PAUSED is a legitimate terminal outcome, not a break. No extract/backflow; write the checkpoint and stop cleanly. |

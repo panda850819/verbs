@@ -2,33 +2,36 @@
 type: skill-eval
 skill: freeze
 bucket: engineering
-evaluated_skill_hash: 2c1d203ec2c8aa8e63baa0206fd0191de0373c41
+evaluated_skill_hash: 4bd4d792cc9042f04cfd51bd27a5016b7b5f9b44
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — freeze
 
-**Verdict: STRONG.** A dead-simple, single-responsibility guard: one job (lock edits to allowed paths), a deterministic ordered process, an exact greppable refusal message, and a clean inline unfreeze. Fully conformant with SKILL-FRONTMATTER.md and the established peer idiom (`careful`).
+**Verdict: SOLID.** A tight, single-purpose guard with a now-precise "falls under" matching contract (L30) and an honest best-effort caveat (L34); it loses points only because the core mechanism is an in-context self-check whose guarantee degrades as context drifts, and the no-args branch (L21) is the one step without a checkable success condition.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L21–L33 — the process is a fixed ordered sequence every run: parse allowlist (L21) → announce (L23–L29) → on each edit check membership (L30–L31) → refuse with a fixed string or proceed (L32). The rubric axis is "same *process* every run," and this process is deterministic. (It is prompt-enforced with no hook, but that is the canonical pandastack idiom for an in-session guard — the nearest sibling `careful` uses the identical self-policed "While Active" pattern with no hook, and SKILL-FRONTMATTER.md L59–L68 confirms even the advisory `forbids` fields are not runtime-enforced.) |
-| Description / invocation | pass | L3–L6 — a clean model-facing description with three stated branches (lock to paths / blocks outside / `/unfreeze`). Having a `description` and no `user-invocable` flag IS the explicit model-invoked choice per the rubric (L20–L21 of writing-great-skills) and SKILL-FRONTMATTER.md (L48–L55, where `user-invocable` is optional); all 8 `doing/` peers do the same. The choice is not implicit. |
-| Completion criteria | pass | L32 — "If not: **refuse the edit** and say: …" is binary and checkable (under allowed path → edit; else refuse with the exact string). |
-| Information hierarchy | pass | L30 — the standing per-edit rule is correctly placed *after* the ordered On-Invoke steps; one file, nothing over-pushed, co-located. |
-| Leading words | weak | L11 — "Lock editing scope to prevent accidental changes outside the working area" restates the description rather than collapsing to a compact pretrained anchor; the FREEZE/FROZEN caps carry the real invocation weight. This is the one genuine soft spot (and overlaps with pruning below). |
-| Pruning | pass | L11 — only the one mild restatement noted above; body is 39 lines, well under the ~80 budget, no sediment, no sprawl, no other no-op. |
-| Granularity | pass | L35 — unfreeze kept inline as the paired branch (`## Unfreeze`) rather than split into its own skill; correct, no distinct leading word earns a cut. |
-| pandastack conformance | pass | L1–L7 — required fields `name` + `description` present and `name` matches the folder (SKILL-FRONTMATTER.md L41–L46); `version`/`type`/`user-invocable` are all OPTIONAL (L48–L55) so their absence is not a defect; `bash scripts/lint-manifest-sync.sh` emits no FAIL; body 39 lines < 80; no `lib/` refs to resolve. |
+| Predictability | weak | L34 — enforcement "holds only while this skill stays in context... a discipline, not a hard guard"; the same trigger does not yield the same standing enforcement once the skill falls out of context, so the process is not reliably reproducible over an unbounded session. The caveat is honest, but it documents the non-determinism rather than removing it. |
+| Description / invocation | pass | L4 — front-loads "Use when you want to lock editing scope to specific paths"; one model-facing trigger branch, no body-identity, no longer restates `/unfreeze` in the description. |
+| Completion criteria | weak | L21 — "If no arguments: ask the user which paths to freeze to" is the only step with no success condition or example; every other step (announce block L23-28, refuse string L31) is concrete and verifiable. |
+| Information hierarchy | pass | L29 — the standing per-edit rule sits correctly after the ordered On-Invoke steps; the matching semantics are co-located with the check that needs them (L30), no premature reference dump, one file. |
+| Leading words | pass | L29 — "before any file edit (Edit, Write, NotebookEdit)" and "refuse the edit" (L31) are strong pretrained anchors; each step leads with an imperative verb, no restatement padding. |
+| Pruning | pass | L34 — single source of truth for the matching rule and one honest enforcement paragraph; 40-line body, no sediment, no no-ops, no duplicated definitions across sections. |
+| Granularity | pass | L29 — the four On-Invoke steps each earn their load (parse, no-arg fallback, announce, enforce) and the enforcement sub-bullets (L30-32) split exactly at the decision points; unfreeze is a clean inline branch, no longer straddling as an advertised peer command. |
+| pandastack conformance | pass | L2 — frontmatter `name: freeze` matches the folder; 40 lines, well under ~80; reads no reference so no >5K-token hot/cold dispatch is owed; no lib/ pointers to resolve. |
 
 ## Why it's good
-The skill does exactly one thing and says so in seven body lines: parse paths, announce, then refuse out-of-scope edits with a fixed, greppable message (L32) and an explicit "never silently skip" (L33). The On-Invoke list (L21–L33) is a clean ordered sequence with concrete announce text, and unfreeze is co-located as the obvious paired branch (L35–L39) — no sprawl, no sediment, no over-splitting. It is fully conformant with SKILL-FRONTMATTER.md and mirrors the accepted `careful` guard idiom.
+The repair fixed the two structural defects from the prior version: the "falls under" definition (L30) now spells out normalized-absolute prefix match for directories, exact match for files, and symlink-escape rejection, so two runs agree on edge paths; and the enforcement-honesty paragraph (L34) tells the model the guard is a discipline rather than a hook instead of overpromising determinism. Length, hierarchy, and pruning are exemplary for an engineering utility.
 
 ## Top fixes
-1. L11 — drop the sentence that restates the description; replace the generic "lock editing scope" framing with a tighter anchor (e.g. "edit allowlist") used consistently in body and description. This is the only real lever; the skill is otherwise clean.
-2. (optional) L30 — the guarantee is prompt-only and degrades over a long session. This matches every peer guard, so it is not a defect, but a one-line note that enforcement is best-effort agent-side (or, longer-term, routing the check through the `pretooluse-destructive-guard.sh`-style hook) would stop a user from over-trusting it as a hard boundary.
+1. L34 — give the per-edit gate a way to survive context drift (a state file or PreToolUse guard reference) or explicitly scope the predictability claim to "while loaded"; right now the standing guarantee silently weakens mid-session.
+2. L21 — make the no-args branch checkable: state what a valid resolution looks like (e.g. "re-prompt until at least one path is given; never default to freezing everything or nothing").
+3. L31 — the refuse string points to `/unfreeze` generically; consider echoing the current allowed-path list on each block so the user sees the active scope at the moment of refusal, not just where the announce ran.
 
 ## Behavioral cases
-- trigger `/freeze src/api/ tests/api/` → expected process: parse both paths as the allowlist (L21), announce FREEZE active with the two paths (L23–L29), then for every subsequent Edit/Write/NotebookEdit check membership and refuse with the FROZEN message if outside (L30–L33).
-- anti-trigger `review my code before I open a PR` → should NOT fire; that is a review pass, routes to `review` (freeze locks an edit allowlist, it does not inspect or critique code).
+- trigger `/freeze src/api/ tests/api/` -> expected process: parse both as the allowlist (L20), announce FREEZE active listing both (L23-28), then for every subsequent Edit/Write/NotebookEdit normalize the target and refuse anything not under either path with the exact FROZEN string (L29-32).
+- trigger `/freeze` (no args) -> expected process: ask which paths to freeze to before activating (L21); do NOT freeze everything or nothing.
+- anti-trigger `careful mode for this prod repo` -> should NOT fire; routes to pandastack `careful` (confirmation gates on destructive commands, not path-scoped edit blocking).
+- anti-trigger `save my working state before I switch context` -> should NOT fire; routes to pandastack `checkpoint` (state snapshot, not edit-scope locking).

@@ -33,26 +33,17 @@ capability_required:
 
 # Boardroom — 4-voice plan critique
 
-> Replaces persona-pipeline (deleted v1.1). Default mode is single-skill sequential voice-switching (no agent files): each voice loads its own SKILL.md cognitive model + iron laws + on-invoke protocol via `lib/persona-frame.md`, critiques in its own posture, hands off to next voice. `--panel` mode (high-stakes) dispatches the voices as cold, mutually-blind subagents via the same `persona-frame.md` inline pattern for genuine independence. User gates each finding in both modes.
+> Each voice loads its own SKILL.md cognitive model + iron laws + on-invoke protocol via `lib/persona-frame.md` (no agent files), critiques in its own posture, and the user gates each finding. The two modes (default sequential vs `--panel` independent) and their tradeoffs are in the Modes table below — that table is the single source for the split.
 
 ## Routing Boundary
 
-Use this as the multi-lens router only when there is a plan, proposal, PRD, or strategy draft ready for cross-functional critique. It coordinates role lenses; it is not a default persona layer.
+Invoke as the multi-lens router only when there is a plan, proposal, PRD, or strategy draft ready for cross-functional critique. Specifically: a draft ready for cross-functional critique, a pre-stakeholder presentation, or a major scope change before commitment. It coordinates role lenses; it is not a default persona layer.
 
-Do not invoke for loose ideas that still need shaping, tactical execution, code debugging, ordinary planning, or single-domain review. Use the single role lens directly when only one lens is needed.
-
-## When to invoke
-
-- Plan / proposal / PRD draft is ready for cross-functional critique
-- Pre-stakeholder presentation
-- Major scope change before commitment
-- User says "review this plan", "boardroom", "4-voice critique"
-
-## When to skip
-
-- Single-domain decisions (use one persona skill directly: `/eng-lead` or `/product-lead`)
-- Tactical execution questions (use `/grill` instead — boardroom is for plans, not problems)
-- Revisions to a plan already boardroom-reviewed (use atomic persona skill on the diff)
+Do not invoke for:
+- Loose ideas that still need shaping — use `/grill` (boardroom is for plans, not problems).
+- Tactical execution or code debugging.
+- Single-domain review — use the one role lens directly (`/eng-lead`, `/product-lead`, etc.).
+- Ordinary planning, or revisions to a plan already boardroom-reviewed (use the atomic persona skill on the diff).
 
 ## Modes
 
@@ -66,7 +57,7 @@ Two modes, same voices, opposite mechanism. Pick by stakes.
 | Use for | quick lens check while shaping | high-stakes / one-way-door / pre-commitment plans |
 | Fixes | "did I miss an angle?" | "all four voices share the same blind spot" |
 
-`--panel` is opt-in; default stays sequential. The core voices (Stage 1 scope) all run in the panel, same as default — no voice is skipped. The independence gate applies only when deciding whether to ADD an optional extra voice beyond Stage 1 scope: add it only if it can *independently* see a failure the core voices would miss — otherwise it is one mind in another hat.
+The core voices (Stage 1 scope) all run in the panel, same as default — no voice is skipped. The independence gate applies only when deciding whether to ADD an optional extra voice beyond Stage 1 scope: add it only if it can *independently* see a failure the core voices would miss — otherwise it is one mind in another hat.
 
 ## Stages
 
@@ -82,12 +73,15 @@ Run probe. Then load the plan from path arg or active context. If no plan path, 
 
 Determine which voices to invoke. Default: CEO + product + design + eng (4 voices, in order).
 
-Add ops-lead **only if** plan is dominantly process / coordination / multi-team handoff. Detection rule:
+Add ops-lead **only if** plan is dominantly process / coordination / multi-team handoff. Deterministic detection rule (count keyword hits, no judgment call):
 
 ```
-ops_dominant = (plan mentions: process, SOP, handoff, coordination, weekly cadence, owner assignment)
-                AND NOT (plan dominant frame is: feature, code, UX, architecture)
+ops_hits     = count of distinct terms present from {process, SOP, handoff, coordination, cadence, owner assignment, multi-team}
+feature_hits = count of distinct terms present from {feature, code, UX, architecture, API, schema, latency}
+ops_dominant = (ops_hits >= 2) AND (ops_hits > feature_hits)
 ```
+
+Tie-break: if `ops_hits == feature_hits` or `ops_hits < 2`, do NOT add ops-lead. Ambiguity defaults to the 4-voice core, never to adding the optional voice. (The user can still force it with `--voices`.)
 
 Print scope decision:
 ```
@@ -109,7 +103,7 @@ For each voice in order:
    ─── {voice} ───
    {Soul one-liner}
    ```
-3. Apply voice's On Invoke protocol to the plan. Output 3-5 critiques in voice's posture.
+3. Apply voice's On Invoke protocol to the plan. **Coverage criterion (not a count):** check every Iron Law from that voice's contract against the plan; emit one finding per law the plan violates or leaves unaddressed. A voice is complete when every Iron Law has been checked — zero findings is a valid result if the plan satisfies all of them, and say so explicitly rather than padding to a count.
 4. Each critique formatted per `lib/outside-voice-rule.md`:
    ```
    ## {voice} Finding {n}: {summary}
@@ -207,7 +201,7 @@ In `--panel` mode each finding is an independent outside-voice finding. Gate it 
 
 ## Voice ordering rationale (default mode)
 
-Ordering applies to default sequential mode only — `--panel` runs all voices at once with no ordering (independence is the point). In default mode, CEO → product → design → eng is intentional:
+In default sequential mode, CEO → product → design → eng is intentional:
 
 1. **CEO first** — strategic frame: should we even do this? two-way / one-way door?
 2. **Product second** — given CEO says yes, what's the user problem? metric? scope discipline?
@@ -218,14 +212,8 @@ Each voice's framing assumes the previous voice's critique has been considered. 
 
 ## Anti-patterns
 
-- ❌ Running all 4 voices in parallel in **default mode** ("save time") — default voices are sequential because each builds on previous applied patches. Parallel is correct ONLY in `--panel` mode, where mutual blindness is the goal (see Modes).
+- ❌ Running all 4 voices in parallel in **default mode** ("save time") — parallel is correct ONLY in `--panel` mode (see Modes).
 - ❌ Auto-applying all critiques without per-finding gate — defeats outside-voice-rule
 - ❌ Letting one voice override another ("eng said no, so we don't even ask CEO") — each voice critiques independently in its own scope
 - ❌ Skipping voices because "they don't have anything to add here" — every voice critiques, the user decides what to apply
 - ❌ Using boardroom for tactical execution questions — boardroom is for plans, grill is for problems
-
-## Origin
-
-- pandastack persona-pipeline (deleted v1.1) — agent chain replaced by single-skill multi-voice
-- pandastack agents/ deleted v1.1 — pandastack is skill-only. No agent dispatch.
-- gstack `/plan-ceo-review` + `/plan-eng-review` (separate commands) — pandastack collapses to one boardroom flow

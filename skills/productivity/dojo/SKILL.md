@@ -3,7 +3,7 @@ name: dojo
 aliases: [prep]
 mode: skill
 description: |
-  Pre-action prep before a sprint / office-hours / boardroom or any non-trivial work session. Scans past similar cases (filename + grep), loads relevant lib/ refs, surfaces gotchas. Triggers on /dojo, /prep (alias), "before I start", "let me prep first", auto-invoked by /sprint and /office-hours at Stage 0.
+  Pre-action prep before a sprint / office-hours / boardroom or any non-trivial work session. Triggers on /dojo, /prep (Layer-1 typing alias), "before I start", "let me prep first", auto-invoked by /sprint and /office-hours at Stage 0.
 reads:
   - repo: lib/capability-probe.md
   - repo: lib/escape-hatch.md
@@ -87,39 +87,7 @@ Don't fabricate gotchas if none surface from real past content. Empty list is OK
 
 ### Stage 0e: Output prep brief
 
-Write to `Inbox/prep-{slug}-{date}.md`:
-
-```markdown
----
-date: {YYYY-MM-DD}
-type: prep
-flow: {sprint|office-hours|knowledge|work|write|standalone}
-topic: {topic}
-tags: [prep, dojo]
----
-
-# Dojo prep — {topic}
-
-## Capability probe
-
-{probe-results-block}
-
-## Past cases
-
-{top 3-5 vault hits with 1-line context}
-
-## Lib loaded
-
-{list with 1-line per lib}
-
-## Gotchas (prior sessions)
-
-{1-3 gotchas, or "none found"}
-
-## Suggested entry point
-
-{1 sentence: where the user should start, given the above}
-```
+Write to `Inbox/prep-{slug}-{date}.md` using the template: @skills/productivity/dojo/lib/prep-brief-template.md
 
 Print the path to user. Do NOT auto-continue into the next flow stage — user reads the prep, then decides to proceed.
 
@@ -138,9 +106,3 @@ If invoked auto from `/sprint` or `/office-hours`, the parent flow's Stage 1 rea
 @../../../lib/escape-hatch.md
 
 If user says "skip prep" / "夠了" during the past-case lookup phase, stop the lookup, write whatever past-cases were found, mark gotcha section as `[skipped, escape-hatch]`, output the prep file. Do not abort the prep entirely — partial prep is better than none.
-
-## Origin
-
-Codex Q6 review (2026-05-04) flagged that pandastack lifecycles all start at Stage 1 (event happens → react). No Stage 0 pre-action prep. CE / gstack have implicit auto-research before plan stages but pandastack didn't systematize. `/dojo` is that systematization.
-
-Naming: `dojo` is Layer 2 metaphor; `/prep` alias for Layer 1 typing convenience.

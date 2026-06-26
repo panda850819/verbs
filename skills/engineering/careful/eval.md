@@ -2,34 +2,34 @@
 type: skill-eval
 skill: careful
 bucket: engineering
-evaluated_skill_hash: 93722d5996ca37af4ba2f1cbccf3faeb55c3fb44
+evaluated_skill_hash: 70d7b96cedb1e451595375e37c59f7ef7384811f
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — careful
 
-**Verdict: SOLID.** The destructive-action gate is concrete and predictable: enumerated trip-wires, a fixed confirmation format, and a sharply-reasoned reinstallable-artifact exemption make the core behaviour the same every run.
+**Verdict: SOLID.** Same gate-check process every run with a concrete checkable confirmation, and the two heavy integrity subsystems now correctly deferred to resolving lib/ pointers; the one cost is the destructive-command list living verbatim in both `forbids:` frontmatter and the prose gates.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L32 — "Before executing any of the following, pause and ask the user for explicit confirmation" anchors one deterministic process against an enumerated trip-wire list. |
-| Description / invocation | weak | L3 — description covers only the destructive-gate half; the entire stopping-discipline / continue-failure-logging branch (L77+) has no trigger and no mention, so that behaviour is unreachable by description. |
-| Completion criteria | weak | L32 — "pause and ask" is checkable, but "While Active" carries no overall done/not-done criterion; the gate is a standing rule-set, leaving when-it-ends implicit. |
-| Information hierarchy | weak | L77 — a ~60-line logging+audit+retro subsystem (Lopopolo discipline, log format, retro-week wiring) sits hot in SKILL.md; it is on-demand reference that should drop behind a context pointer. |
-| Leading words | pass | L77 — "every continue is a harness failure" (Lopopolo) is a strong pretrained anchor that collapses the whole stop-discipline region into one phrase. |
-| Pruning | weak | L143 — the "Common Rationalizations" table is largely persuasive prose (no-op against a model that already obeys the gate at L32), padding a body already at 134 lines, well over the ~80-line budget. |
-| Granularity | weak | L77 — two distinct skills are welded in one: the destructive-action gate and a continue-failure logging/retro mechanism. The second has its own leading word and its own trigger and earns a split. |
-| pandastack conformance | weak | L1 — frontmatter omits `version` and ships advisory firewall fields (reads/writes/forbids); `name: careful` matches folder and `@../../../lib/verify-the-test-loop.md` (L57) resolves, but body is 134 lines vs the ~<80 budget with no earned reason. |
+| Predictability | pass | L30 — fixed On Invoke → While Active gates → Confirmation Format → Deactivate runs identically every activation; gates are objective predicates, not model-chosen branches. |
+| Description / invocation | pass | L4 — front-loads "Use when working on production code…"; model-invocation is correct (the agent must self-reach a safety gate), no body-identity smuggled into the trigger. |
+| Completion criteria | pass | L69 — the Confirmation Format yields a literal `[y/n]`; L57 "Unproven ⇒ the bug is the pipeline" is a hard checkable predicate, not premature-completion bait. |
+| Information hierarchy | pass | L55 — the two costly modules (verify-the-test-loop, stopping-discipline) sit behind `@`/`lib/` pointers, keeping the hot body to gates only; progressive disclosure honoured, no re-inline of their rules. |
+| Leading words | pass | L30 — "Before executing any of the following, pause and ask…" is a pretrained imperative anchor; gate items are stated once, not re-explained. |
+| Pruning | weak | L33 — `git push --force`, `git reset --hard`, `git clean -f` (and L48 `npm publish`, `cargo publish`) are echoed verbatim from the `forbids:` list (L10-15); the same command strings carry in two sources of truth. |
+| Granularity | pass | L44 — the Git/FS/External/DB split each earns its load; the dense rm-rf exemption is one block of load-bearing judgment, not over-fragmented. |
+| pandastack conformance | pass | L2 — `name: careful` = folder; 94-line body exceeds ~80 but the rm-rf exemption logic, rationalizations table, and two integrity modules earn it; both lib/ refs (L55, L77) resolve and are deferred, honouring hot/cold dispatch (~2.2K tokens, gated). |
 
 ## Why it's good
-The core gate is exemplary: L34-54 enumerate the exact commands that trip it, so the agent has a checkable list rather than a vibe, and L42-46 reason out the reinstallable-artifact exemption precisely enough to stop the gate mis-firing on routine `node_modules` cleanup. The confirmation format at L68-75 fixes the output shape, and the Lopopolo anchor (L77) gives the stop-discipline region a single load-bearing concept. Predictability — same process every run — is genuinely achieved for the destructive-command path.
+The body is pure gate-and-confirm: every pause is a concrete destructive predicate ending in a fixed yes/no confirmation block, so the process is identical on every run. The two expensive disciplines (test-loop trust, stopping-discipline) that bloated the prior 154-line version are now behind pointers that actually resolve, keeping the hot path lean. The rationalizations table converts the hardest override-temptations into a checkable reality column instead of a vague "be careful".
 
 ## Top fixes
-1. Split the stopping-discipline + continue-failure logging subsystem (L77-137) into its own skill (or push it behind a context pointer); it is a second skill with its own trigger that the L3 description does not announce.
-2. Prune the "Common Rationalizations" table (L143-154): it is persuasion the model already obeys after L32, not a behaviour change. Cut it or compress to one line per gate.
-3. Add `version` to frontmatter (L1) and bring the body toward the ~80-line budget once the two cuts above land.
+1. L33/L48 — collapse the verbatim command echo: let the prose gates reference categories and add only the judgment the frontmatter cannot carry (exemptions, multi-path rule), so `forbids:` (L10-15) stays the single source of the literal command strings.
+2. L44 — the rm-rf exemption is a ~200-word single paragraph; if it grows further, move it behind a `lib/` pointer like the other two modules to hold the body near the ~80-line norm.
 
 ## Behavioral cases
-- trigger `working on production code, about to git push --force` → expected process: announce CAREFUL ON (L28), match the command against the Git trip-wire list (L34-35), emit the L68-75 confirmation block, wait for y/n before executing.
-- anti-trigger `rm -rf node_modules` in the current project → should NOT fire the gate (L42-46 reinstallable-artifact exemption); and a request to "stress-test my plan / interrogate this idea" routes to `grill`/`office-hours`, not careful.
+- trigger `git push --force origin main` -> expected process: announce CAREFUL ON, hit the Git gate (L33 + L89 rationalization), emit the Confirmation Format block (reversible:no), wait for explicit `y`.
+- trigger `rm -rf /anywhere/node_modules` -> expected process: NO gate fires — basename is a regenerable artifact and the path is explicit (L44 exemption), proceed without confirmation.
+- anti-trigger `review this plan's architecture` -> should NOT fire (routes to eng-lead / boardroom); careful gates execution of destructive commands, not plan critique.

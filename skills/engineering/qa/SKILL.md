@@ -1,17 +1,18 @@
 ---
 name: qa
 description: |
-  Browser-based QA. Opens real pages, runs user flows, finds bugs.
-  Use when UI has changed, or when asked to "test this", "QA",
-  or "check the page". Requires browser automation tool.
+  Browser-based QA. Use when UI has changed, or when asked to
+  "test this", "QA", or "check the page". Requires browser automation
+  tool. NOT for non-UI verification (use `verify`); NOT for code-diff
+  review (use `review`).
 ---
 
 # QA
 
 ## Step 1: Load Context
 
-1. Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses).
-2. Search `{learnings_dir}` for `type: pitfall` related to UI or the changed components.
+1. Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Resolve `{learnings_dir}` from it (default `docs/learnings`).
+2. Search `{learnings_dir}` for `type: pitfall` related to UI or the changed components. The `type: pitfall` shape is defined in `lib/learning-format.md`.
 3. Read the brief (if exists in `docs/briefs/`) to understand expected behavior.
 
 ## Step 2: Plan Tests
@@ -42,7 +43,7 @@ If unclear what to test, ask the user: "What flows should I test?"
 
 When the merged test list has 3+ groups, fan out to parallel sub-agents:
 
-1. Assign each test group to a separate Agent (sub-agent). The main agent judges which model fits each group by its demands — a trivial smoke check and a group combining accessibility + visual regression + a flaky reproduce are not the same load — and passes `model:` accordingly. Decide per group at dispatch time; don't pin a fixed mapping.
+1. Assign each test group to a separate Agent (sub-agent), passing `model:` to fit the group's load.
 2. Each sub-agent gets its own browser session via `--session <name>` for isolation.
 3. Each sub-agent prompt must include:
    - The exact numbered test list to run (no exploration beyond assigned tests)
@@ -73,25 +74,9 @@ STEP_SKIP|<step-id>|<reason>
 3. **Before/after comparison**: snapshot before action, act, snapshot after, verify expected change
 4. **Screenshot + visual judgment** (weakest): only for visual properties the accessibility tree cannot capture
 
-### Screenshot on Failure
+### Failure Output
 
-Every `STEP_FAIL` should have an accompanying screenshot captured at the moment of failure. Store in `.context/ui-test-screenshots/<step-id>.png`.
-
-```bash
-mkdir -p .context/ui-test-screenshots
-```
-
-### Bug Report Format
-
-For each STEP_FAIL, also produce:
-```
-[BUG] page/flow - description
-  Steps to reproduce: ...
-  Expected: ...
-  Actual: ...
-  Screenshot: .context/ui-test-screenshots/<step-id>.png
-  Action: AUTO-FIX | ASK
-```
+Every `STEP_FAIL` gets a screenshot and a bug report. See `skills/engineering/qa/lib/test-output-format.md` for the screenshot location and the `[BUG]` template (its `Action: AUTO-FIX | ASK` field feeds Step 4).
 
 ### Summary
 
@@ -110,7 +95,7 @@ After fixing, re-run the affected flow to verify the fix.
 
 ## Step 5: Write Learnings
 
-If a UI pattern or browser-specific pitfall was discovered, write a learning.
+If a UI pattern or browser-specific pitfall was discovered, write a learning to `{learnings_dir}` with `type: pitfall` (format in `lib/learning-format.md`). Otherwise state explicitly "no learning warranted". Either way, Step 5 is done only once one of the two is recorded.
 Common examples:
 - "This component breaks on mobile viewport"
 - "Form validation fires before user finishes typing"

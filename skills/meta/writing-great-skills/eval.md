@@ -2,34 +2,37 @@
 type: skill-eval
 skill: writing-great-skills
 bucket: meta
-evaluated_skill_hash: 7d5875f5591979e9cef8c88a0066b3867741c5f9
+evaluated_skill_hash: e876f5ef34f3c67b7790f61c7204cbb3dcb6dd14
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — writing-great-skills
 
-**Verdict: STRONG.** A self-applying SSOT: it states the root virtue (predictability) once, then every section is a lever that demonstrably serves it, and the scorecard is a faithful checkable condensation of the prose above it.
+**Verdict: SOLID.** Leading virtue: it is its own proof — a ruthlessly pruned reference where every section header is a leading word with a single definition pushed to GLOSSARY.md. It loses points because the scorecard (L72-81) self-admittedly restates the body and must be hand-synced, carries one orphan glossary definition (*Legwork*, GLOSSARY.md L27, never referenced in SKILL.md), and because as a flat reference it teaches completion criteria without embodying any.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L12 — root virtue named once ("Predictability … is the root virtue; every lever below serves it"), and the doc itself is structured as that chain of levers, so a reader runs the same diagnostic process every time |
-| Description / invocation | weak | L6 — `user-invocable: true` is set, yet L4 keeps a full model-facing description with trigger branches and the L14 binders (`skill-eval` / `skill-creator`) rely on model-reachability; the flag and the description pull opposite ways per the doc's own L20–23 rule |
-| Completion criteria | weak | L37 — defines the completion-criterion concept ("checkable … exhaustive") but this is a reference doc with no ordered steps, so it has no completion criterion of its own to check against; correct for the type, but the axis has no positive evidence here |
-| Information hierarchy | pass | L41 — progressive disclosure and co-location stated and practiced: bold terms pushed to GLOSSARY.md via a context pointer (L14), keeping the top legible |
-| Leading words | pass | L58 — defines leading word then immediately models it ("fast, deterministic, low-overhead" → _tight_), the section enacting its own rule |
-| Pruning | pass | L54 — states the no-op test and the ~<80-line discipline, and the body honours it (48 non-blank body lines); each section maps to exactly one scorecard axis with no restated meaning |
-| Granularity | pass | L47 — "Granularity spends one of the two loads per cut, so split only when the cut earns it" gives the exact two earn-conditions (independent reach / anti-premature-completion) the granularity axis scores |
-| pandastack conformance | pass | L43 — hot/cold dispatch rule stated and bound; frontmatter (L1–8) valid, body under 80 lines, GLOSSARY pointer resolves |
+| Predictability | pass | L12 — names predictability as the root virtue every lever serves, and the doc enacts one process (consult these named levers) rather than chasing one output. |
+| Description / invocation | pass | L4 — front-loads "Reference for writing and editing pandastack skills", one trigger per branch (authoring / splitting / pruning / reviewing), keeps the reach clause (skill-eval binds it); model description coexisting with `user-invocable` is the pandastack norm, not a contradiction. |
+| Completion criteria | weak | L37 — the completion-criterion concept is defined and demanded *of other skills*, but this reference has no ordered steps to end on a checkable criterion, and "where it matters" stays abstract with no worked checkable / not-checkable pair, so the axis is taught, not embodied. |
+| Information hierarchy | pass | L14 — bold terms pushed to GLOSSARY.md via a context pointer, hot/cold dispatch named (L43), co-location held heading by heading; the ladder it describes is the ladder it uses. |
+| Leading words | pass | L58 — every section header (Pruning, Sediment, Sprawl, No-op, tight loop) is a leading word, and it models collapse in place ("fast, deterministic, low-overhead" → tight). |
+| Pruning | weak | L72 — "keep it in sync with them" concedes the scorecard (L74-81) restates the L12-68 principles; a hand-synced condensation is duplication by the doc's own definition (L65), the one place a meaning lives in two spots. Plus orphan **sediment**: GLOSSARY.md L27 defines *Legwork*, but the term is bolded/used zero times in SKILL.md (every other glossary entry appears ≥1), violating GLOSSARY L3's "bolded in SKILL.md, defined once here" — a dead definition by the doc's own Sediment definition (L66). |
+| Granularity | pass | L47 — the only split (GLOSSARY.md) earns its load: 24 definitions reached on demand by sibling evals justify the external-reference cut over inlining them hot. |
+| pandastack conformance | pass | L81 — name=folder verified, SKILL-FRONTMATTER.md / lib/quality-rubric.md / GLOSSARY.md all resolve; body 87 lines, modestly over the ~80 guide but a dense reference earns it; no >5K hot read so no dispatch owed. |
 
 ## Why it's good
-The doc is the rare reference that obeys the discipline it teaches: it names predictability once (L12) and never restates it, collapses its own restatements into leading words (L58), and pushes every defined term to a single-source GLOSSARY (the context pointer at L14) instead of redefining inline. The scorecard (L70–83) is a true condensation — each of the 8 axes traces back to a named section above it, so skill-eval scores against the same vocabulary the prose builds, and the two never drift.
+The skill practices its own doctrine: the smallest set of named levers, each a leading word, defined in a pushed-out glossary reached by a context pointer (L14) — defined exactly once each, modulo the one orphan (*Legwork*) flagged under Pruning. The invocation section (L20-23) is a clean two-cost model that makes the model-vs-user choice derivable instead of memorized, and the failure-mode catalog (L64-68) hands the evaluator a diagnostic vocabulary that maps one-to-one onto the scorecard axes. The SSOT boundary against lib/quality-rubric.md (artifacts) vs this file (construction) is stated explicitly at L14, and all references resolve.
 
 ## Top fixes
-1. L6 — resolve the invocation contradiction: this is a reference bound by skill-eval and skill-creator (both at L14), so it must be model-reachable; either drop `user-invocable: true` and keep the model description, or by its own L20–23 rule collapse the description to a human-facing one-liner. It currently claims both modes at once.
-2. L37 — the completion-criterion principle is stated but the doc gives no worked checkable/not-checkable example pair; one concrete contrast would make the axis self-demonstrating like the leading-words section (L58) already is.
-3. L14 — the artifact-vs-skill boundary ("scores the SKILL.md itself, not the artifact … `lib/quality-rubric.md`") is stated in the body at L14 and again in the description at L4. The description copy is justified (it must be model-facing per L20), so this is acceptable rather than a hard duplication; if pruned, the L4 description clause is the one to trim, not the L14 body anchor.
+1. L72-81 — the scorecard duplicates the body's principles and leans on a manual "keep in sync" note. Make the 8-axis list a pure index that points back at the section headers (the source), so there is one source of truth, not two that drift.
+2. GLOSSARY.md L27 — *Legwork* is defined but bolded/used nowhere in SKILL.md (every other entry appears ≥1). Either wire the term into the body (e.g. under Completion criteria, where "legwork" is the digging a demanding criterion forces) or delete the dead definition; an unreferenced glossary entry is sediment by the doc's own L66.
+3. L37 — give the completion-criterion principle one concrete checkable / not-checkable example (e.g. "exhaustive = every heading enumerated, not sampled") so the doc embodies the checkability it demands of other skills.
+4. L81 — body is 87 lines vs the self-stated ~80; trimming the scorecard restatement (fix 1) is what brings the meta-skill back under the line it teaches.
 
 ## Behavioral cases
-- trigger `is this skill well-written? / why is this SKILL.md predictable?` → expected process: load the scorecard section (L70–83), score the 8 axes each with one cited line, default-to-weak on uncertainty; pairs with skill-eval as the criteria SSOT.
-- anti-trigger `is this PR/report any good?` → should NOT fire; that judges an artifact, routes to `lib/quality-rubric.md` (the SKILL.md draws this boundary explicitly at L14).
+- trigger `is this SKILL.md well-written / score this skill` -> expected process: load this file as the criteria SSOT, walk the 8 axes (L74-81), cite one line per axis, emit leading-virtue + 1-3 fixes (L83).
+- trigger `I'm authoring / splitting / pruning a skill` -> expected process: consult the named levers (invocation, hierarchy, when-to-split, pruning) before writing, resolving bold terms via GLOSSARY.md.
+- anti-trigger `score this article / draft / IC memo for quality` -> should NOT fire (routes to lib/quality-rubric.md, which scores artifacts not skills, per the explicit boundary at L14).
+- anti-trigger `create the skill for me end-to-end` -> should NOT fire as builder (routes to skill-creator, which self-checks *against* this file but owns the build).

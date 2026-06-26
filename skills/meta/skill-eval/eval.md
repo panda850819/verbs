@@ -2,34 +2,35 @@
 type: skill-eval
 skill: skill-eval
 bucket: meta
-evaluated_skill_hash: 25e7ef05320a1a1ac1995961905ed25432e3110b
+evaluated_skill_hash: 012a6d8bdc530c86ebd26cd6be5120ac23764845
 evaluated_at: 2026-06-26
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — skill-eval
 
-**Verdict: SOLID.** A tight, self-referential evaluator: it binds writing-great-skills as its single criteria source, forces one cited line per axis, and closes on a machine-checkable completion criterion (eval.md exists + hash stamped + lint passes).
+**Verdict: SOLID.** A tight, self-binding evaluator: three checkable steps anchored on a hard completion criterion (lint-fresh), losing a single point to a scope statement restated as an anti-pattern.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L19 — `## Steps` is a fixed 4-step ordered process; every run takes the same path (load criteria → score → optional second opinion → write verdict). |
-| Description / invocation | weak | L4 — model-invoked is right, but the trigger list piles five near-synonyms ("eval this skill" / "score this skill" / "is this skill well-written" / "why is this skill good" / "(re)generate a skill's eval") that all name one branch "evaluate a skill" — synonym duplication that should collapse (§ Writing the description). |
-| Completion criteria | pass | L35 — closes checkable and exhaustive: `eval.md` exists + every axis has a cited line + `lint-eval-fresh.sh` passes; no premature-completion bait. |
-| Information hierarchy | pass | L11 — criteria pushed out to the writing-great-skills scorecard via a context pointer ("load its **scorecard** section"); the template kept inline where it is read every run. |
-| Leading words | pass | L17 — "fans out" + "hot/cold rule — never score the whole corpus in one hot context" anchor the dispatch behaviour in pretrained concepts instead of restating it. |
-| Pruning | weak | L29 — Step 3 "Second opinion (optional, for first-class skills)" is the softest tier: "optional" + the fuzzy gate "heavily-used skill" lets the agent skip by default, so the step pays load while changing little behaviour (near no-op). |
-| Granularity | pass | L17 — the `all` fan-out splits by sequence correctly: one sub-agent per skill, honouring the hot/cold rule rather than scoring every skill in one hot context. |
-| pandastack conformance | pass | L23 — frontmatter valid, body 50 non-blank lines (<80), hot/cold honoured (L17), and `lib/quality-rubric.md` / `SKILL-FRONTMATTER.md` / `scripts/lint-eval-fresh.sh` all resolve in-repo. |
+| Predictability | pass | L19 — three numbered `## Steps` (load criteria → score → write+stamp) run the same process every invocation; no branch reorders them. |
+| Description / invocation | pass | L4 — leading word "Score" front-loads; model-facing; one trigger per branch (eval/score a skill, regenerate-after-edit) with the synonym pile collapsed; no body-identity restated. |
+| Completion criteria | pass | L33 — exhaustive and checkable: `eval.md` exists AND every axis cites a line AND `lint-eval-fresh.sh <name>` passes; not "reviewed the skill". |
+| Information hierarchy | pass | L35 — the output contract is pushed below the steps as "## eval.md template", reached by the L33 pointer "using the template below"; the second-opinion note is demoted to an L29 reference blockquote, keeping the hot path the steps. |
+| Leading words | pass | L17 — "fans out" + "hot/cold rule — never score the whole corpus in one hot context", plus "rubber-stamping"/"no-op" (L76), are pretrained anchors doing invocation and execution work in few tokens. |
+| Pruning | weak | L13 — the scope statement "scores the SKILL.md construction NOT the artifact" is restated at L77 as the "Scoring the artifact, not the skill" anti-pattern; the same meaning lives in two places (Duplication, WGS L65). |
+| Granularity | pass | L17 — the `/skill-eval all` fan-out earns the hot/cold sub-agent split; the step splits each carry distinct load (criteria vs score vs write). |
+| pandastack conformance | pass | L17 — frontmatter `name: skill-eval` = folder; hot/cold dispatch honoured; ~33 prose lines (the embedded template earns the rest); both lib refs resolve — `../writing-great-skills/SKILL.md` and `../../../lib/quality-rubric.md` (= repo-root `lib/`). |
 
 ## Why it's good
-The scope note (L13) and the SSOT pointer (L11) keep this skill from re-inventing axes — it judges construction only and defers all criteria to writing-great-skills, so the two stay in sync by reference, not by copy. The completion criterion (L35) is genuinely exhaustive (file + per-axis citation + lint), and the Anti-patterns section (L76-81) names the exact failures this evaluator is most prone to (rubber-stamping, scoring-the-artifact, uncited verdicts) — a self-aware guard most skills lack.
+The skill closes its own loop: it stamps the scored SKILL.md's git hash into the eval and makes `lint-eval-fresh.sh` passing a completion criterion (L33), so a stale eval is a caught signal rather than silent sediment — the exact failure the skill names at L79. It binds the writing-great-skills scorecard by reference instead of copying axes (L11, "do not invent axes"), keeping the two in sync. The anti-default rules — default to weak (L27), no uncited verdicts (L78) — actively fight the rubber-stamp failure this kind of skill is most prone to.
 
 ## Top fixes
-1. L4 — collapse the five synonym triggers to one branch phrase + the re-gen case (e.g. "eval/score a skill, or regenerate its eval after editing"); the renamed-synonym pile is description duplication that pays context load every turn.
-2. L29 — either give Step 3 a hard gate (a named threshold for "first-class"/"heavily-used") or demote it from a numbered Step to an in-skill reference note; an "optional" numbered step invites skip-by-default and reads as a no-op.
-3. L31 — "Disagreement on an axis → downgrade to weak" is a reconciliation rule buried inside the optional Step 3; if that step is skipped the rule is lost. Surface it where scoring happens (L27), not only inside the skippable tier.
+1. L13 / L77 — collapse the "construction vs artifact" point to one home. Keep the L13 scope note (it routes the reader to `quality-rubric.md`) and thin L77 to reference it rather than restate the same distinction.
+2. L29 — the second-opinion blockquote is reference-tier ("for a heavily-used skill") and correctly demoted out of the numbered steps; if it rarely fires, a context pointer to a lib note would keep the hot body even tighter, though at this length it does not yet sprawl.
 
 ## Behavioral cases
-- trigger `/skill-eval ingest` → expected process: read the writing-great-skills scorecard (8 axes), read `skills/<bucket>/ingest/SKILL.md` whole + its sibling refs, score each axis pass/weak/fail with one `L<n>`, write `skills/<bucket>/ingest/eval.md` from the template, stamp `git hash-object`, verify `lint-eval-fresh.sh ingest` passes.
-- anti-trigger `score the brief this skill produced` → should NOT fire (scoring the artifact, not the SKILL.md construction — routes to `lib/quality-rubric.md`, per the scope note at L13).
+- trigger `eval the skill-creator skill` -> expected process: read the writing-great-skills scorecard → resolve & read `skills/meta/skill-creator/SKILL.md` whole + its sibling refs → score 8 axes pass/weak/fail with one cited `L<n>` each, default weak → write `skills/meta/skill-creator/eval.md` from the template, stamp `git hash-object`, confirm `lint-eval-fresh.sh skill-creator` passes (L19-33).
+- trigger `/skill-eval all` -> expected process: fan out one sub-agent per skill under `skills/<bucket>/<skill>/`, never score the whole corpus in one hot context (L17).
+- anti-trigger `score this brain page draft for quality` -> should NOT fire (judges an artifact's prose, not a SKILL.md's construction; routes to repo-root `lib/quality-rubric.md` per L13).
+- anti-trigger `create a new skill / improve this skill` -> should NOT fire (routes to `skill-creator`, the builder counterpart, L11).
