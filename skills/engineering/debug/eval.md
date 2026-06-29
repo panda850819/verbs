@@ -13,10 +13,10 @@ rubric: writing-great-skills@1.0.0
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Description / invocation | pass | Front-loaded triggers (zh + en) with NOT-clauses routing to `review` (diff), `ui` (taste); a render bug is explicitly carved to `debug`. |
+| Description / invocation | pass | Front-loaded triggers (zh + en) with NOT-clauses routing to `review` (diff) and `ui` (taste); `ui` in turn carves a broken render back to `debug`, so the pair's boundary is explicit from both sides. |
 | Predictability | pass | Same shape every run: 3 fixed overrides + a lore pointer. No per-bug branching in the hot path. |
 | Completion criteria | weak | The overrides are gates, but "root cause specific enough" and "grep the signature for siblings" rest on judgment; the `file:function:line` + testable-vs-untestable contrast is the real bar that keeps it from being vague. |
 | Information hierarchy | pass | Lore (known bug classes, CLI archetypes, instrument-first, bisect, handoff template) is cold behind `lib/diagnosis.md`; the spine stays 36 lines. |
-| Pruning | pass | The line-by-line cut removed the rationalization catalog (restated existing gates) and the evidence-ladder enumeration (pretrained); only the deflection tell survived as genuine lore. |
+| Pruning | pass | The line-by-line cut removed the rationalization catalog (restated existing gates) and the evidence-ladder enumeration (pretrained); from that catalog only the deflection tell survived. (The diagnosis-discipline block in `lib/diagnosis.md` keeps falsification/explain-every-symptom as anti-confirmation-bias gates, a judgment call, not claimed as novel lore.) |
 
 **Recommendations:** none load-bearing. If a recurring bug class proves the completion bar too soft, add one checkable "the hypothesis names the propagation path" line to the gate.

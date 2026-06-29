@@ -16,11 +16,11 @@ tags: [team-orchestrate]
 
 ## Branch results
 
-| Branch | Persona | Outcome | Commit / Note |
-|---|---|---|---|
-| 1 {title} | {persona} | APPROVED | {commit} |
-| 2 {title} | {persona} | REJECTED | {reason} |
-| ... | | | |
+| Branch | Outcome | Commit / Note |
+|---|---|---|
+| 1 {title} | APPROVED | {commit} |
+| 2 {title} | REJECTED | {reason} |
+| ... | | |
 
 ## Independence audit
 

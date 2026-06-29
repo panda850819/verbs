@@ -145,7 +145,7 @@ Suggest next skill if applicable (typically `/review` for cross-branch coherence
 - ❌ Using team-orchestrate for parallelism feel when branches really run <2 min each — dispatch overhead > savings
 - ❌ Auto-merging on subagent return without verification — gate exists because subagent self-report drifts from actual worktree state
 - ❌ Defaulting to team-orchestrate when independence is unclear — default to N sequential sprints
-- ❌ Mixing personas within one branch — one branch = one persona
+- ❌ Letting one branch touch another branch's files — one branch = one disjoint file scope (the independence audit enforces this)
 
 ---
 

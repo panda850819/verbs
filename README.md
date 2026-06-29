@@ -250,23 +250,14 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 | `/grill` | The Adversary | Atomic 5-10 min adversarial discovery. One question at a time, hunting for hidden requirements and unknown unknowns. |
 | `/dojo` | The Sensei | Pre-action context prep. Scan past similar cases via rg / find on session notes, surface gotchas before the work session starts. |
 
-### Plan / decide
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/boardroom` | The Boardroom | 4-voice plan critique (CEO → product → design → eng). Per-finding apply gate. |
-| `/ceo` | Strategic Advisor | Multi-framework thinking. Kill / pivot / continue judgment. |
-| `/product-lead` | VP Product | User problems over solutions. Says no more than yes. |
-| `/ops-lead` | COO | Systems that run without you. Process design when there's real pain. |
-
 ### Build
 
 | Skill | Your specialist | What they do |
 |---|---|---|
 | `/sprint` | Sprint Coach | 1-2h single-track focused execution. Internal flow: dojo → grill (lite) → execute → review → ship. For multi-step work, run multiple sprints in sequence. |
 | `/team-orchestrate` | The Conductor | N independent branches in parallel git worktrees. Use only when branches are truly independent. |
-| `/eng-lead` | Staff Engineer | Build, debug, ship. Minimal diff, root cause, no spiral. Also covers tech-stack / DB schema / API contract decisions. |
-| `/design-lead` | Senior Designer | Intentional over decorative. Anti-slop, accessibility-first. |
+| `/debug` | Root-cause debugging | Name the root cause before editing, verify before claiming fixed, scope-blast siblings. Bug-class lore + bisect in lib. |
+| `/ui` | UI craft | Lock a direction and fight your defaults. Reflex-font blocklist, CJK type, OKLCH, CSS bans-with-rewrites in references. |
 | `/careful` | Safety Gate | Confirmation gates before destructive commands (force push, rm -rf, DROP). |
 | `/freeze` | Scope Freezer | Lock edits to specific paths for the session. |
 
@@ -323,18 +314,6 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 `/agent-browser` was archived 2026-06-08 — the npm `agent-browser` CLI carries its own docs; `/qa` still uses the CLI directly.
 
 `summarize`, `notion`, `slack`, `scout`, `inbox-triage`, `work-ship`, `think-like-*` were cut in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
-
-## Personas
-
-5 persona skills under `skills/productivity/{ceo,eng-lead,ops-lead,product-lead,design-lead}/`, sharing the frame in `lib/persona-frame.md`. pandastack is skill-only — no separate agent dispatch layer. Edit any persona SKILL.md; the change picks up after `/reload-plugins`.
-
-| Persona skill | Role |
-|---|---|
-| `eng-lead` | Staff engineer — build, review, debug, ship |
-| `design-lead` | Senior designer — UI/UX, accessibility, anti-slop |
-| `ceo` | Strategic advisor — scope decisions, kill/pivot |
-| `ops-lead` | COO — systems that run without you, process design |
-| `product-lead` | VP Product — requirements, scope, metrics |
 
 ## Lifecycle compositions
 

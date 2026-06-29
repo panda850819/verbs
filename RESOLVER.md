@@ -84,7 +84,7 @@ Private CLI wrappers (`bird` for X/Twitter) are not in the public package; `noti
 | `pandastack:writing-great-skills` | Reference + 8-axis scorecard for well-constructed skills. The construction-quality SSOT (scores the SKILL.md, not its artifact — that's `lib/quality-rubric.md`). `skill-creator` self-checks against it; `skill-eval` binds it. | "how do I write a skill", "what makes a skill good", consulted while authoring |
 | `pandastack:skill-eval` | Score an existing skill against the writing-great-skills scorecard and write a co-located `eval.md` verdict (hash-stamped; `lint-eval-fresh.sh` catches drift). Evaluator counterpart to skill-creator. | "eval this skill", "score this skill", "is this skill well-written" |
 
-> **skill-creator vs skill-eval vs writing-great-skills**: writing-great-skills is the criteria (read); skill-creator builds skills and self-checks against it; skill-eval judges existing skills against it and leaves the verdict. Same SSOT, generator/evaluator split — mirrors how `lib/quality-rubric.md` binds `write`/`design-lead` (generate) and `review` (evaluate).
+> **skill-creator vs skill-eval vs writing-great-skills**: writing-great-skills is the criteria (read); skill-creator builds skills and self-checks against it; skill-eval judges existing skills against it and leaves the verdict. Same SSOT, generator/evaluator split — mirrors how `lib/quality-rubric.md` binds `write`/`ui` (generate) and `review` (evaluate).
 
 ---
 

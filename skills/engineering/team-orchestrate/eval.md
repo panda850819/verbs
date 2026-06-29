@@ -2,7 +2,7 @@
 type: skill-eval
 skill: team-orchestrate
 bucket: engineering
-evaluated_skill_hash: 8326ee91d2172365fa252a47f0b1b52260acae42
+evaluated_skill_hash: d186352bb965a57118236f74cde89967d91cee18
 evaluated_at: 2026-06-29
 rubric: writing-great-skills@1.0.0
 ---

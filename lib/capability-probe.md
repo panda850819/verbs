@@ -18,9 +18,9 @@ Specifically:
 
 Skip for atomic skills that have no substrate dependency (`init`, `done`, `freeze`, `careful`, `checkpoint`).
 
-## Probe checks (6 items)
+## Probe checks (5 items)
 
-Run all 6 checks. Each returns `ok / missing / broken / unknown`.
+Run all 5 checks. Each returns `ok / missing / broken / unknown`.
 
 ```
 [1] AGENTS substrate    — `~/.agents/AGENTS.md` exists, readable, non-empty
@@ -50,7 +50,7 @@ Each check has a 500ms timeout. Probe total ≤3s.
 
 | Result | Action |
 |---|---|
-| All 6 ok | Proceed normally |
+| All 5 ok | Proceed normally |
 | 1-2 degraded, 0 blocked | Proceed in degraded mode (see below) |
 | ≥3 degraded OR ≥1 blocked | Abort, print missing list, suggest fix command, exit |
 

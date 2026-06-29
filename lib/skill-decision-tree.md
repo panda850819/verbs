@@ -1,6 +1,6 @@
 # lib/skill-decision-tree.md — Workflow shape → execution skill
 
-> Shared module. Loaded by `office-hours` (Stage 5 next-skill recommendation), `sprint` and `team-orchestrate` (execution-locus choice), and any Layer 1 flow skill that needs to recommend the next execution step.
+> Shared module. Loaded by `office-hours` (Stage 5 next-skill recommendation) and `team-orchestrate` (execution-locus choice), and any Layer 1 flow skill that needs to recommend the next execution step.
 >
 > Origin: 2026-05-05 — office-hours produced briefs but did not point to the next skill. v2.0.0 simplified the picture: `execute-plan` was cut (its sequential-subagent role overlapped sprint Phase 3); the only execution-locus axis left is sprint vs team-orchestrate.
 
@@ -73,7 +73,7 @@ Use this when reading an office-hours brief:
 ## When this lib is loaded
 
 - `office-hours` Stage 5 — read this lib to recommend next skill in the brief
-- `sprint` / `team-orchestrate` — choose the execution locus (in-session vs parallel subagents)
+- `team-orchestrate` — choose the execution locus (sprint in-session vs parallel subagents)
 
 ## See also
 

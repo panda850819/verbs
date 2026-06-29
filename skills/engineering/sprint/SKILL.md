@@ -7,10 +7,11 @@ reads:
   - repo: lib/capability-probe.md
   - repo: lib/escape-hatch.md
   - repo: lib/push-once.md
-  - repo: lib/skill-decision-tree.md
   - repo: lib/gate-contract.md
   - repo: skills/productivity/dojo/SKILL.md
   - repo: skills/productivity/grill/SKILL.md
+  - repo: skills/productivity/ui/SKILL.md
+  - repo: skills/engineering/debug/SKILL.md
   - repo: skills/engineering/review/SKILL.md
   - repo: skills/engineering/ship/SKILL.md
   - repo: lib/verify-the-test-loop.md
@@ -101,7 +102,7 @@ When no plan file is present, execute conversationally. Done-condition for the c
 **Execution mode (default: architect + subagent build — Panda directive 2026-06-12):** the main session is the ARCHITECT, not the typist. For each non-trivial build unit:
 
 1. Main session writes a tight spec: files in scope, seams/interfaces, hard constraints, style anchor (which existing file to imitate), and a checkable acceptance condition per unit.
-2. Dispatch the unit to a runtime-native subagent (Claude Code: `Agent` tool; one unit = one agent; parallel dispatch ONLY when units are file-disjoint). The subagent gets the spec, not the persona file. The architect judges which model/agent fits each unit by its nature — a deep-reasoning seam vs a mechanical edit — and passes `model:` accordingly. Decide per task at dispatch time; do not hardcode a fixed tier mapping. Codex delegation still targets the Codex runtime.
+2. Dispatch the unit to a runtime-native subagent (Claude Code: `Agent` tool; one unit = one agent; parallel dispatch ONLY when units are file-disjoint). The subagent gets the spec, not the architect's full context. The architect judges which model/agent fits each unit by its nature — a deep-reasoning seam vs a mechanical edit — and passes `model:` accordingly. Decide per task at dispatch time; do not hardcode a fixed tier mapping. Codex delegation still targets the Codex runtime.
 3. Main session reviews the returned diff against the spec, re-verifies acceptance itself (build/test — subagent-reported green is never trusted), fixes integration seams, and owns all git operations.
 
 Carve-outs:
