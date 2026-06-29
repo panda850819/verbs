@@ -12,7 +12,6 @@ Specifically:
 
 - `sprint` Stage 0 (dojo loaded inside)
 - `office-hours` Stage 1 (load context)
-- `boardroom` Stage 0 (load plan + persona-frame)
 - `dojo` / `prep` opening
 - `gatekeeper` opening (if integrating vault past-case lookup)
 - Any retro / brief / curate-feeds run
@@ -110,7 +109,6 @@ capability_required:
   - vault
   - lib/push-once.md
   - lib/escape-hatch.md
-  - lib/persona-frame.md  # if persona-routed
   - cli:gog               # for skills that depend on a specific CLI
 ```
 

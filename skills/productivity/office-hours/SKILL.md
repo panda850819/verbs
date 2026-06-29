@@ -43,8 +43,7 @@ capability_required:
 
 - Bug fix or typo (just do it)
 - Decision already made and clear (use `/sprint` to execute)
-- Pure technical execution question (use `/eng-lead` skill or `/grill`)
-- Already wrote a brief, just want plan critique → use `/boardroom`
+- Pure technical execution question (use `/grill`)
 
 ## Modes
 

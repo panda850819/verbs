@@ -4,7 +4,6 @@ description: |
   Conductor-driven parallel execution: dispatches N independent branches to subagents in one message, each in its own git worktree, gates each as it returns. Use after a plan is approved AND branches are genuinely independent (no shared files, no inter-branch deps). Triggers on /team-orchestrate, "run these in parallel", "fan out", "N branches independent". Skip for sequential or single-track iterative work (use sprint).
 reads:
   - repo: lib/capability-probe.md
-  - repo: lib/persona-frame.md
   - repo: lib/skill-decision-tree.md
   - repo: lib/gate-contract.md
   - skill: skills/engineering/team-orchestrate/lib/inbox-template.md
@@ -18,7 +17,6 @@ classification: lifecycle-flow
 capability_required:
   - agents.md
   - vault
-  - lib/persona-frame.md
   - lib/skill-decision-tree.md
 ---
 
@@ -64,35 +62,15 @@ Read the plan / brief. Extract branches into a numbered list with:
 
 Announce: `Team-orchestrate intake — N branches, M-way parallel dispatch. Independence audit: PASS.`
 
-### Phase 0.5: Persona routing per branch
-
-Read `lib/skill-decision-tree.md` § "Persona routing table". For each branch, classify task signal → pick persona skill. Print routing block:
-
-```
-PERSONA ROUTING
-  Branch 1 ({title}): {persona} — {why}
-  Branch 2 ({title}): {persona} — {why}
-  ...
-
-  Override? [confirm / edit / dispatch all to <persona>]
-```
-
-User can override. Wait for confirmation.
-
 ### Phase 1: Parallel dispatch (single message, N Agent calls)
 
-Build N dispatch prompts using inline-from-skill pattern (see `lib/persona-frame.md` § "Inline-from-skill dispatch pattern"):
-
-1. Resolve each persona's SKILL.md via the host plugin-resolver (`pandastack:{persona}`). Personas are NOT all in one bucket: `eng-lead` (the default) lives in `skills/engineering/`, while `ceo / design-lead / product-lead / ops-lead` live in `skills/productivity/`. Do NOT hardcode a single bucket — let the resolver return the install path. Then read that file.
-2. Extract 6 contract sections (Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns / BAD-GOOD)
-3. Inline persona block + hard rules + branch-specific brief at top of subagent prompt
-4. Dispatch ALL branches in **one message** with multiple `Agent` tool calls:
+Build N dispatch prompts: each branch's prompt = its brief + the hard rules the subagent needs (Panda's voice / commit style / no em dash / no Co-Authored-By — the subagent does NOT read `~/.agents/AGENTS.md`, so inline what the task requires). For a UI branch follow `ui`, for a bug branch `debug`. Dispatch ALL branches in **one message** with multiple `Agent` tool calls:
 
 ```
 Agent({
   description: "Branch 1 — {title}",
   subagent_type: "general-purpose",
-  prompt: "{persona block + hard rules + branch 1 brief}",
+  prompt: "{hard rules + branch 1 brief}",
   isolation: "worktree",
   model: "{conductor picks per branch by task nature — deeper reasoning for strategic / architectural branches, lighter for mechanical or read-only}",
 })

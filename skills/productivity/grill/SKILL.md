@@ -126,4 +126,3 @@ Save to:
 
 - **For structured-brief output** — use `/office-hours` (default full mode) or `/office-hours --quick` (when context already loaded). Replaces the deprecated `grill --mode structured`.
 - **Before `/ship knowledge <decisions/path>` Close stage** — if you're closing a work topic and realize scope was never grilled (replaces v2.1 `/work-ship` reference)
-- **Not a replacement for `/boardroom`** — that's multi-voice review of a complete plan; grill is upstream (problem → grill, plan → boardroom)

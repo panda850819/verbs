@@ -23,11 +23,11 @@ Add to your Codex config (`~/.codex/config.toml`):
 multi_agent = true
 ```
 
-This enables `spawn_agent`, `wait`, and `close_agent` for skills like `pandastack:team-orchestrate` and `pandastack:boardroom`.
+This enables `spawn_agent`, `wait`, and `close_agent` for skills like `pandastack:team-orchestrate`.
 
 ## Named subagent dispatch
 
-Pandastack references named subagents (e.g. `subagent_type=design-lead`, `subagent_type=eng-lead`, `subagent_type=Explore`). Codex does not have a named agent registry — `spawn_agent` creates generic agents from built-in roles (`default`, `explorer`, `worker`).
+Pandastack references named subagents (e.g. `subagent_type=Explore`). Codex does not have a named agent registry — `spawn_agent` creates generic agents from built-in roles (`default`, `explorer`, `worker`).
 
 When a pandastack skill says to dispatch a named subagent type:
 
@@ -38,8 +38,6 @@ When a pandastack skill says to dispatch a named subagent type:
 
 | Skill instruction | Codex equivalent |
 |-------------------|------------------|
-| `Agent({subagent_type: "design-lead", ...})` | `spawn_agent(agent_type="worker", message=<contents of agents/design-lead.md plus task>)` |
-| `Agent({subagent_type: "eng-lead", ...})` | `spawn_agent(agent_type="worker", message=<contents of agents/eng-lead.md plus task>)` |
 | `Agent({subagent_type: "Explore", ...})` | `spawn_agent(agent_type="explorer", message=<task>)` |
 | `Agent({subagent_type: "general-purpose", ...})` | `spawn_agent(message=<task>)` |
 

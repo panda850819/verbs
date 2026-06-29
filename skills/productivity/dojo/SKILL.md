@@ -3,7 +3,7 @@ name: dojo
 aliases: [prep]
 mode: skill
 description: |
-  Pre-action prep before a sprint / office-hours / boardroom or any non-trivial work session. Triggers on /dojo, /prep (Layer-1 typing alias), "before I start", "let me prep first", auto-invoked by /sprint and /office-hours at Stage 0.
+  Pre-action prep before a sprint / office-hours or any non-trivial work session. Triggers on /dojo, /prep (Layer-1 typing alias), "before I start", "let me prep first", auto-invoked by /sprint and /office-hours at Stage 0.
 reads:
   - repo: lib/capability-probe.md
   - repo: lib/escape-hatch.md
@@ -25,7 +25,7 @@ capability_required:
 
 > Before stepping into the ring, you walk into the dojo. You stretch, you check past matches, you surface what you forgot last time. Then you fight.
 
-Universal Stage 0 for every Layer 1 flow (sprint, office-hours, boardroom, work, knowledge, write). Replaces the implicit "I'll just start working" that loses prior context.
+Universal Stage 0 for every Layer 1 flow (sprint, office-hours, work, knowledge, write). Replaces the implicit "I'll just start working" that loses prior context.
 
 ## When to invoke
 
@@ -69,7 +69,6 @@ Loading for /sprint:
   ✓ lib/capability-probe.md  (substrate availability)
   ✓ lib/escape-hatch.md      (2-strike user-stop)
   ✓ lib/stop-rule.md         (per-decision gate)
-  ✓ lib/persona-frame.md     (if persona invoked downstream)
 ```
 
 ### Stage 0d: Gotcha surface

@@ -57,10 +57,6 @@ Reasoning: {one line — which question of Q1/Q2 hit Yes and why}
 Recommended skill:
   → /sprint {topic-slug}                          # if Q1=Yes (single-target, iteration expected; for N-step, run N sprints)
   → /team-orchestrate (with this brief as input)  # if Q2=Yes (N-branch parallel, independence audit required)
-
-Persona for next skill (per lib/skill-decision-tree.md routing table):
-  → {eng-lead | design-lead | ops-lead | product-lead | ceo}
-  Reason: {dominant task signal — code / UI / process / scope / strategic}
 ```
 
 ## Gotchas surfaced
