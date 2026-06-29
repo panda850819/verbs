@@ -5,6 +5,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Signal | Invoke |
 |---|---|
 | Fuzzy idea / scope not locked / 想討論 | `grill` (atomic drill) or `office-hours` (structured brief) |
+| Prepared plan, want independent multi-angle critique | `boardroom` (blind parallel critics) |
 | Touching prod, shared infra, or harness paths (`~/.agents`, `~/.claude`, `~/.codex`) | `careful` first |
 | Bug fix / feature / refactor (3+ files or new abstraction) | grill-lite plan first, not direct edits |
 | Error / crash / regression / failing test / "used to work and now doesn't" | `debug` (root cause before any fix) |

@@ -6,7 +6,7 @@
 
 ## Why this file exists
 
-pandastack ships **24 skills** (22 core + 2 ext). **Lifecycle flows are no longer first-class constructs** — what used to live in `flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
+pandastack ships **25 skills** (23 core + 2 ext). **Lifecycle flows are no longer first-class constructs** — what used to live in `flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
 
 This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md beats multi-repo split, because the categorization lives next to the content.
 
@@ -36,6 +36,7 @@ Vault hygiene (orphans / stale / superseded / dead redirects) is a direct file s
 |---|---|---|
 | `pandastack:grill` | Adversarial requirement discovery, atomic 5-10 min, surfaces unknown unknowns. For structured-brief output use `office-hours`. | grill me, stress test, what am I missing |
 | `pandastack:office-hours` | Structured 5-stage flow producing a brief in `docs/briefs/`. `--quick` mode skips capability probe + goal mapping. | office hours, draft a brief, structured intake |
+| `pandastack:boardroom` | Mutually-blind parallel critique of a PREPARED plan: N blind critics on distinct risk-surface lenses, keep every lone finding, per-finding gate. Repackaged from the deleted persona-voice boardroom (no persona). NOT diff review (`review`) or fuzzy ideas (`office-hours`). | critique this plan, red-team this, 多角度審 |
 | `pandastack:careful` | Confirmation gates for production / shared infra | working on prod |
 | `pandastack:checkpoint` | Save / resume working state snapshot | pausing work |
 | `pandastack:freeze` | Lock editing scope to specific paths | scope discipline |
@@ -166,8 +167,8 @@ What used to be `flows/<name>.md` is gone. Reasons:
 
 | Action | Items | Reason |
 |---|---|---|
-| Deleted | `ceo`, `product-lead`, `ops-lead`, `design-lead`, `eng-lead`, `boardroom` | Role-persona lenses were a uniform wrapper over pretrained frames; a skill earns its slot only by lore + the reflexes the model gets wrong despite understanding. eng-lead debug lore → new `debug`; design-lead craft → new `ui`; scope-judgment + delete-first → `grill` / `office-hours`; ops-lead covered by retro-week / cron / minion. `lib/outside-voice-rule.md` deleted (substrate covers it). git history is the archive. |
-| Added | `debug`, `ui` | Function-named: lore + reflex-overrides, not a persona frame. |
+| Deleted | `ceo`, `product-lead`, `ops-lead`, `design-lead`, `eng-lead` | Role-persona lenses were a uniform wrapper over pretrained frames; a skill earns its slot only by lore + the reflexes the model gets wrong despite understanding. eng-lead debug lore → new `debug`; design-lead craft → new `ui`; scope-judgment + delete-first → `grill` / `office-hours`; ops-lead covered by retro-week / cron / minion. `lib/outside-voice-rule.md` deleted (substrate covers it). git history is the archive. |
+| Added | `debug`, `ui`, `boardroom` | Function-named: lore + reflex-overrides, not a persona frame. `boardroom` is the deleted persona-router rebuilt tiny — its one real capability (mutually-blind parallel plan critique) as a ~30-line forcing-function skill, no persona voices. |
 
 ## v2.2.0 cut summary
 

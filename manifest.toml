@@ -80,6 +80,10 @@ description = "Confirmation gate before destructive commands."
 tier = "core"
 description = "Save / resume working state snapshots."
 
+[skill.boardroom]
+tier = "core"
+description = "Mutually-blind parallel critique of a prepared plan: N blind critics, distinct lenses, keep lone findings, per-finding gate. Repackaged from the deleted persona-voice boardroom (no persona). NOT diff review (review) or fuzzy ideas (office-hours)."
+
 [skill.dojo]
 tier = "core"
 description = "Pre-action prep, surfaces gotchas before a work session."
