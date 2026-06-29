@@ -2,11 +2,10 @@
 
 pandastack should be treated as a stack package, not a single-runtime plugin.
 
-The source of truth is the shared content under `plugins/pandastack/`:
-- skills
-- flows
-- personas
-- contexts
+The source of truth is the shared content at the repo root:
+- skills (under `skills/<bucket>/`)
+- shared primitives (`lib/`)
+- conventions and host docs (`docs/`)
 - command conventions
 - path tokens and host assumptions
 
@@ -26,7 +25,7 @@ Do not fork the methodology unless the host truly cannot express the same behavi
 
 | Layer | Responsibility |
 |---|---|
-| pandastack content | Skills, flows, personas, contexts, conventions |
+| pandastack content | Skills, shared `lib/` primitives, conventions |
 | host adapter | Path rewrites, tool rewrites, frontmatter filtering, install path |
 | runtime | Claude Code, Codex, Hermes, others |
 | scheduler, optional | Hermes cron, launchd, Claude CronCreate, external orchestrators |
@@ -153,17 +152,18 @@ Recommended layout:
 ```text
 README.md
 CHANGELOG.md
+manifest.toml
 docs/
   ADDING_A_HOST.md
   HERMES.md
   OPENCLAW.md
-plugins/pandastack/
-  skills/
-  agents/
-  contexts/
-  .claude-plugin/
-  .codex/
-  .codex-plugin/
+skills/
+  engineering/  productivity/  writing/  meta/
+lib/
+hooks/
+.claude-plugin/
+.codex/
+.codex-plugin/
 ```
 
 If pandastack later adds generated host outputs, extend this with a host registry or adapter directory.

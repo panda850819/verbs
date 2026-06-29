@@ -7,7 +7,7 @@ Hermes support exists today, but it is not the same shape as Claude Code. Hermes
 Hermes loads pandastack skill content from `~/.hermes/skills/`. Copy or symlink the skill directories you want:
 
 ```text
-plugins/pandastack/skills/   →   ~/.hermes/skills/<category>/<skill-name>/
+skills/   →   ~/.hermes/skills/<category>/<skill-name>/
 ```
 
 This repo does not ship a first-class Hermes package manifest; packaging for Hermes is manual today. Import the subset you actually use rather than the whole tree.

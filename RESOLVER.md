@@ -84,6 +84,8 @@ Private CLI wrappers (`bird` for X/Twitter) are not in the public package; `noti
 | `pandastack:skill-creator` | Create new pandastack skills. MECE-checks RESOLVER, enforces hot/cold dispatch, and applies trigger-first skill evolution before creating/extracting abstractions. | "create a skill", "new pandastack skill", "improve this skill" |
 | `pandastack:writing-great-skills` | Reference + 8-axis scorecard for well-constructed skills. The construction-quality SSOT (scores the SKILL.md, not its artifact — that's `lib/quality-rubric.md`). `skill-creator` self-checks against it; `skill-eval` binds it. | "how do I write a skill", "what makes a skill good", consulted while authoring |
 | `pandastack:skill-eval` | Score an existing skill against the writing-great-skills scorecard and write a co-located `eval.md` verdict (hash-stamped; `lint-eval-fresh.sh` catches drift). Evaluator counterpart to skill-creator. | "eval this skill", "score this skill", "is this skill well-written" |
+| `pandastack:using-pandastack` | Session-start cognitive contract: forces the skill-check before any response or action. Loaded automatically at session open. | (automatic at session start) |
+| `pandastack:init` | One-time pandastack init per project: detects project type, writes config to the project CLAUDE.md / AGENTS.md. | set up pandastack here, init this project |
 
 > **skill-creator vs skill-eval vs writing-great-skills**: writing-great-skills is the criteria (read); skill-creator builds skills and self-checks against it; skill-eval judges existing skills against it and leaves the verdict. Same SSOT, generator/evaluator split — mirrors how `lib/quality-rubric.md` binds `write`/`ui` (generate) and `review` (evaluate).
 
@@ -132,9 +134,9 @@ If you're reviewing your own PR → `pandastack:review`. If you're deciding whet
 | `pandastack:retro-week` | Sunday or end of week. Three phases (Auto-scan / Interview / Write). |
 | `pandastack:retro-month` | End of month. References past 4 weekly retros. |
 
-### Three ship modes (single skill)
+### Two ship modes (single skill)
 
-`/ship` is one skill with three modes:
+`/ship` is one skill with two modes:
 
 | Mode | Trigger | What it does |
 |---|---|---|
@@ -163,7 +165,7 @@ What used to be `flows/<name>.md` is gone. Reasons:
 
 ---
 
-## v3.2.0 cut summary — persona layer removed
+## v3.2.0 — persona layer removed (2026-06-29, PR #100/#101)
 
 | Action | Items | Reason |
 |---|---|---|
@@ -215,7 +217,7 @@ Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed
 
 ## Version
 
-This RESOLVER.md is for pandastack v3.1.0. Update when adding / removing / renaming skills.
+This RESOLVER.md is for pandastack v3.2.0. Update when adding / removing / renaming skills.
 
 ---
 

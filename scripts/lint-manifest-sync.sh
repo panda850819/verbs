@@ -44,12 +44,21 @@ while IFS= read -r dir; do
   fi
 done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*')"
 
-# Retired claims must not reappear in living docs (historical sections in
-# RESOLVER/CHANGELOG are exempt by not being scanned).
-stale=$(grep -rn "38 skills\|7 lifecycle flows\|plugins/pandastack/agents/" \
-  "$repo_root/README.md" "$repo_root/CLAUDE.md" \
-  "$repo_root/.codex/INSTALL.md" \
-  "$repo_root/skills/meta/using-pandastack/SKILL.md" 2>/dev/null || true)
+# Retired claims must not reappear in living docs. The persona layer (PR
+# #100/#101) and the driver split (PR #92) are gone, and the live skill count is
+# whatever manifest+disk agree on — a hard-coded 26/28 count, a persona ref, or a
+# pre-flatten plugins/pandastack/ path in a living doc is drift. Historical
+# sections in RESOLVER/CHANGELOG are exempt by not being scanned.
+scan_docs=(
+  "$repo_root/README.md"
+  "$repo_root/CLAUDE.md"
+  "$repo_root/.codex/INSTALL.md"
+  "$repo_root/.claude-plugin/marketplace.json"
+  "$repo_root/PHILOSOPHY.md"
+  "$repo_root/skills/meta/using-pandastack/SKILL.md"
+)
+stale=$(grep -niE "38 skills|2[68] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|plugins/pandastack/(agents|skills)/" \
+  "${scan_docs[@]}" 2>/dev/null || true)
 if [ -n "$stale" ]; then
   echo "FAIL: stale claims found:"
   echo "$stale" | sed 's/^/  /'

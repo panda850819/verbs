@@ -7,7 +7,7 @@
 #
 # Tier semantics:
 #   core      — markdown-only. No external CLI required. Runs on a fresh clone after
-#               `git clone && /plugin install`. Personas, lifecycle skills, session
+#               `git clone && /plugin install`. Lifecycle skills, session
 #               management.
 #   ext       — needs a publicly installable CLI (brew / npm / pipx / curl / gh release).
 #               bootstrap.sh prints the install command; user opts in.
@@ -30,9 +30,9 @@
 # This file is hand-curated. When you add or rename a skill, update here.
 
 [manifest]
-version = "3.1.0"
+version = "3.2.0"
 schema  = "skill-tier-v1"
-updated = "2026-06-26"
+updated = "2026-06-29"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
@@ -68,7 +68,7 @@ updated = "2026-06-26"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (26) — markdown-only, fresh-clone runnable
+# CORE (23) — markdown-only, fresh-clone runnable
 # Buckets on disk: engineering / productivity / writing / meta
 # ============================================================================
 
@@ -129,7 +129,7 @@ description = "Systematic root-cause debugging: hypothesis gate, instrument-firs
 [skill.ship]
 tier = "core"
 requires = ["cli:git", "cli:gh"]
-description = "Multi-mode ship verb: git (default), knowledge (incl. decision-note variant for work-topic close, replaces v2.1 /work-ship), write. Knowledge / write modes run from vault root."
+description = "Multi-mode ship verb: git (default), knowledge (incl. decision-note variant for work-topic close, replaces v2.1 /work-ship). Knowledge mode runs from vault root."
 
 [skill.handover]
 tier = "core"

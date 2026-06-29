@@ -1,6 +1,6 @@
 # pandastack (plugin internal)
 
-Personal AI operator OS for Claude Code, with Codex CLI compatibility. 26 skills (24 core / 2 ext — see `manifest.toml`), 5 persona skills, 3 documented lifecycle compositions, 7 context recipes.
+Personal AI operator OS for Claude Code, with Codex CLI compatibility. 25 skills (23 core / 2 ext — see `manifest.toml`) in engineering / productivity / writing / meta buckets, plus 3 documented lifecycle compositions. Skill-only: no agent dispatch, no persona sub-agents.
 
 This file is the plugin-internal contract read by skill content. The user-facing README lives at the repo root.
 
@@ -13,7 +13,7 @@ Full catalog in `RESOLVER.md` at the repo root. Dev-workflow primitives:
 - `/pandastack:office-hours` — structured 5-stage flow that produces a brief (`--quick` for pre-loaded context)
 - `/pandastack:review` — parallel 3-pass review + Codex cross-check + learnings
 - `/pandastack:qa` — browser-based QA with structured assertions
-- `/pandastack:ship` — multi-mode (git / knowledge / write); default git mode = test + commit + PR
+- `/pandastack:ship` — multi-mode (git / knowledge); default git mode = test + commit + PR
 - `/pandastack:freeze` — restrict edits to specific paths (safety)
 - `/pandastack:careful` — confirm before destructive actions (safety)
 - `/pandastack:checkpoint` — save / resume working state snapshots
@@ -24,13 +24,9 @@ Lifecycle skills (knowledge / writing / work / retro / decision / research) list
 
 - `/sprint` — focused 1-2h execution: dojo → grill-lite → execute → review → ship
 - `/office-hours` — 5-stage intake producing a brief: load context → grill → premise challenge → alternatives → write brief
-- `/boardroom` — 4-voice plan critique (CEO → product → design → eng), per-finding apply gate
+- `/boardroom` — blind parallel critique of a prepared plan: N mutually-blind critics, deduped + ranked findings, per-finding apply gate
 - `/dojo` — pre-action prep (scan past sessions, surface gotchas)
 - `/retro-week` / `/retro-month` — interactive retro: prep → interview → write
-
-## Agent personas
-
-5 persona skills under `skills/{ceo,eng-lead,ops-lead,product-lead,design-lead}/`. Read in-session via `/<persona>` slash or chained from `/boardroom`. pandastack is skill-only; no agent dispatch.
 
 ## Learnings
 

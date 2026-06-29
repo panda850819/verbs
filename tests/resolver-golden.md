@@ -7,6 +7,8 @@ tags: [resolver, regression, b-test]
 
 # Resolver Golden Test — pandastack v1.4.x
 
+> **Status: stale (v1.4.x-era spec).** This regression set predates the current 25-skill surface. Cases referencing removed skills (`eng-lead` in T25/T30, `scout` in T19/T26, `brief-morning` in T13/T27, `write-ship`/`content-write` in T10/T16, the private-overlay `bird`/`curate-feeds`) and the deleted persona-voice boardroom (T30's "voice eng-lead missing" abort) no longer describe real behavior. New skills `debug` and `ui` have no cases yet. A v3.1 re-cut is a tracked follow-up; until then treat failures here as expected drift, not regressions.
+
 > 30 prompts × expected skill mapping. Run before merging changes. Catches regressions when prompts → skill matching changes due to renames, new skills, or description tweaks. Updated 2026-05-07 for v1.4.0 tool-* prefix drop and v1.4.1 pdf removal.
 
 ## How to run

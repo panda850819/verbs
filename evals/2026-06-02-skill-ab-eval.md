@@ -5,9 +5,12 @@ method: Nisi-style A/B (load-skill vs not), neutral judge
 run: wf_fcab7903-585
 cost: 188 agents / 5.6M tokens / ~14min
 caveat: n=3 fixtures, 1 run, no burn-in
+status: historical
 ---
 
 # Pandastack Skill A/B Eval — 2026-06-02
+
+> **Status: historical (2026-06-02).** Predates the driver split (PR #92) and persona removal (PR #100/#101). The 5 persona skills (`ceo` / `eng-lead` / `ops-lead` / `product-lead` / `design-lead`) scored below as cut/keep candidates no longer ship; current behavioral truth is the per-skill `eval.md` files + `evals/browser-integration/`. Kept as a methodology record, not a current verdict.
 
 Origin: [[../../../../knowledge/brain/media/videos/nisi-deleted-95-percent-skills-personalized]] — measure don't assume. Harness: gatekeeper/evals/ab-pilot/PROTOCOL.md.
 

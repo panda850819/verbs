@@ -2,14 +2,16 @@
 type: skill-eval
 skill: using-pandastack
 bucket: meta
-evaluated_skill_hash: bf99b4211f75618e4a9a18ab89a4a1b2971571f4
-evaluated_at: 2026-06-26
+evaluated_skill_hash: 4537a3566b0789f62611575dd5383ec12cf5f169
+evaluated_at: 2026-06-29
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — using-pandastack
 
 **Verdict: SOLID.** The 1%-threshold forcing function (L11) plus the now-recorded skip-reason done-state (L32) give this router a genuine invariant process; the main point still bleeding is the hot session-opener block that should ride a pointer.
+
+_2026-06-29 re-stamp: SKILL.md L18 dropped the stale "persona lenses" phrase (persona layer removed, PR #100/#101). Content-preserving edit — verdict and axis citations unchanged; hash refreshed._
 
 | Axis | Verdict | Evidence |
 |---|---|---|

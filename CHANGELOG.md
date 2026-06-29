@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+## v3.2.0 — 2026-06-29
+
+> **Persona layer removed; doc surface reconciled to 25 skills.** The 5 role-persona skills are cut (the model holds those frames natively); their durable lore moves into function-named skills (`debug`, `ui`) and the intake skills. `boardroom` is rebuilt persona-free. Skill count is now **25 (23 core / 2 ext)**. This release also consolidates the post-2.2.0 work below (handover split, ship write-mode retirement, pdctx/overlay doc strip).
+
 ### Removed
 
+- **Persona layer** (PR #100/#101): the 5 role-persona skills (`ceo`, `product-lead`, `eng-lead`, `design-lead`, `ops-lead`) plus `lib/persona-frame.md` and `lib/outside-voice-rule.md`. Role-persona lenses were a uniform wrapper over frames the model already holds; eng-lead debug lore → new `debug`, design-lead craft → new `ui`, scope-judgment / delete-first → `grill` / `office-hours`, ops-lead → retro-week / cron. git history is the archive.
 - `ship` write mode retired (`references/modes/write-mode.md` deleted, `write-ship` alias dropped). The mode's entire input tree (obsidian-vault `Blog/_daily` / `Blog/Drafts` / `Blog/Published`) no longer exists after the 2026-06 machine rebuild, and brain owns daily content — the mode pointed at a dead path. Writing composition is now `/write` → manual publish; README lifecycle map + RESOLVER updated. Companion W24-retro GC in the same sprint scrubbed the remaining `Blog/_daily` references from `ship` SKILL.md / knowledge mode / `using-pandastack`.
 - `pandastack-private` overlay and `pdctx` references stripped from user-facing docs: README collapsed to a single self-contained surface (no public/private tier split, no pdctx context-dispatch), `docs/telemetry.md` deleted (it documented the pdctx-only audit timeline), `docs/HERMES.md` rewritten to direct skill import. The v2.2.0 "moved to overlay" entry below is unchanged release history.
 
@@ -11,6 +16,8 @@
 
 - `handover` skill — hand UNFINISHED work to Codex to DO. `/handover [slug]` (sync) spawns `codex exec` now and collects the structured result; `/handover --async [slug]` writes a payload to `docs/handoffs/` for Hermes / offline. Splits cleanly from `/ship`: ship CLOSES finished work, handover DELEGATES unfinished work. Owns the single Codex-invocation SSOT (`references/codex-invocation.md`): XML payload, verified `codex exec`, sandbox-escape gate, result classification.
 - `lib/trigger-first-skill-evolution.md` — shared rule for skill evolution: trigger clarity first, inline checklist / rubric before extraction, no lens / persona / rubric registry until repeated evidence exists.
+- `debug`, `ui`, `boardroom` skills — function-named (lore + reflex-overrides, not a persona frame). `boardroom` is the deleted persona-router rebuilt as a ~30-line blind-critic forcing function: mutually-blind parallel plan critique, no persona voices.
+- Doc reconciliation + `lint-manifest-sync.sh` guard hardening (PR #103): every living doc aligned to 25 skills (23 core / 2 ext); persona / `contexts/` / pre-flatten `plugins/pandastack/` refs purged; the broken `.codex/INSTALL.md` `codex-tools.md` path fixed; the stale-claim guard now catches `26`/`28 skills` + persona refs across README / CLAUDE.md / INSTALL / marketplace / PHILOSOPHY / using-pandastack so the drift can't silently reappear.
 
 ### Changed
 
