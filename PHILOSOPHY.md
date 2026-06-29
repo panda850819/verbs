@@ -1,4 +1,4 @@
-# pstack Philosophy
+# pandastack Philosophy
 
 ## Core Belief
 
@@ -6,11 +6,12 @@ Each unit of engineering work should make subsequent units easier — not harder
 
 ## Principles
 
-### 1. Agents Have Judgment, Skills Are Triggers
+### 1. The Model Has Judgment, Skills Carry Lore
 
-The intelligence lives in agent personas, not in skill prompts. A skill is a short
-sequence of steps that triggers an agent and manages the learnings loop. Agent files
-are replaceable — swap `agents/eng.md` to change how reviews work across all skills.
+The intelligence lives in the model plus the skill's own lore, not in swappable
+persona agents. A skill is a short sequence of steps that frames the task, loads the
+relevant lore, and manages the learnings loop. There is no agent layer to swap —
+pandastack is skill-only.
 
 ### 2. Close the Loop
 
@@ -26,7 +27,7 @@ The system gets smarter with every cycle. This is the only feature that matters.
 ### 3. Zero Dependencies
 
 Pure markdown. No compiled binaries, no runtime requirements, no build step.
-If you have Claude Code and git, pstack works.
+If you have Claude Code and git, pandastack works.
 
 ### 4. Less Is More
 
@@ -37,8 +38,8 @@ The best abstraction is the one you didn't write.
 ### 5. Just Enough Engineer
 
 Don't over-engineer the harness. Models get smarter every six months.
-Today's 800-line prompt is tomorrow's over-engineering. Keep skills thin,
-keep agents opinionated, let the model do the thinking.
+Today's 800-line prompt is tomorrow's over-engineering. Keep skills thin and
+opinionated, let the model do the thinking.
 
 ### 6. User Sovereignty
 
@@ -68,7 +69,7 @@ Without explicit contracts, quality degrades silently through the chain —
 later stages lose nuance from earlier ones (telephone effect) and budget
 gets misallocated across passes (model overbuild).
 
-## What pstack Is Not
+## What pandastack Is Not
 
 - Not a replacement for thinking. It's a tool for structured thinking.
 - Not a fixed pipeline. Skills are composable. Use what you need.

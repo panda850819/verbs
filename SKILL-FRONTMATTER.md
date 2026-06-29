@@ -90,7 +90,7 @@ Validators may emit informational signals on long descriptions but should not wa
 
 ## Validation
 
-`bash scripts/lint-manifest-sync.sh` checks each `skills/*/SKILL.md` and `plugins/*/skills/*/SKILL.md` against this spec.
+`bash scripts/lint-manifest-sync.sh` checks each `skills/<bucket>/<skill>/SKILL.md` against this spec.
 
 Status levels:
 

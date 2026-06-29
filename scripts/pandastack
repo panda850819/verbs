@@ -14,7 +14,7 @@ MANIFEST_PATH = Path(os.environ.get("PANDASTACK_MANIFEST", str(_DEFAULT_MANIFEST
 DISPATCH_PATH = REPO_ROOT / "DISPATCH.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 
-# Schema version for capabilities.json / runtimes.json. Mirrored in pandastack.toml
+# Schema version for capabilities.json / runtimes.json.
 # ([capabilities] schema_version) and the test suites; bump all sites together.
 SCHEMA_VERSION = 1
 
@@ -366,7 +366,6 @@ def read_or_build_capabilities(runtimes, roles, manifest_check, recommendation):
     """Merge capabilities from files, fall back to live detection.
 
     Priority: local capabilities.json > global runtimes.json overlay > live detection.
-    pandastack.toml declares intended defaults for humans and is not merged here.
     Files that are not JSON objects or whose schema_version does not match are
     ignored with a warning. Always returns valid JSON; missing/ignored files
     produce entries in 'warnings'.

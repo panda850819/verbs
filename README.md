@@ -2,20 +2,20 @@
 
 Personal context-aware AI operator OS — one substrate, three runtimes, no vendor lock-in.
 
-I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Personas are replaceable. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
+I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
-The stack is **28 skills** focused on dev, writing, and knowledge workflows, tiered into 26 core (markdown-only, fresh-clone runnable) and 2 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
+The stack is **25 skills** focused on dev, writing, and knowledge workflows, tiered into 23 core (markdown-only, fresh-clone runnable) and 2 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
 
 **Philosophy**: pandastack ships verbs. The brain (gbrain or your own knowledge store) keeps state. Lifecycle discipline is your job, not the package's. v2.2 dropped the `flows/` directory (7 spec files); the public package is self-contained: clone + install gives you everything in the manifest.
 
 **Stability scope (read this first):**
 
-v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. v2.2.0 (2026-05-09) was a scope-tightening release that cut 38 → 26 skills, 7 → 0 flows; the current surface is 28 skills. Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
+v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is **25 skills (23 core / 2 ext)**, after successive scope-tightening (v2.2.0 dropped the `flows/` layer; later releases split out the autonomous driver and removed the persona layer). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
 
 What this means for you:
 
 - If you are the author or a fork-and-learn power user, the current cut is stable for daily use.
-- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (26 skills) should run on a clean clone.
+- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (23 skills) should run on a clean clone.
 - If you use Logseq / Roam / Notion instead of Obsidian, skills will reference Panda's vault conventions (`knowledge/`, `Inbox/`, `docs/learnings/`, etc.) — these are prompt defaults, not hard-coded interfaces. You'd adapt them per session or by editing skill text. There's no built-in adapter layer; whether that matters depends on your tolerance for hand-tuning conventions.
 
 **Who this is for:**
@@ -35,7 +35,7 @@ bash scripts/bootstrap.sh --claude    # or --codex
 
 `bootstrap.sh` reports:
 - substrate state (`~/.agents/AGENTS.md` only)
-- 26 core skills runnable on this clone with no external CLI
+- 23 core skills runnable on this clone with no external CLI
 - 2 extension skills with the exact `brew install` / `npm install -g` to enable each
 
 After install:
@@ -57,7 +57,7 @@ After install:
                   ─────────────────────
 
   dev        DEFINE ──▶ PLAN ──▶ GATE ──▶ BUILD ──▶ VERIFY ──▶ REVIEW ──▶ SHIP
-             office-h   /plan   careful  build     qa         review     ship
+             office-h   grill   careful  build     qa         review     ship
              or grill                                          (codex
                                                               cross-check)
 
@@ -173,7 +173,7 @@ Claude Code (Opus) handles foreground reasoning. Codex CLI takes multi-file edit
 
 ## Runtime support
 
-pandastack is not a monolithic runtime. It is a stack package: shared skills, personas, and conventions that different hosts can consume.
+pandastack is not a monolithic runtime. It is a stack package: shared skills and conventions that different hosts can consume.
 
 Host design notes live in [`docs/ADDING_A_HOST.md`](docs/ADDING_A_HOST.md).
 
@@ -240,7 +240,7 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 ## Skills
 
-28 skills grouped by lifecycle (26 core / 2 ext — see `manifest.toml`). Persona names follow the gstack convention — each skill is "your specialist" for that step.
+25 skills grouped by lifecycle (23 core / 2 ext — see `manifest.toml`). Each skill is "your specialist" for that step.
 
 ### Think / intake
 
@@ -260,6 +260,12 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 | `/ui` | UI craft | Lock a direction and fight your defaults. Reflex-font blocklist, CJK type, OKLCH, CSS bans-with-rewrites in references. |
 | `/careful` | Safety Gate | Confirmation gates before destructive commands (force push, rm -rf, DROP). |
 | `/freeze` | Scope Freezer | Lock edits to specific paths for the session. |
+
+### Plan critique
+
+| Skill | Your specialist | What they do |
+|---|---|---|
+| `/boardroom` | The Boardroom | Blind parallel critique of a prepared plan. N mutually-blind critics, deduped + ranked findings, per-finding apply gate. |
 
 ### Review / QA
 
@@ -314,6 +320,15 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 `/agent-browser` was archived 2026-06-08 — the npm `agent-browser` CLI carries its own docs; `/qa` still uses the CLI directly.
 
 `summarize`, `notion`, `slack`, `scout`, `inbox-triage`, `work-ship`, `think-like-*` were cut in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
+
+### Meta / skill authoring
+
+| Skill | Your specialist | What they do |
+|---|---|---|
+| `/using-pandastack` | The Router | Session-start contract: how pandastack dispatches verbs to skills, plus the private-overlay hook. |
+| `/skill-creator` | Skill Smith | Create a new pandastack skill, MECE-checked against `RESOLVER.md`, trigger-first. |
+| `/skill-eval` | Skill Examiner | Score a skill's construction against the `writing-great-skills` scorecard; write a co-located `eval.md`. |
+| `/writing-great-skills` | The Scorecard | Reference + 8-axis scorecard for well-constructed skills; the construction-quality SSOT. |
 
 ## Lifecycle compositions
 

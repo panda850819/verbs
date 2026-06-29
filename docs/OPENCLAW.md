@@ -80,7 +80,7 @@ Do not move those concerns into pandastack docs.
 Pandastack should own:
 - shared workflow discipline
 - coding and review methodology
-- personas, flows, and contexts
+- shared `lib/` primitives and conventions
 - host-agnostic skill content where possible
 - guidance for when to escalate into a coding runtime
 
@@ -113,7 +113,7 @@ Use a simple classification model.
 There is no first-class OpenClaw installer in this repo yet.
 
 Current honest install story:
-- use `plugins/pandastack/skills/` as the canonical content source
+- use `skills/` (at the repo root) as the canonical content source
 - adapt selected methodology into OpenClaw-native skills if needed
 - or keep OpenClaw thin and dispatch to a pandastack-enabled runtime
 

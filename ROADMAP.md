@@ -4,6 +4,8 @@
 
 ## v1.x, personal-substrate stable (superseded by v3.1)
 
+> **Historical record.** Post-v3.1 the persona and context primitives described below were retired (persona layer removed 2026-06-29, PR #100/#101); only skill-as-markdown remains. The 38-skill / 5-persona / 4-context counts describe the v1.x era, not the current 25-skill surface.
+
 Status: stable since 2026-04-29 (`aab8f49`). API, schema, and skill content are stable for the author's daily use. Dogfooded across 4 of 7 lifecycle flows (ship / work / knowledge / review). Three lifecycles unfired during the dogfood window (dev / write / retro / grill) are not v1 cut blockers; personal-substrate stable does not require all 7 lifecycles covered.
 
 What v1 is:

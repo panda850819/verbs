@@ -2,11 +2,11 @@
 
 > **Status: retired.** The L5 per-skill firewall — and the L3 (MCP deny list) and L4 (context recipe) layers it relied on — was implemented in the `pdctx` overlay, which has been removed. Nothing reads the `reads` / `writes` / `forbids` / `classification` skill-frontmatter fields at runtime. They remain only as **advisory audit metadata** documenting a skill's intended access.
 
-The only active guard on the public surface is the global `plugins/pandastack/hooks/pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands. That is a separate mechanism, not L5.
+The only active guard on the public surface is the global `hooks/pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands. That is a separate mechanism, not L5.
 
 ## The fields
 
-`reads` / `writes` / `forbids` / `domain` / `classification` stay valid in `SKILL.md` frontmatter as documentation of intent. See [docs/skill-context-schema.md](skill-context-schema.md) for the schema and [SKILL-FRONTMATTER.md](../SKILL-FRONTMATTER.md) for the full frontmatter spec. They are not enforced.
+`reads` / `writes` / `forbids` / `domain` / `classification` stay valid in `SKILL.md` frontmatter as documentation of intent. See [SKILL-FRONTMATTER.md](../SKILL-FRONTMATTER.md) for the full frontmatter spec. They are not enforced.
 
 ## History
 

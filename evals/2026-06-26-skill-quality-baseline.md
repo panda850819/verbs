@@ -17,6 +17,7 @@ Post-baseline repairs changed several findings below:
 - `init` no longer has the Completion FAIL; current evidence is `skills/engineering/init/eval.md`.
 - `retro-week` no longer has the broken `retro-scan.sh` path or write-target contradiction; current evidence is `skills/productivity/retro-week/eval.md`.
 - `skill-creator` no longer cites the dead `learnings/patterns/long-session-evals` path; current evidence is `skills/meta/skill-creator/eval.md`.
+- The 5 persona skills (`ceo`, `eng-lead`, `ops-lead`, `product-lead`, `design-lead`) and `lib/persona-frame.md` were removed (2026-06-29, PR #100/#101); `debug`, `ui`, `boardroom` were added. Any persona row in the historical scorecard below describes a skill that no longer ships. Current surface: 25 skills.
 
 Current live debt should be taken from those co-located evals. At the time of this boundary note, the concrete live debt called out by current evals includes `retro-week` body length and trigger-clustering in `skills/productivity/retro-week/eval.md`; repaired baseline findings below are audit history only.
 
