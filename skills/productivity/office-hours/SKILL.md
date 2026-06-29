@@ -140,9 +140,9 @@ APPROACH C: Apply to brief? [Add / Defer / Reject]
 
 STOP. Wait for user response on each. No silent continuation.
 
-### Stage 4: Premise refresh
+### Stage 5: Output brief
 
-After alternatives picked, refresh the premise:
+Before writing, refresh the premise (its output feeds the brief's premise fields):
 
 ```
 Original premise: {what was assumed at Stage 1}
@@ -151,9 +151,7 @@ Revised premise: {what holds after grilling}
 Premise still load-bearing: [Y/N/partial]
 ```
 
-If revised premise is significantly different from original, surface this — user may want to redo Stage 3 with the new framing.
-
-### Stage 5: Output brief
+If the revised premise is significantly different from the original, surface it before writing — the user may want to redo Stage 3 with the new framing.
 
 Write to `docs/briefs/{YYYY-MM-DD}-{slug}.md` using the brief scaffold in `skills/productivity/office-hours/lib/output-templates.md`. The brief carries: Problem, original + revised premise, alternatives considered (with each approach's Add/Defer/Reject), chosen approach + rationale, Scope (in/out), the "Next skill (recommended)" routing block (`lib/skill-decision-tree.md` 2-question test), Gotchas, a per-stage Gate Log, and OPEN_QUESTIONS.
 
