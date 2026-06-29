@@ -10,7 +10,6 @@ Skills that generate substantive user-facing prose where posture / directness af
 
 - `grill` (both modes) — pushback prompts and critique synthesis
 - `office-hours` (B5) — diagnostic findings
-- `boardroom` (B4) — per-voice critique
 - `review` — finding write-ups
 - `write` — voice review on user drafts
 - `evening-distill`, `brief-morning` — daily note synthesis

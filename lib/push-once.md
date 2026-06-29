@@ -1,6 +1,6 @@
 # lib/push-once.md — Pushback patterns
 
-> Shared module. Loaded by `grill`, `office-hours`, `boardroom`. Gives the model a fixed menu of 5 named pushback prompts to use when a first reply is rehearsed / vague / unsupported. Replaces ad-hoc improvised pushes with named, audit-able patterns.
+> Shared module. Loaded by `grill`, `office-hours`. Gives the model a fixed menu of 5 named pushback prompts to use when a first reply is rehearsed / vague / unsupported. Replaces ad-hoc improvised pushes with named, audit-able patterns.
 >
 > Origin: gstack `office-hours` ships 5 pushback patterns inside the skill body (943 lines total). pandastack lifts the residue (the 5 patterns themselves) into a shared lib so multiple skills can ref it without duplicating the body.
 
@@ -10,7 +10,6 @@ Skills that take user input on a fuzzy / unverified claim and need to drill befo
 
 - `grill` Protocol step — first reply on any axis
 - `office-hours` Stage 2 (Premise challenge) — first claim
-- `boardroom` per-voice critique — when a voice's first take is too soft
 
 Do NOT load for skills where input is already concrete (bug fix, typo, executing a confirmed plan).
 
@@ -86,7 +85,7 @@ If user triggers escape hatch BEFORE the model has done 1 push on any axis, that
 A rule ("push once before switching axes") leaves the prompt shape to the model, which improvises with drift over sessions. A 5-named-pattern menu:
 
 - Audit-able: log records "Q3 pushed with pattern [3] reverse-premise" instead of "Q3 pushed with some prompt"
-- Composable: same 5 patterns work across grill / office-hours / boardroom, so user learns the menu once
+- Composable: same 5 patterns work across grill / office-hours, so user learns the menu once
 - User-correctable: if user prefers [3] always, they can say so; if [1] feels too aggressive in office-hours, can disable per-skill
 
 This is the gstack residue lift: copy the discipline, not the body.
@@ -94,4 +93,4 @@ This is the gstack residue lift: copy the discipline, not the body.
 ## Origin
 
 - gstack `office-hours` SKILL.md (943 lines) — 5 pushback patterns embedded inside skill body, repeated 11×
-- pandastack 2026-05-04 — extracted to `lib/push-once.md`, refed by `grill`, `office-hours` (B5), `boardroom` (B4)
+- pandastack 2026-05-04 — extracted to `lib/push-once.md`, refed by `grill`, `office-hours` (B5)

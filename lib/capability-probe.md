@@ -1,6 +1,6 @@
 # lib/capability-probe.md — Substrate availability check + graceful degradation
 
-> Shared module. Loaded by Layer 1 flow skills (`sprint`, `office-hours`, `boardroom`, `dojo`, `prep`) at startup. Detects missing substrate (vault, AGENTS.md, lib/ files, declared CLIs) and either degrades to generic mode or aborts with a missing-deps list. Never silently fails.
+> Shared module. Loaded by Layer 1 flow skills (`sprint`, `office-hours`, `dojo`, `prep`) at startup. Detects missing substrate (vault, AGENTS.md, lib/ files, declared CLIs) and either degrades to generic mode or aborts with a missing-deps list. Never silently fails.
 >
 > Origin: pandastack v1.0 is public, but slim skills assume the user has Obsidian + AGENTS.md + a few CLIs set up. Fresh-clone users hit silent degradation. Codex Q6 (2026-05-04 review) flagged this. capability-probe makes the substrate dependency explicit + load-bearing.
 
@@ -26,9 +26,8 @@ Run all 6 checks. Each returns `ok / missing / broken / unknown`.
 [1] AGENTS substrate    — `~/.agents/AGENTS.md` exists, readable, non-empty
 [2] vault root          — cwd looks like a vault (has Inbox/ or .obsidian/)
 [3] lib/ files          — required lib/ refs for THIS skill exist (read frontmatter `reads:` to determine list)
-[4] persona skills      — if skill chains personas, check `skills/{persona}/SKILL.md` exists in plugin
-[5] cli tools           — domain-specific CLIs (gog, slack, bird, notion, defuddle) only if frontmatter `reads: cli: <name>`
-[6] write paths         — directories the skill will write to exist + are writable (Inbox/ / docs/ / Blog/ etc.)
+[4] cli tools           — domain-specific CLIs (gog, slack, bird, notion, defuddle) only if frontmatter `reads: cli: <name>`
+[5] write paths         — directories the skill will write to exist + are writable (Inbox/ / docs/ / Blog/ etc.)
 ```
 
 Each check has a 500ms timeout. Probe total ≤3s.
@@ -40,9 +39,8 @@ Each check has a 500ms timeout. Probe total ≤3s.
 [1] AGENTS substrate    : ok
 [2] vault root          : ok
 [3] lib/ files          : missing (lib/push-once.md not found)
-[4] persona skills      : ok
-[5] cli tools           : ok
-[6] write paths         : ok
+[4] cli tools           : ok
+[5] write paths         : ok
 
 → degraded: [3]
 → blocked:  [] (none — degrade rather than block)
@@ -61,7 +59,6 @@ Each check has a 500ms timeout. Probe total ≤3s.
 For each degraded check:
 
 - **lib/ file missing** → load the inline fallback embedded in the skill body (each skill MUST have a 3-line summary of each lib it uses, for fallback) OR proceed with `[lib/X.md missing — using inline fallback]` warning
-- **persona skill missing** → if persona file isn't there, prompt user "persona X not installed, proceed without?" with N as default
 - **cli tool missing** → skip that integration, proceed without; log `[skipped: cli:X not available]`
 - **vault path missing** → ABORT (this is structural, can't degrade)
 - **AGENTS.md missing** → ABORT (substrate is gone, behavior would drift wildly)
@@ -126,4 +123,4 @@ capability_required:
 
 - codex Q6 (2026-05-04 review of pandastack v1.1 redesign) — public repo dogfood mismatch, slim skills silently fail on fresh clone
 - pandastack 2026-05-04 — `lib/capability-probe.md` created to make substrate dependency explicit + load-bearing
-- v2.1.0 (2026-05-07): probe simplified — gbq / pdctx checks removed. Vault path comes from cwd, persona skills resolve via plugin paths.
+- v2.1.0 (2026-05-07): probe simplified — gbq / pdctx checks removed. Vault path comes from cwd.

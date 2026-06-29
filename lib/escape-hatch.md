@@ -1,6 +1,6 @@
 # lib/escape-hatch.md — Hard-cap user-impatience protocol
 
-> Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `office-hours`, `boardroom`, `gatekeeper`, `prep` / `dojo`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
+> Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `office-hours`, `gatekeeper`, `prep` / `dojo`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
 >
 > Origin: gstack `office-hours` ships an embedded escape hatch (943 lines total). pandastack lifts the rule into shared lib so every interrogation skill obeys the same hard cap, no per-skill drift.
 
@@ -10,7 +10,6 @@ Any skill where the model asks ≥2 questions in sequence and the user might rea
 
 - `grill` — adversarial drilling
 - `office-hours` (default + `--quick`) — structured 5-stage flow, diagnostic pressure cooker
-- `boardroom` (B4) — 4-voice critique with per-finding gates
 - `gatekeeper` — `Apply? [Y/N/edit]` per-STRIDE-finding gate
 - `prep` / `dojo` (B3) — pre-action clarification
 

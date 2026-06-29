@@ -1,12 +1,12 @@
 # Quality Rubric — 4-axis SSOT
 
-> Single source of truth for cross-skill quality evaluation. Generator skills (`write`, `design-lead`) load this for self-check. Evaluator skills (`review`, `cross-modal-review`) load this as part of the gate criteria. Don't restate the rules elsewhere — link back to this file.
+> Single source of truth for cross-skill quality evaluation. Generator skills (`write`) load this for self-check. Evaluator skills (`review`, `cross-modal-review`) load this as part of the gate criteria. Don't restate the rules elsewhere — link back to this file.
 
 ## Why this exists
 
 Adapted from Prithvi Rajasekaran / Anthropic Labs ([Harness Design for Long-Running Apps](https://www.anthropic.com/engineering/harness-design-long-running-apps), 2026-05). Mechanism: the same 4-axis rubric goes to both the generator agent and the evaluator agent. Generator knows the scoring axes upfront and steers toward them; evaluator doesn't invent its own standards and stays consistent across runs.
 
-Without a shared SSOT, each skill drifts: `write` slop-check, `design-lead` anti-slop principle, `review` 3-pass — three separate quality theories. This rubric is the cross-cut.
+Without a shared SSOT, each skill drifts: `write` slop-check, `review` 3-pass — separate quality theories. This rubric is the cross-cut.
 
 ## The 4 axes
 
@@ -50,7 +50,7 @@ Per-skill overrides allowed:
 | Skill | Heaviest axes | Lightest |
 |---|---|---|
 | `pandastack:write` | Originality, Coherence | Craft (slop-check already covers) |
-| `pandastack:design-lead` | Originality, Craft | — |
+| `pandastack:ui` | Originality, Craft | — |
 | `pandastack:review` (artifact review) | Functionality, Craft | — |
 | `gbrain:cross-modal-review` | All 4 equally, plus skill's own Contract | — |
 
@@ -69,7 +69,7 @@ Evaluator side (reviewing the artifact):
 
 This rubric is NOT just exposed via pointer link — it binds to runtime moments:
 
-1. **Generation moment** — `pandastack:write edit` and `pandastack:design-lead brief→design` MUST load rubric and self-score before declaring output ready.
+1. **Generation moment** — `pandastack:write edit` MUST load rubric and self-score before declaring output ready.
 2. **Review moment** — `pandastack:review` Step 5 spawns a per-rubric pass for any artifact in scope.
 3. **Cross-model moment** — `gbrain:cross-modal-review` Phase 2 loads rubric as part of evaluator context, not separate.
 
