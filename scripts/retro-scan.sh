@@ -8,16 +8,25 @@
 # this brief.
 #
 # TRI-RUNTIME CONTRACT — any runtime invokes the same way:
-#   bash ~/site/skills/pandastack/scripts/retro-scan.sh week   # 7-day
-#   bash ~/site/skills/pandastack/scripts/retro-scan.sh month  # 30-day
+#   bash <pandastack>/scripts/retro-scan.sh week   # 7-day
+#   bash <pandastack>/scripts/retro-scan.sh month  # 30-day
 #   - Claude: retro-week / retro-month skills call this in Phase 1.
 #   - Hermes: a cron job runs this to pre-generate the brief (deliver=local).
 #   - Codex : a prompt/exec runs this, then conducts the interview.
 # Pure bash + git + gbrain. No CLI-specific deps. Missing sources degrade to
 # a noted skip, never an error.
+#
+# Config (env, all optional; defaults assume the author's layout so existing
+# setups are unchanged, but a fresh install can repoint or just leave them):
+#   PANDASTACK_BRAIN       brain repo root      (default: $HOME/site/knowledge/brain)
+#   PANDASTACK_SCAN_PATHS  repo globs to scan   (default: $HOME/site/{skills,apps,cli,trading}/*)
+#   PANDASTACK_RETRO_OUT   prep-brief out dir   (default: $BRAIN/inbox/retros, or ./.pandastack/retros if no brain)
+#   PANDASTACK_TRIAGE      inbox-triage script  (default: $HOME/gbrain/skills/transcript-ingest/lib/triage_inbox.sh)
 set -uo pipefail
-export PATH="/Users/panda/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
-export HOME="${HOME:-/Users/panda}"
+: "${HOME:?retro-scan.sh: HOME must be set}"
+# Headless contexts (cron/launchd) start with a bare PATH; augment with common
+# bin dirs + the user's ~/.local/bin. No machine-specific absolute paths.
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
 MODE="${1:-week}"
 case "$MODE" in
@@ -28,8 +37,14 @@ esac
 SINCE="${DAYS} days ago"
 SINCE_DATE=$(date -v-"${DAYS}"d +%Y-%m-%d 2>/dev/null || date -d "-${DAYS} days" +%Y-%m-%d)
 
-BRAIN="$HOME/site/knowledge/brain"
-OUT_DIR="$BRAIN/inbox/retros"
+BRAIN="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}"
+if [ -d "$BRAIN" ]; then
+  OUT_DIR="${PANDASTACK_RETRO_OUT:-$BRAIN/inbox/retros}"
+else
+  # No brain on this machine — write locally instead of fabricating the
+  # author's ~/site tree under someone else's HOME.
+  OUT_DIR="${PANDASTACK_RETRO_OUT:-$PWD/.pandastack/retros}"
+fi
 OUT="$OUT_DIR/${SINCE_DATE}-retro-${MODE}-prep.md"
 mkdir -p "$OUT_DIR"
 
@@ -52,7 +67,11 @@ mkdir -p "$OUT_DIR"
     n=$(git -C "$BRAIN" log --since="$SINCE" --oneline --no-merges 2>/dev/null | wc -l | tr -d ' ')
     echo "- [brain] ${n} commits"
   fi
-  for d in "$HOME/site/skills/"* "$HOME/site/apps/"* "$HOME/site/cli/"* "$HOME/site/trading/"*; do
+  # Repos to scan for activity (space-separated globs); default = author layout.
+  # Globs that match nothing on a fresh machine stay literal and are skipped by
+  # the .git test below — degrade, never error.
+  SCAN_PATHS="${PANDASTACK_SCAN_PATHS:-$HOME/site/skills/* $HOME/site/apps/* $HOME/site/cli/* $HOME/site/trading/*}"
+  for d in $SCAN_PATHS; do
     [ -d "$d/.git" ] || continue
     n=$(git -C "$d" log --since="$SINCE" --oneline --no-merges 2>/dev/null | wc -l | tr -d ' ')
     [ "${n:-0}" -gt 0 ] && echo "- [$(basename "$d")] ${n} commits"
@@ -164,7 +183,7 @@ mkdir -p "$OUT_DIR"
   # the per-file list contains work-domain slugs that would reveal private topics.
   # Run the full per-domain report locally during the interview.
   echo "## INBOX DRAIN — unfiled transcript-ingest distills"
-  TRIAGE="$HOME/gbrain/skills/transcript-ingest/lib/triage_inbox.sh"
+  TRIAGE="${PANDASTACK_TRIAGE:-$HOME/gbrain/skills/transcript-ingest/lib/triage_inbox.sh}"
   if [ -x "$TRIAGE" ]; then
     "$TRIAGE" --count | sed 's/^/- /'
     echo "_Full per-domain list (per-domain destinations): run \`$TRIAGE\` locally — not committed._"
