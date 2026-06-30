@@ -2,34 +2,36 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 337308c0fa467cbf0194c6d19476747618405511
+evaluated_skill_hash: dd5f2069a4e8980a452ed5851cb58707de8bf9c2
 evaluated_at: 2026-06-29
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — sprint
 
-**Verdict: SOLID.** Leading virtue: a hard, computed terminal-state machine (SHIPPED/PAUSED/FAILED/ABORTED) where only one state triggers backflow, so the process repeats every run even when the outcome differs. Costs points on Codex-delegation duplication across Modes and Stage 3 plus a long lifecycle body, not on path resolution.
+**Verdict: SOLID.** A deterministic 6-stage state machine with four computed terminal states is its leading virtue; body length and one residual duplication keep it off STRONG.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L191 — terminal state is a *computed* if/elif block, not narrated; Stages 0→6 are an ordered spine and modes prune whole named stages rather than improvising, so the process repeats every run |
-| Description / invocation | pass | L5 — front-loads "Focused execution session", one trigger per branch (/sprint, "sprint on this", "let's ship X", "focused session"), no synonym padding, plus a real reach clause (routes UI work to `ui`) |
-| Completion criteria | pass | L100 — the no-plan conversational path now carries an explicit done-condition ("not complete until every unit's acceptance re-verifies, matching the plan-driven path's idempotency check"); terminal state computed from booleans (L194), no premature-completion bait |
-| Information hierarchy | pass | L71 — heavy shared mechanics (capability-probe, push-once, escape-hatch, gate-contract, verify-the-test-loop) sit behind `@lib/` autoloads and the codex batch loop pushes to references/codex-delegation.md; body keeps orchestration, refs hold the detail |
-| Leading words | pass | L102 — "the main session is the ARCHITECT, not the typist" carries the whole execution model cheaply; reinforced by "A sprint has a whistle and a finish line" (L42) and strong stage-name anchors |
-| Pruning | weak | L115 — Codex-delegation rule is restated near-verbatim twice (L65 Modes, L115 Stage 3): same OFF-by-default / ≥3-mechanical-units-advisory-not-auto / synchronous-use-`--async`-to-free-session content. One source of truth would cut ~6 lines |
-| Granularity | pass | L75 — each stage split earns its load (probe/dojo/grill/execute/review/ship/terminal are distinct decisions); modes are branches within one skill, the 4 terminal sub-blocks each carry unique do/do-not rules, no no-op wrappers |
-| pandastack conformance | weak | L149 — the aggregator checklist now uses an explicit skill-local path (`skills/engineering/sprint/lib/aggregator-test-checklist.md`) while shared libs remain repo-root refs; all refs resolve. The weak ground is body length: 329 lines overshoots ~80, partly earned by irreducible lifecycle surface, partly the L65/L115 duplication. |
+| Predictability | pass | L42 — four named terminal states (SHIPPED/PAUSED/FAILED/ABORTED) with only SHIPPED triggering backflow; the whole flow is a numbered, gated state machine the agent re-runs identically every time. |
+| Description / invocation | pass | L5 — front-loads "Focused execution session", lists `/sprint` + three phrase triggers, and carries anti-trigger reach clauses (UI → `ui`, bugs → `debug`). |
+| Completion criteria | pass | L100 — "Execute is not complete until every unit's acceptance re-verifies" (checkable + exhaustive; subagent-reported green never trusted), reinforced by the Stage 5 state-computation block at L174. |
+| Information hierarchy | pass | L294 — the rationalizations catalog is now a one-line lazy pointer to `lib/rationalizations.md` (the #106 win); steps stay inline, rule catalogs (aggregator L129, codex-delegation L115) sit behind pointers. |
+| Leading words | pass | L102 — "the main session is the ARCHITECT, not the typist" anchors the whole execute-stage behaviour in one pretraining concept. |
+| Pruning | weak | L237 — "Only SHIPPED runs ship/extract/backflow" restates the contract already given at L42 and enforced by the Stage 6 handlers; body is still 256 lines with rationale prose (L113, L157). |
+| Granularity | pass | L77 — distinct leading-word behaviours (dojo, grill, review, ship, ui, debug) are split into their own model-invoked skills reached by pointer; only the sequence-coupled orchestration spine stays in-body. |
+| pandastack conformance | pass | L3 — `type: skill` (corrected from `mode:` in #106) plus complete reads/writes/capability_required; all five `lib/` + `references/` pointers resolve on disk. |
 
 ## Why it's good
-The terminal-state contract is the load-bearing virtue: L194-202 computes SHIPPED/PAUSED/FAILED/ABORTED from explicit booleans and L257 makes "only SHIPPED runs ship/extract/backflow" non-negotiable, so the skill can't silently ship half-done work or treat a pause as a break. Plan-driven execution derives task status from git rather than a mutable progress field (L95), so a fresh Claude session or a Codex handoff re-derives state instead of trusting stale prose. The architect-vs-typist execution default (L102) with trivial/interface/no-subagent carve-outs and the bounded 3-loop review gate (L175) encode hard-won discipline as checkable rules, and the Common Rationalizations table (L312) pre-empts exactly the shortcuts an agent invents under time pressure.
+Sprint is a textbook lifecycle-flow: a whistle-to-finish-line state machine where every stage has a checkable exit and the terminal state is computed from booleans (L174), not narrated. It delegates each distinct-leading-word phase to its own skill rather than re-implementing it, so the body is orchestration, not duplication. The #106 slim correctly pushed the two largest cold catalogs (rationalizations L294, aggregator-test L129) out to lazy pointers while keeping the hot orchestration path legible.
 
 ## Top fixes
-1. **L65 / L115 (pruning):** collapse the duplicated Codex-delegation rule to one source — keep the trigger summary in Modes (L65), let Stage 3 (L115) point to it plus references/codex-delegation.md, instead of restating OFF-by-default / ≥3-advisory / sync-vs-async twice.
-2. **L40 / body length (conformance):** the 329-line body is mostly earned by the lifecycle's state surface, but a pass to fold the Codex duplication and tighten Stage 3 prose would pull it closer to the guidance without losing any checkable rule.
+1. L235-239 — fold the "Terminal state contract" section into the Stage 6 header or delete it; "Only SHIPPED runs ship/extract/backflow" is already stated at L42 and structurally enforced by the Stage 6 per-state handlers, so this is duplication that inflates the contract's rank.
+2. L163 — `verify-the-test-loop.md` is hot-`@import`ed (part of the ~5K-token capability-probe / escape-hatch / push-once bundle at L71/L89) yet only the deploy-validated branch needs it; convert it to a `Read`-pointer like the catalogs so it loads only when the deploy-proof precondition fires.
+3. L5 — the description restates the full internal flow ("dojo, grill (lite), execute, review, ship"), which is identity-in-body; the triggers + routing clauses already disambiguate sprint, so the flow list is prunable context load.
 
 ## Behavioral cases
-- trigger `let's ship the rate-limiter fix today` -> expected process: open sprint default mode -> Stage 0 capability probe -> dojo -> grill (3-question lite) -> architect/subagent execute under baseline engineering discipline -> review gate (<=3 iterations) -> Stage 5 deploy-proof + ship gate computes terminal state -> only SHIPPED runs ship/extract/backflow
-- trigger `/sprint --continue billing-fix` -> expected process: skip dojo+grill, load PAUSED checkpoint + plan, re-derive done U-IDs from git+acceptance, resume at first non-done task (L64)
-- anti-trigger `let me think out loud about whether to build a rate limiter at all` -> should NOT fire; pure scoping/ideation with no single concrete topic routes to `/office-hours`, per the When-to-skip clause
+- trigger `let's ship the auth-rate-limit fix today` → expected process: Stage 0 probe → dojo → grill-lite (3-question cap) → architect/subagent execute → review gate (≤3 iterations) → Stage 5 deploy-proof + ship-gate computes terminal state; only SHIPPED runs ship+extract+backflow, the other three write a checkpoint and stop.
+- trigger `/sprint --continue payments-webhook` → expected process: skip dojo+grill, load the PAUSED checkpoint + `docs/plans/payments-webhook.md`, re-derive done U-IDs from git+acceptance, resume at the first non-done task (L64).
+- anti-trigger `let me think out loud about whether to build a rate limiter at all` → should NOT fire; no single concrete topic, pure ideation routes to `office-hours` (When-to-skip, L56).
+- anti-trigger `review this diff before I open the PR` → should NOT fire; code-diff review routes to `review`, not the full sprint flow.

@@ -1,7 +1,7 @@
 ---
 name: write
 aliases: [content-write]
-description: "Canonical Panda writing assistant for personal voice writing: sparring, structure coaching, draft review, slop detection, postmortem, and idea-gate routing (originals/ → brief → /write spar). Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, why would this land, should I write about this, idea-gate. NOT for generic de-AI cleanup when the only goal is humanization (use humanizer), nor investment/IC memo final-pass cleanup (use avoid-ai-writing)."
+description: "Voice-aware writing assistant: sparring, structure coaching, draft review, slop detection, postmortem, idea-gate routing. Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, should I write about this, idea-gate. NOT generic de-AI humanization (use humanizer) or investment/IC memo final-pass cleanup (use avoid-ai-writing)."
 version: "1.3.0"
 user-invocable: true
 ---
@@ -206,71 +206,7 @@ Origin + Panda adaptation notes: `[[media/articles/shann-content-os-bookmarkable
 
 ### 8. Idea Gate (`/write idea-gate`)
 
-User specifies a candidate idea source (brain `originals/` path, `ideas/` path, raw text, or URL). Your job: decide if/how to promote it to a draft, and (if yes) produce a writer context packet that hands off cleanly to `/write spar`.
-
-This mode is the **upstream gate** for the writing pipeline. It exists to prevent two failure modes:
-- **Originals piling up unpromoted** -- raw thinking accumulates in `originals/` but never becomes published writing
-- **Wrong route picked late** -- drafting starts before "should this even be a post?" gets answered
-
-**Input forms**:
-- `/write idea-gate originals/2026-MM-DD-some-thought.md` -- specific brain page
-- `/write idea-gate ideas/some-half-formed.md` -- half-baked idea page
-- `/write idea-gate "raw text or URL"` -- ad-hoc input (for URL, prefer `/write ref` first)
-
-**Process**:
-
-1. **Load source.** If brain page, read full content + frontmatter. If raw text or URL, work with what's given.
-
-2. **Stage 0 -- brain check (mandatory)**. Before route decision, grep brain for existing coverage:
-   - `grep -ril <key-terms> writing/ media/articles/ topics/`
-   - If existing pages cover ≥70% of the same thesis → default to **暫不寫** with "merge into existing X" suggestion
-   - If existing pages are tangential but related → flag the cross-link for the brief's "open loops"
-
-3. **Pick the route** (one of five). Ask 1-2 disambiguating questions ONLY if genuinely ambiguous; otherwise pick and explain in one line:
-
-   | Route | When | Brief draws on |
-   |-------|------|----------------|
-   | **ORIGINAL** | Genuinely new take from user's own thinking / lived experience. Not previously published. | Foundation files (positioning, proof bank, pillars). No external source. High taste investment. |
-   | **REPURPOSE** | Builds on existing owned content (a prior post, thread slice, essay paragraph). | Owned source + slice instruction. Format changes; spine stays user's. |
-   | **REWRITE** | External material worth a teardown (article, tweet, transcript) translated through user's POV. | External source + voice rules + explicit "what to keep, what to credit". |
-   | **RESEARCH+IDEATE** | Topic worth exploring but no thesis yet. | Not a draft -- outputs a sharpened idea or angle list, back into `ideas/`. |
-   | **暫不寫** | Idea is half-baked / duplicates existing brain coverage / thesis too vague / voice-borrowing risk too high. | One-sentence reason + suggestion (mature 1-2 weeks / merge into X / run `/write spar` first to find thesis). |
-
-4. **If 暫不寫**: stop. Output the reason + concrete next-step suggestion. Do NOT produce a packet.
-
-5. **If ORIGINAL / REPURPOSE / REWRITE / RESEARCH+IDEATE**: produce the writer context packet:
-
-   ```
-   writer context packet
-   ─────────────────────
-   route:         [original / repurpose / rewrite / research+ideate]
-   source:        [brain path or external URL or "raw input"]
-   thesis:        [one sentence the post must prove -- pulled from source, not invented]
-   reader:        [specific person who should save it -- by role + situation, not segment]
-   proof:         [numbers, examples, lived evidence the source contains]
-   angle:         [unexpected framing -- what makes this not generic]
-   constraints:   [format (X long post / blog / essay), target length, tone]
-   voice anchors: [2-3 lines from source that sound like user -- keep verbatim]
-   risks:         [what would make this read as slop, hedge, or borrow-authority]
-   open loops:    [what user hasn't decided, that `/write spar` should pin down]
-   ```
-
-6. **Handoff**: end output with one line:
-   ```
-   Next: `/write spar` with this packet, or `/write structure` if prose already drafted.
-   ```
-
-**Rules**:
-
-- Do NOT auto-write the draft. Idea-gate produces packet, not prose. If you wrote any paragraphs of body content, restart.
-- Do NOT invent proof / examples / numbers. If source lacks them, mark `proof: missing -- needs interview / data / lived example` and flag to user before they proceed to spar.
-- For Chinese sources, keep `voice anchors` verbatim in Chinese -- never translate when quoting back.
-- If 4 active routes genuinely all fit (rare), default to **ORIGINAL** (highest leverage on user's voice).
-- **暫不寫 is a real option, not a hedge**. Roughly 30-40% of raw originals/ entries should sit longer or merge with existing pages, not become posts. Defaulting everything to ORIGINAL inflates draft queue with weak ideas.
-- If source is someone else's tweet/essay and route is REWRITE, flag the "voice-borrowing risk" in `risks:` explicitly -- writing user's own POV on someone else's frame is the slop trap.
-- Cap packet at 400-900 tokens (Shann's discipline). If you need more, the idea is too broad -- split or downgrade to RESEARCH+IDEATE.
-
-Origin + Panda adaptation notes: `[[media/articles/shann-content-os-bookmarkable-personalized]]`.
+Upstream gate for the writing pipeline: given a candidate source (brain `originals/` / `ideas/` path, raw text, or URL), decide whether/how to promote it to a draft and emit a writer context packet that hands off to `/write spar`. Full routing table (ORIGINAL / REPURPOSE / REWRITE / RESEARCH+IDEATE / 暫不寫), packet template, and rules: `references/idea-gate.md`.
 
 ## Structural Toolkit (Spar & Structure modes)
 
@@ -353,6 +289,4 @@ Before sending ANY response, load `references/output-validation.md` and verify a
 
 - Never produce a "clean rewrite" -- Panda's voice gets lost in rewrites. Always annotate, never replace.
 - Short sentences are a feature, not a bug. Do not merge them for "flow."
-- Chinese articles: keep tech terms in English (e.g., "AI slop" not "AI 垃圾内容")
 - The user is not lazy -- they have a "write or don't write" binary. Don't nag about consistency. Help them make each piece count when they do write.
-- `/write` vs `content-creator`: `/write` is for personal voice writing (blog, opinion, reflection). `content-creator` is for SEO marketing content with keyword research. If writing a personal blog post, use `/write`. If optimizing for search or creating marketing copy, use `content-creator`.

@@ -1,6 +1,6 @@
 ---
 name: office-hours
-mode: skill
+type: skill
 description: |
   Bring a fuzzy idea to office hours: model challenges, drills, surfaces unknowns, ends with a written brief. Default 30 min; --quick mode skips context-load when already loaded. Triggers on /office-hours, "office hours", "stress test this", "draft a brief".
 reads:

@@ -1,6 +1,6 @@
 ---
 name: sprint
-mode: skill
+type: skill
 description: |
   Focused execution session: from "I want to do X" to shipped or explicitly paused/failed/aborted. Internal flow: dojo, grill (lite), execute, review, ship; only SHIPPED triggers backflow. Triggers on /sprint, "sprint on this", "let's ship X", "focused session". Routes UI work to `ui`, bugs to `debug`.
 reads:
@@ -112,7 +112,7 @@ Carve-outs:
 
 Rationale: the architect's context window and judgment are the scarce resource; spend them on spec, review, and integration, not keystrokes. "Faster if I just write it myself" is the failure mode this default exists to prevent — it was true for the single unit and false for the sprint.
 
-**Codex delegation (only when `--delegate codex` is passed):** instead of dispatching units to free runtime subagents, hand a batch of mechanical units to Codex (burns Codex quota) via the `/handover` invocation, keeping planning / review / git on Claude. OFF by default, never auto-triggered. A batch of ≥3 mechanical units is the threshold at which it's worth *surfacing* the flag to the user, but the switch is always explicit. Read `references/codex-delegation.md` for the gate, batching, and the circuit breaker; it delegates each batch via `skills/engineering/handover/references/codex-invocation.md`. This is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async` instead.
+**Codex delegation:** when `--delegate codex` is set (the rule lives in Modes, above), Stage 3 hands the batch of mechanical units to Codex via `/handover` instead of dispatching to free subagents — planning / review / git stay on Claude. It is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async`. Gate, batching, and circuit breaker: `references/codex-delegation.md`.
 
 Stage 3 runs with baseline engineering discipline — root cause before fix, minimal diff, verify before done, 3-strike escalation — from `~/.agents/AGENTS.md` § Coding Discipline plus `careful` and `review`. For a UI build, follow `ui`; for a bug, follow `debug`. There is no separate persona-lens step.
 
@@ -291,19 +291,4 @@ Save to `Inbox/sprint-{slug}-{date}.md` regardless of terminal state.
 
 ## Common Rationalizations
 
-| Rationalization | Reality |
-|---|---|
-| "I already know this codebase, skip dojo" | The past-you who knew it was a different model context. Cold scans surface the half-built attempt you forgot about. |
-| "Topic is clear, skip grill" | If it were clear, you'd be in execute mode, not opening `/sprint`. The 3-question cap costs 2 minutes; ambiguity costs a re-do. |
-| "Small change, skip review" | Small changes are where regressions hide because nobody looks. P0 review still runs in 90 seconds on a small diff. |
-| "One more iteration will fix it" (iter ≥ 3) | 3-strike rule is empirical: at iteration 4 the diagnosis itself is the bug. State=FAILED, manual intervention. |
-| "It's partly UI, partly backend, do it all in one sprint" | Split into two sequential sprints — one for the `ui` surface, one for the backend. |
-| "Sprint within a sprint for the sub-task" | Flatten. Either the sub-task is a Stage 3 step in the current sprint, or it's a separate sprint that fires after this one ends. |
-| "Review found P1 but ship anyway" | Terminal state contract is load-bearing. P1 unaddressed = state ≠ SHIPPED. Mark PAUSED with the open finding logged, or fix and re-review. |
-| "BUILD SUCCEEDED, so the user is testing my fix" | Success proves the compiler ran, not that the deployed artifact is the one you built. Deploy-proof before human test (`lib/verify-the-test-loop.md` R1). |
-| "My instrumentation didn't show in their screenshot, weird — anyway" | That is the pipeline alarm, not a fluke. Stop, verify the loop (R1/R2). The session this rule exists for lost days exactly here. |
-| "3 lifecycle variants failed, the 4th is my escalation" | Same-shape failure ×3 ⇒ the abstraction/loop is wrong (R4). A 4th variant of the same approach is strike 4, not escalation. Switch primitive or re-verify the loop. |
-| "Re-asking the user to re-test is just one more round" | Each contaminated human round-trip is the expensive unit. If the loop needs repeated round-trips, harden the loop first (R3), then iterate. |
-| "Let's sprint on stuff" (no single topic) | Sprint requires one concrete topic. No-topic ideation routes to `/office-hours`, not sprint. |
-| "Substrate's fine, skip Stage 0 capability probe" | Probe each run — state changes between sessions. The probe block is the opening, not optional. |
-| "Sprint didn't ship, so it failed (PAUSED = failure)" | PAUSED is a legitimate terminal outcome, not a break. No extract/backflow; write the checkpoint and stop cleanly. |
+Anti-bypass table tying each shortcut to the failure it causes: `@skills/engineering/sprint/lib/rationalizations.md`.

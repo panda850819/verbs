@@ -142,22 +142,7 @@ For each file in `RECENT_FEEDBACK`:
 2. **Extract `Why:` line and `How to apply:` line** from body (per CLAUDE.md feedback memory schema) — the trigger context
 3. **Classify trigger surface** by keyword heuristic:
 
-```
-filename / body keyword               → propose mechanism
-─────────────────────────────────────────────────────────
-"file format", "frontmatter", "yaml" → lint (PreToolUse:Write hook)
-"voice", "language", "phrasing"      → CLAUDE.md rule line
-"workflow", "before X", "after X"    → hook (settings.json)
-"never X", "always X" + content       → skill update (anti-pattern table)
-"second time", "Nth time"             → already covered by skill-gap rule, leave
-                                        (do NOT propose — flag as already-mechanized)
-recurring pattern across 3+ files     → propose new skill
-universal rule, CC-project mem only   → promote to ~/.agents/memory/ (substrate;
-                                        Codex + Hermes read it). git mv + update
-                                        both MEMORY.md indexes. Exempt from the
-                                        count>=2 gate — relocation, not a new
-                                        mechanism. CC-local rule ≠ cross-CLI truth.
-```
+   Catalog (filename / body keyword → mechanism): [`skills/productivity/retro-week/lib/gc-inputs.md`](skills/productivity/retro-week/lib/gc-inputs.md).
 
 4. **Cross-check MEMORY.md** — if the feedback is already indexed, mark `indexed:yes` (passive). If body has a `[[wikilink]]` to an existing skill, mark `linked:<skill>` (already partially mechanized).
 5. **Recurrence gate (load-bearing)** — count how many times this correction's pattern has occurred (distinct feedback files + any `count:`/recurrence marker in the body + matching continue-log events). A mechanism proposal (lint / hook / skill / CLAUDE.md rule) may ONLY be emitted to the table when `count >= 2`. A single occurrence (count == 1, no pattern signal) does NOT get a `propose` cell — render its row with `propose: leave (1x — stays as memory feedback)`. One-off corrections never become mechanisms; only recurrence justifies a forcing function.
@@ -170,17 +155,7 @@ For each line in `RECENT_CONTINUE_EVENTS`:
 2. **Group by question pattern** — collapse near-duplicate questions ("commit?" / "ship?" / "push now?") into a single pattern
 3. Classify by reason:
 
-```
-reason             → propose
-─────────────────────────────────────────────────────────
-external-dep       → leave (real external dependency, can't auto)
-preference         → if same pattern 3+ times → CLAUDE.md default
-                     (e.g., "always X unless told otherwise")
-judgment-call      → if same pattern 3+ times → skill rule or
-                     anti-pattern entry in relevant skill
-unknown            → flag as Lopopolo failure mode — skill-gap
-                     candidate, propose investigation in interview
-```
+   Catalog (reason → propose): [`skills/productivity/retro-week/lib/gc-inputs.md`](skills/productivity/retro-week/lib/gc-inputs.md).
 
 Output rows for the GC table use this column shape: `[continue-log] | <question pattern> (<count>x) | <propose>`.
 

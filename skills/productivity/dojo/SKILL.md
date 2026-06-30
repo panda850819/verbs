@@ -1,7 +1,7 @@
 ---
 name: dojo
 aliases: [prep]
-mode: skill
+type: skill
 description: |
   Pre-action prep before a sprint / office-hours or any non-trivial work session. Triggers on /dojo, /prep (Layer-1 typing alias), "before I start", "let me prep first", auto-invoked by /sprint and /office-hours at Stage 0.
 reads:

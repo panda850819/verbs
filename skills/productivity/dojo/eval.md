@@ -2,34 +2,35 @@
 type: skill-eval
 skill: dojo
 bucket: productivity
-evaluated_skill_hash: 15588937d1681d5c545ed1f913215bab34c882ef
+evaluated_skill_hash: 06ca525615c59896270badb2df20a155ed8f3b66
 evaluated_at: 2026-06-29
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — dojo
 
-**Verdict: SOLID.** Leading virtue: a clean, fixed 5-stage Stage-0 spine that runs the same process every invocation. The old origin sediment and inline prep template are gone; remaining costs are a trigger-stuffed description and a 108-line body.
+**Verdict: SOLID.** Leading virtue: a fixed 0a→0e Stage-0 spine that runs the same prep process every invocation, with the verbose template and origin sediment already pushed out to lib/.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L42 — "## Stages" opens a fixed 0a→0e sequence (probe → past-case → lib-load → gotcha → output) that runs identically every invocation; output varies by topic, process does not. |
-| Description / invocation | weak | L6 — front-loads "Pre-action prep" well, but stacks `/dojo`, `/prep`, two natural-language trigger phrases, "any non-trivial work session", and the `/sprint` + `/office-hours` auto-invoke reach clause into one long model-facing description. The triggers are useful, but the line still carries too much hot context. |
-| Completion criteria | pass | L59 — "Take top 5 hits across both. De-dup. Read the matched file's first 200 chars" is bounded and checkable; the lib-load step (L65) anchors the soft word "relevant" with a required 1-line-per-lib print so done-vs-not-done stays observable. |
-| Information hierarchy | pass | L46 — `@../../../lib/capability-probe.md` pushes the probe behind a resolving context pointer; steps inline, reference externalized, each stage co-located under one heading. |
-| Leading words | pass | L26 — the dojo/ring metaphor ("Before stepping into the ring, you walk into the dojo … Then you fight") + "Stage 0" anchor prep-before-action in one pretrained concept the agent runs the skill with. |
-| Pruning | pass | L90 — the verbose prep-file template has been extracted to `skills/productivity/dojo/lib/prep-brief-template.md`, and the old origin block is gone; the remaining lines all change runtime behavior. |
-| Granularity | pass | L90 — `/prep` alias and the 0a→0e split each earn their load: alias = Layer-1 typing reach, and the sequential stages split to block rushing past-case lookup (premature completion). |
-| pandastack conformance | weak | Frontmatter is valid: `name=dojo` matches folder, `description` present, `mode: skill` is permitted, and all `@`/lib refs resolve. Weak only because the body is 108 lines vs the ~80-line discipline, though the excess is mostly earned by the prep pipeline. |
+| Predictability | pass | L42 — `## Stages` opens a fixed 0a→0e sequence (probe → past-case → lib-load → gotcha → output prep) that runs identically every run; only the output varies by topic, the process does not. |
+| Description / invocation | weak | L6 — front-loads "Pre-action prep" well, but the one description line stacks `/dojo`, `/prep`, two NL trigger phrases, "any non-trivial work session", AND the `/sprint`+`/office-hours` auto-invoke reach clause; useful triggers, but too much hot context for one line. |
+| Completion criteria | pass | L59 — "Take top 5 hits across both. De-dup. Read the matched file's first 200 chars" is bounded and checkable (done vs not-done), forcing the past-case legwork rather than inviting "we know this topic". |
+| Information hierarchy | pass | L46 — standalone `@../../../lib/capability-probe.md` pointer pushes the probe behind a context pointer; the prep-brief template is likewise externalized (L89), so steps stay inline and reference is loaded only on demand. |
+| Leading words | pass | L26 — the dojo/ring metaphor ("Before stepping into the ring … Then you fight") + "Stage 0" anchor prep-before-action in one pretrained concept the agent runs the skill with. |
+| Pruning | weak | L34 — the NL trigger phrases "before I start" / "let me prep first" are restated verbatim here after already living in the description (L6); the description should own the triggers and "When to invoke" should keep only the >30-min scope threshold + the unique "what did I do last time on X". |
+| Granularity | pass | L3 — `aliases: [prep]` earns the Layer-1 typing reach by invocation, and the 0a→0e split is by-sequence to stop the agent rushing past-case lookup (premature completion); neither cut is gratuitous. |
+| pandastack conformance | weak | L89 — frontmatter is valid (`name: dojo` matches folder, `type: skill` is the canonical key after the #106 `mode→type` fix, description present) and all three refs resolve, but L89's co-located template pointer is bare repo-root `@skills/...` while the pack convention backtick-wraps co-located lib pointers (ship/careful/review/sprint); body is also ~84 lines, a touch over the ~80 discipline though the prep pipeline mostly earns it. |
 
 ## Why it's good
-The five-stage spine (L42-92) is the load-bearing strength: each stage has a concrete action and most end on a checkable result (top-5 + de-dup, first-200-char read, 1-line-per-lib, 1-3 gotchas), so the agent runs the same process every time. The dojo leading word (L26) and resolving `@`-imports (L46, L106) keep the prep contract legible, and the anti-fabrication guard (L86) plus escape-hatch handling (L108) close the two ways a prep flow most often goes wrong.
+The five-stage spine (L42-93) is the load-bearing strength: each stage names a concrete action and most end on a checkable result (top-5 + de-dup + first-200-char read, 1-line-per-lib print, 1-3 gotchas), so the agent takes the same process every time. The dojo leading word (L26) and the standalone `@`-imports (L46, L105) keep the contract legible, and the anti-fabrication guard (L85) plus partial-prep escape-hatch (L107) close the two ways a prep flow most often fails.
 
 ## Top fixes
-1. L6 — split or prune the trigger cluster in the description; keep the model-facing trigger words and the `/sprint` + `/office-hours` auto-invoke reach clause, but remove any trigger phrase that does not select a distinct branch.
-2. L63-73 — the lib-loading example is helpful but reference-shaped; consider moving it beside the prep-brief template if body length becomes a problem.
-3. L104-108 — escape-hatch details are valuable but could be a one-line pointer to the shared escape-hatch rule plus the dojo-specific partial-prep clause.
+1. L6 / L34 — collapse the trigger duplication: keep the model-facing triggers + the `/sprint`+`/office-hours` reach clause in the description, and let "When to invoke" carry only the unique scope threshold (>30 min) and "what did I do last time on X", not a re-list of the same NL phrases.
+2. L89 — match the pack convention: backtick-wrap the co-located template pointer (`` `@skills/productivity/dojo/lib/prep-brief-template.md` ``) so it reads as a lazy pointer like ship/careful/review/sprint, rather than a bare mid-sentence import.
+3. L65-72 — the lib-loading worked-example block is reference-shaped; if body length later matters, fold it beside the prep-brief template in lib/ and leave a one-line instruction.
 
 ## Behavioral cases
-- trigger `/sprint on the payments refactor` -> expected process: dojo auto-fires at Stage 0 (L33), runs capability-probe (0a), scans `docs/sessions`/`docs/learnings`/`knowledge` for "payments refactor" (0b), loads the sprint flow's declared libs (0c), surfaces real gotchas (0d), writes `Inbox/prep-*.md` and prints the path (0e), then STOPS — does not auto-continue into Stage 1 (L92).
-- anti-trigger `fix this one-line typo in the config` -> should NOT fire; the "When to skip" gate (L38, "Trivial fix (1-line typo, single config)") routes it straight to the edit, no prep brief.
+- trigger `/sprint on the auth refactor` → expected process: dojo auto-fires at Stage 0 (L33), runs capability-probe (0a, L44), scans `docs/sessions`/`docs/learnings`/`knowledge` for "auth refactor" (0b, L52), loads the sprint flow's declared libs (0c, L65), surfaces only real gotchas (0d, L76), writes `Inbox/prep-*.md` and prints the path (0e, L89-91), then STOPS — no auto-continue into Stage 1 (L91).
+- anti-trigger `fix this one-line typo in the config` → should NOT fire; the "When to skip" gate (L38, "Trivial fix (1-line typo, single config)") routes straight to the edit, no prep brief.
+- anti-trigger `stress-test this fuzzy idea` → should NOT fire; that is adversarial discovery, routes to `grill` / `office-hours`, not dojo's pre-action prep.
