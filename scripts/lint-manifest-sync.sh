@@ -55,6 +55,7 @@ scan_docs=(
   "$repo_root/CLAUDE.md"
   "$repo_root/.codex/INSTALL.md"
   "$repo_root/.claude-plugin/marketplace.json"
+  "$repo_root/.claude-plugin/plugin.json"
   "$repo_root/PHILOSOPHY.md"
   "$repo_root/skills/meta/using-pandastack/SKILL.md"
 )
