@@ -68,7 +68,8 @@ Recommended skill:
 - Stage 1 (load context): {summary}
 - Stage 2 (premise challenge): {n questions, n pushes via push-once, escape-hatch fired? Y/N}
 - Stage 3 (alternatives): chose {A/B/C}
-- Stage 5 (premise refresh + output): premise still load-bearing {Y/N/partial}; brief saved to {path}
+- Stage 4 (premise refresh): {premise still load-bearing}
+- Stage 5 (output): brief saved to {path}
 
 ## OPEN_QUESTIONS
 
