@@ -7,7 +7,7 @@ tags: [resolver, regression, b-test]
 
 # Resolver Golden Test — pandastack v3.2.x
 
-> Re-cut 2026-06-29 against the current 25-skill surface (23 core + 2 ext, `manifest.toml` v3.2.0). The v1.4.x-era cases that referenced removed skills (`eng-lead`, `scout`, `brief-morning`, `write-ship`, the private-overlay `bird`/`curate-feeds`/`slack`/`notion`/`summarize`/`agent-browser`) and the deleted persona-voice boardroom abort have been dropped. New `debug` and `ui` cases added; boundary anti-triggers added to lock the debug↔review and ui↔qa collisions the v3.2 descriptions call out.
+> Re-cut 2026-06-29 against the current 23-skill surface (21 core + 2 ext, `manifest.toml`). The v1.4.x-era cases that referenced removed skills (`eng-lead`, `scout`, `brief-morning`, `write-ship`, the private-overlay `bird`/`curate-feeds`/`slack`/`notion`/`summarize`/`agent-browser`) and the deleted persona-voice boardroom abort have been dropped. New `debug` and `ui` cases added; boundary anti-triggers added to lock the debug↔review and ui↔qa collisions the v3.2 descriptions call out.
 
 > 31 prompts × expected skill mapping. **Manual spec — not executed by CI** (no automated runner; `tests/run-all.sh` does not read this file). Run by hand before merging changes that touch skill descriptions, names, or the dispatch table; catches routing regressions from renames, new skills, or trigger tweaks.
 
@@ -37,7 +37,6 @@ T09  /ship                                      context: personal:developer  →
 T10  /handover auth-refactor                    context: personal:developer  → handover (sync)
 T11  /debug auth test fails intermittently      context: personal:developer  → debug
 T12  /ui build the settings page                context: -                   → ui
-T13  /retro-week                                context: -                   → retro-week
 T14  /qa check the checkout flow                context: personal:developer  → qa
 ```
 
@@ -100,7 +99,7 @@ T31  /boardroom <fuzzy idea, no prepared plan>
 
 ## Acceptance criteria (v3.2.x cut)
 
-- ≥21 / 23 pass (≈90%) on the deterministic set: direct slash + aliases + degradation/precondition (T01-T20, T29-T31 = 23 cases). Allow 2 documented, fixable failures.
+- ≥20 / 22 pass (≈90%) on the deterministic set: direct slash + aliases + degradation/precondition (T01-T12, T14-T20, T29-T31 = 22 cases; retro-week moved to the personal overlay 2026-06-30). Allow 2 documented, fixable failures.
 - ≥6 / 8 pass on the fuzzier set: natural-language triggers + boundary anti-triggers (T21-T28 = 8 cases). Description match is fuzzier; 75% threshold acceptable.
 - 0 silent failures (every fail must produce an error message or a defensible wrong-skill trace, not a wrong skill firing unnoticed).
 

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- **retro-week / retro-month moved to the personal overlay** (`~/.agents/skills/`); public pack 25 → **23 skills** (21 core / 2 ext). They are brain-centric personal reflection (PKM), not coding-agent skills. With the new event-driven `lib/learning-recall.md` (recall at every dev-unit opener — `review` / `sprint` / `debug`), compounding now happens continuously in the dev flow rather than via a calendar retro. The shared `retro-scan.sh` engine moved with them. `lint-manifest-sync` stale-count regex tightened to `2[4-9] skills`.
+
 ## v3.2.0 — 2026-06-29
 
 > **Persona layer removed; doc surface reconciled to 25 skills.** The 5 role-persona skills are cut (the model holds those frames natively); their durable lore moves into function-named skills (`debug`, `ui`) and the intake skills. `boardroom` is rebuilt persona-free. Skill count is now **25 (23 core / 2 ext)**. This release also consolidates the post-2.2.0 work below (handover split, ship write-mode retirement, pdctx/overlay doc strip).

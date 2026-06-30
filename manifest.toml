@@ -30,9 +30,9 @@
 # This file is hand-curated. When you add or rename a skill, update here.
 
 [manifest]
-version = "3.2.0"
+version = "3.3.0"
 schema  = "skill-tier-v1"
-updated = "2026-06-29"
+updated = "2026-06-30"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
@@ -68,7 +68,7 @@ updated = "2026-06-29"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (23) — markdown-only, fresh-clone runnable
+# CORE (21) — markdown-only, fresh-clone runnable
 # Buckets on disk: engineering / productivity / writing / meta
 # ============================================================================
 
@@ -107,14 +107,6 @@ description = "One-time pandastack init per project."
 [skill.office-hours]
 tier = "core"
 description = "5-stage flow: load context, grill, premise challenge, alternatives, brief."
-
-[skill.retro-month]
-tier = "core"
-description = "Three-phase monthly retro."
-
-[skill.retro-week]
-tier = "core"
-description = "Three-phase weekly retro: Auto-scan, Interview, Write."
 
 [skill.review]
 tier = "core"

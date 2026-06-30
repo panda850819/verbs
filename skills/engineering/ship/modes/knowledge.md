@@ -163,7 +163,7 @@ Append to `Inbox/ship-log/YYYY-MM-DD.md`:
 - Citations: N
 ```
 
-retro-week / retro-month read this for "knowledge ship rate".
+a periodic retro / GC sweep can read this for "knowledge ship rate" (if you run one).
 
 ---
 

@@ -6,7 +6,7 @@
 
 ## Why this file exists
 
-pandastack ships **25 skills** (23 core + 2 ext). **Lifecycle flows are no longer first-class constructs** — what used to live in `flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
+pandastack ships **23 skills** (21 core + 2 ext). **Lifecycle flows are no longer first-class constructs** — what used to live in `flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
 
 This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md beats multi-repo split, because the categorization lives next to the content.
 
@@ -58,8 +58,6 @@ Greenfield design (DB schema / service topology / ADRs) is rare for Panda's main
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `pandastack:retro-week` | Three-phase weekly retro (Auto-scan → Interview → Write). Phase 1 scans git, brain reflection inputs, and feedback files directly (rg / find) to fetch retro inputs. | weekly retro |
-| `pandastack:retro-month` | Three-phase monthly retro (with weekly retros referenced) | monthly retro |
 
 ### Tool wrappers (1:1 with public CLIs)
 
@@ -127,13 +125,6 @@ If you're reviewing your own PR → `pandastack:review`. If you're deciding whet
 - `pandastack:grill` — adversarial, one-question-at-a-time, surfaces unknown unknowns. Atomic 5-10 min, no brief output (just `Inbox/grill-*.md` log).
 - `pandastack:office-hours` — structured 5-stage flow that produces a brief in `docs/briefs/`. Default ~30 min; `--quick` mode (~10-15 min) skips capability probe + goal mapping when context is pre-loaded.
 
-### Two retro skills
-
-| Skill | When |
-|---|---|
-| `pandastack:retro-week` | Sunday or end of week. Three phases (Auto-scan / Interview / Write). |
-| `pandastack:retro-month` | End of month. References past 4 weekly retros. |
-
 ### Two ship modes (single skill)
 
 `/ship` is one skill with two modes:
@@ -161,7 +152,7 @@ What used to be `flows/<name>.md` is gone. Reasons:
 - **research**: not a real flow — it's a knowledge variant (Phase 1-3 vary, Phase 4-6 = knowledge ship). The variant lives inline in `/scout`'s SKILL.md (cut in v2.2) and `/ship knowledge`.
 - **work**: not a real flow — it's a dev variant + decision-note variant of `/ship knowledge`. The Phase 0 triage and Phase 5 ext-push are now AGENTS.md rules ("external-mutation-is-proposal").
 - **decision**: not a flow — it's an async autonomy contract ("cron proposes, Panda decides, Panda executes"). Lives as a rule in `~/.agents/AGENTS.md`, not as a flow spec.
-- **retro**: `/retro-week` and `/retro-month` are the executable specs. The cadence (daily close → weekly → monthly) lives in their SKILL.md files.
+- **retro**: moved to the personal overlay (`~/.agents/skills/`) on 2026-06-30 — brain-centric PKM, not a coding-agent skill. Compounding now lives in the dev flow via `lib/learning-recall.md`, not a calendar retro.
 
 ---
 

@@ -45,7 +45,7 @@ ls -la ~/.codex/skills/pandastack
 codex exec --skip-git-repo-check 'List the pandastack skills you can see.'
 ```
 
-You should see a symlink pointing to your pandastack skills directory, and Codex should enumerate 25 skills as `pandastack:<name>`.
+You should see a symlink pointing to your pandastack skills directory, and Codex should enumerate 23 skills as `pandastack:<name>`.
 
 ## Updating
 

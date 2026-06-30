@@ -4,13 +4,13 @@ Personal context-aware AI operator OS — one substrate, three runtimes, no vend
 
 I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
-The stack is **25 skills** focused on dev, writing, and knowledge workflows, tiered into 23 core (markdown-only, fresh-clone runnable) and 2 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
+The stack is **23 skills** focused on dev, writing, and knowledge workflows, tiered into 21 core (markdown-only, fresh-clone runnable) and 2 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
 
 **Philosophy**: pandastack ships verbs. The brain (gbrain or your own knowledge store) keeps state. Lifecycle discipline is your job, not the package's. v2.2 dropped the `flows/` directory (7 spec files); the public package is self-contained: clone + install gives you everything in the manifest.
 
 **Stability scope (read this first):**
 
-v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is **25 skills (23 core / 2 ext)**, after successive scope-tightening (v2.2.0 dropped the `flows/` layer; later releases split out the autonomous driver and removed the persona layer). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
+v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is **23 skills (21 core / 2 ext)**, after successive scope-tightening (v2.2.0 dropped the `flows/` layer; later releases split out the autonomous driver and removed the persona layer). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
 
 What this means for you:
 
@@ -35,7 +35,7 @@ bash scripts/bootstrap.sh --claude    # or --codex
 
 `bootstrap.sh` reports:
 - substrate state (`~/.agents/AGENTS.md` only)
-- 23 core skills runnable on this clone with no external CLI
+- 21 core skills runnable on this clone with no external CLI
 - 2 extension skills with the exact `brew install` / `npm install -g` to enable each
 
 After install:
@@ -86,11 +86,11 @@ Cross-flow router (start here when you're not sure which composition applies):
 | Turn a draft into a published post | `/write` then manual publish | writing |
 | Make a raw note durable | `/ship knowledge <path>` | knowledge |
 | Close out a work topic / decision | `/ship knowledge <decisions/path>` | knowledge (decision-note variant) |
-| End a session / week / month | `/checkpoint` · `/retro-week` · `/retro-month` | (independent skills, no flow) |
+| End a session | `/checkpoint` | (independent skill, no flow) |
 
 **Express path for dev work**: `/sprint` chains DEFINE → SHIP internally for 1-2h focused tasks. Use sprint when one skill should drive the whole arc; use the manual phase-by-phase progression when stages need user gates between them (e.g. `/careful` for prod) or when the work spans multiple sessions.
 
-**What's NOT a flow** (cut in v2.2.0): `research` is a knowledge-flow variant (`/grill` then `/scout`-like recon then `/ship knowledge`); `work` is a dev-flow variant + decision-note variant of `/ship knowledge`; `decision` is the cron-autonomy contract ("cron proposes, Panda decides, Panda executes") which lives as a rule in `~/.agents/AGENTS.md`, not as a flow; `retro` is a cadence served by `/retro-week` and `/retro-month` skills directly. None of these earn a separate spec.
+**What's NOT a flow** (cut in v2.2.0): `research` is a knowledge-flow variant (`/grill` then `/scout`-like recon then `/ship knowledge`); `work` is a dev-flow variant + decision-note variant of `/ship knowledge`; `decision` is the cron-autonomy contract ("cron proposes, Panda decides, Panda executes") which lives as a rule in `~/.agents/AGENTS.md`, not as a flow; `retro` (weekly/monthly reflection) is brain-centric PKM and moved to the personal overlay on 2026-06-30. None of these earn a separate spec.
 
 ## How skills connect
 
@@ -133,7 +133,7 @@ Claude: [Close]    frontmatter / used_in / wiki-link 補齊
         [Backflow]
                    principle → docs/learnings/patterns/fingerprint-over-keyword.md
                    SOP → curate-feeds skill 已合併
-                   signal → 加進 weekly retro 候選
+                   signal → 成為 learning 候選
 ```
 
 You said "RSS digest tool". The agent reframed it as "curation system" — listening to the pain, not the feature request. Three slash commands, end to end. Brief is the contract between phases.
@@ -228,10 +228,9 @@ docs/
   sessions/            # session logs
   learnings/           # learnings sedimented by /review
   checkpoints/         # /checkpoint snapshots
-  retros/              # /retro-* output when no brain is connected
 ```
 ```bash
-mkdir -p Inbox knowledge docs/{briefs,plans,sessions,learnings,checkpoints,retros}
+mkdir -p Inbox knowledge docs/{briefs,plans,sessions,learnings,checkpoints}
 ```
 
 **Fresh start (no project yet)**: `/pandastack:init` needs a git repo. To try pandastack without one, `cd` into any writable dir (or `git init` a scratch repo) and run `/office-hours --quick "<a real problem you have>"` — it produces a brief without `/init`. Full guided run: [`docs/first-session.md`](docs/first-session.md).
@@ -261,7 +260,7 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 ## Skills
 
-25 skills grouped by lifecycle (23 core / 2 ext — see `manifest.toml`). Each skill is "your specialist" for that step.
+23 skills grouped by lifecycle (21 core / 2 ext — see `manifest.toml`). Each skill is "your specialist" for that step.
 
 ### Think / intake
 
@@ -312,8 +311,6 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 | Skill | Your specialist | What they do |
 |---|---|---|
-| `/retro-week` | Weekly Retro | Three-phase weekly retro. Phase 1 scans git, brain reflection inputs, and feedback files directly via rg / find. |
-| `/retro-month` | Monthly Retro | Strategic monthly review with project memory updates. |
 
 Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or — when `gbrain` is connected — a brain query (`mcp__gbrain__find_orphans`). v2.2.0 cut `/inbox-triage`.
 
@@ -361,7 +358,7 @@ v2.2.0 cut the `flows/` directory. There are no longer separate flow spec files 
    - `research` → knowledge variant (Phase 1-3 vary, Phase 4-6 = knowledge ship)
    - `work` → dev variant + decision-note variant of `/ship knowledge`
    - `decision` → autonomy contract ("cron proposes, Panda decides, Panda executes") in `~/.agents/AGENTS.md`
-   - `retro` → cadence served by `/retro-week` and `/retro-month` directly
+   - `retro` → moved to the personal overlay (brain-centric PKM)
 
 This shrinks the documentation surface and makes "which skill do I run" answerable in 30 seconds from the Lifecycle map alone.
 

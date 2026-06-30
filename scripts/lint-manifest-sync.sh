@@ -45,8 +45,9 @@ while IFS= read -r dir; do
 done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*')"
 
 # Retired claims must not reappear in living docs. The persona layer (PR
-# #100/#101) and the driver split (PR #92) are gone, and the live skill count is
-# whatever manifest+disk agree on — a hard-coded 26/28 count, a persona ref, or a
+# #100/#101) and the driver split (PR #92) are gone, retro-week/retro-month moved
+# to the personal overlay (2026-06-30), and the live skill count is whatever
+# manifest+disk agree on — a hard-coded 24-29 count, a persona ref, or a
 # pre-flatten plugins/pandastack/ path in a living doc is drift. Historical
 # sections in RESOLVER/CHANGELOG are exempt by not being scanned.
 scan_docs=(
@@ -57,7 +58,7 @@ scan_docs=(
   "$repo_root/PHILOSOPHY.md"
   "$repo_root/skills/meta/using-pandastack/SKILL.md"
 )
-stale=$(grep -niE "38 skills|2[68] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|plugins/pandastack/(agents|skills)/" \
+stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|plugins/pandastack/(agents|skills)/" \
   "${scan_docs[@]}" 2>/dev/null || true)
 if [ -n "$stale" ]; then
   echo "FAIL: stale claims found:"

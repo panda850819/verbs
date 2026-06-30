@@ -14,11 +14,10 @@ Before responding to any task-shaped message, match it against this table. On ma
 | About to commit | `review`, then `ship` |
 | Knowledge note or decision closed | `ship knowledge <path>` |
 | External artifact before install / adopt | `gatekeeper` |
-| Weekly / monthly retro | `retro-week` / `retro-month` |
 | Run a bounded coding loop (test/build/CI until green) | hardened kickoff in `docs/loop-kickoffs.md` |
 | Non-trivial but no row matches | read pandastack `RESOLVER.md`, pick closest |
 
-Miss log: 事後發現該用而沒用 → append `date | runtime | signal | skill` to `~/.agents/memory/dispatch-miss.log`. Reviewed at `retro-week`.
+Miss log: 事後發現該用而沒用 → append `date | runtime | signal | skill` to `~/.agents/memory/dispatch-miss.log`. Reviewed periodically (e.g. at a weekly retro).
 
 <!-- Maintenance: this file is the SINGLE SOURCE for the process-axis routing table.
      Injected at session start by hooks/session-start (Claude Code + Codex both run

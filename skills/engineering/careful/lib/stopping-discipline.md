@@ -47,7 +47,7 @@ Example:
 
 ## How this is audited
 
-`/retro-week` Phase 1.6 GC sweep reads this log alongside `memory/feedback_*.md`:
+A retro / GC sweep reads this log alongside `memory/feedback_*.md` (if you run one):
 
 - Past 7d log entries grouped by reason → propose CLAUDE.md additions / skill anti-patterns
 - Repeated `unknown` reasons → flag as skill-gap candidate

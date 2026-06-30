@@ -1,6 +1,6 @@
 # pandastack (plugin internal)
 
-Personal AI operator OS for Claude Code, with Codex CLI compatibility. 25 skills (23 core / 2 ext — see `manifest.toml`) in engineering / productivity / writing / meta buckets, plus 3 documented lifecycle compositions. Skill-only: no agent dispatch, no persona sub-agents.
+Personal AI operator OS for Claude Code, with Codex CLI compatibility. 23 skills (21 core / 2 ext — see `manifest.toml`) in engineering / productivity / writing / meta buckets, plus 3 documented lifecycle compositions. Skill-only: no agent dispatch, no persona sub-agents.
 
 This file is the plugin-internal contract read by skill content. The user-facing README lives at the repo root.
 
@@ -26,7 +26,6 @@ Lifecycle skills (knowledge / writing / work / retro / decision / research) list
 - `/office-hours` — 5-stage intake producing a brief: load context → grill → premise challenge → alternatives → write brief
 - `/boardroom` — blind parallel critique of a prepared plan: N mutually-blind critics, deduped + ranked findings, per-finding apply gate
 - `/dojo` — pre-action prep (scan past sessions, surface gotchas)
-- `/retro-week` / `/retro-month` — interactive retro: prep → interview → write
 
 ## Learnings
 
