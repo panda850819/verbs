@@ -46,6 +46,8 @@ After install:
 4. `/ship knowledge <path>` on a finished note in your vault
 5. Stop there. You'll know if pandastack fits how you work.
 
+> **New to pandastack?** [`docs/first-session.md`](docs/first-session.md) is a 15-minute guided first run. Note `/pandastack:init` is per-project (it needs a git repo); to try pandastack vault-only with no project, see **Fresh start** under [Install § Substrate config](#substrate-config).
+
 > **Tier model**: Skills are tiered in `manifest.toml`. Core = markdown-only, runs on a fresh clone. Ext = needs a public CLI install. `capability-probe` only ABORTs when substrate is missing, not when ext CLIs are absent.
 
 ## Lifecycle map
@@ -209,11 +211,30 @@ After install, run `/pandastack:init` once inside your project.
 
 ### Substrate config
 
-`~/.agents/AGENTS.md` is the only required substrate. No env vars needed as of v2.0.1:
+**Identity contract** (one is enough): `~/.agents/AGENTS.md` (the author's personal substrate), **or** a project `./CLAUDE.md`, **or** `./AGENTS.md`. A fresh Claude Code user with a `CLAUDE.md` is covered — `/pandastack:init` creates one. Flow skills abort only when *none* of the three exists. No env vars needed as of v2.0.1.
 
-- **Vault path**: skills run from vault root (`cd <your-vault> && /<skill>`). Cron entries `cd` first.
-- **Plugin path**: resolved via host plugin-resolver (Claude Code / Codex SDK) or relative path from the calling skill.
+- **Work dir**: skills write into the cwd — any writable repo or vault, not only an Obsidian vault. Missing work dirs (`Inbox/`, `docs/briefs/` …) are auto-created on first write by `capability-probe`; you don't have to pre-make them.
+- **Plugin path**: resolved via the host plugin-resolver (`$CLAUDE_PLUGIN_ROOT` under Claude Code) or a relative path from the calling skill.
 - **Work-vault decision-note close**: `cd <work-vault> && /ship knowledge decisions/<file>.md` — runs the decision-note variant which also writes `Inbox/ship-proposals/` for manual external push (replaces v2.1 `/work-ship`).
+
+**Vault structure** (created on demand — here's the full tree if you'd rather pre-make it):
+
+```
+Inbox/                 # session captures, ship proposals
+knowledge/             # long-form notes
+docs/
+  briefs/              # /office-hours output
+  plans/               # executable plans (/sprint --plan)
+  sessions/            # session logs
+  learnings/           # learnings sedimented by /review
+  checkpoints/         # /checkpoint snapshots
+  retros/              # /retro-* output when no brain is connected
+```
+```bash
+mkdir -p Inbox knowledge docs/{briefs,plans,sessions,learnings,checkpoints,retros}
+```
+
+**Fresh start (no project yet)**: `/pandastack:init` needs a git repo. To try pandastack without one, `cd` into any writable dir (or `git init` a scratch repo) and run `/office-hours --quick "<a real problem you have>"` — it produces a brief without `/init`. Full guided run: [`docs/first-session.md`](docs/first-session.md).
 
 Re-run `bash scripts/bootstrap.sh` any time to verify substrate.
 
