@@ -2,37 +2,34 @@
 type: skill-eval
 skill: team-orchestrate
 bucket: engineering
-evaluated_skill_hash: d186352bb965a57118236f74cde89967d91cee18
-evaluated_at: 2026-06-29
+evaluated_skill_hash: 0cac3789d5158badfc1cbe40afbdca2838a1ecce
+evaluated_at: 2026-06-30
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — team-orchestrate
 
-**Verdict: SOLID.** Tightly determinate phase machine with a hard independence gate and checkable per-branch criteria; loses points on a body running ~2x the soft budget and an Origin/intake tail that re-states the decision-tree SSOT.
+**Verdict: SOLID.** A deterministic conductor process whose mandatory independence audit hard-aborts on file overlap, forcing the same safe parallel-dispatch run every time; loses points on duplicated rules and a declared-but-unused probe ref.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | Fixed Phase 0→1→2→3 spine; the abort path is deterministic and Phase 1 builds each branch prompt from its brief + hard rules, so the same process runs every time. |
-| Description / invocation | pass | L4 — front-loads "Conductor-driven parallel execution"; one trigger per branch (parallel / fan out / N independent); explicit skip→sprint clause; no body-identity restated in the description. |
-| Completion criteria | pass | L118 — every Phase-2 step is checkable (worktree exists + has commits, files match declared scope, self-report vs actual worktree state), and the independence audit (L63) is a hard PASS/ABORT, not "reviewed the structure". |
-| Information hierarchy | pass | Gate schema deferred behind `lib/gate-contract.md`, Inbox skeleton behind `lib/inbox-template.md`; the dispatch steps stay hot, reference loads cold via pointers. |
-| Leading words | pass | L34 — "conductor", "gate per branch as it returns", "fan out" are pretrained anchors carrying the execution model; "wall-clock parallel" (L39) collapses the latency rationale into two words. |
-| Pruning | weak | L181 — Origin block (L181-185) is changelog/provenance sediment that belongs in git history, and the intake locus table (L29-32) re-states `lib/skill-decision-tree.md`'s own locus table (its L7-14), a second source for one meaning. |
-| Granularity | pass | Each phase split earns its load: intake / dispatch / gate / synthesis are distinct user-visible stages each with its own completion criterion, none collapsible without losing a gate. |
-| pandastack conformance | weak | L25 — frontmatter valid (name=folder) and all `lib/` refs resolve, but the body is ~145 lines (185 incl. frontmatter) against the ~80 soft budget, and `lib/capability-probe.md` is declared in `reads:` (L6) yet never consulted in the body — dangling audit metadata. |
+| Predictability | pass | L61 — the independence audit is `(mandatory)`; "If any two branches touch the same file, ABORT and route to N sequential sprints" makes the unsafe path non-optional, pinning the process. |
+| Description / invocation | pass | L4 — front-loads the leading concept ("Conductor-driven parallel execution"), lists triggers, and carries an explicit skip clause routing sequential/single-track work to `sprint`. |
+| Completion criteria | pass | L98 — "Subagent's self-reported result matches actual state (read worktree files, don't trust the report)" is a checkable done/not-done, not "reviewed". |
+| Information hierarchy | pass | L100 — gate mechanics are deferred behind a `lib/gate-contract.md` context pointer; SKILL.md keeps only the four-outcome summary hot. |
+| Leading words | pass | L32 — the "conductor" metaphor anchors execution behavior: "It dispatches, reviews returns, merges. It does NOT edit during dispatch." |
+| Pruning | weak | L86 — re-states L67's "subagent does not read your `CLAUDE.md` / `AGENTS.md`, so inline…" clause; the independence rule also recurs at L36/L43/L61/L89/L141/L147, and the body runs 162 lines vs the ~<80 discipline. |
+| Granularity | pass | L30 — clean by-invocation split from `/sprint`; the execution-locus table row draws the conductor-vs-in-session boundary that justifies a separate skill. |
+| pandastack conformance | weak | L6 — `lib/capability-probe.md` is declared in `reads:` yet never invoked anywhere in the L23-162 body (dangling metadata), and the body is 162 lines vs ~80. (The #110 de-personalization at L67/L87 is itself a conformance win.) |
 
 ## Why it's good
-
-The skill earns its parallelism with a non-negotiable independence audit (L63) that aborts to sequential sprints rather than risk silent merge corruption, so the dangerous default is structurally foreclosed, not merely warned against. The gate-as-they-return loop (L114-140) binds the shared four-option contract from `lib/gate-contract.md` via `AskUserQuestion` and forces verification against actual worktree state (L121), so subagent self-report drift cannot leak into a merge.
+The skill turns a high-blast-radius operation (N parallel writers) into a deterministic pipeline: a mandatory pre-dispatch independence audit (L61) that aborts to sequential sprints rather than risk silent merge corruption, single-message fan-out (L65), a gate-as-they-return loop that verifies against actual worktree state instead of self-report (L98), and a synthesis artifact (L133). The #110 de-personalization (L67, L87) swaps author-specific "Panda's voice / no Co-Authored-By" for portable "read your `CLAUDE.md` / `AGENTS.md`" wording, raising distribution-fitness without weakening the inline-the-rules instruction.
 
 ## Top fixes
-
-1. L181-185 — delete the Origin block; provenance is git's job, not the hot skill body. Cuts ~5 lines of pure sediment.
-2. L29-32 — drop the duplicated locus table and point to `lib/skill-decision-tree.md` for the sprint-vs-team-orchestrate distinction; keep only the one-line conductor framing at L34.
-3. L6 — either wire `lib/capability-probe.md` into a real pre-dispatch capability check or remove it from `reads:`; a declared-but-unread pointer is dangling metadata. With (1) and (2) this also pulls the body back toward the ~80-line budget.
+1. L86 — collapse the duplicated "subagent does not read your CLAUDE.md / AGENTS.md" clause; it already appears at L67. State it once, at the Phase 1 hard-rules block.
+2. L6 — either wire `lib/capability-probe.md` into a visible pre-dispatch probe step (every Layer-1 flow opens with it) or drop it from `reads:`; a declared-but-unmentioned pointer is dangling audit metadata.
+3. L141/L146/L147 — three anti-patterns all re-encode "don't let branches share files"; fold into one, since L61 already enforces it. With (1) and (3) the body moves back toward the ~80-line budget.
 
 ## Behavioral cases
-
-- trigger `run these 4 audit branches in parallel, they don't share files` -> expected process: Phase 0 intake + independence audit PASS, Phase 1 single-message N-Agent worktree dispatch (brief + hard rules per branch), Phase 2 gate-as-they-return via AskUserQuestion, Phase 3 synthesis + Inbox artifact, suggest /review, no auto-chain.
-- anti-trigger `refactor this module then update its callers` -> should NOT fire (inter-branch dependency; routes to N sequential sprints / `/sprint` per L45, L177).
+- trigger `fan out these 4 independent audit passes in parallel` → expected process: Phase 0 intake + independence audit (PASS), Phase 1 single-message N-Agent worktree dispatch, Phase 2 gate-as-they-return per `lib/gate-contract.md`, Phase 3 synthesis + `Inbox/team-orchestrate-*.md`, suggest `/review`, no auto-chain.
+- anti-trigger `refactor this module then update its callers` → should NOT fire (inter-branch dependency; routes to N sequential `/sprint` per L43/L143).

@@ -1,7 +1,7 @@
 ---
 name: write
 aliases: [content-write]
-description: "Voice-aware writing assistant: sparring, structure coaching, draft review, slop detection, postmortem, idea-gate routing. Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, should I write about this, idea-gate. NOT generic de-AI humanization (use humanizer) or investment/IC memo final-pass cleanup (use avoid-ai-writing)."
+description: "PERSONAL-VOICE skill — tuned to the author's voice (references/voice-profile.md); a fresh user must customize the voice profile + slop patterns first, or output comes back in the author's style, not yours. Voice-aware writing assistant: sparring, structure coaching, draft review, slop detection, postmortem, idea-gate routing. Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, should I write about this, idea-gate. NOT generic de-AI humanization (use humanizer) or investment/IC memo final-pass cleanup (use avoid-ai-writing)."
 version: "1.3.0"
 user-invocable: true
 ---
@@ -112,7 +112,7 @@ Load matching references in addition to base voice-profile.md. Multiple can fire
 2. Cut filler: remove sentences where deletion doesn't change meaning
 3. Suggest stronger openings for sections that start flat
 4. Run slop check (see below)
-5. **Generate alternatives** (mandatory — do not skip): For every item matching a trigger below, provide **3-5 alternative versions** (or 2-3 for drafts under 200 words). One suggestion = average suggestion. Quantity lets Panda pick the best.
+5. **Generate alternatives** (mandatory — do not skip): For every item matching a trigger below, provide **3-5 alternative versions** (or 2-3 for drafts under 200 words). One suggestion = average suggestion. Quantity lets you pick the best.
 
    Trigger criteria (generate when ANY match):
    - Opening sentence of a section is a plain statement of fact rather than a hook or question
@@ -121,7 +121,7 @@ Load matching references in addition to base voice-profile.md. Multiple can fire
    - Any paragraph flagged by slop detection (filler, hedge stack, AI opener, etc.)
    - Section transition feels abrupt or missing -- provide 2-3 bridge alternatives
 
-Output format: Quote each problematic line with `>`, then comment with `→` prefix underneath. Do NOT output a clean rewritten draft — every change must be an individual annotation that Panda accepts or rejects. Self-check: if you've written more than 3 consecutive sentences of new prose outside a `→` annotation, you're rewriting. Stop and convert to annotations.
+Output format: Quote each problematic line with `>`, then comment with `→` prefix underneath. Do NOT output a clean rewritten draft — every change must be an individual annotation that you accept or reject. Self-check: if you've written more than 3 consecutive sentences of new prose outside a `→` annotation, you're rewriting. Stop and convert to annotations.
 
 ### 4. Reference (`/write ref`)
 
@@ -250,11 +250,11 @@ Both files use the same format (Pattern / Example / Fix table). Zero tolerance �
 | All problems resolved neatly | Sounds too polished/fake | Leave one honest tension unresolved |
 | 5+ consecutive "X is Y" sentences | Weak verbs dominate | Replace with active/specific verbs |
 
-**Layer 3: Voice scan** (the "would Panda say this?" test)
+**Layer 3: Voice scan** (the "would you say this?" test)
 
 For every flagged passage, apply this test:
 
-> Would Panda say this out loud to a friend at a coffee shop?
+> Would you say this out loud to a friend at a coffee shop?
 
 - If yes → keep
 - If "sort of but more formal" → simplify
@@ -287,6 +287,6 @@ Before sending ANY response, load `references/output-validation.md` and verify a
 
 ## Gotchas
 
-- Never produce a "clean rewrite" -- Panda's voice gets lost in rewrites. Always annotate, never replace.
+- Never produce a "clean rewrite" -- your voice gets lost in rewrites. Always annotate, never replace.
 - Short sentences are a feature, not a bug. Do not merge them for "flow."
 - The user is not lazy -- they have a "write or don't write" binary. Don't nag about consistency. Help them make each piece count when they do write.

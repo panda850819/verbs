@@ -64,7 +64,7 @@ Announce: `Team-orchestrate intake — N branches, M-way parallel dispatch. Inde
 
 ### Phase 1: Parallel dispatch (single message, N Agent calls)
 
-Build N dispatch prompts: each branch's prompt = its brief + the hard rules the subagent needs (Panda's voice / commit style / no em dash / no Co-Authored-By — the subagent does NOT read `~/.agents/AGENTS.md`, so inline what the task requires). For a UI branch follow `ui`, for a bug branch `debug`. Dispatch ALL branches in **one message** with multiple `Agent` tool calls:
+Build N dispatch prompts: each branch's prompt = its brief + the hard rules the subagent needs (your voice / commit conventions — the subagent does NOT read your `CLAUDE.md` / `AGENTS.md`, so inline what the task requires). For a UI branch follow `ui`, for a bug branch `debug`. Dispatch ALL branches in **one message** with multiple `Agent` tool calls:
 
 ```
 Agent({
@@ -83,9 +83,8 @@ Agent({
 
 Single message, multiple tool-use blocks = wall-clock parallel execution per the Agent tool docs.
 
-**Hard rules to inline in every dispatch**:
-- Conventional Commits, body in English, no em dash, no Co-Authored-By trailer
-- Voice: no sycophantic openers, no closing fluff
+**Hard rules to inline in every dispatch** (the subagent does not read your `CLAUDE.md` / `AGENTS.md`, so inline whatever it must obey — use YOUR project's rules, not the author's):
+- Your commit + voice conventions: read them from your `CLAUDE.md` / `AGENTS.md` and inline them verbatim (commit format, body language, em-dash / trailer / opener rules — whatever you enforce).
 - Subagent must commit to its worktree branch before returning (conductor merges later)
 - Subagent must NOT touch files outside its declared scope (independence guarantee)
 

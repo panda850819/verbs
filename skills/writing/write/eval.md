@@ -2,36 +2,36 @@
 type: skill-eval
 skill: write
 bucket: writing
-evaluated_skill_hash: 82b11d1879c046fe80496414e2c89b654d317d3d
-evaluated_at: 2026-06-29
+evaluated_skill_hash: 97717e4369c0eb36413f4e9cd7a756e24a1303bb
+evaluated_at: 2026-06-30
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — write
 
-**Verdict: SOLID.** Leading virtue is structurally-enforced anti-ghostwriting predictability: every generative mode aborts on a checkable drift criterion, and the #106 slim pulled the Idea Gate catalog behind a pointer so the body now reads as routing + self-checks rather than inlined reference.
+**Verdict: SOLID.** Process determinism is the leading virtue: every generative mode aborts on a checkable drift criterion, and the bulky reference material is dispatched cold, not inlined.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L31 — the Mode Selection table maps each user signal to a fixed route, and every mode (L50, L73, L85, L126, L138, L168, L178, L207) runs the same process each invocation rather than improvising. |
-| Description / invocation | weak | L4 — front-loads a leading word ("Voice-aware writing assistant") and is shorter than before, but the capability list (sparring / structure coaching / draft review / slop detection / postmortem / idea-gate) restates branches that the trigger list names again, so it still duplicates meaning the body owns. |
-| Completion criteria | pass | L124 — "if you've written more than 3 consecutive sentences of new prose outside a `→` annotation… Stop and convert to annotations" is checkable and anti-premature-completion; mirrored per mode (L58, L83, L166). |
-| Information hierarchy | pass | L209 — the full Idea Gate routing table, packet template, and rules now sit behind a context pointer to `references/idea-gate.md`, loaded only when the idea-gate branch fires; matches the hot/cold dispatch for the ~8K article-patterns library (L54, L105) and the conditional zh-ref table (L93). |
-| Leading words | pass | L15 — "sparring partner, structure coach, and slop detector" anchors the whole skill in three pretrained roles in one line; "ghostwriter" (L41) reuses a compact behavior anchor for the redirect. |
-| Pruning | weak | L239 — "Zero tolerance — every match gets flagged" repeats L231 verbatim within eight lines; the Gotchas (L290–291) also restate annotate-never-replace and short-sentence rules already enforced in Edit/Structure self-checks. Improved: the prior largest no-op (Idea Gate rationale block) is gone. |
-| Granularity | pass | L207 — Idea Gate earns its place as a subcommand: distinct `/write idea-gate` leading word and an upstream-gate reach (originals/ → packet → handoff) no other mode covers, while sharing the voice/slop core that keeps it inside one skill. |
-| pandastack conformance | weak | L54 — hot/cold dispatch honoured, `name: write` matches folder, and every `references/` + repo-root `lib/quality-rubric.md` ref resolves; residual is the 292-line body (down from 358) — earned by 8 modes but still far over the ~<80 discipline and partly prunable. |
+| Predictability | pass | L33 — the Mode Selection table maps each user signal to a fixed route ("Help me write about X" → Spar, never ghostwrite), so the agent runs the same process each invocation rather than improvising. |
+| Description / invocation | weak | L4 — the HOT description front-loads the "PERSONAL-VOICE… tuned to the author's voice" caveat before the trigger words; the leading slot does warning work, not invocation work, and the capability list restates branches the trigger list names again. |
+| Completion criteria | pass | L83 — "your output should contain zero new sentences that weren't in the original draft… delete it" is checkable and exhaustive; mirrored per mode (L58, L91, L166, L184). |
+| Information hierarchy | pass | L54 — hot/cold dispatch with teeth: the ~8K-token article-patterns library is explicitly NOT loaded hot, a sub-agent returns only the matched entry; matches the conditional zh-ref trigger table (L93-102). |
+| Leading words | pass | L15 — "You are not a ghostwriter. You are a sparring partner, structure coach, and slop detector" anchors three pretrained roles in one line that the agent thinks with across all 8 modes. |
+| Pruning | weak | L239 — "Zero tolerance — every match gets flagged" repeats L231 verbatim within eight lines; combined with a 292-line body (~3.6x the ~80-line discipline), the sprawl exceeds what the 8 modes earn. |
+| Granularity | pass | L213 — the Structural Toolkit is pushed to references/structural-checks.md rather than split into a skill; 8 modes correctly co-locate under one /write verb sharing the voice + slop core that keeps them inside one skill. |
+| pandastack conformance | pass | L54 — hot/cold dispatch honoured, frontmatter valid (`name: write` matches folder, version, user-invocable), every `references/` + repo-root `lib/quality-rubric.md` ref resolves; the PERSONAL-VOICE marker is good distribution-fitness. |
 
 ## Why it's good
-The anti-ghostwriting contract is enforced by construction, not exhortation: every generative mode ends on a hard self-check that names the drift and the abort action (Spar L58, Structure L83, Edit L124, Distill L166), and the L285 Output Validation pointer makes the per-mode checks exhaustive. The #106 slim landed its target cleanly — the Idea Gate mode collapsed from ~65 inlined lines to a single pointer (L209), so the body now carries routing and guardrails while the bulky route table lazy-loads. Predictability is real across eight distinct uses because the L31 signal table plus subcommand routing pins one process per signal.
+The anti-ghostwriting contract is enforced by construction, not exhortation: every generative mode ends on a hard self-check that names the drift and the abort action (Spar L58, Structure L83, Edit L124, Distill L166), and the L286 Output Validation pointer makes the per-mode checks exhaustive. Progressive disclosure is exemplary — the 8K pattern library and four conditional Chinese slop refs load cold via sub-agent or trigger table (L54, L93-102), keeping the hot body legible. The de-personalization lands its target: voice specifics now live in references/voice-profile.md and the HOT description flags PERSONAL-VOICE so a fresh user customizes the profile before output comes back in the author's style.
 
 ## Top fixes
-1. L4 — collapse the capability list into the trigger list; "draft review", "structure", "postmortem", and "idea-gate" each appear twice in one hot string.
-2. L239 — delete the duplicated "Zero tolerance — every match gets flagged" (kept once at L231); fold any Gotcha (L290–291) already covered by a mode self-check.
-3. L211 — push the Structural Toolkit and Slop Detection sections toward the same pointer treatment Idea Gate just received if the body needs to reach the ~<80 discipline; they remain the largest hot blocks.
+1. L4 — re-order the HOT description so "/write" + the capability/trigger words lead and the PERSONAL-VOICE caveat trails; the leading slot is the invocation lever and is currently spent on a warning, while "draft review" / "postmortem" / "idea-gate" each appear twice in one hot string.
+2. L239 / L231 — delete the duplicated "Zero tolerance — every match gets flagged" (keep one), and prune the 292-line body; the sprawl past the 8 earned modes is the weak axis.
+3. L205 — "Origin + Panda adaptation notes" is a residual author name that survived the de-personalization pass; genericize it or fold the attribution into the linked brain page.
 
 ## Behavioral cases
-- trigger `should I write about this originals/2026-06-26-thought.md` → expected process: Idea Gate (L207) — loads `references/idea-gate.md`, runs Stage-0 brain grep, picks 1 of 5 routes, emits a writer-context-packet or 暫不寫.
-- trigger `/write postmortem on this near-final draft` → expected process: Postmortem mode (L178) — quote the exact line per category, banned generic-praise words enforced (L198), run AFTER `/write edit` for long posts (L202).
+- trigger `/write spar` ("help me write about X") → expected process: route to Spar (L50-58), cold sub-agent pattern-check against article-patterns.md, ask 2-3 sparring questions, emit thesis + skeleton + challenges, never prose.
+- trigger `最後掃一遍 / final pass on this near-final draft` → expected process: Postmortem mode (L178-203) — quote the exact line per category, banned generic-praise words enforced, run AFTER `/write edit` for long posts.
 - anti-trigger `just make this text sound human, de-AI it` → should NOT fire (routes to `humanizer`, per L4).
-- anti-trigger `final voice cleanup on this IC memo` → should NOT fire (routes to `avoid-ai-writing`, per L4).
+- anti-trigger `final voice cleanup on this IC / investment memo` → should NOT fire (routes to `avoid-ai-writing`, per L4).

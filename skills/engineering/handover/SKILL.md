@@ -4,7 +4,7 @@ description: |
   Explicit Codex handover workflow for unfinished mechanical build units from an existing plan.
   - /handover [slug]: sync handoff, spawn `codex exec`, poll, collect structured result.
   - /handover --async [slug]: write a self-contained payload to docs/handoffs/ only; does not spawn Codex or touch git.
-  Use when a plan has several rote, file-scoped build units and Panda deliberately wants Codex subscription quota used. NOT for plan writing, generic engine invocation, subagent-driven-development loops, closing finished work, PR/ship flow, or exploratory judgment-heavy work.
+  Use when a plan has several rote, file-scoped build units and you deliberately want Codex subscription quota used. NOT for plan writing, generic engine invocation, subagent-driven-development loops, closing finished work, PR/ship flow, or exploratory judgment-heavy work.
 reads:
   - repo: docs/plans/**
   - repo: skills/engineering/handover/references/codex-invocation.md
@@ -27,7 +27,7 @@ classification: exec
 
 ## Routing Boundary
 
-Use this skill only for explicit Panda Stack `/handover`: unfinished mechanical build units from an existing plan are delegated to Codex, while the orchestrator keeps planning, review, and git ownership.
+Use this skill only for an explicit pandastack `/handover`: unfinished mechanical build units from an existing plan are delegated to Codex, while the orchestrator keeps planning, review, and git ownership.
 
 Do not use it for:
 - Writing plans — use `plan` or `writing-plans`.
@@ -111,4 +111,4 @@ Codex-executes split becomes visible in the state file. A later `/review` or
 
 - `docs/plans/{slug}.md` stays the source of truth for WHAT. The handoff is a derived snapshot — do not copy the brief's rationale into it.
 - Codex never commits / pushes / opens PRs — the Claude orchestrator owns git (enforced in the payload's `<constraints>`). In sync mode Claude commits on a completed batch; in async mode the human owns git entirely.
-- Escalating Codex past `-s workspace-write` (e.g. `--dangerously-bypass-approvals-and-sandbox` for network / dep-install) is NEVER auto-selected from plan/task content — it needs an explicit one-time confirmation from Panda this session. See `references/codex-invocation.md`.
+- Escalating Codex past `-s workspace-write` (e.g. `--dangerously-bypass-approvals-and-sandbox` for network / dep-install) is NEVER auto-selected from plan/task content — it needs an explicit one-time confirmation from the orchestrator this session. See `references/codex-invocation.md`.

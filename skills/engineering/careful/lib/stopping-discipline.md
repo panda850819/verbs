@@ -24,7 +24,7 @@ When you DO have to ask (passes the self-check), append one line to:
 $CLAUDE_PROJECT_DIR/memory/log_continue-failures.md
 ```
 
-(Fall back to `~/.claude/projects/<auto-derived-slug>/memory/log_continue-failures.md` if the env var is unset. Create the file if it doesn't exist; do not create the directory — error out if the memory dir is missing, that's a deeper config issue.)
+(Fall back to `~/.claude/projects/<auto-derived-slug>/memory/log_continue-failures.md` if the env var is unset. Create the file if its directory already exists; if the memory dir is missing, skip the log silently — continue-failure logging is best-effort, not a hard dependency, so a fresh install never errors here.)
 
 Format (one event per line, append-only, no edits):
 
