@@ -76,7 +76,7 @@ Abort or degrade per probe rules. Output probe block as opening.
 
 Invoke `skills/productivity/dojo/SKILL.md` for the topic. Output prep brief, print path. User reads, then continues.
 
-Best-effort: also surface `{brain}/learnings/` pages matching the topic (the auto-sedimented learnings from transcript-ingest) so plan-time context includes past lessons. Skip silently if `{brain}` is absent. (Semantic two-brain `gbrain query` is the private-overlay upgrade; this flat glob is the public, Zero-Dependencies-safe baseline that closes the write→read loop.)
+Run the learnings recall per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md): surface the top 3-5 learnings relevant to the sprint topic so plan-time context carries past lessons, and use them in the plan, not just list them. Store-agnostic — `gbrain query` filtered to `learnings/` when present, else ranked grep over `docs/learnings/`, else skip with a note. This closes the write→read loop the auto-sedimented learnings exist for.
 
 ### Stage 2: Grill (lite, skip if `--quick`)
 
