@@ -15,7 +15,7 @@ v3 is **personal-substrate stable**: API, schema, and skill content are stable f
 What this means for you:
 
 - If you are the author or a fork-and-learn power user, the current cut is stable for daily use.
-- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (23 skills) should run on a clean clone.
+- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (21 skills) should run on a clean clone.
 - If you use Logseq / Roam / Notion instead of Obsidian, skills will reference Panda's vault conventions (`knowledge/`, `Inbox/`, `docs/learnings/`, etc.) — these are prompt defaults, not hard-coded interfaces. You'd adapt them per session or by editing skill text. There's no built-in adapter layer; whether that matters depends on your tolerance for hand-tuning conventions.
 
 **Who this is for:**
@@ -309,8 +309,7 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 ### Reflect / cadence
 
-| Skill | Your specialist | What they do |
-|---|---|---|
+Retro (weekly / monthly reflection) moved to the personal overlay on 2026-06-30 — brain-centric PKM, not a coding-agent skill. Compounding now runs continuously in the dev flow via `lib/learning-recall.md`, not a calendar retro.
 
 Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or — when `gbrain` is connected — a brain query (`mcp__gbrain__find_orphans`). v2.2.0 cut `/inbox-triage`.
 

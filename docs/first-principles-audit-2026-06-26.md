@@ -1,6 +1,6 @@
 # First-Principles Audit — pandastack repo (2026-06-26)
 
-> **Status: historical snapshot (2026-06-26), superseded.** This audit predates the driver-platform split (PR #92) and the persona-layer removal (PR #100/#101). It still describes `skills/doing/` paths (now `skills/engineering/`), the `drive-*` driver platform (since removed), `lib/persona-frame.md` + the 5 persona skills (since removed), and a 28-skill count (current: 25). Kept as the reasoning record behind those cuts; do not treat its file inventory as current state.
+> **Status: historical snapshot (2026-06-26), superseded.** This audit predates the driver-platform split (PR #92) and the persona-layer removal (PR #100/#101). It still describes `skills/doing/` paths (now `skills/engineering/`), the `drive-*` driver platform (since removed), `lib/persona-frame.md` + the 5 persona skills (since removed), and a 28-skill count (current: 23). Kept as the reasoning record behind those cuts; do not treat its file inventory as current state.
 
 > Question asked of every file: *if I deleted this, would the skills pack stop working?* Verdicts: **KEEP** (the irreducible pack), **SEPARATE** (real, but a different product fused in — move to its own repo), **CUT** (dead/cruft/finished-migration, safe to delete). Verdicts are grounded in grep, not assumption: `skill_referenced` = some live `SKILL.md`/`lib` actually invokes it; `cron_wired` = a scheduler/launchd job runs it (so move-don't-delete even when separating).
 

@@ -56,6 +56,7 @@ scan_docs=(
   "$repo_root/.codex/INSTALL.md"
   "$repo_root/.claude-plugin/marketplace.json"
   "$repo_root/.claude-plugin/plugin.json"
+  "$repo_root/.codex-plugin/plugin.json"
   "$repo_root/PHILOSOPHY.md"
   "$repo_root/skills/meta/using-pandastack/SKILL.md"
 )
@@ -64,6 +65,15 @@ stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ personas?|persona skills|perso
 if [ -n "$stale" ]; then
   echo "FAIL: stale claims found:"
   echo "$stale" | sed 's/^/  /'
+  fail=1
+fi
+
+# Derived loader manifests restate the version + skill count from manifest.toml.
+# scripts/pandastack sync is the generator; --check is the drift gate so the
+# Codex/Claude/marketplace JSON can never silently fall behind a manifest bump.
+if ! sync_out="$(python3 "$repo_root/scripts/pandastack" sync --check 2>&1)"; then
+  echo "FAIL: derived loader manifests drift from manifest.toml:"
+  echo "$sync_out" | sed 's/^/  /'
   fail=1
 fi
 

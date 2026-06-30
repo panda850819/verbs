@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## v3.3.0 — 2026-06-30
 
 ### Changed
 - **retro-week / retro-month moved to the personal overlay** (`~/.agents/skills/`); public pack 25 → **23 skills** (21 core / 2 ext). They are brain-centric personal reflection (PKM), not coding-agent skills. With the new event-driven `lib/learning-recall.md` (recall at every dev-unit opener — `review` / `sprint` / `debug`), compounding now happens continuously in the dev flow rather than via a calendar retro. The shared `retro-scan.sh` engine moved with them. `lint-manifest-sync` stale-count regex tightened to `2[4-9] skills`.
+- **Single-sourced version + skill count** (#122): `manifest.toml` is the one hand-edited place; new `scripts/pandastack sync` regenerates `version` + the "N skills" description into `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `.claude-plugin/marketplace.json`. `lint-manifest-sync.sh` now adds `.codex-plugin/plugin.json` to its scan set and runs `sync --check`, closing the hole that let the Codex loader fall behind to 3.2.0 / "25 skills".
+- **Doc reconciliation to 23 skills / v3.3.0** (#122): fixed the Codex plugin loader, the `CLAUDE.md` lifecycle list, `RESOLVER.md` (provenance row, version pointer, dead Retro/session table, `tool-browser` alias), the `README.md` Core count + empty Reflect table, and stale present-tense "25 skills" claims in `ROADMAP.md` / `evals/` / the first-principles audit.
 
 ## v3.2.0 — 2026-06-29
 

@@ -4,6 +4,7 @@ import argparse
 import datetime
 import json
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -762,6 +763,127 @@ def run_init(args):
 
 
 # ---------------------------------------------------------------------------
+# Subcommand: sync (manifest.toml -> derived loader manifests)
+# ---------------------------------------------------------------------------
+#
+# manifest.toml is the single source of truth for the version string and the
+# skill count. Those two facts are restated in loader/marketplace JSON that
+# tooling reads, and they drift the moment one file is bumped and another is
+# not (the 25->23 / 3.2.0->3.3.0 split). `sync` regenerates them from the
+# manifest so the count and version live in exactly one hand-edited place.
+
+# Count phrase used in human-facing JSON descriptions, e.g. "23 skills".
+_COUNT_RE = re.compile(r"\b\d+ skills\b")
+
+
+def _sync_root():
+    """Repo root the JSON targets are resolved under. Overridable for tests."""
+    override = os.environ.get("PANDASTACK_SYNC_ROOT")
+    return Path(override) if override else REPO_ROOT
+
+
+def _sync_targets(root):
+    """(path, set_version) for each derived file. marketplace has no version."""
+    return [
+        (root / ".claude-plugin" / "plugin.json", True),
+        (root / ".codex-plugin" / "plugin.json", True),
+        (root / ".claude-plugin" / "marketplace.json", False),
+    ]
+
+
+def _derive_facts(manifest_data):
+    """Return (version, total) derived from manifest.toml, or (None, n)."""
+    version = manifest_data.get("manifest", {}).get("version")
+    total = len(manifest_data.get("skill", {}))
+    return version, total
+
+
+def _sync_descriptions(obj, total, name, issues):
+    """Rewrite any 'description' skill-count under obj (and nested plugins)."""
+    desc = obj.get("description")
+    if isinstance(desc, str):
+        new = _COUNT_RE.sub(f"{total} skills", desc)
+        if new != desc:
+            issues.append(f"{name}: description skill-count stale")
+            obj["description"] = new
+    plugins = obj.get("plugins")
+    if isinstance(plugins, list):
+        for plugin in plugins:
+            if isinstance(plugin, dict):
+                _sync_descriptions(plugin, total, name, issues)
+
+
+def _sync_one(path, set_version, version, total):
+    """Return (issues, data). issues is non-empty iff the file is out of sync."""
+    data = json.loads(path.read_text())
+    issues = []
+    if set_version and data.get("version") != version:
+        issues.append(
+            f"{path.name}: version {data.get('version')!r} != {version!r}"
+        )
+        data["version"] = version
+    _sync_descriptions(data, total, path.name, issues)
+    return issues, data
+
+
+def _write_json_nofollow(path, data):
+    """Write pretty JSON + trailing newline, refusing to follow a symlink."""
+    if path.is_symlink():
+        raise OSError(f"refusing to write through symlink: {path}")
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW)
+    with os.fdopen(fd, "w") as fh:
+        fh.write(json.dumps(data, indent=2) + "\n")
+
+
+def run_sync(args):
+    manifest_ok, manifest_err, manifest_data = load_manifest()
+    if not manifest_ok:
+        print(f"ERROR: {manifest_err}", file=sys.stderr)
+        sys.exit(1)
+
+    version, total = _derive_facts(manifest_data)
+    if not version:
+        print("ERROR: no [manifest] version in manifest.toml", file=sys.stderr)
+        sys.exit(1)
+
+    check = getattr(args, "check", False)
+    root = _sync_root()
+    all_issues = []
+    written = []
+    for path, set_version in _sync_targets(root):
+        if not path.exists():
+            continue
+        issues, data = _sync_one(path, set_version, version, total)
+        if issues:
+            all_issues.extend(issues)
+            if not check:
+                try:
+                    _write_json_nofollow(path, data)
+                except OSError as exc:
+                    print(f"ERROR: {exc}", file=sys.stderr)
+                    sys.exit(1)
+                written.append(path.name)
+
+    if check:
+        if all_issues:
+            print("FAIL: derived files out of sync with manifest.toml:")
+            for issue in all_issues:
+                print(f"  {issue}")
+            print("  Fix: scripts/pandastack sync")
+            sys.exit(1)
+        print(f"OK: derived files in sync (version {version}, {total} skills)")
+        return
+
+    if written:
+        for issue in all_issues:
+            print(f"synced: {issue}")
+        print(f"Synced {len(written)} file(s) to version {version}, "
+              f"{total} skills: {', '.join(written)}")
+    else:
+        print(f"OK: already in sync (version {version}, {total} skills)")
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -803,6 +925,16 @@ def main():
     ini.add_argument("--dry-run", action="store_true",
                      help="Print commands without running them")
 
+    syn = sub.add_parser(
+        "sync",
+        help="Regenerate version + skill count in loader JSON from manifest.toml",
+    )
+    syn.add_argument(
+        "--check",
+        action="store_true",
+        help="Exit nonzero if derived files drift from manifest.toml (no writes)",
+    )
+
     sub.add_parser("help", help="Show this help message")
 
     args = parser.parse_args()
@@ -811,6 +943,8 @@ def main():
         run_doctor(args)
     elif args.command == "init":
         run_init(args)
+    elif args.command == "sync":
+        run_sync(args)
     elif args.command == "help":
         parser.print_help()
     elif args.command is None:

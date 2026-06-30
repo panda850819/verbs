@@ -18,7 +18,7 @@ Full catalog in `RESOLVER.md` at the repo root. Dev-workflow primitives:
 - `/pandastack:careful` — confirm before destructive actions (safety)
 - `/pandastack:checkpoint` — save / resume working state snapshots
 
-Lifecycle skills (knowledge / writing / work / retro / decision / research) listed in `RESOLVER.md`.
+Lifecycle skills: knowledge (`/ship knowledge`) and writing (`/write`), cataloged in `RESOLVER.md`. work / research / decision are documented as variants, not first-class flows; retro moved to the personal overlay (2026-06-30).
 
 ## Scenario flows (single-skill, internally chained)
 

@@ -54,11 +54,6 @@ For multi-step sequential work, run multiple sprints in sequence. v1.x had `exec
 
 Greenfield design (DB schema / service topology / ADRs) is rare for Panda's maintenance-heavy work; scope it in `office-hours`, then build in a sprint.
 
-### Retro / session
-
-| Skill | Purpose | Trigger |
-|---|---|---|
-
 ### Tool wrappers (1:1 with public CLIs)
 
 | Skill | Wraps |
@@ -199,7 +194,7 @@ Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed
 | Origin | Skills (still in the current public package) |
 |---|---|
 | Built in v0.16 | careful, checkpoint, freeze, init, qa, review, ship |
-| Added in v1 from `~/.claude/skills/` (local) | grill, retro-week, retro-month, gatekeeper, deepwiki, agent-browser |
+| Added in v1 from `~/.claude/skills/` (local) | grill, gatekeeper, deepwiki |
 | Decision/sprint flow | sprint, dojo, office-hours, team-orchestrate |
 | Meta | using-pandastack, init, skill-creator, writing-great-skills, skill-eval |
 | Writing | write |
@@ -208,7 +203,7 @@ Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed
 
 ## Version
 
-This RESOLVER.md is for pandastack v3.2.0. Update when adding / removing / renaming skills.
+This RESOLVER.md is for pandastack v3.3.0. Update when adding / removing / renaming skills.
 
 ---
 
@@ -223,7 +218,7 @@ The following skill names were renamed/merged across versions. Old names still r
 | `write-ship` | n/a (`ship write` mode retired 2026-06-12 — Blog tree gone post-rebuild) | v2.0.0 (2026-05-07) | retired 2026-06-12 |
 | `tool-bird` | `bird` (now in private overlay) | v1.4.0 | 2026-08-05 |
 | `tool-deepwiki` | `deepwiki` | v1.4.0 | 2026-08-05 |
-| `tool-browser` | `agent-browser` | v1.4.0 | 2026-08-05 |
+| `tool-browser` | n/a (`agent-browser` archived 2026-06-08) | v1.4.0 | n/a after archive |
 | `tool-slack` / `tool-notion` / `tool-summarize` | n/a (skills cut in v2.2.0) | v1.4.0 | n/a after cut |
 | `agent-browser` | `tool-browser` | v1.1 (then reverted in v1.4.0) | n/a |
 | `content-write` | `write` | v1.1 | expired 2026-08-04 |
