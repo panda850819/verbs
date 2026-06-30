@@ -1,15 +1,15 @@
 ---
 date: 2026-05-04
-last_updated: 2026-05-07
+last_updated: 2026-06-29
 type: test
 tags: [resolver, regression, b-test]
 ---
 
-# Resolver Golden Test — pandastack v1.4.x
+# Resolver Golden Test — pandastack v3.2.x
 
-> **Status: stale (v1.4.x-era spec).** This regression set predates the current 25-skill surface. Cases referencing removed skills (`eng-lead` in T25/T30, `scout` in T19/T26, `brief-morning` in T13/T27, `write-ship`/`content-write` in T10/T16, the private-overlay `bird`/`curate-feeds`) and the deleted persona-voice boardroom (T30's "voice eng-lead missing" abort) no longer describe real behavior. New skills `debug` and `ui` have no cases yet. A v3.1 re-cut is a tracked follow-up; until then treat failures here as expected drift, not regressions.
+> Re-cut 2026-06-29 against the current 25-skill surface (23 core + 2 ext, `manifest.toml` v3.2.0). The v1.4.x-era cases that referenced removed skills (`eng-lead`, `scout`, `brief-morning`, `write-ship`, the private-overlay `bird`/`curate-feeds`/`slack`/`notion`/`summarize`/`agent-browser`) and the deleted persona-voice boardroom abort have been dropped. New `debug` and `ui` cases added; boundary anti-triggers added to lock the debug↔review and ui↔qa collisions the v3.2 descriptions call out.
 
-> 30 prompts × expected skill mapping. Run before merging changes. Catches regressions when prompts → skill matching changes due to renames, new skills, or description tweaks. Updated 2026-05-07 for v1.4.0 tool-* prefix drop and v1.4.1 pdf removal.
+> 31 prompts × expected skill mapping. **Manual spec — not executed by CI** (no automated runner; `tests/run-all.sh` does not read this file). Run by hand before merging changes that touch skill descriptions, names, or the dispatch table; catches routing regressions from renames, new skills, or trigger tweaks.
 
 ## How to run
 
@@ -20,72 +20,70 @@ For each test case:
 3. Compare to expected. Mark pass / fail.
 4. If fail: examine which skill fired instead, decide if it's a description fix, a missing trigger, or an actual regression.
 
-Automated runner is a follow-up — manual eval acceptable for v1.1 cut.
-
 ## Test cases
 
-### Direct slash invocation (12 cases)
+### Direct slash invocation (14 cases)
 
 ```
 T01  /sprint fix hermes cron                    context: personal:developer  → sprint
 T02  /sprint --quick rename one var             context: personal:developer  → sprint (quick mode)
 T03  /office-hours product kill or pivot        context: -                   → office-hours
-T04  /boardroom plans/q2-roadmap.md             context: -                   → boardroom
-T05  /dojo "fix hermes weekly retro cron"       context: personal:developer  → dojo
-T06  /prep "ship the rename batch"              context: personal:developer  → dojo (alias /prep)
-T07  /grill 想做一個 points system              context: -                   → grill (default mode)
-T08  /office-hours --quick points system        context: -                   → office-hours (quick mode)
-T09  /review                                    context: personal:developer  → review
-T10  /ship                                      context: personal:writer     → write-ship (route by context)
-T11  /ship                                      context: personal:developer  → ship (route by context)
-T11b /handover auth-refactor                    context: personal:developer  → handover (sync)
-T11c 把剩下的丟給 codex 做                        context: personal:developer  → handover
-T12  /retro week                                context: -                   → retro-week
+T04  /office-hours --quick points system        context: -                   → office-hours (quick mode)
+T05  /grill 想做一個 points system              context: -                   → grill (default mode)
+T06  /boardroom plans/q2-roadmap.md             context: -                   → boardroom
+T07  /dojo "fix hermes weekly retro cron"       context: personal:developer  → dojo
+T08  /review                                    context: personal:developer  → review
+T09  /ship                                      context: personal:developer  → ship (git mode)
+T10  /handover auth-refactor                    context: personal:developer  → handover (sync)
+T11  /debug auth test fails intermittently      context: personal:developer  → debug
+T12  /ui build the settings page                context: -                   → ui
+T13  /retro-week                                context: -                   → retro-week
+T14  /qa check the checkout flow                context: personal:developer  → qa
 ```
 
-### Old-name aliases — 90-day grace (13 cases)
+### Old-name aliases — frontmatter `aliases:`, 90-day grace (6 cases)
 
 ```
-T13  /morning-briefing                          context: personal:writer     → brief-morning (alias)
-T14  /weekly-retro-prep                         context: personal:writer     → FAIL (retro-prep-week was cut in v2.0.0; expect "skill not found")
-T15  /feed-curator                              context: personal:knowledge-manager  → curate-feeds (alias)
-T16  /content-write                             context: personal:writer     → write (alias)
-T17  /tool-browser open https://example.com     context: -                   → agent-browser (alias, v1.4.0)
-T18  /slowmist-agent-security check this repo   context: -                   → gatekeeper (alias)
-T19  /harness-survey scan public ecosystem      context: -                   → scout (alias)
-T19a /tool-bird read tweet                      context: -                   → bird (alias, v1.4.0)
-T19b /tool-slack search                         context: -                   → slack (alias, v1.4.0)
-T19c /tool-notion get page                      context: -                   → notion (alias, v1.4.0)
-T19d /tool-deepwiki repo                        context: -                   → deepwiki (alias, v1.4.0)
-T19e /tool-summarize https://...                context: -                   → summarize (alias, v1.4.0)
-T19f /agent-browser ...                         context: -                   → agent-browser (no alias; canonical name kept)
+T15  /content-write draft this post             context: personal:writer     → write (alias, grace through 2026-08-04)
+T16  /slowmist-agent-security check this repo   context: -                   → gatekeeper (alias)
+T17  /tool-deepwiki repo                        context: -                   → deepwiki (alias)
+T18  /knowledge-ship                            context: -                   → ship (alias, knowledge mode)
+T19  /prep "ship the rename batch"              context: personal:developer  → dojo (alias)
+T20  /weekly-retro-prep                         context: personal:writer     → FAIL (retro-prep-week cut in v2.0.0; expect "skill not found", no silent wrong-fire)
 ```
 
-### Natural language triggers (8 cases)
+### Natural language triggers (6 cases)
 
 ```
-T20  "is this MCP safe to install"              context: -                   → gatekeeper
-T21  "check this github repo for me"            context: -                   → gatekeeper
+T21  "is this MCP safe to install"              context: -                   → gatekeeper
 T22  "I want to think out loud about X"         context: -                   → office-hours
-T23  "let me prep before I start"               context: personal:developer  → dojo
-T24  "review this plan with all the leads"      context: -                   → boardroom
-T25  "what would the staff engineer say about"  context: -                   → eng-lead (skill mode)
-T26  "scout other harnesses for ideas"          context: -                   → scout
-T27  "morning briefing into today's note"       context: personal:writer     → brief-morning
+T23  "poke holes in this plan before I commit"  context: -                   → boardroom
+T24  "let me prep before I start"               context: personal:developer  → dojo
+T25  "以前是好的，現在報錯" / "used to work, now broken"  context: -          → debug
+T26  "這個頁面很醜，排版怪怪的" / "the layout looks wrong"   context: -          → ui
 ```
 
-### Capability-probe degradation (3 cases)
+### Boundary anti-triggers (collision locks, 2 cases)
 
 ```
-T28  /sprint <topic>     env: ripgrep missing
-                                                                          → sprint runs, capability-probe surfaces missing rg,
-                                                                            stage 1 dojo falls back to find, stage proceeds
-T29  /office-hours <topic>  env: ~/.agents/AGENTS.md missing
+T27  "review my diff before the PR"             context: personal:developer  → review  (NOT debug — a diff to read, no error/crash/regression)
+T28  "QA the checkout flow in the browser"      context: personal:developer  → qa      (NOT ui — runtime verification of real pages, not design taste)
+```
+
+### Degradation & precondition (3 cases)
+
+```
+T29  /sprint <topic>        env: ripgrep missing
+                                                                          → sprint runs; capability-probe surfaces missing rg,
+                                                                            stage-0 dojo falls back to find, stage proceeds
+T30  /office-hours <topic>  env: ~/.agents/AGENTS.md missing
                                                                           → office-hours ABORTS with capability-probe error,
-                                                                            does NOT silently degrade
-T30  /boardroom <plan>      env: skills/eng-lead/ deleted
-                                                                          → boardroom ABORTS at Stage 2 voice scope detection,
-                                                                            error: "voice eng-lead missing"
+                                                                            does NOT silently degrade (manifest: AGENTS.md is
+                                                                            a substrate dep, capability-probe aborts without it)
+T31  /boardroom <fuzzy idea, no prepared plan>
+                                                                          → boardroom declines / routes to office-hours or grill;
+                                                                            needs a PREPARED plan, does NOT convene a panel on an
+                                                                            unformed idea (per its description's NOT clause)
 ```
 
 ## Expected pass/fail tracking
@@ -94,31 +92,31 @@ T30  /boardroom <plan>      env: skills/eng-lead/ deleted
 | Case | Expected | Actual | Pass/Fail | Notes |
 |---|---|---|---|---|
 | T01 | sprint | _ | _ | _ |
-| T02 | sprint (quick mode) | _ | _ | _ |
+| T11 | debug | _ | _ | _ |
+| T12 | ui | _ | _ | _ |
+| T27 | review (not debug) | _ | _ | _ |
 ... fill in during run ...
 ```
 
-## Acceptance criteria for v1.1 cut
+## Acceptance criteria (v3.2.x cut)
 
-- ≥27 / 30 pass (90%) on direct slash + alias + capability-probe (T01-T19, T28-T30 = 22 cases). Allow 2 failures in this set if they're documented and fixable in v1.2.
-- ≥6 / 8 pass on natural language triggers (T20-T27). Description match is fuzzier; 75% threshold acceptable.
-- 0 silent failures (every fail must produce error message, not wrong skill firing without notice).
+- ≥21 / 23 pass (≈90%) on the deterministic set: direct slash + aliases + degradation/precondition (T01-T20, T29-T31 = 23 cases). Allow 2 documented, fixable failures.
+- ≥6 / 8 pass on the fuzzier set: natural-language triggers + boundary anti-triggers (T21-T28 = 8 cases). Description match is fuzzier; 75% threshold acceptable.
+- 0 silent failures (every fail must produce an error message or a defensible wrong-skill trace, not a wrong skill firing unnoticed).
 
 ## Failure response protocol
 
 For each fail:
 
 1. Run `bash scripts/bootstrap.sh` to confirm substrate is healthy at test time.
-2. Read the skill's frontmatter `description:` — does it contain triggering keywords from the prompt?
-3. If description gap: patch description, re-run that case only.
-4. If actual skill is wrong: this is a real regression; examine the resolver's matching logic.
-5. If silent failure (no skill fires): substrate or registration broken; check plugin manifest.
-
-Log all fails to `Inbox/cron-reports/2026-05-04-resolver-test-results.md` with verdict + patch action.
+2. Read the skill's frontmatter `description:` — does it contain the triggering keywords from the prompt?
+3. If description gap: patch description, re-run that case only, then re-run `/skill-eval <name>` (the edit bumps `evaluated_skill_hash`).
+4. If actual skill is wrong: this is a real regression; examine the resolver's matching logic and the `DISPATCH.md` row.
+5. If silent failure (no skill fires): substrate or registration broken; check the plugin manifest + `lint-manifest-sync.sh`.
 
 ## Origin
 
-- codex Blind Spot 2 (2026-05-04 review) — pandastack has no resolver regression test, all dogfood is manual
-- v1.1 cut introduced 7 renames + 4 new flow skills + Layer 1/2/3 split
-- 2026-05-07 update: v1.4.0 dropped the `tool-` prefix on 6 wrappers (added T17, T19a-T19e); v1.4.1 removed `pdf` skill (no test case needed — skill no longer resolves at all)
-- 30 cases is enough to catch obvious breaks; not exhaustive (automation pending)
+- codex Blind Spot 2 (2026-05-04 review) — pandastack had no resolver regression test; all dogfood was manual.
+- 2026-05-07: v1.4.0 dropped the `tool-` prefix on 6 wrappers; v1.4.1 removed `pdf`.
+- 2026-06-29: full re-cut to v3.2.0. Dropped 13 cases for removed/overlay skills (`eng-lead`, `scout`, `brief-morning`, `write-ship`, `bird`, `slack`, `notion`, `summarize`, `agent-browser`, `curate-feeds`); fixed the boardroom case (persona-voice abort → no-plan precondition); added `debug` + `ui` triggers and the debug↔review / ui↔qa boundary anti-triggers; recounted acceptance criteria. Alias cases now track only the live `aliases:` declared in current SKILL.md frontmatter.
+- 31 cases is enough to catch obvious breaks; not exhaustive (automation still pending).
