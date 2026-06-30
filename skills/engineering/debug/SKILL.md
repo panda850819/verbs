@@ -32,5 +32,4 @@ accumulators, schema category-leak, and CLI archetypes: PATH drift, stdout/stder
 backpressure, cold-start), instrument-first-by-bug-class, bisect with worktree safety, and the
 3-failed-hypotheses handoff template.
 
-Root cause is a bug class not in that file and not in `docs/learnings/` → write a learning
-(`lib/learning-format.md`). Matches one → bump its `recurrence`.
+Recall first per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md) (store-agnostic): pull learnings matching the symptom / bug class before hypothesizing. Root cause is a bug class not in that file and with no matching learning → write a learning (`lib/learning-format.md`). Matches an existing one → bump its `recurrence` + `last_seen` (bug classes genuinely recur, so debug is where the recurrence ratchet earns its keep).
