@@ -7,14 +7,14 @@ if `retro-scan.sh` cannot run.
 
 ### 1a. Git activity (past 30 days)
 
-Engine runs `git log` over the brain repo and every `~/site/{skills,apps,cli,trading}/*` repo. Summarize: total commits + key deliverables by repo.
+Engine runs `git log` over the brain repo and every repo matched by `PANDASTACK_SCAN_PATHS` (default `~/site/{skills,apps,cli,trading}/*`; unset on a fresh install → scans the brain only). Summarize: total commits + key deliverables by repo.
 
 ### 1b. Learnings health — `brain/learnings/`
 
-Engine counts total / new-this-month / stale(90d+) under `$HOME/site/knowledge/brain/learnings/`. If missing, it notes "learnings/ not found — skip". Manual fallback:
+Engine counts total / new-this-month / stale(90d+) under `$PANDASTACK_BRAIN/learnings/` (default `~/site/knowledge/brain/learnings/`). If missing, it notes "learnings/ not found — skip". Manual fallback:
 
 ```bash
-LEARNINGS_DIR="$HOME/site/knowledge/brain/learnings"
+LEARNINGS_DIR="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}/learnings"
 ls "$LEARNINGS_DIR"/*.md 2>/dev/null | wc -l                                          # total
 find "$LEARNINGS_DIR" -name "*.md" -newer <(date -v-30d +%Y-%m-%d) 2>/dev/null | wc -l # new this month
 find "$LEARNINGS_DIR" -name "*.md" -not -newer <(date -v-90d +%Y-%m-%d) 2>/dev/null | wc -l # stale 90d+
@@ -31,7 +31,7 @@ Engine sweeps recent `feedback_*.md` across all three runtimes (Claude / substra
 ### Reference last 4 retro-week files (month-only)
 
 ```bash
-RETRO_WEEKLY="$HOME/site/knowledge/brain/reflections/weekly"
+RETRO_WEEKLY="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}/reflections/weekly"
 ls "$RETRO_WEEKLY"/*.md 2>/dev/null | sort -r | head -4
 ```
 

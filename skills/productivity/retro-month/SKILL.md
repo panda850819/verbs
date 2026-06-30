@@ -18,8 +18,12 @@ Three-phase flow:
 **Data source = the BRAIN, not the retired obsidian-vault.** Phase 1 raw-data gathering is done by the shared, runtime-agnostic engine so Claude / Codex / Hermes all produce the same brief:
 
 ```bash
-bash ~/site/skills/pandastack/scripts/retro-scan.sh month
-# → writes brain/inbox/retros/<date>-retro-month-prep.md and prints its path
+# Engine path: the pandastack checkout by default; the plugin root when installed via /plugin.
+RETRO_SCAN="$HOME/site/skills/pandastack/scripts/retro-scan.sh"
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && RETRO_SCAN="$CLAUDE_PLUGIN_ROOT/scripts/retro-scan.sh"
+bash "$RETRO_SCAN" month
+# → prints the prep-brief path it wrote: $BRAIN/inbox/retros/<date>-retro-month-prep.md when a
+#   brain exists, else ./.pandastack/retros/. Override brain location with PANDASTACK_BRAIN.
 ```
 
 Run standalone OR after a Hermes cron has pre-generated the brief. Then read it and print a compressed scan block before Phase 2.
@@ -40,8 +44,9 @@ Then say: **"掃完了。要開始月度 interview 嗎？"** — wait for user.
 
 ```bash
 LAST_MONTH=$(date -v-1m +%Y-%m)
-# Engine (and any Hermes cron) writes prep to brain/inbox/retros/$DATE-retro-month-prep.md
-PREP=$(ls -t "$HOME/site/knowledge/brain/inbox/retros/"*-retro-month-prep.md 2>/dev/null | head -1)
+# Engine writes prep to $BRAIN/inbox/retros (or ./.pandastack/retros when no brain). Check both.
+BRAIN="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}"
+PREP=$(ls -t "${PANDASTACK_RETRO_OUT:-$BRAIN/inbox/retros}/"*-retro-month-prep.md ./.pandastack/retros/*-retro-month-prep.md 2>/dev/null | head -1)
 ```
 
 If prep file exists: print a compressed summary in Traditional Chinese, max 40 lines, of the engine's real sections:
@@ -98,13 +103,15 @@ For each `status: active` pattern in feedback-log.md:
 
 ## Phase 3: Write final retro
 
-Ensure output directory exists:
+Pick the output dir — write into the brain when one exists, else a local fallback so a brain-less install doesn't fabricate the author's tree:
 
 ```bash
-mkdir -p "$HOME/site/knowledge/brain/reflections/monthly"
+BRAIN="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}"
+if [ -d "$BRAIN" ]; then OUT_DIR="$BRAIN/reflections/monthly"; else OUT_DIR="docs/retros/monthly"; fi
+mkdir -p "$OUT_DIR"
 ```
 
-Write `brain/reflections/monthly/$YEAR-$MONTH.md` (brain, not vault). Full output template (frontmatter + every section) → [`skills/productivity/retro-month/lib/retro-template.md`](skills/productivity/retro-month/lib/retro-template.md). Every section traces to interview answers or Phase 1 scan — never invent.
+Write `$OUT_DIR/$YEAR-$MONTH.md` (the brain when present, else local `docs/retros/monthly/`). Full output template (frontmatter + every section) → [`skills/productivity/retro-month/lib/retro-template.md`](skills/productivity/retro-month/lib/retro-template.md). Every section traces to interview answers or Phase 1 scan — never invent.
 
 ### Step 3b: Updates to other files
 

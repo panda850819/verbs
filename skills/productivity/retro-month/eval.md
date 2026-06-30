@@ -2,36 +2,36 @@
 type: skill-eval
 skill: retro-month
 bucket: productivity
-evaluated_skill_hash: d58a1009f8dc2fa9f162a2e7854ffd3777bdd74c
-evaluated_at: 2026-06-26
+evaluated_skill_hash: 2c943729c43076cebba14bf4f3615e5303ac3897
+evaluated_at: 2026-06-30
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — retro-month
 
-**Verdict: SOLID.** Leading virtue is a hard-anchored interview process (one-question-at-a-time, verbatim capture, no-invent rule) that makes the strategic conversation reproducible. The earlier engine-section mismatch and scan-only completion hole are repaired; remaining cost is a 126-line body and some residual monthly-specific memory-update complexity.
+**Verdict: SOLID.** A hard-anchored one-question interview with a completion floor that survives every branch, now made distribution-safe via env-var indirection and brain-less write guards without disturbing the process spine.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L61 — "Walk through layers ONE QUESTION AT A TIME" plus the fixed 3-phase spine (L14-16) pins the same process every run regardless of output. |
-| Description / invocation | pass | L3 — front-loads "Interactive monthly retro", user-invocable, one trigger per branch ("/retro-month", "monthly retro", "monthly review"), no body-identity restated. |
-| Completion criteria | pass | L57 — either branch must wait for the user's interview start, and L61 makes 2b-i goal-alignment the completion floor for every branch including scan-only and short mode. |
-| Information hierarchy | pass | L31 — engine block details and weekly-retro reference commands are pushed behind `skills/productivity/retro-month/lib/scan-blocks.md`; the Phase-3 template is behind `skills/productivity/retro-month/lib/retro-template.md` (L107). |
-| Leading words | pass | L70 "Drift candidates" / L89 "commodity check" / L123 "append + supersede" anchor behaviour in compact reusable concepts. |
-| Pruning | pass | L47 — Phase 2 now prints the engine's real sections instead of re-describing obsolete scan subsections; the output template and scan-block details are cold pointers. |
-| Granularity | pass | L61 — the 2b-i-through-2b-v split is justified by anti-premature-completion (short-version still forces goal-alignment), each layer earns its load. |
-| pandastack conformance | weak | L107 — all internal refs resolve and the engine-section mismatch is gone; weak only because the body is 126 lines, above the ~80 guideline, with project-memory and feedback-log update branches still hot. |
+| Predictability | pass | L13 — the fixed three-phase spine (auto-scan → interview → write) pins the same _process_ every run regardless of the output it produces; the engine is shared so Claude/Codex/Hermes converge. |
+| Description / invocation | weak | L3 — front-loads "Interactive monthly retro" and stays out of the body, but carries three trigger phrasings for one branch ("/retro-month", "monthly retro", "monthly review"); the two NL forms are synonyms renaming one branch and should collapse (same call the sibling retro-week eval made). |
+| Completion criteria | pass | L66 — "A run that produced only the scan with no goal-alignment answers is not done" is a checkable, every-branch (scan-only / 短版) floor that forces the legwork and blocks premature completion. |
+| Information hierarchy | pass | L35 — engine block detail + weekly-retro reference commands pushed behind `lib/scan-blocks.md`; the full output template behind `lib/retro-template.md` (L114), leaving the steps hot and the reference cold. |
+| Leading words | pass | L130 — "append + supersede over delete + rewrite" borrows a pretrained version-control anchor to compact the memory-update discipline in a few tokens; "drift" (L75) and "commodity" (L94) anchor likewise. |
+| Pruning | weak | L132 — the scan-only/短版 completion floor is restated a third time here after L62 and the canonical L66; one meaning in three places, on top of a 124-line body (rubric guideline ~<80). |
+| Granularity | pass | L94 — 2b-v is split out as an always-ask atomic layer distinct from the conditional 2b-ii–iv, and the 短版 path (L132) still forces 2b-i; each sequence split earns its load against premature completion. |
+| pandastack conformance | weak | L110 — the brain-less write guard (`if [ -d "$BRAIN" ] … else docs/retros/monthly`) and the `$CLAUDE_PLUGIN_ROOT` engine fallback (L23) are correct distribution-safe robustness, frontmatter is valid and both `lib/` refs resolve; weak only on the 124-line body over the ~80 guideline. |
 
 ## Why it's good
-The interview engine is the load-bearing strength: one-question-at-a-time (L61), verbatim capture including "想不到/沒有" (L93), and a hard never-invent rule (L124) make a genuinely stochastic strategic conversation reproducible. The runtime-agnostic scan engine (L18-23) guarantees Claude/Codex/Hermes produce the same brief, and the append+supersede memory discipline (L123) protects project memory from lossy rewrites.
+The interview engine is the load-bearing strength: one-question-at-a-time with a hard completion floor (L66) that even scan-only and 短版 runs cannot short-circuit, verbatim capture including "想不到/沒有" (L98), and a never-invent rule (L114) make a genuinely stochastic strategic conversation reproducible. The path de-personalization is a clean robustness win, not a defect: `${PANDASTACK_BRAIN:-…}` defaults (L48, L109), a `$CLAUDE_PLUGIN_ROOT` engine path with a checkout fallback (L22-23), and a write guard that falls back to `docs/retros/monthly/` so a brain-less install never fabricates the author's tree (L110). The append+supersede memory discipline (L130) protects project memory from lossy rewrites.
 
 ## Top fixes
-1. L83-87 — `feedback-log.md` is still named directly; align it with the newer weekly retro pattern of deriving from active feedback files, or document where the file lives.
-2. L76-80 — project memory edits are powerful side effects; add a brief "draft-and-confirm before edit" gate if this skill is run outside a fully interactive monthly retro.
-3. L107-115 — push the mechanical update checklist behind `skills/productivity/retro-month/lib/retro-template.md` or a sibling reference if trimming toward ~80 lines becomes a priority.
+1. L3 — collapse "monthly retro" / "monthly review" into one trigger, or justify why both NL phrasings are needed; as written they rename a single branch.
+2. L62 / L66 / L132 — keep the scan-only completion floor in one canonical place (L66) and have L62 and L132 point back to it instead of re-stating the rule.
+3. L116-122 — push the Step 3b mechanical update checklist behind a `lib/` reference to pull the body back toward ~80 lines without losing the interview spine.
 
 ## Behavioral cases
-- trigger `/retro-month` -> expected process: run retro-scan.sh month, print compressed scan block, ask "掃完了。要開始月度 interview 嗎？", then one-question-at-a-time interview, then write brain/reflections/monthly/$YEAR-$MONTH.md.
-- trigger `monthly review` -> expected process: same 3-phase flow; if a Hermes cron already wrote the prep, locate it via ls -t inbox/retros and read instead of re-scanning.
-- anti-trigger `weekly retro` -> should NOT fire (routes to retro-week; 30-day vs 7-day window and monthly output dir differ).
-- anti-trigger `stress test this idea` -> should NOT fire (routes to grill/office-hours; that is fuzzy-idea intake, not a periodic retro).
+- trigger `/retro-month` → expected process: run `retro-scan.sh month` via `$CLAUDE_PLUGIN_ROOT` or the checkout fallback (L22-24), print the compressed scan block, ask "掃完了。要開始月度 interview 嗎？" (L37), then one-question-at-a-time interview through 2b-i…2b-v, then write `$OUT_DIR/$YEAR-$MONTH.md` (brain if present, else `docs/retros/monthly/`).
+- trigger `monthly review` → expected process: same three-phase flow; if a Hermes cron already wrote the prep, locate it via `ls -t` over `$BRAIN/inbox/retros` (L49) and read instead of re-scanning.
+- anti-trigger `weekly retro` → should NOT fire (routes to retro-week; 7-day vs 30-day window, weekly output dir).
+- anti-trigger `stress test this idea` → should NOT fire (routes to grill / office-hours; fuzzy-idea intake, not a periodic retro).

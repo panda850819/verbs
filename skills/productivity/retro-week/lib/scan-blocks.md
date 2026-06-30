@@ -7,11 +7,11 @@ if `retro-scan.sh` cannot run.
 
 ### 1a. Git activity (past 7 days)
 
-Engine runs `git log` over the brain repo and every `~/site/{skills,apps,cli,trading}/*` repo. Summarize: total commits across repos, key deliverables by repo name.
+Engine runs `git log` over the brain repo and every repo matched by `PANDASTACK_SCAN_PATHS` (default `~/site/{skills,apps,cli,trading}/*`; unset on a fresh install → scans the brain only). Summarize: total commits across repos, key deliverables by repo name.
 
 ### 1b. Learnings health — `brain/learnings/`
 
-Engine counts total / new-this-week / stale(90d+) under `$HOME/site/knowledge/brain/learnings/`. If missing, it notes "learnings/ not found — skip".
+Engine counts total / new-this-week / stale(90d+) under `$PANDASTACK_BRAIN/learnings/` (default `~/site/knowledge/brain/learnings/`). If missing, it notes "learnings/ not found — skip".
 
 ### 1c. Recent brain activity — past 7 days
 

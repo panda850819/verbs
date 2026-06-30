@@ -20,8 +20,13 @@ Multi-phase flow:
 **Data source = the BRAIN, not the retired obsidian-vault.** All Phase 1 / 1.5 / 1.6 raw-data gathering is done by the shared, runtime-agnostic engine so Claude / Codex / Hermes all produce the same brief:
 
 ```bash
-bash ~/site/skills/pandastack/scripts/retro-scan.sh week
-# → writes the prep brief to brain/inbox/retros/<date>-retro-week-prep.md and prints its path
+# Engine path: the pandastack checkout by default; the plugin root when installed via /plugin.
+RETRO_SCAN="$HOME/site/skills/pandastack/scripts/retro-scan.sh"
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && RETRO_SCAN="$CLAUDE_PLUGIN_ROOT/scripts/retro-scan.sh"
+bash "$RETRO_SCAN" week
+# → prints the prep-brief path it wrote: $BRAIN/inbox/retros/<date>-retro-week-prep.md when a
+#   brain exists, else ./.pandastack/retros/. Override brain location with PANDASTACK_BRAIN;
+#   see scripts/retro-scan.sh header for all env knobs.
 ```
 
 Run standalone OR after a Hermes cron has already pre-generated the brief (same script, same output path). Then read that brief and print a compressed scan block to the user before Phase 2.
@@ -71,7 +76,7 @@ Only `gbrain query` / `search` / `list` exist; salience, anomalies, and topic st
 SINCE_7D=$(date -v-7d +%Y-%m-%d)
 
 # Hotspot pages this week (commit frequency = salience proxy) — input for THESIS
-git -C ~/site/knowledge/brain log --since="$SINCE_7D" --name-only --pretty=format: \
+git -C "${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}" log --since="$SINCE_7D" --name-only --pretty=format: \
   | grep '\.md$' | sort | uniq -c | sort -rn | head -20
 
 # Per top-3 hotspot TOPIC, pull older brain context — input for CONTRADICTIONS
@@ -131,7 +136,7 @@ RECENT_CONTINUE_EVENTS=$(SINCE=$(date -v-7d +%Y-%m-%d); \
 
 # Compound-loop GC fuel: dispatch misses + fresh pitfalls (see skills/productivity/retro-week/lib/gc-inputs.md).
 DISPATCH_MISSES=$(tail -n 50 "$HOME/.agents/memory/dispatch-miss.log" 2>/dev/null)
-RECENT_PITFALLS=$(find "$HOME/site/knowledge/brain/learnings/pitfalls" -name "*.md" -mtime -7 2>/dev/null)
+RECENT_PITFALLS=$(find "${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}/learnings/pitfalls" -name "*.md" -mtime -7 2>/dev/null)
 ```
 
 ### 1h. Build GC proposal table
@@ -194,8 +199,9 @@ Then say: **"GC sweep 完了。Phase 2 會把每個 proposal 變成 yes/no/defer
 WEEK_NUM=$(date +%V)
 YEAR=$(date +%Y)
 TODAY=$(date +%Y-%m-%d)
-# Engine (and any Hermes cron) writes prep to brain/inbox/retros/$DATE-retro-week-prep.md
-PREP=$(ls -t "$HOME/site/knowledge/brain/inbox/retros/"*-retro-week-prep.md 2>/dev/null | head -1)
+# Engine writes prep to $BRAIN/inbox/retros (or ./.pandastack/retros when no brain). Check both.
+BRAIN="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}"
+PREP=$(ls -t "${PANDASTACK_RETRO_OUT:-$BRAIN/inbox/retros}/"*-retro-week-prep.md ./.pandastack/retros/*-retro-week-prep.md 2>/dev/null | head -1)
 ```
 
 If prep file exists: read and print a compressed summary (Traditional Chinese, max 30 lines):
@@ -258,12 +264,14 @@ Ask exactly once at the end of the interview:
 
 ## Phase 3: Write final retro
 
-After interview, write `brain/reflections/weekly/$YEAR-W$WEEK_NUM.md` (brain, not vault). Full page template (frontmatter + all sections: Git Activity, Learnings Health, Decisions, Validated/Rejected Observations, Feedback Pattern Status, Recommendation, What I'm Sitting With, Obsolete-yourself Candidate, GC Decisions) → [`skills/productivity/retro-week/lib/output-formats.md`](skills/productivity/retro-week/lib/output-formats.md) (Phase 3 section). Recommendation for Next Week obeys the same reading-source discipline as Phase 1.5 (no named source without a vault basis).
+After interview, write `$OUT_DIR/$YEAR-W$WEEK_NUM.md` (the brain when present, else local `docs/retros/weekly/`). Full page template (frontmatter + all sections: Git Activity, Learnings Health, Decisions, Validated/Rejected Observations, Feedback Pattern Status, Recommendation, What I'm Sitting With, Obsolete-yourself Candidate, GC Decisions) → [`skills/productivity/retro-week/lib/output-formats.md`](skills/productivity/retro-week/lib/output-formats.md) (Phase 3 section). Recommendation for Next Week obeys the same reading-source discipline as Phase 1.5 (no named source without a vault basis).
 
-Ensure `brain/reflections/weekly/` directory exists before writing:
+Pick the output dir before writing — write into the brain when one exists, else a local fallback so a brain-less install doesn't fabricate the author's tree:
 
 ```bash
-mkdir -p "$HOME/site/knowledge/brain/reflections/weekly"
+BRAIN="${PANDASTACK_BRAIN:-$HOME/site/knowledge/brain}"
+if [ -d "$BRAIN" ]; then OUT_DIR="$BRAIN/reflections/weekly"; else OUT_DIR="docs/retros/weekly"; fi
+mkdir -p "$OUT_DIR"
 ```
 
 ### Step 3b: Updates to other files
