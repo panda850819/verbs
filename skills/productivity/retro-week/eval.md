@@ -2,36 +2,36 @@
 type: skill-eval
 skill: retro-week
 bucket: productivity
-evaluated_skill_hash: 7b6457186eaf2a9a8fa3c40a0f1279e644344246
-evaluated_at: 2026-06-29
+evaluated_skill_hash: 5e59891e3b7be47ef9f768b387a73c972dcec371
+evaluated_at: 2026-06-30
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — retro-week
 
-**Verdict: SOLID.** Leading virtue is a discipline-spine: propose-only GC, a hard `count >= 2` recurrence gate, and a per-phase wait gate make the five-phase flow deterministic and hard to short-circuit.
+**Verdict: SOLID.** One deterministic shared engine drives identical cross-runtime prep, and every phase ends on a hard wait gate.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L13 — five-phase flow (scan → synthesis → GC → interview → write), each boundary ending on an explicit wait-for-user; write target stays one path (L18 overview + L261 step both say `brain/reflections/weekly/`), no Phase-1/Phase-3 contradiction. |
-| Description / invocation | pass | L3 — front-loads the leading phrase "Five-phase weekly retro," states what it does, and carries the minimal trigger set (one slash command + one NL form collapsed to "weekly retro/review"); no body-identity restated. |
-| Completion criteria | pass | L148 — GC proposal gated on a checkable `count >= 2`; every phase ends on a concrete print + wait gate (L56, L97, L178, L210), so no step invites premature completion. |
-| Information hierarchy | pass | L145 — the #106 win: GC classify catalogs (keyword→mechanism, reason→propose) now sit behind a `lib/gc-inputs.md` pointer instead of hot in the body; verbatim layouts live in `lib/output-formats.md` (L93, L176, L261), scan detail in `lib/scan-blocks.md` (L33). |
-| Leading words | pass | L108 — "Garbage Collection" borrows Lopopolo's pretrained anchor to compress the convert-slop-to-mechanism sub-protocol; "forcing function," "hotspot," "salience proxy" (L73) anchor compactly. |
-| Pruning | weak | L70 — the Phase 1.5 synthesis shell probes (~20 commented lines, L70-89) are still hot and overlap with what L33 says the engine "already covers (gbrain synthesis)"; SSOT itself is clean (recurrence gate defined once at L148, back-referenced at L174/L176/L183), but residual command detail remains prunable. |
-| Granularity | pass | L60 / L106 — Phase 1.5 (synthesis) and Phase 1.6 (GC) are distinct processes with distinct inputs/outputs and their own skip conditions (L62 gbrain-absent skip; L185 empty-week block); each split earns its load. |
-| pandastack conformance | weak | L284 — frontmatter valid, all three `lib/` refs resolve, hot/cold dispatch honoured (catalogs cold), but the body is 284 lines, well over the ~<80 guideline; the five-phase gated flow earns much of it, not all. |
+| Predictability | pass | L20 — "All Phase 1 / 1.5 / 1.6 raw-data gathering is done by the shared, runtime-agnostic engine so Claude / Codex / Hermes all produce the same brief" — same process every run, across runtimes. |
+| Description / invocation | weak | L3 — "writes the final retro to brain/reflections/weekly/" names a single fixed destination, but the de-personalized body (L273) falls back to `docs/retros/weekly/` on a brain-less install; the description overstates the path. |
+| Completion criteria | pass | L153 — "A mechanism proposal … may ONLY be emitted to the table when `count >= 2`" is checkable and exhaustive; each phase boundary also ends on a concrete wait-for-user gate (L61, L102, L183, L216). |
+| Information hierarchy | pass | L150 — the keyword→mechanism classification catalog is pushed behind a context pointer to `lib/gc-inputs.md` (the #106 move); SKILL.md keeps the classify steps + recurrence gate hot, the lookup table loads cold. |
+| Leading words | pass | L113 — borrows Lopopolo's "categorically eliminate" / forcing-function anchor to compact the convert-slop-to-mechanism sub-protocol; "hotspot"/"salience proxy" (L78) anchor compactly too. |
+| Pruning | weak | L188 — the 1j "what NOT to do" block restates the recurrence gate already canonical at L153 (and the proposes-only rule at L115); a recap that fails the no-op test, curable with a cross-reference. |
+| Granularity | pass | L7 — `related_skills: [retro-month, ship]` shows the by-sequence split (week vs month) drawn cleanly; Phase 1.5 / 1.6 are gated sub-processes with their own skip conditions, no independent trigger warranting their own skill. |
+| pandastack conformance | weak | L42 — frontmatter valid, all three `lib/` refs resolve, and the `${PANDASTACK_BRAIN}` / `$CLAUDE_PLUGIN_ROOT` indirection + write guards are correct robustness; the one residual miss is length: the Phase-1 raw-scan format is still inlined (L44-59) while its Phase-1.5/1.6/3 siblings live in `lib/output-formats.md`, leaving the body ~293 lines over the ~<80 bar. |
 
 ## Why it's good
-The #106 slim landed cleanly: the GC keyword→mechanism and reason→propose catalogs moved out of the body into `lib/gc-inputs.md`, so the body shrank from ~309 to 284 lines while the recurrence gate keeps a single canonical definition (L148) that downstream steps back-reference rather than re-state. The spine is discipline — propose-only GC (L110, L182), a hard `count >= 2` gate, and an explicit user wait at every phase boundary make the process reproducible and resistant to short-circuiting.
+The spine is a single shared engine (`retro-scan.sh`, resolved via `$CLAUDE_PLUGIN_ROOT` with a checkout fallback at L25) so Claude, Codex, and Hermes generate the same prep brief, and every phase transition is a hard "wait for user" gate that keeps the run deterministic without freezing the conversation. The de-personalization is a real conformance win: `${PANDASTACK_BRAIN}` plus the brain-present write guard (L273) make a brain-less install degrade to a local `docs/retros/weekly/` fallback instead of fabricating the author's tree. The GC sweep's `count >= 2` recurrence gate (L153) is a genuinely checkable criterion that stops one-off corrections from becoming mechanisms.
 
 ## Top fixes
-1. L70-89 — move the Phase 1.5 synthesis shell probes (git-log hotspots + `gbrain query`, with their THESIS / CONTRADICTIONS / GAP comments) into `lib/scan-blocks.md`; keep only the process gate + skip condition hot. This is the largest remaining hot block and was the prior eval's Top fix #3, still not landed.
-2. L33 vs L66 — resolve the ambiguity: L33 says the engine "already covers… gbrain synthesis," yet L66-89 has the agent re-derive synthesis inputs as if always run. State whether step 1e reads engine output or is a standalone fallback (mirror the explicit "only when running standalone" guard already used for GC inputs at L114).
-3. L154 — the awk quote-stripping minutiae (`gsub(/^[ ]*"|"[ ]*$/, "", question)`) is implementation detail; push it to `lib/gc-inputs.md` and keep only the "strip surrounding quotes before grouping" instruction hot.
+1. L185–190 — collapse the 1j discipline recap into a cross-reference to L115 / L153; as written it re-states rules already canonical elsewhere (no-op / sediment).
+2. L42 — move the Phase-1 raw-scan format (L44-59) into `lib/output-formats.md` to match its siblings; this both fixes the hot/cold inconsistency and trims the body toward the ~<80 bar.
+3. L3 — align the description's destination with the de-personalized fallback (e.g. "writes the retro to the brain, local `docs/retros/weekly/` fallback") so it no longer overstates a brain-only path.
 
 ## Behavioral cases
-- trigger `/retro-week` → expected process: run `retro-scan.sh week`, print the compressed scan block, Phase 1.5 synthesis (on a user gate), Phase 1.6 GC sweep (on a user gate), one-question-at-a-time interview, then write `brain/reflections/weekly/$YEAR-W$WEEK_NUM.md`.
-- trigger `weekly review` → expected process: same five-phase flow (NL branch); if a Hermes cron pre-generated the brief, read it from `brain/inbox/retros/` instead of re-scanning (L27).
-- anti-trigger `monthly review` → should NOT fire (routes to retro-month).
-- anti-trigger `ship this note` → should NOT fire (routes to ship; retro-week writes only the retro page and never git-commits, L273).
+- trigger `/retro-week` → expected process: run the shared engine scan (Phase 1) and print the compressed scan block, gate; auto-generate brain synthesis (1.5) and the GC sweep (1.6) as propose-only blocks, each on a user gate; conduct a one-question-at-a-time interview; write the final retro to `brain/reflections/weekly/` (local `docs/retros/weekly/` fallback if no brain).
+- trigger `weekly review` → expected process: same five-phase flow; if a Hermes cron pre-generated the brief, read it from `$BRAIN/inbox/retros/` instead of re-scanning (L32).
+- anti-trigger `monthly retro` → should NOT fire (routes to `retro-month`).
+- anti-trigger `ship this note` → should NOT fire (routes to `ship`; retro-week writes only the retro page and never git-commits, L281).
