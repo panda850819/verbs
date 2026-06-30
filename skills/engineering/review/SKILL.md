@@ -67,7 +67,7 @@ grep -rl "keyword" {learnings_dir}/ 2>/dev/null
 Read matching files. For each match, note:
 "Prior learning: [key] (confidence N/10, from [date])"
 
-Apply confidence decay per `skills/engineering/review/lib/confidence.md` rules. Skip learnings with effective confidence < 3.
+Apply confidence decay: `effective = max(0, confidence − floor(days_since_created / 30))` — `observed`/`inferred` sources lose 1 point per 30d, `user-stated` never decays. Skip learnings with effective confidence < 3.
 
 ## Step 3: Brief Alignment Check
 
