@@ -85,6 +85,8 @@ ext_check() {
 ext_check "agent-browser"  "agent-browser" "npm install -g agent-browser"
 ext_check "deepwiki"       "curl"          "(curl + jq, usually preinstalled)"
 ext_check "qa"             "agent-browser" "npm install -g agent-browser"
+ext_check "ship"           "gh"            "brew install gh  (GitHub CLI, for the PR step)"
+ext_check "handover"       "codex"         "npm install -g @openai/codex  (Codex CLI)"
 
 echo
 

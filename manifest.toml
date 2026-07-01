@@ -68,8 +68,13 @@ updated = "2026-06-30"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (21) — markdown-only, fresh-clone runnable
+# CORE (19) — markdown-only, fresh-clone runnable
 # Buckets on disk: engineering / productivity / writing / meta
+#
+# "No external CLI" is literal: git is the one assumed substrate CLI (a fresh
+# clone already has it), so review / debug / team-orchestrate stay core with a
+# cli:git requirement. Skills needing a genuinely optional external CLI (gh,
+# codex, agent-browser, …) are ext, not core — see /ship and /handover below.
 # ============================================================================
 
 [skill.careful]
@@ -118,16 +123,6 @@ tier = "core"
 requires = ["cli:git"]
 description = "Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui)."
 
-[skill.ship]
-tier = "core"
-requires = ["cli:git", "cli:gh"]
-description = "Multi-mode ship verb: git (default), knowledge (incl. decision-note variant for work-topic close, replaces v2.1 /work-ship). Knowledge mode runs from vault root."
-
-[skill.handover]
-tier = "core"
-requires = ["cli:git", "cli:codex"]
-description = "Hand unfinished work to Codex to DO (not /ship, which closes finished work): sync (spawn codex exec now) or --async (write payload for Hermes). Codex runs on ChatGPT-subscription quota, conserving the Claude session."
-
 [skill.skill-creator]
 tier = "core"
 description = "Create new pandastack skills, MECE-checked against RESOLVER, trigger-first evolution."
@@ -162,7 +157,7 @@ tier = "core"
 description = "Build/fix UI with a committed point of view. Four override reflexes + craft lore in references (reflex-font blocklist, CJK+Latin type, OKLCH, CSS bans+rewrites, strategic omissions). NOT browser-test (qa) or render-bug debugging (debug)."
 
 # ============================================================================
-# EXT (2) — public CLI dependencies
+# EXT (4) — public CLI dependencies
 # ============================================================================
 
 [skill.qa]
@@ -174,6 +169,16 @@ description = "Browser-based UI QA, real pages, real flows."
 tier = "ext"
 requires = ["cli:curl", "cli:jq"]
 description = "GitHub repo docs + Mermaid diagrams via deepwiki."
+
+[skill.ship]
+tier = "ext"
+requires = ["cli:git", "cli:gh"]
+description = "Multi-mode ship verb: git (default), knowledge (incl. decision-note variant for work-topic close, replaces v2.1 /work-ship). Knowledge mode runs from vault root. The git-mode PR step needs `gh`, hence ext."
+
+[skill.handover]
+tier = "ext"
+requires = ["cli:git", "cli:codex"]
+description = "Hand unfinished work to Codex to DO (not /ship, which closes finished work): sync (spawn codex exec now) or --async (write payload for Hermes). Codex runs on ChatGPT-subscription quota, conserving the Claude session. Needs the `codex` CLI, hence ext."
 
 # ============================================================================
 # Notes

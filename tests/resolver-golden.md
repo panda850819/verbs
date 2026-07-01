@@ -7,7 +7,7 @@ tags: [resolver, regression, b-test]
 
 # Resolver Golden Test — pandastack v3.2.x
 
-> Re-cut 2026-06-29 against the current 23-skill surface (21 core + 2 ext, `manifest.toml`). The v1.4.x-era cases that referenced removed skills (`eng-lead`, `scout`, `brief-morning`, `write-ship`, the private-overlay `bird`/`curate-feeds`/`slack`/`notion`/`summarize`/`agent-browser`) and the deleted persona-voice boardroom abort have been dropped. New `debug` and `ui` cases added; boundary anti-triggers added to lock the debug↔review and ui↔qa collisions the v3.2 descriptions call out.
+> Re-cut 2026-06-29 against the current 23-skill surface (19 core + 4 ext, `manifest.toml`). The v1.4.x-era cases that referenced removed skills (`eng-lead`, `scout`, `brief-morning`, `write-ship`, the private-overlay `bird`/`curate-feeds`/`slack`/`notion`/`summarize`/`agent-browser`) and the deleted persona-voice boardroom abort have been dropped. New `debug` and `ui` cases added; boundary anti-triggers added to lock the debug↔review and ui↔qa collisions the v3.2 descriptions call out.
 
 > 31 prompts × expected skill mapping. **Manual spec — not executed by CI** (no automated runner; `tests/run-all.sh` does not read this file). Run by hand before merging changes that touch skill descriptions, names, or the dispatch table; catches routing regressions from renames, new skills, or trigger tweaks.
 
