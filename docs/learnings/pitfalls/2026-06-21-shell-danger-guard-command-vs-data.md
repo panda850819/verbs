@@ -3,7 +3,7 @@ type: pitfall
 key: shell-danger-guard-command-vs-data
 confidence: 9
 source: observed
-skill: eng-lead
+skill: debug
 files:
   - plugins/pandastack/hooks/pretooluse-destructive-guard.sh
   - tests/destructive-guard-test.sh

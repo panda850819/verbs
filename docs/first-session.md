@@ -26,7 +26,7 @@ If the brief routes to build work, run the plan it named:
 /sprint --plan <the-slug-it-printed>
 ```
 
-`sprint` runs a focused execution loop and ends in exactly one terminal state: **SHIPPED / PAUSED / FAILED**. PAUSED is a legitimate stop, not a failure.
+`sprint` runs a focused execution loop and ends in one of four terminal states: **SHIPPED / PAUSED / FAILED / ABORTED_BY_USER**. PAUSED is a legitimate stop, not a failure.
 
 ## 3. (optional) Close a note (2 min)
 
@@ -41,7 +41,7 @@ This extracts any reusable learning and files it. It never writes to external sy
 ## What "done" looks like
 
 - **office-hours** → a brief file in `docs/briefs/` ending with a "Next skill (recommended)" line.
-- **sprint** → a printed terminal state (SHIPPED/PAUSED/FAILED), not a vibe.
+- **sprint** → a printed terminal state (SHIPPED/PAUSED/FAILED/ABORTED_BY_USER), not a vibe.
 - Each run opens with a **capability-probe** block telling you what's available. Ext CLIs you haven't installed show as a one-line install hint, not an error.
 
 ## If a skill aborts

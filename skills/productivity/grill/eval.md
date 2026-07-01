@@ -18,7 +18,7 @@ rubric: writing-great-skills@1.0.0
 | Completion criteria | pass | L71 — stopping rule is checkable and exhaustive (3 consecutive no-new-unknowns OR 7+ questions OR escape hatch), with exact log lines (L84) on the hard cap defending against premature continuation. |
 | Information hierarchy | pass | L51 — push-once is correctly deferred to lib/push-once.md (body keeps the trigger, lib holds the 5-pattern menu); the menu re-inlining from the prior version is gone, so progressive disclosure now holds. |
 | Leading words | weak | L23 — "Adversarial requirement discovery" is restated verbatim from the description (L4) at the body opener (L23) and echoed again at L25; the restatements should collapse to one canonical statement. |
-| Pruning | weak | L126 — "(replaces v2.1 /work-ship reference)" and L125 "Replaces the deprecated grill --mode structured" are migration archaeology that change no run behaviour and belong in a changelog, not the load-bearing body. |
+| Pruning | weak | L128 — "(replaces v2.1 /work-ship reference)" and L127 "Replaces the deprecated grill --mode structured" are migration archaeology that change no run behaviour and belong in a changelog, not the load-bearing body. |
 | Granularity | pass | L11 — the two lib splits (goal-mapping, push-once) each earn their load: push-once is genuinely reached by office-hours too, so the cut buys cross-skill reach, not just length. |
 | pandastack conformance | pass | L2 — name=grill matches folder; frontmatter valid; both lib/ pointers (and the transitively-referenced lib/gate-contract.md) resolve at repo root; lib reads ~2.1K tokens stay under the 5K hot/cold dispatch line, so inline loading is correct and 127 lines is earned reference. |
 
@@ -27,9 +27,9 @@ The skill commits to a single interrogation process — one question, push once 
 
 ## Top fixes
 1. L23/L25 — collapse the "Adversarial requirement discovery" identity statement to one place; the description (L4) already owns it, so the body opener is a restatement that adds no process.
-2. L125-126 — strip the "replaces v2.1 /work-ship" and "replaces deprecated grill --mode structured" parentheticals; move migration notes to a changelog so the relationship section states only the current routing.
+2. L127-128 — strip the "replaces v2.1 /work-ship" and "replaces deprecated grill --mode structured" parentheticals; move migration notes to a changelog so the relationship section states only the current routing.
 3. L29 — the recommended goal-mapping pre-step points at a lib written in office-hours shape (it references "Alternatives (Step 4)", the brief's Gate Log, and the four-option gate via lib/gate-contract.md); note or scope the fit so grill's atomic no-brief contract is not silently asked to produce brief-stage artifacts.
 
 ## Behavioral cases
 - trigger `grill me on the points-system scope` -> expected process: optional goal-map pre-step (L29), then ONE question at a time (L47), push-once via the lib menu on a rehearsed reply (L51), drill the 8 axes as a search space (L53), stop per the stopping rule (L71), emit a confirmed/open grill log to Inbox/grill-*.md (L112).
-- anti-trigger `draft me a brief / structured intake on X` -> should NOT fire; routes to /office-hours (default full or --quick) per L8 and L125.
+- anti-trigger `draft me a brief / structured intake on X` -> should NOT fire; routes to /office-hours (default full or --quick) per L8 and L127.
