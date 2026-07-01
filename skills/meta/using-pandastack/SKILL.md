@@ -34,7 +34,7 @@ When the current task matches one of these signals, the corresponding skill must
 | Signal | Invoke (or record an explicit skip-reason this turn) |
 |---|---|
 | About to write/edit code in any production / shared-infra path | `pandastack:careful` (gate), then dev flow |
-| Bug fix / feature / refactor (3+ files OR new abstraction) | `pandastack:grill` or `/plan` first, NOT direct edits |
+| Bug fix / feature / refactor (3+ files OR new abstraction) | `pandastack:grill` or `pandastack:office-hours` first, NOT direct edits |
 | About to commit | `pandastack:review` first, THEN `pandastack:ship` |
 | Finished a knowledge note (`knowledge/<domain>/<note>.md` style) | `pandastack:ship knowledge <path>` to Close + Extract + Backflow |
 | Finished a work topic with a decision to log | `pandastack:ship knowledge <decisions/path>` (decision-note variant; replaces v2.1 `/work-ship`) |
@@ -60,7 +60,7 @@ Default behavior: run silently, output ONLY on anomaly. Healthy session = zero l
 - Autocommit cron stuck > 2 hours (launchd dead, or git push failing silently)
 - HEAD detached, or on an unexpected branch
 
-When user explicitly wants a deep state-restore (returning after long absence, post-dream consolidation), route to `gbrain:cold-start` (heavy 506-line version) instead — the 5-step ritual covers warm sessions, not cold revivals.
+When user explicitly wants a deep state-restore (returning after long absence, post-dream consolidation), do a full session-start sync instead: a `gbrain query` for in-progress / open / blocked items, plus `pandastack:checkpoint` (resume mode) to reload the last saved working state. The 5-step ritual covers warm sessions, not cold revivals.
 
 ## Loop guard (3-strike rule)
 
