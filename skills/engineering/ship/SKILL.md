@@ -140,6 +140,7 @@ If `tag: none`: skip.
    - Body: what changed, why, how to test
    - If learnings were written this session, mention in PR body
 3. Return the PR URL.
+4. Closure evidence before claiming done: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done.
 
 ### Step 9: Release (if configured)
 

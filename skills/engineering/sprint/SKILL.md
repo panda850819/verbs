@@ -212,7 +212,8 @@ the phase it parked in; FAILED/ABORTED emit `failed`/`aborted`.
    `{brain}/sessions/` + `gbrain sync` + announce path when a brain runtime
    is present — skip silently when not, possibly Inbox/ship-log/)
 3. Route deferred work: append any deferred follow-ups / OPEN_QUESTIONS to the repo's canonical next-work tracker (`ROADMAP.md` or `TODOS.md`) with a date + source PR. Do NOT park deferred work in a CLI's private memory (it is per-runtime — Codex / Gemini / Claude diverge — and drifts), and do NOT leave it only in the dated session note (not discoverable as "what's next"). If the repo has no tracker, say so in the summary rather than defaulting to memory.
-4. Output sprint summary: `Stage 1-6 complete, SHIPPED. {commit-hash}, {PR-url if any}, {extract summary}.`
+4. Closure evidence before claiming SHIPPED: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done.
+5. Output sprint summary: `Stage 1-6 complete, SHIPPED. {commit-hash}, {PR-url if any}, {extract summary}.`
 
 #### PAUSED
 1. Write `Inbox/sprint-{slug}-{date}.md` checkpoint:
