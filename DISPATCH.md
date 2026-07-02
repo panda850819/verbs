@@ -17,7 +17,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Run a bounded coding loop (test/build/CI until green) | hardened kickoff in `docs/loop-kickoffs.md` |
 | Non-trivial but no row matches | read pandastack `RESOLVER.md`, pick closest |
 
-Miss log: 事後發現該用而沒用 → append `date | runtime | signal | skill` to `~/.agents/memory/dispatch-miss.log`. Reviewed periodically (e.g. at a weekly retro).
+Miss log: 事後發現該用而沒用 → append `date | runtime | signal | skill` to `~/.agents/memory/dispatch-miss.log`. Invocations are appended automatically by the plugin's PreToolUse hook to `~/.agents/memory/dispatch-fired.log`. Both logs are reviewed periodically (e.g. at a weekly retro).
 
 <!-- Maintenance: this file is the SINGLE SOURCE for the process-axis routing table.
      Injected at session start by hooks/session-start (Claude Code + Codex both run
