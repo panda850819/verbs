@@ -20,13 +20,13 @@ Scope note: this scores the **SKILL.md construction** (predictability, no-ops, c
 
 ### 1. Load criteria → read the target
 
-Read the writing-great-skills scorecard (the 8 axes). Resolve the target: `skills/<bucket>/<name>/SKILL.md` (bucket = engineering|productivity|writing|meta). Read it whole, plus any sibling reference files it points at.
+Read the writing-great-skills scorecard axes. Resolve the target: `skills/<bucket>/<name>/SKILL.md` (bucket = engineering|productivity|writing|meta). Read it whole, plus any sibling reference files it points at.
 
-### 2. Score the 8 axes
+### 2. Score the axes
 
 For each axis, return **pass / weak / fail** with exactly one cited line (`L<n>`) as evidence. A verdict with no line is not a verdict — re-read until you can cite. Default to **weak**, not pass, when uncertain; a generous scorecard is a no-op. If you took a second opinion (see below) and the two reads disagree on an axis, downgrade that axis to **weak** and note both reads.
 
-> Second opinion (reference): for a heavily-used skill, get a cross-model read before scoring — hand the SKILL.md + the 8 axes to Codex (`codex exec`) or `gbrain:cross-modal-review`. Feed any disagreement back into the rule above.
+> Second opinion (reference): for a heavily-used skill, get a cross-model read before scoring — hand the SKILL.md + the scorecard axes to Codex (`codex exec`) or `gbrain:cross-modal-review`. Feed any disagreement back into the rule above.
 
 ### 3. Write the verdict → `eval.md`
 
@@ -41,7 +41,7 @@ skill: <name>
 bucket: <bucket>
 evaluated_skill_hash: <git hash-object SKILL.md>
 evaluated_at: <YYYY-MM-DD>
-rubric: writing-great-skills@1.0.0
+rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — <name>
@@ -56,6 +56,7 @@ rubric: writing-great-skills@1.0.0
 | Information hierarchy | … | L<n> — … |
 | Leading words | … | L<n> — … |
 | Pruning | … | L<n> — … |
+| Native parity | … | L<n> — … |
 | Granularity | … | L<n> — … |
 | pandastack conformance | … | L<n> — … |
 
