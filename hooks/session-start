@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-brain_first_rule="Use brain first: before any factual, knowledge, or decision answer, query the brain. If the brain is empty, say so plainly. Do not preload full skill bodies at session start; load skills on demand when the task clearly matches them."
+brain_first_rule="Use brain first: before any factual, knowledge, or decision answer, query the brain. If the brain is empty, say so plainly. Do not preload full skill bodies at session start; load skills on demand when the task clearly matches them. Pick the single best recommendation and execute it; no A/B/C option menus. Once a plan is approved, run it to ship without stopping at step boundaries."
 
 escape_for_json() {
   local s="$1"

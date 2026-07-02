@@ -8,6 +8,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Prepared plan, want independent multi-angle critique | `boardroom` (blind parallel critics) |
 | Touching prod, shared infra, or harness paths (`~/.agents`, `~/.claude`, `~/.codex`) | `careful` first |
 | Bug fix / feature / refactor (3+ files or new abstraction) | grill-lite plan first, not direct edits |
+| Mechanical, file-scoped build units with locked spec | delegate — `handover` (Codex) or subagent; main model orchestrates |
 | Error / crash / regression / failing test / "used to work and now doesn't" | `debug` (root cause before any fix) |
 | Build / fix a UI surface, "looks off", 不好看 / 很醜 / 排版 / 字體 | `ui` (lock direction, fight defaults) |
 | Focused build-to-ship session | `sprint` |

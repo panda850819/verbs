@@ -34,6 +34,8 @@ is a valid outcome, and it kills sprawl upstream of the overlap check below.
 
 Open `RESOLVER.md`. Walk every category (Knowledge / Writing / Dev workflow / Retro / session / Tool wrappers / Trust evaluation / Meta / skill authoring). For each existing skill in scope, ask: does its trigger surface already cover this intent? If yes, extend that skill instead of adding new.
 
+**subtract-first gate:** before creating a skill, name the existing skill it absorbs/replaces, or why extending an existing skill was rejected. If neither can be named, do not create the skill.
+
 Also read the **Disambiguation** section — it lists known "look-like overlap" pairs (four review skills, requirement-discovery split, etc.). Make sure your new skill doesn't recreate a deliberately-separated split.
 
 ### 3. Decide hot or cold (mandatory)
