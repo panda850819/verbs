@@ -49,8 +49,10 @@ done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archi
 # #100/#101) and the driver split (PR #92) are gone, retro-week/retro-month moved
 # to the personal overlay (2026-06-30), and the live skill count is whatever
 # manifest+disk agree on — a hard-coded 24-29 count, a persona ref, or a
-# pre-flatten plugins/pandastack/ path in a living doc is drift. Historical
-# sections in RESOLVER/CHANGELOG are exempt by not being scanned.
+# pre-flatten plugins/pandastack/ path in a living doc is drift. Current-count
+# claims also drift; manifest.toml owns the tier list and scripts/pandastack sync
+# owns derived loader JSON descriptions. Historical sections in RESOLVER/CHANGELOG
+# are exempt by not being scanned.
 scan_docs=(
   "$repo_root/README.md"
   "$repo_root/CLAUDE.md"
@@ -63,6 +65,13 @@ scan_docs=(
 )
 stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|plugins/pandastack/(agents|skills)/" \
   "${scan_docs[@]}" 2>/dev/null || true)
+current_counts=$(grep -niE "[0-9]+ skills? \(|\([0-9]+ core|[0-9]+ (core|ext)\b" \
+  "${scan_docs[@]}" 2>/dev/null || true)
+resolver_header_counts=$(head -20 "$repo_root/RESOLVER.md" | grep -niE "[0-9]+ skills? \(|\([0-9]+ core|[0-9]+ (core|ext)\b" || true)
+if [ -n "$resolver_header_counts" ]; then
+  resolver_header_counts=$(echo "$resolver_header_counts" | sed "s|^|$repo_root/RESOLVER.md:|")
+fi
+stale=$(printf "%s\n%s\n%s\n" "$stale" "$current_counts" "$resolver_header_counts" | sed '/^$/d')
 if [ -n "$stale" ]; then
   echo "FAIL: stale claims found:"
   echo "$stale" | sed 's/^/  /'

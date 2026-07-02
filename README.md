@@ -4,18 +4,18 @@ Personal context-aware AI operator OS — one substrate, three runtimes, no vend
 
 I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
-The stack is **19 skills** focused on dev, writing, and knowledge workflows, tiered into 15 core (markdown-only, fresh-clone runnable) and 4 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
+The stack is a compact skill set focused on dev, writing, and knowledge workflows, tiered **core** (markdown-only, fresh-clone runnable) and **ext** (publicly installable CLI) in `manifest.toml`. Anchored on a personal Obsidian vault as SSOT.
 
 **Philosophy**: pandastack ships verbs. The brain (gbrain or your own knowledge store) keeps state. Lifecycle discipline is your job, not the package's. v2.2 dropped the `flows/` directory (7 spec files); the public package is self-contained: clone + install gives you everything in the manifest.
 
 **Stability scope (read this first):**
 
-v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is **19 skills (15 core / 4 ext)**, after successive scope-tightening (v2.2.0 dropped the `flows` layer; later releases split out the autonomous driver, removed the persona layer, and cut model-judgment scaffolding). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
+v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is the tier list in `manifest.toml`, after successive scope-tightening (v2.2.0 dropped the `flows` layer; later releases split out the autonomous driver, removed the persona layer, and cut model-judgment scaffolding). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
 
 What this means for you:
 
 - If you are the author or a fork-and-learn power user, the current cut is stable for daily use.
-- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (15 skills) should run on a clean clone.
+- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core should run on a clean clone.
 - If you use Logseq / Roam / Notion instead of Obsidian, skills will reference Panda's vault conventions (`knowledge/`, `Inbox/`, `docs/learnings/`, etc.) — these are prompt defaults, not hard-coded interfaces. You'd adapt them per session or by editing skill text. There's no built-in adapter layer; whether that matters depends on your tolerance for hand-tuning conventions.
 
 **Who this is for:**
@@ -35,8 +35,8 @@ bash scripts/bootstrap.sh --claude    # or --codex
 
 `bootstrap.sh` reports:
 - substrate state (`~/.agents/AGENTS.md` only)
-- 15 core skills runnable on this clone with no external CLI
-- 4 extension skills with the exact `brew install` / `npm install -g` to enable each
+- core skills runnable on this clone with no external CLI
+- extension skills with the exact `brew install` / `npm install -g` to enable each
 
 After install:
 
@@ -258,7 +258,7 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 ## Skills
 
-19 skills grouped by lifecycle (15 core / 4 ext — see `manifest.toml`). Each skill is "your specialist" for that step.
+Skills grouped by lifecycle (core / ext tiers — see `manifest.toml`). Each skill is "your specialist" for that step.
 
 ### Think / intake
 
