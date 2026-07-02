@@ -67,9 +67,13 @@ Diagnose a struggling skill against these:
 - **Sprawl** — too long even when every line is live; cure with the ladder and splits.
 - **No-op** — a line the model already obeys by default. A weak leading word (_be thorough_) is a no-op; fix with a stronger word, not a new technique.
 
+## Native parity
+
+**Native parity** treats every skill as competing with the harness's own defaults, which ship faster than this pack. Name the nearest native feature — built-in command, tool, or default behavior — and the delta that still earns the skill its slot: the lore plus reflex-override the model gets wrong despite understanding. A skill that cannot name its delta is a cut candidate at the next harness release; re-check this axis whenever the harness ships an overlapping feature.
+
 ## The scorecard
 
-`skill-eval` scores a skill on these 8 axes — each **pass / weak / fail** with one cited line. The criterion for each lives in the section it names above; this is the index, not a second copy.
+`skill-eval` scores a skill on these axes — each **pass / weak / fail** with one cited line. The criterion for each lives in the section it names above; this is the index, not a second copy.
 
 1. **Predictability** — see [Writing Great Skills](#writing-great-skills) (the root virtue).
 2. **Description / invocation** — see [Invocation](#invocation) + [Writing the description](#writing-the-description).
@@ -77,8 +81,9 @@ Diagnose a struggling skill against these:
 4. **Information hierarchy** — see [Information hierarchy](#information-hierarchy).
 5. **Leading words** — see [Leading words](#leading-words).
 6. **Pruning** — see [Pruning](#pruning) + [Failure modes](#failure-modes).
-7. **Granularity** — see [When to split](#when-to-split).
-8. **pandastack conformance** — SKILL-FRONTMATTER.md valid; hot/cold dispatch honoured; ~<80 lines unless earned; `lib/` refs resolve.
+7. **Native parity** — see [Native parity](#native-parity).
+8. **Granularity** — see [When to split](#when-to-split).
+9. **pandastack conformance** — SKILL-FRONTMATTER.md valid; hot/cold dispatch honoured; ~<80 lines unless earned; `lib/` refs resolve.
 
 Verdict shape: the skill's leading virtue (why it is good) + the top 1–3 line-cited fixes.
 

@@ -2,35 +2,36 @@
 type: skill-eval
 skill: skill-eval
 bucket: meta
-evaluated_skill_hash: 012a6d8bdc530c86ebd26cd6be5120ac23764845
-evaluated_at: 2026-06-26
-rubric: writing-great-skills@1.0.0
+evaluated_skill_hash: 6a2549f2cf9da3a115fddb156e601ac9b0c18ee9
+evaluated_at: 2026-07-02
+rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — skill-eval
 
-**Verdict: SOLID.** A tight, self-binding evaluator: three checkable steps anchored on a hard completion criterion (lint-fresh), losing a single point to a scope statement restated as an anti-pattern.
+**Verdict: SOLID.** A tight, self-binding evaluator: three checkable steps, a hash-stamped output, and the new Native parity axis wired into the template. It remains short of STRONG because the skill still duplicates its construction-vs-artifact boundary and does not explicitly name its own native competitor.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L19 — three numbered `## Steps` (load criteria → score → write+stamp) run the same process every invocation; no branch reorders them. |
-| Description / invocation | pass | L4 — leading word "Score" front-loads; model-facing; one trigger per branch (eval/score a skill, regenerate-after-edit) with the synonym pile collapsed; no body-identity restated. |
-| Completion criteria | pass | L33 — exhaustive and checkable: `eval.md` exists AND every axis cites a line AND `lint-eval-fresh.sh <name>` passes; not "reviewed the skill". |
-| Information hierarchy | pass | L35 — the output contract is pushed below the steps as "## eval.md template", reached by the L33 pointer "using the template below"; the second-opinion note is demoted to an L29 reference blockquote, keeping the hot path the steps. |
-| Leading words | pass | L17 — "fans out" + "hot/cold rule — never score the whole corpus in one hot context", plus "rubber-stamping"/"no-op" (L76), are pretrained anchors doing invocation and execution work in few tokens. |
-| Pruning | weak | L13 — the scope statement "scores the SKILL.md construction NOT the artifact" is restated at L77 as the "Scoring the artifact, not the skill" anti-pattern; the same meaning lives in two places (Duplication, WGS L65). |
-| Granularity | pass | L17 — the `/skill-eval all` fan-out earns the hot/cold sub-agent split; the step splits each carry distinct load (criteria vs score vs write). |
-| pandastack conformance | pass | L17 — frontmatter `name: skill-eval` = folder; hot/cold dispatch honoured; ~33 prose lines (the embedded template earns the rest); both lib refs resolve — `../writing-great-skills/SKILL.md` and `../../../lib/quality-rubric.md` (= repo-root `lib/`). |
+| Predictability | pass | L19 — three ordered steps (load criteria -> score -> write verdict) run the same process every invocation; no branch reorders them. |
+| Description / invocation | pass | L4 — leading word "Score" front-loads the job, and the trigger branches are concrete: eval/score a skill, or regenerate its eval after editing. |
+| Completion criteria | pass | L33 — exhaustive and checkable: `eval.md` exists, every axis has a cited line, and `lint-eval-fresh.sh <name>` passes. |
+| Information hierarchy | pass | L35 — the output contract is pushed below the numbered steps as a template, reached only after the process says to write the verdict. |
+| Leading words | pass | L17 — "fans out" and "hot/cold rule" compact the all-skills branch into a model-native execution anchor. |
+| Pruning | weak | L13 — the construction-vs-artifact scope note is useful, but the same meaning is repeated as an anti-pattern later, so one rule has two homes. |
+| Native parity | weak | L33 — nearest native feature is the model's default evaluation/review behavior; the delta is hash-stamped freshness plus lint enforcement, but the skill does not name that native competitor directly. |
+| Granularity | pass | L17 — `/skill-eval all` earns fan-out to one sub-agent per skill; the normal one-skill path stays in one compact evaluator. |
+| pandastack conformance | pass | L11 — name=folder is valid, the criteria SSOT reference resolves, hot/cold fan-out is honoured, and the body stays short enough that no reference extraction is owed. |
 
 ## Why it's good
-The skill closes its own loop: it stamps the scored SKILL.md's git hash into the eval and makes `lint-eval-fresh.sh` passing a completion criterion (L33), so a stale eval is a caught signal rather than silent sediment — the exact failure the skill names at L79. It binds the writing-great-skills scorecard by reference instead of copying axes (L11, "do not invent axes"), keeping the two in sync. The anti-default rules — default to weak (L27), no uncited verdicts (L78) — actively fight the rubber-stamp failure this kind of skill is most prone to.
+The skill closes its own loop: it stamps the scored SKILL.md's git hash into the eval and makes `lint-eval-fresh.sh` passing the completion criterion (L33), so drift is caught mechanically instead of trusted to memory. It binds writing-great-skills by reference (L11), then mirrors that SSOT in the template (L51-61) without inventing private axes. The default-to-weak and no-uncited-verdict rules (L27, L79) directly fight the rubber-stamp failure this evaluator is prone to.
 
 ## Top fixes
-1. L13 / L77 — collapse the "construction vs artifact" point to one home. Keep the L13 scope note (it routes the reader to `quality-rubric.md`) and thin L77 to reference it rather than restate the same distinction.
-2. L29 — the second-opinion blockquote is reference-tier ("for a heavily-used skill") and correctly demoted out of the numbered steps; if it rarely fires, a context pointer to a lib note would keep the hot body even tighter, though at this length it does not yet sprawl.
+1. L13 / L78 — collapse the "construction vs artifact" rule to one home. Keep L13 because it routes to `quality-rubric.md`; thin L78 so it names the anti-pattern without restating the whole distinction.
+2. L33 — make the native-parity delta explicit in the skill: nearest native feature = default model review/evaluation; earned slot = hash-stamped, lint-fresh, co-located eval with one cited line per axis.
 
 ## Behavioral cases
-- trigger `eval the skill-creator skill` -> expected process: read the writing-great-skills scorecard → resolve & read `skills/meta/skill-creator/SKILL.md` whole + its sibling refs → score 8 axes pass/weak/fail with one cited `L<n>` each, default weak → write `skills/meta/skill-creator/eval.md` from the template, stamp `git hash-object`, confirm `lint-eval-fresh.sh skill-creator` passes (L19-33).
+- trigger `eval the skill-creator skill` -> expected process: read the writing-great-skills scorecard axes -> resolve and read `skills/meta/skill-creator/SKILL.md` whole + sibling refs -> score every axis pass/weak/fail with one cited `L<n>` each, default weak -> write `skills/meta/skill-creator/eval.md` from the template, stamp `git hash-object`, confirm `lint-eval-fresh.sh skill-creator` passes (L19-33).
 - trigger `/skill-eval all` -> expected process: fan out one sub-agent per skill under `skills/<bucket>/<skill>/`, never score the whole corpus in one hot context (L17).
 - anti-trigger `score this brain page draft for quality` -> should NOT fire (judges an artifact's prose, not a SKILL.md's construction; routes to repo-root `lib/quality-rubric.md` per L13).
 - anti-trigger `create a new skill / improve this skill` -> should NOT fire (routes to `skill-creator`, the builder counterpart, L11).
