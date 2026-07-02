@@ -2,14 +2,16 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 908eee9335ececff24cc5abb6e42304745c2cbdf
-evaluated_at: 2026-06-30
+evaluated_skill_hash: e2402219bbdc97484b1a6bf9cc5b12f8f93a6257
+evaluated_at: 2026-07-02
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — sprint
 
 **Verdict: SOLID.** A deterministic whistle-to-finish-line state machine whose new store-agnostic learning recall closes the write→read loop and removes the old `{brain}` path leak; held off STRONG by body length/duplication and one undeclared `reads:` dependency.
+
+_2026-07-02 re-stamp: v3.4.0 retired `dojo`; Stage 1 now performs a minimal in-session prep pass before learning recall. Verdict unchanged._
 
 | Axis | Verdict | Evidence |
 |---|---|---|
@@ -19,11 +21,11 @@ rubric: writing-great-skills@1.0.0
 | Information hierarchy | pass | L79 — the changed line: learnings recall is pushed behind a store-agnostic `@../../../lib/learning-recall.md` context pointer ("`gbrain query` when present, else ranked grep over `docs/learnings/`, else skip") instead of an inline hand-rolled glob; cold rule-catalogs sit behind pointers too (rationalizations L294, aggregator-test L129). |
 | Leading words | pass | L102 — "the main session is the ARCHITECT, not the typist" anchors the whole execute-stage behaviour in one pretraining concept. |
 | Pruning | weak | L237 — "Only SHIPPED runs ship/extract/backflow" restates the contract already given at L42 and structurally enforced by the Stage 6 per-state handlers; the body is 294 lines with residual rationale prose (L113, L157). |
-| Granularity | pass | L77 — distinct leading-word phases are split into their own model-invoked skills reached by pointer (Stage 1 invokes `skills/productivity/dojo/SKILL.md` rather than inlining prep); only the sequence-coupled orchestration spine stays in-body. |
+| Granularity | pass | L77 — Stage 1 now inlines only the minimum prep needed after `dojo` retirement; heavier rules remain behind library or skill pointers. |
 | pandastack conformance | weak | L79 — Stage 1 now `@import`s `../../../lib/learning-recall.md`, but the frontmatter `reads:` block (L6-21) was not updated to declare it; every sibling `@import` IS declared (capability-probe L7, escape-hatch L8, push-once L9, verify-the-test-loop L17), so this is a manifest desync. The pointer itself resolves on disk and is correctly store-agnostic (no hardcoded brain path). |
 
 ## Why it's good
-Sprint is a textbook lifecycle-flow: a whistle-to-finish-line machine where every stage has a checkable exit and the terminal state is computed from booleans (L174), not narrated. The #116 change is a net win — it replaces a `{brain}/learnings/` glob that both leaked a personal path placeholder and only listed lessons, with a store-agnostic `lib/learning-recall.md` pointer (L79) that resolves the store the way capture does and forces the recalled lessons to change the plan, closing the write→read loop. It delegates each distinct-leading-word phase to its own skill (L77) rather than re-implementing it, so the body is orchestration, not duplication.
+Sprint is a textbook lifecycle-flow: a whistle-to-finish-line machine where every stage has a checkable exit and the terminal state is computed from booleans (L174), not narrated. The #116 change is a net win — it replaces a `{brain}/learnings/` glob that both leaked a personal path placeholder and only listed lessons, with a store-agnostic `lib/learning-recall.md` pointer (L79) that resolves the store the way capture does and forces the recalled lessons to change the plan, closing the write→read loop.
 
 ## Top fixes
 1. L79 + reads block L6-21 — add `- repo: lib/learning-recall.md` to the frontmatter `reads:`. The new Stage 1 `@import` introduced a repo lib dependency that every other `@import` declares (L7/L8/L9/L17); leaving it out desyncs the manifest from the body.

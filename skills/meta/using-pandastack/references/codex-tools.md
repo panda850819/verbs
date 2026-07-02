@@ -23,7 +23,7 @@ Add to your Codex config (`~/.codex/config.toml`):
 multi_agent = true
 ```
 
-This enables `spawn_agent`, `wait`, and `close_agent` for skills like `pandastack:team-orchestrate`.
+This enables `spawn_agent`, `wait`, and `close_agent` for bounded multi-agent checks.
 
 ## Named subagent dispatch
 

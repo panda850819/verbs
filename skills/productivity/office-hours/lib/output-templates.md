@@ -51,12 +51,12 @@ Out: {what's explicitly excluded}
 Apply `lib/skill-decision-tree.md` 2-question test against the chosen approach:
 
 ```
-Shape: {single-target-iterative / N-sequential-sprints / N-branch-parallel}
-Reasoning: {one line — which question of Q1/Q2 hit Yes and why}
+Shape: {single-target-iterative / delegated-mechanical-batch / pure-decision}
+Reasoning: {one line — which route fits and why}
 
 Recommended skill:
-  → /sprint {topic-slug}                          # if Q1=Yes (single-target, iteration expected; for N-step, run N sprints)
-  → /team-orchestrate (with this brief as input)  # if Q2=Yes (N-branch parallel, independence audit required)
+  → /sprint {topic-slug}                          # if active judgment and review stay in the foreground session
+  → /handover {topic-slug}                        # if the next work is a bounded mechanical batch for Codex
 ```
 
 ## Gotchas surfaced

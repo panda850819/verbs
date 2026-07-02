@@ -17,8 +17,9 @@ fail=0
 
 manifest_skills="$(grep -o '^\[skill\.[a-z0-9-]*\]' "$manifest" | sed 's/^\[skill\.//; s/\]$//' | sort)"
 # Bucket layout: a skill dir is at depth 2 (skills/<bucket>/<skill>). Archived
-# skills under skills/.archive/ are excluded by path.
-disk_skills="$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' -exec basename {} \; | sort)"
+# skills under skills/.archive/ and deprecated skills under skills/_deprecated/
+# are excluded by path.
+disk_skills="$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' ! -path '*/_deprecated/*' -exec basename {} \; | sort)"
 
 missing_on_disk="$(comm -23 <(echo "$manifest_skills") <(echo "$disk_skills"))"
 missing_in_manifest="$(comm -13 <(echo "$manifest_skills") <(echo "$disk_skills"))"
@@ -42,7 +43,7 @@ while IFS= read -r dir; do
     echo "FAIL: ${dir#"$repo_root"/}/ has no SKILL.md"
     fail=1
   fi
-done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*')"
+done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' ! -path '*/_deprecated/*')"
 
 # Retired claims must not reappear in living docs. The persona layer (PR
 # #100/#101) and the driver split (PR #92) are gone, retro-week/retro-month moved

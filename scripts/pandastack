@@ -145,7 +145,7 @@ def check_manifest_skills(manifest_data):
     if SKILLS_DIR.is_dir():
         # Skills live one level deep under category buckets: skills/<bucket>/<skill>/.
         for bucket in SKILLS_DIR.iterdir():
-            if not bucket.is_dir() or bucket.name == ".archive":
+            if not bucket.is_dir() or bucket.name in {".archive", "_deprecated"}:
                 continue
             for entry in bucket.iterdir():
                 if entry.is_dir():

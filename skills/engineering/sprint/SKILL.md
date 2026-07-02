@@ -2,13 +2,12 @@
 name: sprint
 type: skill
 description: |
-  Focused execution session: from "I want to do X" to shipped or explicitly paused/failed/aborted. Internal flow: dojo, grill (lite), execute, review, ship; only SHIPPED triggers backflow. Triggers on /sprint, "sprint on this", "let's ship X", "focused session". Routes UI work to `ui`, bugs to `debug`.
+  Focused execution session: from "I want to do X" to shipped or explicitly paused/failed/aborted. Internal flow: prep, grill (lite), execute, review, ship; only SHIPPED triggers backflow. Triggers on /sprint, "sprint on this", "let's ship X", "focused session". Routes UI work to `ui`, bugs to `debug`.
 reads:
   - repo: lib/capability-probe.md
   - repo: lib/escape-hatch.md
   - repo: lib/push-once.md
   - repo: lib/gate-contract.md
-  - repo: skills/productivity/dojo/SKILL.md
   - repo: skills/productivity/grill/SKILL.md
   - repo: skills/productivity/ui/SKILL.md
   - repo: skills/engineering/debug/SKILL.md
@@ -31,7 +30,6 @@ capability_required:
   - vault
   - lib/capability-probe.md
   - lib/escape-hatch.md
-  - skills/productivity/dojo
   - skills/productivity/grill
   - skills/engineering/review
   - skills/engineering/ship
@@ -57,11 +55,11 @@ capability_required:
 
 ## Modes
 
-- Default: full sprint (dojo → grill lite → execute → review → ship)
-- `--quick`: skip dojo + grill, go execute → review → ship
+- Default: full sprint (prep → grill lite → execute → review → ship)
+- `--quick`: skip prep + grill, go execute → review → ship
 - `--design`: auto-invoke `ui` skill at execute stage (replaces `commands/design.md`)
 - `--plan {path|slug}`: execute against a durable plan at `docs/plans/{slug}.md` (the artifact `/office-hours` Stage 5b emits). Sprint reads it READ-ONLY and derives per-task progress from git — see Stage 3 plan-driven execution. Auto-detect rule: slugify the topic the same way office-hours does and check for `docs/plans/{that-slug}.md` (exact slug, no fuzzy match); if the sprint began from an office-hours brief, use the plan path office-hours printed. If none found, run conversationally.
-- `--continue {slug}`: resume a PAUSED sprint. Skips dojo + grill; loads the PAUSED checkpoint + `docs/plans/{slug}.md`, recomputes which U-IDs are already done (git + acceptance), and resumes at the first non-done task.
+- `--continue {slug}`: resume a PAUSED sprint. Skips prep + grill; loads the PAUSED checkpoint + `docs/plans/{slug}.md`, recomputes which U-IDs are already done (git + acceptance), and resumes at the first non-done task.
 - `--delegate codex`: in Stage 3, hand a batch of mechanical units to Codex (synchronous, in-loop) via the `/handover` invocation. OFF unless you pass this flag — sprint defaults to free Claude subagents and never auto-delegates. A batch of ≥3 mechanical units is the advisory threshold worth surfacing the flag at, NOT an auto-trigger. Requires a plan file. See `references/codex-delegation.md` for the batch loop; the single-invocation mechanics live in `skills/engineering/handover/references/codex-invocation.md`. For ASYNC handover that frees this session, use `/handover --async`.
 
 ## Stages
@@ -72,9 +70,13 @@ capability_required:
 
 Abort or degrade per probe rules. Output probe block as opening.
 
-### Stage 1: Dojo (skip if `--quick`)
+### Stage 1: Prep (skip if `--quick`)
 
-Invoke `skills/productivity/dojo/SKILL.md` for the topic. Output prep brief, print path. User reads, then continues.
+Run a minimal in-session prep pass:
+
+1. Scan local project docs for the topic with `rg` / `find` (`docs/sessions`, `docs/learnings`, `knowledge`, and `docs/plans` when present).
+2. Surface only concrete gotchas, half-built attempts, and relevant prior decisions. No fabricated pattern matching.
+3. If no useful history exists, say "No relevant prior context found" and continue.
 
 Run the learnings recall per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md): surface the top 3-5 learnings relevant to the sprint topic so plan-time context carries past lessons, and use them in the plan, not just list them. Store-agnostic — `gbrain query` filtered to `learnings/` when present, else ranked grep over `docs/learnings/`, else skip with a note. This closes the write→read loop the auto-sedimented learnings exist for.
 
@@ -94,7 +96,7 @@ Run `skills/productivity/grill/SKILL.md` in default (adversarial) mode with **3-
 
 - Do NOT edit the plan body during the sprint. Per-task `status:` is DERIVED, never hand-written. The only writes go to code + git. (This guards the two-runtime drift AGENTS.md warns about — a fresh Claude session or a Codex handoff must re-derive state from git + the plan, never from a mutable progress field.)
 - Before executing each `{slug}-T0N` task, run an idempotency check: (1) does the task's `acceptance:` check already pass (grep / run it)? (2) is its scope already present in the git diff/tree? If yes → mark that U-ID done and SKIP it, no silent reimplementation. Respect `depends-on:` ordering.
-- For `--continue`: load `Inbox/sprint-{slug}-*.md` (PAUSED checkpoint) + the plan, run the idempotency check across all U-IDs, resume at the first non-done task. Skip Stage 1 (dojo) and Stage 2 (grill).
+- For `--continue`: load `Inbox/sprint-{slug}-*.md` (PAUSED checkpoint) + the plan, run the idempotency check across all U-IDs, resume at the first non-done task. Skip Stage 1 (prep) and Stage 2 (grill).
 - If a task has no checkable `acceptance:`, fall back to the `iteration` counter for that task and flag it in the narrate line.
 
 When no plan file is present, execute conversationally. Done-condition for the conversational path: each build unit's acceptance condition (Execution mode step 1) is re-verified by the architect — subagent-reported green is never trusted. Execute is not complete until every unit's acceptance re-verifies, matching the plan-driven path's idempotency check.
@@ -263,7 +265,7 @@ tags: [sprint, {state-lowercase}]
 | Stage | Status | Output |
 |---|---|---|
 | 0 capability probe | ok / degraded / abort | {summary} |
-| 1 dojo | done / skipped | {prep file path} |
+| 1 prep | done / skipped | {prior context summary} |
 | 2 grill (lite) | done / escape-hatch / skipped | {n questions, log path} |
 | 3 execute | done / failed | {iteration} |
 | 4 review | done / iteration-exceeded / skipped | {findings count, P0/P1 remaining} |

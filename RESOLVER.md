@@ -6,7 +6,7 @@
 
 ## Why this file exists
 
-pandastack ships **23 skills** (19 core + 4 ext). **Lifecycle flows are no longer first-class constructs** — what used to live in `flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
+pandastack ships **19 skills** (15 core + 4 ext). **Lifecycle flows are no longer first-class constructs** — what used to live in `flows/*.md` is now either documented inline in the relevant skill (sprint covers dev, ship knowledge covers knowledge close) or has been demoted because it wasn't really a flow (decision was an autonomy contract, research was a knowledge variant, work was a dev variant + work-ship).
 
 This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md beats multi-repo split, because the categorization lives next to the content.
 
@@ -38,17 +38,13 @@ Vault hygiene (orphans / stale / superseded / dead redirects) is a direct file s
 | `pandastack:office-hours` | Structured 5-stage flow producing a brief in `docs/briefs/`. `--quick` mode skips capability probe + goal mapping. | office hours, draft a brief, structured intake |
 | `pandastack:boardroom` | Mutually-blind parallel critique of a PREPARED plan: N blind critics on distinct risk-surface lenses, keep every lone finding, per-finding gate. Repackaged from the deleted persona-voice boardroom (no persona). NOT diff review (`review`) or fuzzy ideas (`office-hours`). | critique this plan, red-team this, 多角度審 |
 | `pandastack:careful` | Confirmation gates for production / shared infra | working on prod |
-| `pandastack:checkpoint` | Save / resume working state snapshot | pausing work |
-| `pandastack:freeze` | Lock editing scope to specific paths | scope discipline |
 | `pandastack:ui` | Build/fix UI with a point of view: 4 override reflexes (lock direction + anti-slop, verify render not source, build past happy path, decompose cited products) + craft lore in references (fonts, CJK+Latin type, OKLCH, CSS bans, omissions). NOT browser-test (`qa`) or render-bug (`debug`). | design, 做頁面, 不好看, 很醜, 排版 |
 | `pandastack:qa` | Browser-based UI QA | test this UI |
 | `pandastack:review` | Parallel 3-pass review + Codex cross-check | review PR |
 | `pandastack:debug` | Systematic root-cause debugging: one-sentence root-cause gate, hypothesis-explains-every-symptom, instrument-first by bug class, bisect, scope-blast (举一反三), known bug classes. NOT diff review (`review`) or UI taste (`ui`). | bug, crash, regression, 報錯, 跑不通, used to work |
 | `pandastack:ship` | Test + commit + PR (git mode is default). CLOSES finished work — to hand UNFINISHED work to Codex use `handover`. | code done, ship it |
 | `pandastack:handover` | Hand unfinished work to Codex to DO: sync (spawn `codex exec` now) or `--async` (write payload for Hermes). Not `ship` — ship closes, handover delegates. | hand this to codex, let codex finish, 丟給 codex |
-| `pandastack:sprint` | Single-track 1-2h focused execution: dojo → grill-lite → execute → review → ship. Replaces the v2.1 `dev` flow spec. `--delegate codex` delegates a ≥3-unit batch via `handover`. | small focused task |
-| `pandastack:dojo` | Pre-action prep, surfaces gotchas | before a work session |
-| `pandastack:team-orchestrate` | Conductor-driven parallel execution across N independent worktree branches | fan out, run these in parallel |
+| `pandastack:sprint` | Single-track 1-2h focused execution: scope → grill-lite → execute → review → ship. Replaces the v2.1 `dev` flow spec. `--delegate codex` delegates a ≥3-unit batch via `handover`. | small focused task |
 
 For multi-step sequential work, run multiple sprints in sequence. v1.x had `execute-plan` as a sequential subagent coordinator; cut in v2.0.0 because it overlapped sprint Phase 3 without earning its complexity.
 
@@ -93,16 +89,6 @@ v2.2.0 cut 4 skills (bird, brief-morning, evening-distill, curate-feeds) from th
 ---
 
 ## Disambiguation: where things look like overlap but aren't
-
-### Sprint vs team-orchestrate
-
-| | sprint | team-orchestrate |
-|---|---|---|
-| Tracks | 1 | N |
-| Executor | Main session | N subagents (one per worktree) |
-| Use when | Single focused task; for N-step sequential, run N sprints | N truly independent branches, wall-clock parallelism matters |
-
-Different shapes. Sprint = time line. team-orchestrate = space cut. They are not "sprint × N".
 
 ### Four "review" skills
 
@@ -158,6 +144,16 @@ What used to be `flows/<name>.md` is gone. Reasons:
 | Deleted | `ceo`, `product-lead`, `ops-lead`, `design-lead`, `eng-lead` | Role-persona lenses were a uniform wrapper over pretrained frames; a skill earns its slot only by lore + the reflexes the model gets wrong despite understanding. eng-lead debug lore → new `debug`; design-lead craft → new `ui`; scope-judgment + delete-first → `grill` / `office-hours`; ops-lead covered by retro-week / cron / minion. `lib/outside-voice-rule.md` deleted (substrate covers it). git history is the archive. |
 | Added | `debug`, `ui`, `boardroom` | Function-named: lore + reflex-overrides, not a persona frame. `boardroom` is the deleted persona-router rebuilt tiny — its one real capability (mutually-blind parallel plan critique) as a ~30-line forcing-function skill, no persona voices. |
 
+## v3.4.0 — Fable 5 harness cut (2026-07-02)
+
+Public package shrinks 23 → 19 skills. The cut removes skills whose main value was model-judgment scaffolding or orchestration now covered by native workflows.
+
+| Action | Items | Reason |
+|---|---|---|
+| Archived | `team-orchestrate` | Native Workflow + worktree isolation cover the parallel branch shape. |
+| Archived | `freeze` | Scope lock should be a code gate when needed, not a prose gate. |
+| Archived | `checkpoint`, `dojo` | Downgraded from active runtime skills; native context handling plus `sprint`'s own intake covers the routine use case. |
+
 ## v2.2.0 cut summary
 
 Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed into per-skill SKILL.md and README "Lifecycle map").
@@ -193,9 +189,9 @@ Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed
 
 | Origin | Skills (still in the current public package) |
 |---|---|
-| Built in v0.16 | careful, checkpoint, freeze, init, qa, review, ship |
+| Built in v0.16 | careful, init, qa, review, ship |
 | Added in v1 from `~/.claude/skills/` (local) | grill, gatekeeper, deepwiki |
-| Decision/sprint flow | sprint, dojo, office-hours, team-orchestrate |
+| Decision/sprint flow | sprint, office-hours |
 | Meta | using-pandastack, init, skill-creator, writing-great-skills, skill-eval |
 | Writing | write |
 
@@ -203,7 +199,7 @@ Public package shrinks 38 → 26 skills. 7 lifecycle flow specs → 0 (collapsed
 
 ## Version
 
-This RESOLVER.md is for pandastack v3.3.0. Update when adding / removing / renaming skills.
+This RESOLVER.md is for pandastack v3.4.0. Update when adding / removing / renaming skills.
 
 ---
 

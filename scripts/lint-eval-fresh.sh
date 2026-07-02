@@ -47,7 +47,7 @@ while IFS= read -r skdir; do
     echo "       SKILL.md=$current  eval=$recorded"
     fail=1
   fi
-done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' | sort)"
+done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' ! -path '*/_deprecated/*' | sort)"
 
 if [ -n "$only" ] && [ "$checked" -eq 0 ]; then
   echo "FAIL: no skill named '$only' under skills/"

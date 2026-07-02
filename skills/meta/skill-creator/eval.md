@@ -2,8 +2,8 @@
 type: skill-eval
 skill: skill-creator
 bucket: meta
-evaluated_skill_hash: 7bc9290399c2fbf8fd9e4aaec19e4578764b22b8
-evaluated_at: 2026-06-29
+evaluated_skill_hash: 832fb1e5f141209b0f84b415731572d121b042b5
+evaluated_at: 2026-07-02
 rubric: writing-great-skills@1.0.0
 ---
 
@@ -12,6 +12,8 @@ rubric: writing-great-skills@1.0.0
 **Verdict: SOLID.** Same checkable process every run: refuse-to-build gated upfront, hot/cold made mandatory, scorecard bound at the generation moment. It loses points on triple-citing the trigger-first rule and body length, not on path resolution.
 
 _2026-06-29 re-stamp: SKILL.md L35 synced the MECE category walk to RESOLVER's current headings (dropped the removed "Personas" / "Multi-lens review" categories). Content-preserving edit — verdict and axis citations unchanged; hash refreshed._
+
+_2026-07-02 re-stamp: v3.4.0 removed `team-orchestrate` from the disambiguation examples. Content-preserving edit — verdict and axis citations unchanged; hash refreshed._
 
 | Axis | Verdict | Evidence |
 |---|---|---|

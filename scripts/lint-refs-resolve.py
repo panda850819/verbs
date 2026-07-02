@@ -45,7 +45,7 @@ def accepted(t):
 
 broken = {}
 for f in glob.glob("skills/**/SKILL.md", recursive=True):
-    if "/.archive/" in f:
+    if "/.archive/" in f or "/_deprecated/" in f:
         continue
     for m in set(TOKEN.findall(open(f).read())):
         tok = m.rstrip(".,):;`")

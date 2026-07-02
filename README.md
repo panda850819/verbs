@@ -4,18 +4,18 @@ Personal context-aware AI operator OS — one substrate, three runtimes, no vend
 
 I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
-The stack is **23 skills** focused on dev, writing, and knowledge workflows, tiered into 19 core (markdown-only, fresh-clone runnable) and 4 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
+The stack is **19 skills** focused on dev, writing, and knowledge workflows, tiered into 15 core (markdown-only, fresh-clone runnable) and 4 ext (publicly installable CLI). Anchored on a personal Obsidian vault as SSOT.
 
 **Philosophy**: pandastack ships verbs. The brain (gbrain or your own knowledge store) keeps state. Lifecycle discipline is your job, not the package's. v2.2 dropped the `flows/` directory (7 spec files); the public package is self-contained: clone + install gives you everything in the manifest.
 
 **Stability scope (read this first):**
 
-v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is **23 skills (19 core / 4 ext)**, after successive scope-tightening (v2.2.0 dropped the `flows/` layer; later releases split out the autonomous driver and removed the persona layer). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
+v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is **19 skills (15 core / 4 ext)**, after successive scope-tightening (v2.2.0 dropped the `flows` layer; later releases split out the autonomous driver, removed the persona layer, and cut model-judgment scaffolding). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
 
 What this means for you:
 
 - If you are the author or a fork-and-learn power user, the current cut is stable for daily use.
-- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (19 skills) should run on a clean clone.
+- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core (15 skills) should run on a clean clone.
 - If you use Logseq / Roam / Notion instead of Obsidian, skills will reference Panda's vault conventions (`knowledge/`, `Inbox/`, `docs/learnings/`, etc.) — these are prompt defaults, not hard-coded interfaces. You'd adapt them per session or by editing skill text. There's no built-in adapter layer; whether that matters depends on your tolerance for hand-tuning conventions.
 
 **Who this is for:**
@@ -35,7 +35,7 @@ bash scripts/bootstrap.sh --claude    # or --codex
 
 `bootstrap.sh` reports:
 - substrate state (`~/.agents/AGENTS.md` only)
-- 19 core skills runnable on this clone with no external CLI
+- 15 core skills runnable on this clone with no external CLI
 - 4 extension skills with the exact `brew install` / `npm install -g` to enable each
 
 After install:
@@ -86,8 +86,6 @@ Cross-flow router (start here when you're not sure which composition applies):
 | Turn a draft into a published post | `/write` then manual publish | writing |
 | Make a raw note durable | `/ship knowledge <path>` | knowledge |
 | Close out a work topic / decision | `/ship knowledge <decisions/path>` | knowledge (decision-note variant) |
-| End a session | `/checkpoint` | (independent skill, no flow) |
-
 **Express path for dev work**: `/sprint` chains DEFINE → SHIP internally for 1-2h focused tasks. Use sprint when one skill should drive the whole arc; use the manual phase-by-phase progression when stages need user gates between them (e.g. `/careful` for prod) or when the work spans multiple sessions.
 
 **What's NOT a flow** (cut in v2.2.0): `research` is a knowledge-flow variant (`/grill` then `/scout`-like recon then `/ship knowledge`); `work` is a dev-flow variant + decision-note variant of `/ship knowledge`; `decision` is the cron-autonomy contract ("cron proposes, Panda decides, Panda executes") which lives as a rule in `~/.agents/AGENTS.md`, not as a flow; `retro` (weekly/monthly reflection) is brain-centric PKM and moved to the personal overlay on 2026-06-30. None of these earn a separate spec.
@@ -227,7 +225,7 @@ docs/
   plans/               # executable plans (/sprint --plan)
   sessions/            # session logs
   learnings/           # learnings sedimented by /review
-  checkpoints/         # /checkpoint snapshots
+  checkpoints/         # sprint pause/resume snapshots
 ```
 ```bash
 mkdir -p Inbox knowledge docs/{briefs,plans,sessions,learnings,checkpoints}
@@ -260,7 +258,7 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 
 ## Skills
 
-23 skills grouped by lifecycle (19 core / 4 ext — see `manifest.toml`). Each skill is "your specialist" for that step.
+19 skills grouped by lifecycle (15 core / 4 ext — see `manifest.toml`). Each skill is "your specialist" for that step.
 
 ### Think / intake
 
@@ -268,18 +266,15 @@ For Codex, the equivalent loop is `git pull` or local edits on the cloned repo p
 |---|---|---|
 | `/office-hours` | The Interrogator | Bring a fuzzy idea, walk out with a written brief. 5-stage flow: load context, adversarial grill, premise challenge, alternatives, write brief. |
 | `/grill` | The Adversary | Atomic 5-10 min adversarial discovery. One question at a time, hunting for hidden requirements and unknown unknowns. |
-| `/dojo` | The Sensei | Pre-action context prep. Scan past similar cases via rg / find on session notes, surface gotchas before the work session starts. |
 
 ### Build
 
 | Skill | Your specialist | What they do |
 |---|---|---|
-| `/sprint` | Sprint Coach | 1-2h single-track focused execution. Internal flow: dojo → grill (lite) → execute → review → ship. For multi-step work, run multiple sprints in sequence. |
-| `/team-orchestrate` | The Conductor | N independent branches in parallel git worktrees. Use only when branches are truly independent. |
+| `/sprint` | Sprint Coach | 1-2h single-track focused execution. Internal flow: prep → grill (lite) → execute → review → ship. For multi-step work, run multiple sprints in sequence. |
 | `/debug` | Root-cause debugging | Name the root cause before editing, verify before claiming fixed, scope-blast siblings. Bug-class lore + bisect in lib. |
 | `/ui` | UI craft | Lock a direction and fight your defaults. Reflex-font blocklist, CJK type, OKLCH, CSS bans-with-rewrites in references. |
 | `/careful` | Safety Gate | Confirmation gates before destructive commands (force push, rm -rf, DROP). |
-| `/freeze` | Scope Freezer | Lock edits to specific paths for the session. |
 
 ### Plan critique
 
@@ -318,9 +313,8 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 | Skill | Your specialist | What they do |
 |---|---|---|
 | `/init` | The Initializer | One-time pandastack init per project. Detects project type, writes config to CLAUDE.md. |
-| `/checkpoint` | The Bookmarker | Save / resume working state snapshots. |
 
-`/done` was cut (session close folded into `/checkpoint` + brain session pages; skill deleted in PR #5).
+`/checkpoint` and `/done` were cut from the active surface. Sprint pause/resume state now lives in sprint artifacts and external session notes.
 
 ### Writing
 

@@ -161,7 +161,7 @@ Print path. Surface the "Next skill (recommended)" block from the brief verbatim
 
 ### Stage 5b: Emit executable plan (when the next step is execution)
 
-If the chosen approach routes to `/sprint` or `/team-orchestrate` (there is build work to do, not a pure decision), ALSO write an executable plan to `docs/plans/{slug}.md` (NO date prefix — the date lives in frontmatter; readers `/sprint --plan {slug}` / `--continue {slug}` / `/handover {slug}` resolve by bare slug, so write and read must match). One active plan per slug; re-planning the same topic overwrites it. Skip this stage for pure-decision briefs with no execution.
+If the chosen approach routes to `/sprint` or `/handover` (there is build work to do, not a pure decision), ALSO write an executable plan to `docs/plans/{slug}.md` (NO date prefix — the date lives in frontmatter; readers `/sprint --plan {slug}` / `--continue {slug}` / `/handover {slug}` resolve by bare slug, so write and read must match). One active plan per slug; re-planning the same topic overwrites it. Skip this stage for pure-decision briefs with no execution.
 
 The brief is the **WHY** (problem, premise, rationale). The plan is the **WHAT** (tasks, acceptance, deps). Keep them strictly separate — do NOT copy the brief's rationale into the plan, do NOT put task IDs in the brief. Each fact lives in exactly one file (else the two drift).
 

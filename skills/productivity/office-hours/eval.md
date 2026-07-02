@@ -2,14 +2,16 @@
 type: skill-eval
 skill: office-hours
 bucket: productivity
-evaluated_skill_hash: fd0d5bf01b68b66dd97b3a4f28ae901235b5a5b4
-evaluated_at: 2026-06-30
+evaluated_skill_hash: f2869fefc171b4481c69b2e361aef7ef150651b6
+evaluated_at: 2026-07-02
 rubric: writing-great-skills@1.0.0
 ---
 
 # Eval — office-hours
 
 **Verdict: SOLID.** Gate-enforced predictability — every stage closes on a printed STOP/gate so the same gated *process* runs each run, not the same output — is the leading virtue; the soft spots are the verbose Stage-2 skip-guard and an over-~80 body.
+
+_2026-07-02 re-stamp: v3.4.0 retired `team-orchestrate`; execution routing now points to `/sprint` or `/handover`. Verdict unchanged._
 
 | Axis | Verdict | Evidence |
 |---|---|---|
@@ -19,7 +21,7 @@ rubric: writing-great-skills@1.0.0
 | Information hierarchy | pass | L68 — capability-probe is an explicit cold pointer ("Cold pointer, not a hot import — `--quick` runs never pay its tokens"); push-once / escape-hatch / stop-rule / bad-good are `@`-pointers and both output scaffolds live in `lib/output-templates.md` (L158, L168). |
 | Leading words | pass | L32 — "30-minute structured pressure cooker" anchors the whole behaviour in one pretrained concept; reinforced by "mid-flight weapon" (L60) and one-way/two-way door (L95). |
 | Pruning | weak | L85 — the Stage-2 skip-guard re-argues the four-condition print (L80-83) in prose ("self-confirming … the evidence print is the guard … do NOT skip"); the Differs-from-grill block (L57-58) also restates the mode-timing already at L50-51. |
-| Granularity | pass | L162 — splitting Stage 5b (executable plan) off Stage 5 (brief) is earned by-sequence: reached only when the brief routes to /sprint or /team-orchestrate, and it guards the WHY/WHAT separation. The 5 numbered stages are a clean single-skill sequence. |
+| Granularity | pass | L162 — splitting Stage 5b (executable plan) off Stage 5 (brief) is earned by-sequence: reached only when the brief routes to /sprint or /handover, and it guards the WHY/WHAT separation. The 5 numbered stages are a clean single-skill sequence. |
 | pandastack conformance | weak | L178 — file ends at 178 lines (~98 non-blank body lines), past the ~80 discipline and not all earned (skip-guard prose L85, Differs-from-grill dup L57-58). Frontmatter valid (`type: skill`, L3), hot/cold dispatch honoured (L68), all 7 `lib/` refs + output-templates.md resolve — the only ding is length. |
 
 ## Why it's good
