@@ -2,7 +2,7 @@
 type: skill-eval
 skill: write
 bucket: writing
-evaluated_skill_hash: 97717e4369c0eb36413f4e9cd7a756e24a1303bb
+evaluated_skill_hash: 1fe3e9312e8dbec8fed015155fcbd603ca3d886c
 evaluated_at: 2026-06-30
 rubric: writing-great-skills@1.0.0
 ---
@@ -33,5 +33,5 @@ The anti-ghostwriting contract is enforced by construction, not exhortation: eve
 ## Behavioral cases
 - trigger `/write spar` ("help me write about X") → expected process: route to Spar (L50-58), cold sub-agent pattern-check against article-patterns.md, ask 2-3 sparring questions, emit thesis + skeleton + challenges, never prose.
 - trigger `最後掃一遍 / final pass on this near-final draft` → expected process: Postmortem mode (L178-203) — quote the exact line per category, banned generic-praise words enforced, run AFTER `/write edit` for long posts.
-- anti-trigger `just make this text sound human, de-AI it` → should NOT fire (routes to `humanizer`, per L4).
-- anti-trigger `final voice cleanup on this IC / investment memo` → should NOT fire (routes to `avoid-ai-writing`, per L4).
+- anti-trigger `just make this text sound human, de-AI it` → should NOT fire (outside `/write`, per L4).
+- anti-trigger `final voice cleanup on this IC / investment memo` → should NOT fire (outside `/write`, per L4).

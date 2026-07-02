@@ -1,0 +1,6 @@
+# Slash commands that are legitimate outside this pandastack skill pack.
+/content-write
+/work-ship
+/plan
+/knowledge-ship
+/brainstorm

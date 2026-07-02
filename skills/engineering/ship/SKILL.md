@@ -13,6 +13,10 @@ reads:
   - repo: AGENTS.md
   - repo: docs/briefs/**
   - repo: docs/learnings/**
+  - repo: lib/trigger-first-skill-evolution.md
+  - repo: skills/engineering/ship/lib/project-state.md
+  - repo: skills/engineering/ship/lib/quote-gate.md
+  - repo: skills/engineering/ship/lib/rationalizations.md
   - cli: git
 writes:
   - repo: "**"

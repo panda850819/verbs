@@ -8,6 +8,11 @@ reads:
   - repo: AGENTS.md
   - repo: docs/briefs/**
   - repo: docs/learnings/**
+  - repo: lib/gate-contract.md
+  - repo: lib/learning-format.md
+  - repo: lib/learning-recall.md
+  - repo: lib/trigger-first-skill-evolution.md
+  - repo: skills/engineering/review/lib/rationalizations.md
   - cli: git
   - cli: grep
 writes:

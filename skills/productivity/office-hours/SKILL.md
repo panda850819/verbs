@@ -10,6 +10,7 @@ reads:
   - repo: lib/stop-rule.md
   - repo: lib/bad-good-calibration.md
   - repo: lib/goal-mapping.md
+  - repo: lib/skill-decision-tree.md
   - vault: knowledge/**
   - vault: docs/sessions/**
 writes:

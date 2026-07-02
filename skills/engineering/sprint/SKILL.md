@@ -8,12 +8,15 @@ reads:
   - repo: lib/escape-hatch.md
   - repo: lib/push-once.md
   - repo: lib/gate-contract.md
+  - repo: lib/learning-recall.md
   - repo: skills/productivity/grill/SKILL.md
   - repo: skills/productivity/ui/SKILL.md
   - repo: skills/engineering/debug/SKILL.md
   - repo: skills/engineering/review/SKILL.md
   - repo: skills/engineering/ship/SKILL.md
   - repo: lib/verify-the-test-loop.md
+  - repo: skills/engineering/sprint/lib/rationalizations.md
+  - repo: skills/engineering/sprint/lib/aggregator-test-checklist.md
   - repo: skills/engineering/sprint/references/codex-delegation.md
   - vault: knowledge/**
   - vault: docs/learnings/**

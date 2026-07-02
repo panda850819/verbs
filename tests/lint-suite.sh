@@ -31,6 +31,9 @@ run() {
 run lint-manifest-sync    bash    scripts/lint-manifest-sync.sh
 run lint-eval-fresh       bash    scripts/lint-eval-fresh.sh
 run lint-refs-resolve     python3 scripts/lint-refs-resolve.py
+run lint-reads-block      python3 scripts/lint-reads-block.py
+run lint-meta-sync        python3 scripts/lint-meta-sync.py
+run lint-eval-quotes      python3 scripts/lint-eval-quotes.py
 run conformance-smoke:hook bash   scripts/conformance-smoke.sh hook
 
 if [ "$fail" -ne 0 ]; then

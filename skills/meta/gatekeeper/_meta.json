@@ -1,7 +1,7 @@
 {
   "name": "gatekeeper",
-  "version": "0.1.1",
-  "description": "Comprehensive security review framework for AI agents. Covers skill/MCP installation, GitHub repos, URLs/documents, on-chain addresses, products/services, and social shares. Built from real-world attack patterns.",
+  "version": "0.3.0",
+  "description": "Pre-adoption trust check for external artifacts before they touch your system: skill/MCP installs, GitHub repos, URLs/documents, on-chain addresses, DeFi protocol governance/admin risk, products/services, social shares. Triggers on /gatekeeper, /slowmist-agent-security (alias), \"is this safe to install\", \"check this repo\", \"看這個協議的中央化風險\".",
   "author": "evilcos",
   "license": "MIT",
   "homepage": "https://github.com/slowmist/slowmist-agent-security",
