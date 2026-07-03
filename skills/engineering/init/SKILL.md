@@ -1,10 +1,8 @@
 ---
 name: init
 description: |
-  Use once per project to initialize pandastack. Triggers on `/init`,
-  "initialize pandastack", "set up this project". Detects project type,
-  confirms detected values, writes pandastack config to CLAUDE.md (Claude
-  Code) or AGENTS.md (Codex / other agent runtimes).
+  One-time pandastack project setup.
+user-invocable: true
 ---
 
 # Init

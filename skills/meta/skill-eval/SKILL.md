@@ -4,8 +4,8 @@ description: |
   Score a skill's construction quality against the writing-great-skills scorecard and write a co-located eval.md verdict. Use when asked to eval/score a skill, or to regenerate its eval after editing. Evaluator counterpart to skill-creator (which builds) — both bind the same writing-great-skills SSOT.
 version: 1.0.0
 type: skill
+user-invocable: false
 ---
-
 # Skill Eval
 
 The evaluator half of skill construction. `skill-creator` builds and self-checks; `skill-eval` judges an existing skill and leaves a greppable verdict next to it. Criteria SSOT: [`../writing-great-skills/SKILL.md`](../writing-great-skills/SKILL.md) — load its **scorecard** section; do not invent axes.

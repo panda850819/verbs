@@ -8,8 +8,8 @@ description: |
   `grill`), or executing an approved plan (use `sprint`).
 reads:
   - repo: lib/gate-contract.md
+user-invocable: false
 ---
-
 # Boardroom
 
 A plan you wrote, you accept — your own blind spots are invisible to you, and a single review

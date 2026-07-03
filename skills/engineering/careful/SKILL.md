@@ -15,8 +15,8 @@ forbids:
   - cli: cargo publish
 domain: shared
 classification: exec
+user-invocable: false
 ---
-
 # Careful Mode
 
 Adds a confirmation gate before destructive or high-risk actions.

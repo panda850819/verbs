@@ -2,7 +2,7 @@
 type: skill-eval
 skill: office-hours
 bucket: productivity
-evaluated_skill_hash: ccbddbe3f85c51320313cbd67b387269b223ccab
+evaluated_skill_hash: be8299581c864f9788fe2a7b1b2ffffdea9e3773
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

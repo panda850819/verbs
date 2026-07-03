@@ -3,7 +3,7 @@ name: writing-great-skills
 description: |
   Reference for writing and editing pandastack skills well — the vocabulary and principles that make a skill predictable, plus the checkable scorecard skill-eval scores against. Consult when authoring, splitting, pruning, or reviewing a SKILL.md. The construction-quality SSOT (counterpart to lib/quality-rubric.md, which scores artifacts, not skills).
 version: 1.1.0
-user-invocable: true
+user-invocable: false
 type: skill
 ---
 

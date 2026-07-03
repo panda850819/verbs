@@ -3,7 +3,7 @@ name: skill-creator
 description: |
   Create new pandastack skills, MECE-checked against the pandastack RESOLVER.md at the repo root (the skill-overlap index, NOT the brain filing-tree RESOLVER.md). Triggers: "create a skill", "new pandastack skill", "improve this skill", "扩 skill".
 version: 1.0.0
-user-invocable: true
+user-invocable: false
 type: skill
 ---
 
@@ -84,7 +84,7 @@ name: <folder-name>             # plain. no pandastack: prefix.
 description: |
   <one-paragraph trigger sentence — short, concrete, decision-enabling>
 version: 1.0.0                  # optional
-user-invocable: true | false    # default false
+user-invocable: true | false    # required
 type: skill | flow | lib        # default skill
 allowed-tools: <patterns>       # optional
 ---

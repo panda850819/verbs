@@ -8,7 +8,7 @@ description: |
   Skip when: code grep/lookup (use gh CLI or grep).
 allowed-tools: Bash, Read, Write, Grep, Glob
 version: "1.0.0"
-user-invocable: true
+user-invocable: false
 ---
 
 # DeepWiki Skill

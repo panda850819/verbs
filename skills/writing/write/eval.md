@@ -2,7 +2,7 @@
 type: skill-eval
 skill: write
 bucket: writing
-evaluated_skill_hash: ee6001888d6bb9ac06e45590ab21eb410071deb4
+evaluated_skill_hash: a896138f4153885faf59e28ff8cb212c0b866880
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

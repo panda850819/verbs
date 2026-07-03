@@ -36,8 +36,8 @@ capability_required:
   - skills/productivity/grill
   - skills/engineering/review
   - skills/engineering/ship
+user-invocable: false
 ---
-
 # Sprint — focused 1-2 hour execution
 
 > A sprint has a whistle and a finish line. You walk in with a topic. You walk out with one of four states: SHIPPED, PAUSED, FAILED, or ABORTED_BY_USER. Only SHIPPED triggers ship/extract/backflow. The other three write a checkpoint and stop cleanly.

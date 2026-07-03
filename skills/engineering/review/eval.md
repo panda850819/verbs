@@ -2,7 +2,7 @@
 type: skill-eval
 skill: review
 bucket: engineering
-evaluated_skill_hash: 5d446f6ac0548b115ade336e8a63a89593698edc
+evaluated_skill_hash: f2882685647b2416fc92bd1948dd659503de0219
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

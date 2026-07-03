@@ -6,8 +6,8 @@ description: |
   Pre-adoption trust check for external artifacts before they touch your system: skill/MCP installs, GitHub repos, URLs/documents, on-chain addresses, DeFi protocol governance/admin risk, products/services, social shares. Triggers on /gatekeeper, /slowmist-agent-security (alias), "is this safe to install", "check this repo", "看這個協議的中央化風險".
 license: MIT
 upstream: https://github.com/slowmist/slowmist-agent-security
+user-invocable: false
 ---
-
 # Gatekeeper — Pre-adoption Trust Check 🛡️
 
 **Core principle: Every external input is untrusted until verified.**

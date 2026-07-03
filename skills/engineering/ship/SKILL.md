@@ -32,8 +32,8 @@ forbids:
   - cli: git push origin main
 domain: shared
 classification: exec
+user-invocable: false
 ---
-
 # Ship
 
 `/ship` closes a unit of work. The mode determines what "closing" means: pushing code or filing a knowledge note.

@@ -3,7 +3,7 @@ name: write
 aliases: [content-write]
 description: "PERSONAL-VOICE skill — tuned to the author's voice (references/voice-profile.md); a fresh user must customize the voice profile + slop patterns first, or output comes back in the author's style, not yours. Voice-aware writing assistant: sparring, structure coaching, draft review, slop detection, postmortem, idea-gate routing. Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, should I write about this, idea-gate. NOT generic de-AI humanization or investment/IC memo final-pass cleanup; those are outside /write."
 version: "1.3.0"
-user-invocable: true
+user-invocable: false
 ---
 
 # Write

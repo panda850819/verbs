@@ -2,7 +2,7 @@
 type: skill-eval
 skill: handover
 bucket: engineering
-evaluated_skill_hash: 7207fa74b964f9683d09cc48aaa20a1fc32e6eb7
+evaluated_skill_hash: d8bac2a975a0f6be8c23c9772627cead07930841
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

@@ -2,7 +2,7 @@
 type: skill-eval
 skill: gatekeeper
 bucket: meta
-evaluated_skill_hash: b8aa98191abc516aa774ff7ba57c0cb9f51dad0f
+evaluated_skill_hash: ab82faff78b26c88c60264197102706bf2594921
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

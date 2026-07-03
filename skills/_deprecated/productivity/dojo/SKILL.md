@@ -19,6 +19,7 @@ capability_required:
   - agents.md
   - vault
   - lib/capability-probe.md
+user-invocable: false
 ---
 
 # Dojo — Pre-action prep (Stage 0)

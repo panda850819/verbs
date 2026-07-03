@@ -5,8 +5,8 @@ description: |
   "test this", "QA", or "check the page". Requires browser automation
   tool. NOT for non-UI verification (use `verify`); NOT for code-diff
   review (use `review`).
+user-invocable: false
 ---
-
 # QA
 
 ## Step 1: Load Context

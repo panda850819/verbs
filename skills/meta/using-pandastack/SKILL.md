@@ -1,8 +1,8 @@
 ---
 name: using-pandastack
 description: Use at the start of any session — establishes the cognitive contract that pandastack skills must be checked BEFORE any response or action, including clarifying questions.
+user-invocable: false
 ---
-
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, skip this skill.
 </SUBAGENT-STOP>

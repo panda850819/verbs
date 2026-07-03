@@ -2,7 +2,7 @@
 type: skill-eval
 skill: deepwiki
 bucket: engineering
-evaluated_skill_hash: be5dbcd6f2bc42bc375320e21601c42433e0172c
+evaluated_skill_hash: ee13e512aac719fe1418bde03a7ee923f392035c
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

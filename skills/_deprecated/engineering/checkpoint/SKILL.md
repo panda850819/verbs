@@ -4,6 +4,7 @@ description: |
   Save, resume, or list working state snapshots. Captures git state,
   decisions made, remaining work. Use when pausing work, switching
   context, before a long session break, or to list saved checkpoints.
+user-invocable: false
 ---
 
 # Checkpoint

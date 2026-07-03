@@ -23,8 +23,8 @@ forbids:
   - cli: gh pr create
 domain: shared
 classification: hybrid
+user-invocable: false
 ---
-
 # Code Review
 
 ## Step 0: System Audit (fixed opener)

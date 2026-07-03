@@ -2,7 +2,7 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 6ce615722652934a7b9bbba30ddd01c6f86437e1
+evaluated_skill_hash: 25e2a2b6e83c17df0220f2e38b17aea7fd3b1c9a
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

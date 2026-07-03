@@ -16,8 +16,8 @@ writes:
   - cli: stdout
 domain: shared
 classification: tool
+user-invocable: false
 ---
-
 # Grill
 
 Adversarial requirement discovery. Inspired by Matt Pocock's "grill me" prompt — see [[matt-pocock-agent-coding-workflow]].

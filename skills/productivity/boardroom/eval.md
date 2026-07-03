@@ -2,7 +2,7 @@
 type: skill-eval
 skill: boardroom
 bucket: productivity
-evaluated_skill_hash: 4d1bca8d5780bcf8f4b866f2819a2def501471b8
+evaluated_skill_hash: a964aaa71090d4d97706418b43263cf1c8b70702
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

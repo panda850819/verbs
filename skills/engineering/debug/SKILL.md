@@ -7,8 +7,8 @@ description: |
   反覆修不好, debug, why is this broken, regression, root cause, used to work,
   stack trace. NOT for code-diff review (use `review`), UI taste complaints
   (use `ui`), or building new features.
+user-invocable: false
 ---
-
 # Debug
 
 You already know how to debug. This skill is not the method. It overrides the three reflexes you get

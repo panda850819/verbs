@@ -3,6 +3,7 @@ name: freeze
 description: |
   Use when you want to lock editing scope to specific paths.
   Blocks edits outside the allowed directories for this session.
+user-invocable: false
 ---
 
 # Freeze

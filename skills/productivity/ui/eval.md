@@ -2,7 +2,7 @@
 type: skill-eval
 skill: ui
 bucket: productivity
-evaluated_skill_hash: f51f99ace86c25b646a2254c1965fde119819720
+evaluated_skill_hash: 8b805e79bdee0c90bfa307286fa04b82b1ba75fe
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

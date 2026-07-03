@@ -2,7 +2,7 @@
 type: skill-eval
 skill: careful
 bucket: engineering
-evaluated_skill_hash: d19adea78a769c60e23cb91ce73c5b9325eed7f9
+evaluated_skill_hash: 33c39ee6ae9587ad216bf5390619e6ae3cb4a697
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

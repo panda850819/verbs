@@ -2,7 +2,7 @@
 type: skill-eval
 skill: debug
 bucket: engineering
-evaluated_skill_hash: f5bacfad15498087c793a6cb31251b22d511b124
+evaluated_skill_hash: c7176c982c7b11a605c536092e121c880c39fc12
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

@@ -7,8 +7,8 @@ description: |
   page/component, make it look good, typography, this looks wrong. NOT for
   backend logic, browser-test verification (use `qa`), or root-cause debugging
   of a broken render (use `debug`).
+user-invocable: false
 ---
-
 # UI
 
 You know design. You lack the craft numbers (`skills/productivity/ui/references/craft.md`) and the will to

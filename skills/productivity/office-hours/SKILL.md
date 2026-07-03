@@ -25,8 +25,8 @@ capability_required:
   - lib/push-once.md
   - lib/escape-hatch.md
   - lib/stop-rule.md
+user-invocable: false
 ---
-
 # Office Hours — bring a problem, leave with a brief
 
 > 30-minute structured pressure cooker. You walk in with a fuzzy idea or a stuck decision. Model challenges premises, drills unknowns, forces alternatives, and writes the brief that captures what you actually decided.

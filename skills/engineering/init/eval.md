@@ -2,7 +2,7 @@
 type: skill-eval
 skill: init
 bucket: engineering
-evaluated_skill_hash: 5af4941809ae3f94f6cb64f5dadd4013f656aaab
+evaluated_skill_hash: cd7b017fdd5a34e39fc7b489c2bf3c4c016fe081
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---

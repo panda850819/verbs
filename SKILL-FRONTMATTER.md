@@ -30,10 +30,10 @@ YAML-style frontmatter delimited by `---` at the top of `SKILL.md`. Inline scala
 ---
 name: <skill-folder-name>
 description: <one-paragraph trigger sentence>
+user-invocable: true | false
 # optional below
 allowed-tools: <tool patterns>
 version: <semver>
-user-invocable: true | false
 type: skill | flow | lib
 ---
 ```
@@ -44,6 +44,20 @@ type: skill | flow | lib
 |---|---|
 | `name` | Must equal the skill's folder name. Plain. No `pandastack:` or `ps-` prefix. The prefix belongs to the consumer side (Claude Code plugin namespace, etc.), not the content. |
 | `description` | Trigger paragraph. Should be short and concrete enough for an AI runtime to decide whether the skill applies. See "On length". |
+| `user-invocable` | Boolean. `true` marks a user-invoked-only skill that the human must call by name; `false` marks a model-dispatched skill that the runtime may choose from its description. |
+
+### Description cost rule
+
+User-invoked-only skills (`user-invocable: true` and not model-dispatched) carry
+a one-line human-facing description with trigger lists stripped. Model-invoked
+skills keep rich "Use when" / "Triggers" phrasing because the description is
+the routing surface.
+
+### Dependency rule
+
+A user-invoked-only skill body may reference model-invoked skills, never another
+user-invoked-only skill. If the workflow needs that much user memory, put the
+routing in a model-dispatched router instead.
 
 ## Optional fields
 
@@ -51,7 +65,6 @@ type: skill | flow | lib
 |---|---|
 | `allowed-tools` | Tool-pattern allowlist for runtimes that honour it (e.g. Claude Code). |
 | `version` | Semver string. Bumped on user-visible behavior change. |
-| `user-invocable` | Boolean. `true` if the skill is surfaced as `/<name>` to the user. |
 | `type` | `skill` (default), `flow` (multi-step orchestration), or `lib` (helper consumed by other skills). |
 
 Other top-level keys are not warned and not blocked. Stacks may extend.
