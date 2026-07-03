@@ -2,35 +2,35 @@
 type: skill-eval
 skill: debug
 bucket: engineering
-evaluated_skill_hash: 445fe38bc10b8683633e8f09cf7a6e811992a064
+evaluated_skill_hash: c7176c982c7b11a605c536092e121c880c39fc12
 evaluated_at: 2026-07-03
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — debug
 
-**Verdict: SOLID.** Override-of-reflexes spine with all method, lore, and now recall pushed cold — predictable and lean; the one soft spot is judgment-leaning completion gates.
+**Verdict: SOLID.** The skill is a compact reflex override for debugging: root cause, red-capable proof, run-and-look, sibling sweep.
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L17 — `## Override` holds exactly three invariant gates (name root cause / ran-and-looked / grep siblings); per-bug method is pushed cold, so the run-shape is identical every time. |
-| Description / invocation | pass | L4 — front-loads the leading phrase "Systematic root-cause debugging," then enumerates branches (errors/crashes/regressions/used-to-work/flaky) with bilingual triggers and NOT-routing. |
-| Completion criteria | weak | L25 — "grep the signature for siblings" is checkable in spirit but "the signature" and its exhaustiveness rest on judgment; same softness in the root-cause "specific enough" bar. The ran-and-looked gate (L22) is the one fully checkable criterion. |
-| Information hierarchy | pass | L35 — the recall procedure is not inlined; it is a store-agnostic context-pointer to `../../../lib/learning-recall.md` loaded only when stuck, alongside the diagnosis.md lore pointer. Spine stays at live gates. |
-| Leading words | pass | L15 — "lore you cannot derive" anchors the consult-don't-invent region in three words; "the failure mode" (L21) and "ratchet" (L35) also pull weight. |
-| Pruning | pass | L14 — "You already know how to debug. This skill is not the method." explicitly refuses to restate pretrained procedure (anti-duplication / anti-no-op); body is 35 lines with all method offloaded. |
-| Native parity | pass | L14 — names the native/default competitor ("You already know how to debug") and the earned delta ("overrides the three reflexes"), which is exactly the axis's native-vs-skill check. |
-| Granularity | pass | L9 — by-invocation splits are explicit (NOT for `review` diff / `ui` taste); lore split by size into diagnosis.md and recall shared by-reference via lib, neither minted as its own skill. Right-sized. |
-| pandastack conformance | pass | L30 — hot/cold dispatch honored: the >5K-token lore lives cold in `skills/engineering/debug/lib/diagnosis.md`; frontmatter valid, 35 lines (<80), and the L35 recall lib ref resolves to repo-root `lib/`. |
+| Predictability | pass | L17 — `## Override` holds the invariant gates that must happen before edit, diagnosis-done, fixed, and done. |
+| Description / invocation | pass | L4 — front-loads "Systematic root-cause debugging" and enumerates error, crash, regression, flaky, and NOT-routing branches. |
+| Completion criteria | pass | L22 — diagnosis now ends on an already-run red-capable command with seen output, which is a checkable done gate. |
+| Information hierarchy | pass | L30 — deep bug-class lore stays behind `diagnosis.md`, keeping the hot skill body focused on overrides. |
+| Leading words | pass | L22 — "red-capable command" is a compact operational label for a command that can prove the hypothesis wrong. |
+| Pruning | pass | L14 — "This skill is not the method" prevents a generic debugging checklist and keeps only non-default behavior. |
+| Native parity | pass | L14 — names the native competitor ("You already know how to debug") and the delta: reflex overrides under momentum. |
+| Granularity | pass | L8 — anti-triggers route diff review and UI taste complaints to other skills, so debug stays right-sized. |
+| pandastack conformance | pass | L32 — cold references live under `lib/`, frontmatter is valid, and the body stays below the ~80-line target. |
 
 ## Why it's good
-Every spine line is a reflex the model gets wrong *despite* understanding debugging (edit-before-root-cause, claim-fixed-before-running, ignore-siblings), and the opening "this is not the method" contract is what keeps it from decaying into a restated checklist. The new store-agnostic recall is a clean info-hierarchy + granularity move: it resurfaces prior learnings via a shared lib pointer rather than hardcoding a brain path or duplicating per-skill, and it retains the recurrence/last_seen bump only here, where bug classes genuinely recur — the one place the ratchet that `learning-recall.md` argues against elsewhere actually earns its keep.
+The skill now has a stronger diagnosis completion gate without turning into a debugging method dump. The red-capable command criterion makes the end of diagnosis observable, while the existing lore pointer keeps bug-class tactics cold.
 
 ## Top fixes
-1. L25 — tighten the sibling-sweep into a checkable criterion (e.g. "name the signature you grepped and the count of hits"), which would lift Completion criteria from weak to pass.
-2. L35 — the bare `lib/learning-format.md` does not resolve from the skill dir while the same-line `../../../lib/learning-recall.md` does; normalize both to the `../../../lib/` form for one consistent, resolvable pointer.
+1. L27 — tighten the sibling sweep into "name the signature grepped and hit count" so the final scan is as checkable as the red-capable command gate.
+2. L37 — normalize `lib/learning-format.md` to the same `../../../lib/` reference style used by `learning-recall.md`.
 
 ## Behavioral cases
-- trigger `以前是好的，現在這個 build 跑不通` → expected process: name the root cause at `file:function:line` with evidence before editing; run-and-look (not compile-only) before claiming fixed; grep the signature for siblings; consult diagnosis.md and recall matching prior learnings when the cause is not obvious.
+- trigger `以前是好的，現在這個 build 跑不通` → expected process: recall matching learnings if the cause is not obvious; name the root cause at `file:function:line`; prove diagnosis with a red-capable command already run; run-and-look before fixed; grep siblings.
 - anti-trigger `review my diff before I open the PR` → should NOT fire (routes to `review`).
 - anti-trigger `this button spacing looks off` → should NOT fire (routes to `ui`).

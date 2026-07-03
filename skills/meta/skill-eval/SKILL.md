@@ -26,6 +26,11 @@ Read the writing-great-skills scorecard axes. Resolve the target: `skills/<bucke
 
 For each axis, return **pass / weak / fail** with exactly one cited line (`L<n>`) as evidence. A verdict with no line is not a verdict — re-read until you can cite. Default to **weak**, not pass, when uncertain; a generous scorecard is a no-op. If you took a second opinion (see below) and the two reads disagree on an axis, downgrade that axis to **weak** and note both reads.
 
+Vocabulary checks from the scorecard:
+- **No-op**: sample sentences with the deletion test — if removing one changes no process, cite it under Pruning.
+- **Sediment**: verify referenced paths, commands, features, and retired branches still exist before passing conformance.
+- **Leading words**: cite compression opportunities where a pretrained concept could replace diffuse instructions.
+
 > Second opinion (reference): for a heavily-used skill, get a cross-model read before scoring — hand the SKILL.md + the scorecard axes to Codex (`codex exec`) or `gbrain:cross-modal-review`. Feed any disagreement back into the rule above.
 
 ### 3. Write the verdict → `eval.md`

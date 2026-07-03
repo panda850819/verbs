@@ -34,7 +34,8 @@ The non-generic moves, the ones easy to skip under momentum:
   state X before/after Y runs, "is this object alive here". Log both sides of the boundary.
 - **The log changed the behavior = timing/concurrency bug.** If adding a log makes the bug move or vanish,
   you have a race, not a logic error. Treat the Heisenbug as the diagnosis, not a nuisance.
-- **Prefix discipline.** Tag instrumentation logs with a unique prefix so you can grep and strip them.
+- **Prefix discipline.** Tag every temporary probe with one shared marker such as `[DEBUG-a4f2]`;
+  cleanup is one grep, and leftovers are impossible to miss.
 - **Removal discipline.** Strip every diagnostic log before claiming done. A left-behind probe is debt.
 
 Distinct from the `review` test-loop alarm "my added log didn't show up = the build under test isn't mine":

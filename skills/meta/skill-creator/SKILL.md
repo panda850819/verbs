@@ -32,6 +32,9 @@ walking the index. If the capability is really knowledge (→ a brain page) or o
 deterministic step (→ a one-line script / `lib/` helper), stop here — "not a skill"
 is a valid outcome, and it kills sprawl upstream of the overlap check below.
 
+Before proposing a new skill or abstraction, consult `docs/out-of-scope/`. If a
+precedent matches, surface that entry and stop instead of continuing.
+
 Open `RESOLVER.md`. Walk every current category (Knowledge / Writing / Dev workflow / Tool wrappers / Trust evaluation / Meta / skill authoring). For each existing skill in scope, ask: does its trigger surface already cover this intent? If yes, extend that skill instead of adding new.
 
 **subtract-first gate:** before creating a skill, name the existing skill it absorbs/replaces, or why extending an existing skill was rejected. If neither can be named, do not create the skill.

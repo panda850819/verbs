@@ -14,7 +14,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-skills_dir="$repo_root/skills"
+skills_dir="${PANDASTACK_LINT_SKILLS_DIR:-$repo_root/skills}"
 only="${1:-}"
 scorecard="$repo_root/skills/meta/writing-great-skills/SKILL.md"
 scorecard_version="$(sed -n 's/^version:[[:space:]]*//p' "$scorecard" | head -1 | tr -d '"[:space:]')"
@@ -29,6 +29,31 @@ done < <(
 
 fail=0
 checked=0
+allowlisted=0
+allowlist_summary=""
+
+verdict_allowlist_reason() {
+  case "$1" in
+    skills/engineering/deepwiki)
+      echo "pre-existing WEAK eval before issue #155; follow-up: prune and re-evaluate deepwiki"
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+allowlist_or_fail() {
+  local rel="$1" message="$2" reason
+  if reason="$(verdict_allowlist_reason "${rel%/}")"; then
+    echo "ALLOWLIST: $rel/eval.md $message — $reason"
+    allowlisted=$((allowlisted + 1))
+    allowlist_summary="${allowlist_summary}${rel%/} — ${reason}
+"
+  else
+    echo "FAIL: $rel/eval.md $message"
+    fail=1
+  fi
+}
 
 while IFS= read -r skdir; do
   [ -n "$skdir" ] || continue
@@ -38,7 +63,10 @@ while IFS= read -r skdir; do
 
   skill_md="$skdir/SKILL.md"
   eval_md="$skdir/eval.md"
-  rel="${skdir#"$repo_root"/}"
+  case "$skdir" in
+    "$repo_root"/*) rel="${skdir#"$repo_root"/}" ;;
+    *) rel="$skdir" ;;
+  esac
 
   if [ ! -f "$eval_md" ]; then
     echo "FAIL: $rel/ has no eval.md  (run: /skill-eval $name)"
@@ -49,6 +77,7 @@ while IFS= read -r skdir; do
   current="$(git -C "$repo_root" hash-object "$skill_md")"
   recorded="$(sed -n 's/^evaluated_skill_hash:[[:space:]]*//p' "$eval_md" | head -1 | tr -d '[:space:]')"
   rubric="$(sed -n 's/^rubric:[[:space:]]*//p' "$eval_md" | head -1 | tr -d '[:space:]')"
+  verdict="$(sed -n 's/^\*\*Verdict:[[:space:]]*\([A-Z][A-Z]*\)\..*/\1/p' "$eval_md" | head -1)"
 
   if [ -z "$recorded" ]; then
     echo "FAIL: $rel/eval.md missing evaluated_skill_hash"
@@ -67,6 +96,30 @@ while IFS= read -r skdir; do
     fail=1
   fi
 
+  if [ -z "$verdict" ]; then
+    allowlist_or_fail "$rel" "missing top-level verdict"
+  elif [ "$verdict" = "WEAK" ]; then
+    allowlist_or_fail "$rel" "has failing verdict: WEAK"
+  elif [ "$verdict" != "STRONG" ] && [ "$verdict" != "SOLID" ]; then
+    allowlist_or_fail "$rel" "has unknown verdict: $verdict"
+  fi
+
+  axis_fails="$(
+    awk -F '|' '
+      $0 ~ /^\|/ {
+        gsub(/^[ \t]+|[ \t]+$/, "", $2)
+        gsub(/^[ \t]+|[ \t]+$/, "", $3)
+        if ($3 == "fail") print $2
+      }
+    ' "$eval_md"
+  )"
+  if [ -n "$axis_fails" ]; then
+    while IFS= read -r axis; do
+      [ -n "$axis" ] || continue
+      allowlist_or_fail "$rel" "has failing axis verdict: $axis"
+    done <<< "$axis_fails"
+  fi
+
   for axis in "${scorecard_axes[@]}"; do
     if ! grep -Fq "| $axis |" "$eval_md"; then
       echo "FAIL: $rel/eval.md missing scorecard axis: $axis"
@@ -80,7 +133,18 @@ if [ -n "$only" ] && [ "$checked" -eq 0 ]; then
   exit 1
 fi
 
+# A skills dir that resolves to zero skills (typo'd PANDASTACK_LINT_SKILLS_DIR,
+# deleted fixture) must never produce a green gate.
+if [ "$checked" -eq 0 ]; then
+  echo "FAIL: no skills found under $skills_dir — refusing to pass an empty gate"
+  exit 1
+fi
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all $checked skill eval(s) fresh (hash + $expected_rubric axes match current scorecard)."
+  if [ "$allowlisted" -ne 0 ]; then
+    echo "FOLLOW-UP: $allowlisted eval verdict allowlist item(s):"
+    printf '%s' "$allowlist_summary" | sed '/^$/d; s/^/FOLLOW-UP: /'
+  fi
 fi
 exit "$fail"

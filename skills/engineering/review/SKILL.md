@@ -222,6 +222,8 @@ If yes, check `{learnings_dir}` for existing learnings with similar key.
 
 Use the format from `lib/learning-format.md`.
 
+Guard escalation (propose-only): if the flaw is a bug class seen before (grep `{learnings_dir}` for the signature) or is mechanically checkable, propose one structural guard and name the exact file it would add: `scripts/lint-<class>.sh`, `tests/<class>-test.sh`, or a hook under `hooks/`. Never auto-create the guard during review.
+
 If nothing worth recording: skip silently. Not every review produces learnings.
 
 ## Step 7.5: Route caught flaws back to the skill (propose-only)

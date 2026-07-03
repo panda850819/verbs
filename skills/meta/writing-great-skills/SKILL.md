@@ -63,9 +63,9 @@ Diagnose a struggling skill against these:
 
 - **Premature completion** — ending a step before it is done. Defence: sharpen the completion criterion first; only then hide post-completion steps by splitting.
 - **Duplication** — same meaning in two places; costs maintenance, tokens, and inflates a meaning's rank.
-- **Sediment** — stale layers that settle because adding feels safe and removing feels risky.
-- **Sprawl** — too long even when every line is live; cure with the ladder and splits.
-- **No-op** — a line the model already obeys by default. A weak leading word (_be thorough_) is a no-op; fix with a stronger word, not a new technique.
+- **Sediment** — stale instructions from earlier edits; verify referenced paths, features, and branches still exist.
+- **Sprawl** — scope creep into another skill's territory; cure with the ladder or a split.
+- **No-op** — a sentence whose deletion changes no behaviour. A weak leading word (_be thorough_) is a no-op; fix with a stronger word, not a new technique.
 
 ## Native parity
 

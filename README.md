@@ -2,6 +2,8 @@
 
 Personal context-aware AI operator OS — one substrate, three runtimes, no vendor lock-in.
 
+Agent install runbook: see [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md).
+
 I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
 
 The stack is a compact skill set focused on dev, writing, and knowledge workflows, tiered **core** (markdown-only, fresh-clone runnable) and **ext** (publicly installable CLI) in `manifest.toml`. Anchored on a personal Obsidian vault as SSOT.

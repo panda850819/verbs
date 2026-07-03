@@ -38,6 +38,8 @@ Scope:
 
 Out of v2 scope (deferred or rejected):
 
+Agent-readable precedent entries are mirrored in `docs/out-of-scope/`.
+
 - B-class TA (no vault, want to start from zero). Bundling a vault-less mode adds a second product surface; not worth the complexity in v2.
 - D-class TA (no vault, just want multi-CLI persona switching). Out of scope — pandastack is vault-centric.
 - Hosted SaaS variant. Cofounder.co occupies that surface; pandastack stays self-hosted personal-OS by design.
