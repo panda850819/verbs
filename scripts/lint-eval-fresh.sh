@@ -133,6 +133,13 @@ if [ -n "$only" ] && [ "$checked" -eq 0 ]; then
   exit 1
 fi
 
+# A skills dir that resolves to zero skills (typo'd PANDASTACK_LINT_SKILLS_DIR,
+# deleted fixture) must never produce a green gate.
+if [ "$checked" -eq 0 ]; then
+  echo "FAIL: no skills found under $skills_dir — refusing to pass an empty gate"
+  exit 1
+fi
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all $checked skill eval(s) fresh (hash + $expected_rubric axes match current scorecard)."
   if [ "$allowlisted" -ne 0 ]; then
