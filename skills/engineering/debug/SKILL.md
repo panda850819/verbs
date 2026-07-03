@@ -19,6 +19,8 @@ wrong under momentum, and points you to lore you cannot derive.
 - **Name the root cause before you edit.** At `file:function:line`, with the evidence. "A state issue"
   is not a root cause; "stale cache in `useUser` at `user.ts:42`, dep array missing `userId`" is.
   Editing before you can say that sentence is the failure mode.
+- **Diagnosis ends only on a red-capable command.** Name one already-run deterministic, fast,
+  agent-runnable command that can fail, and say you saw its output. "I understand the bug" is not done.
 - **Do not claim fixed until you ran it and looked.** "Should work" is not evidence. Compile-only is
   not enough for UI / native / generated-artifact bugs: open it, and for generated output read the
   contents, not the source diff. Cannot run it here → say so and hand off the exact check.
