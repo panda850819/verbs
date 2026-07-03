@@ -18,6 +18,7 @@ capability_required:
   - agents.md
   - vault
   - lib/skill-decision-tree.md
+user-invocable: false
 ---
 
 # Team-Orchestrate
