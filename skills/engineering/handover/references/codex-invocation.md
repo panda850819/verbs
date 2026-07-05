@@ -18,6 +18,9 @@ Write the prompt + the result schema into a `mktemp -d` scratch dir (capture its
 - Stay within the repo root; keep changes scoped to the listed U-IDs only.
 - Resolve each task fully; do not stop at the first plausible answer.
 </constraints>
+<judgment>
+{verbatim contents of ~/.agents/judgment-compact.md — execution judgment rules that travel with the task; omit this block if the file is absent}
+</judgment>
 <verify>
 {the U-IDs' acceptance checks, as ONE combined test/lint command}
 Run all tests together in one process; do not report done unless they pass.
