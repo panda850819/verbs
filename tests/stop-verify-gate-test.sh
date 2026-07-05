@@ -62,10 +62,12 @@ sys.exit(0 if ok else 1)
 }
 
 # --- case 1: code edit, no test command -> block JSON on stdout ---
-T="$WORK/c1.jsonl"
-{ u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; } > "$T"
-run_gate "$T"
-expect_block "c1 code edit, no test cmd"
+for tool in Edit MultiEdit; do
+  T="$WORK/c1.jsonl"
+  { u "fix the bug"; edit "$tool" /tmp/proj/app.py; toolres; } > "$T"
+  run_gate "$T"
+  expect_block "c1 code edit, no test cmd ($tool)"
+done
 
 # --- case 2: code edit + verify command after the edit -> silent exit 0 ---
 for cmd in "python3 -m pytest tests/ -v" "bun test" "bash tests/x.sh" "bash scripts/lint-suite.sh"; do

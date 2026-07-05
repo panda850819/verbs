@@ -41,7 +41,7 @@ TEST_CMD_RE = re.compile(
     re.IGNORECASE,
 )
 
-EDIT_TOOLS = {"Edit", "Write", "NotebookEdit"}
+EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 SHELL_TOOLS = {"Bash", "PowerShell"}
 LOCAL_COMMAND_PREFIXES = (
     "<command-name>", "<local-command-stdout>",
