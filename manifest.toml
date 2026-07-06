@@ -32,7 +32,7 @@
 [manifest]
 version = "3.4.0"
 schema  = "skill-tier-v1"
-updated = "2026-07-02"
+updated = "2026-07-06"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not

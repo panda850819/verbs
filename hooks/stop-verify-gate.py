@@ -20,7 +20,7 @@ import sys
 from pathlib import PurePath
 
 CODE_EXTS = {
-    ".py", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs",
+    ".py", ".ipynb", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs",
     ".sh", ".ps1", ".psm1", ".vbs",
     ".go", ".rs", ".java", ".c", ".cpp", ".h", ".hpp", ".cs", ".rb", ".sql", ".php",
 }
@@ -29,10 +29,12 @@ CODE_EXTS = {
 # (bash tests/<x>.sh suites, bash scripts/lint-<x>.sh linters). Word/position
 # anchors keep look-alikes out (make testdata, npm run testbed, cat tox.ini).
 TEST_CMD_RE = re.compile(
-    r"(pytest"
+    r"((^|[;&|\n]\s*)(uv\s+run\s+|poetry\s+run\s+)?pytest\b"
+    r"|python[3]?(\.exe)?\s+-m\s+pytest\b"
     r"|python[3]?(\.exe)?\s+(-m\s+unittest|(\S*[/\\])?(test\S*\.py|\S*_test\.py))"
     r"|npm\s+(run\s+)?test\b|yarn\s+test\b|pnpm\s+(run\s+)?test\b|bun\s+test\b|node\s+--test"
-    r"|go\s+test|cargo\s+test|\bvitest\b|\bjest\b"
+    r"|go\s+test|cargo\s+test"
+    r"|(^|[;&|\n]\s*)(npx\s+|bunx\s+|yarn\s+|pnpm\s+)?(vitest|jest)\b"
     r"|mvnw?(\.cmd)?\s+(\S+\s+)*test(\s|$)|gradlew?(\.bat)?\s+(\S+\s+)*test(\s|$)|dotnet\s+test(\s|$)"
     r"|\brspec\b|\bphpunit\b|\bctest\b|make\s+test\b|rake\s+(\S+\s+)*test\b|mix\s+test\b"
     r"|(^|[;&|]\s*)(tox|nox)\b|deno\s+test|rails\s+test"

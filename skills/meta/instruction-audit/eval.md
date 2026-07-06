@@ -2,8 +2,8 @@
 type: skill-eval
 skill: instruction-audit
 bucket: meta
-evaluated_skill_hash: ecef75cb9e8764477fc1393526417e05c9e76126
-evaluated_at: 2026-07-05
+evaluated_skill_hash: 2eec80f6c0a43604213115193033dfad6d186f06
+evaluated_at: 2026-07-06
 rubric: writing-great-skills@1.1.0
 ---
 

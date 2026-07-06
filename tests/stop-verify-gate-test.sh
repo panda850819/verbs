@@ -19,6 +19,7 @@ WANT_REASON='[pandastack verify-gate] code changed this turn with no test or ver
 # --- fixture line builders (one JSONL entry per call; args must not contain ") ---
 u()       { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
 edit()    { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t","name":"%s","input":{"file_path":"%s","old_string":"a","new_string":"b"}}]}}\n' "$1" "$2"; }
+nbedit()  { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t","name":"NotebookEdit","input":{"notebook_path":"%s","new_source":"x"}}]}}\n' "$1"; }
 bashcmd() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t","name":"Bash","input":{"command":"%s"}}]}}\n' "$1"; }
 toolres() { printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t","content":"ok"}]}}\n'; }
 
@@ -132,6 +133,28 @@ T="$WORK/c11.jsonl"
 { u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "pytest -q"; toolres; edit Edit /tmp/proj/app.py; toolres; bashcmd "pytest -q"; toolres; } > "$T"
 run_gate "$T"
 expect_allow "c11 re-verify after re-edit"
+
+# --- extra: NotebookEdit on .ipynb, no test -> block (notebook_path plumbing) ---
+T="$WORK/c12.jsonl"
+{ u "edit the notebook"; nbedit /tmp/proj/analysis.ipynb; toolres; } > "$T"
+run_gate "$T"
+expect_block "c12 notebook edit, no test cmd"
+
+# --- extra: commands that merely MENTION a test framework are not a verify ---
+for cmd in "pip install pytest" "cat jest.config.js" "grep vitest package.json"; do
+  T="$WORK/c13.jsonl"
+  { u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "$cmd"; toolres; } > "$T"
+  run_gate "$T"
+  expect_block "c13 look-alike is not a verify: $cmd"
+done
+
+# --- extra: anchored runner forms still count as a verify ---
+for cmd in "npx jest" "uv run pytest" "cd /tmp/proj && pytest -q"; do
+  T="$WORK/c14.jsonl"
+  { u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "$cmd"; toolres; } > "$T"
+  run_gate "$T"
+  expect_allow "c14 runner form verifies: $cmd"
+done
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

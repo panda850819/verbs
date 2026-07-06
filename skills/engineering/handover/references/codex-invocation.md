@@ -22,7 +22,7 @@ Write the prompt + the result schema into a `mktemp -d` scratch dir (capture its
 {explicit not-to-do list derived from the plan units — at least one entry; name the adjacent things a drive-by change would otherwise touch, e.g. schema lines, neighbouring sections, formatting of untouched code}
 </non_goals>
 <stop_conditions>
-{when to stop and report instead of continuing — always include: a needed file falls outside <files>; a compile/syntax error on special-syntax files you cannot resolve; secrets encountered; a change would require deleting files}
+{when to stop and report instead of continuing — always include: a needed file falls outside <files>; a compile/syntax error on special-syntax files you cannot resolve; secrets encountered; a change would require deleting files. These take precedence over the "resolve each task fully" constraint: hitting one means stop and report, not push through}
 </stop_conditions>
 <judgment>
 {verbatim contents of ~/.agents/judgment-compact.md — execution judgment rules that travel with the task; omit this block if the file is absent}

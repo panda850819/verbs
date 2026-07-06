@@ -26,7 +26,7 @@ Audit in this order — always-loaded files first, since their cost is paid ever
 1. `~/.agents/AGENTS.md` — the agent-agnostic contract (growth budget: ~200 lines)
 2. `~/.claude/CLAUDE.md` — the Claude shim
 3. `~/.agents/judgment-compact.md` — the judgment block
-4. pandastack skill bodies (`skills/<bucket>/<skill>/SKILL.md`) — loaded per-invocation; audited mainly for class (d) against layers 1-3
+4. pandastack skill bodies (`skills/<bucket>/<skill>/SKILL.md`) — loaded per-invocation; audited for class (d) only, against layers 1-3 (construction quality of a single skill routes to `/skill-eval`)
 
 ## Defect classes
 
@@ -47,7 +47,7 @@ Read every surface above in full; record `wc -l` for each. Completion criterion:
 
 ### 2. Hunt per defect class
 
-Walk each surface once per class (a)-(e); run (f) on AGENTS.md. For every hit, quote the exact rule line — the quote must be greppable in the source file. Completion criterion: every class explicitly reported, including "no hits"; an unexamined class is not a clean class.
+Walk surfaces 1-3 once per class (a)-(e); walk surface 4 (skill bodies) for class (d) only; run (f) on AGENTS.md. For every hit, quote the exact rule line — the quote must be greppable in the source file. Completion criterion: every class explicitly reported, including "no hits"; an unexamined class is not a clean class.
 
 ### 3. Write the candidate list
 
