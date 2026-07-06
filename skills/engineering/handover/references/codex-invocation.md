@@ -18,6 +18,12 @@ Write the prompt + the result schema into a `mktemp -d` scratch dir (capture its
 - Stay within the repo root; keep changes scoped to the listed U-IDs only.
 - Resolve each task fully; do not stop at the first plausible answer.
 </constraints>
+<non_goals>
+{explicit not-to-do list derived from the plan units — at least one entry; name the adjacent things a drive-by change would otherwise touch, e.g. schema lines, neighbouring sections, formatting of untouched code}
+</non_goals>
+<stop_conditions>
+{when to stop and report instead of continuing — always include: a needed file falls outside <files>; a compile/syntax error on special-syntax files you cannot resolve; secrets encountered; a change would require deleting files. These take precedence over the "resolve each task fully" constraint: hitting one means stop and report, not push through}
+</stop_conditions>
 <judgment>
 {verbatim contents of ~/.agents/judgment-compact.md — execution judgment rules that travel with the task; omit this block if the file is absent}
 </judgment>
@@ -28,6 +34,9 @@ Run all tests together in one process; do not report done unless they pass.
 <output_contract>
 Report status (completed | partial | failed), files_modified[], issues[], summary,
 verification_summary (what you ran to verify + outcome).
+A result with no run evidence must say "changed but not verified" and report status
+partial, never "should work". Out-of-scope discoveries belong in issues[] as reports,
+not fixes.
 </output_contract>
 ```
 

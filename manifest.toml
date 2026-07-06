@@ -32,7 +32,7 @@
 [manifest]
 version = "3.4.0"
 schema  = "skill-tier-v1"
-updated = "2026-07-02"
+updated = "2026-07-06"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
@@ -68,7 +68,7 @@ updated = "2026-07-02"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (15) — markdown-only, fresh-clone runnable
+# CORE (16) — markdown-only, fresh-clone runnable
 # Buckets on disk: engineering / productivity / writing / meta
 #
 # "No external CLI" is literal: git is the one assumed substrate CLI (a fresh
@@ -118,6 +118,10 @@ description = "Create new pandastack skills, MECE-checked against RESOLVER, trig
 [skill.skill-eval]
 tier = "core"
 description = "Score a skill's construction against the writing-great-skills scorecard; write co-located eval.md."
+
+[skill.instruction-audit]
+tier = "core"
+description = "Audit live instruction surfaces (AGENTS.md, CLAUDE.md, judgment-compact, skill bodies) for stale/duplicate/overtriggered rules; candidate list only, never edits the audited files."
 
 [skill.sprint]
 tier = "core"

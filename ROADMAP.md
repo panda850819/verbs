@@ -72,3 +72,5 @@ Full reasoning, alternatives considered, and gate log live in the office-hours b
 - Open questions = not decisions; they get resolved as data arrives, not on a schedule
 
 - [x] 2026-06-12 (PR #7 deferred): dojo SKILL.md no longer greps the retired daily-blog path in its past-case scan.
+- [ ] 2026-07-06 (PR #166 deferred): review quiz-before-merge option — big diff, model quizzes its own understanding of the change, all-correct before merge (source: Thariq field guide, brain media/articles/aihao-claude-fable-5-prompting-personalized).
+- [ ] 2026-07-06 (PR #166 deferred, gbrain repo): retro-week checklist line suggesting /instruction-audit before adding new rules.

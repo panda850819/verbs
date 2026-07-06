@@ -2,12 +2,14 @@
 type: skill-eval
 skill: handover
 bucket: engineering
-evaluated_skill_hash: d8bac2a975a0f6be8c23c9772627cead07930841
-evaluated_at: 2026-07-03
+evaluated_skill_hash: ac147a23c99faecfbbdae30da07c39c1b15fb541
+evaluated_at: 2026-07-05
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — handover
+
+> 2026-07-05 re-validation (#165): SKILL.md delta since the 2026-07-03 scoring is one additive enumeration line (payload block list gained non_goals / stop_conditions / judgment). All axis evidence re-grounded via lint-eval-quotes; scores and verdict unchanged.
 
 **Verdict: SOLID.** Fail-closed 5-gate preflight plus a clean hot/cold split keep the body a pure orchestration layer; costs one point for restating the Codex-quota economics across three sections.
 
