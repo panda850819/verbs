@@ -24,6 +24,9 @@ Write the prompt + the result schema into a `mktemp -d` scratch dir (capture its
 <stop_conditions>
 {when to stop and report instead of continuing — always include: a needed file falls outside <files>; a compile/syntax error on special-syntax files you cannot resolve; secrets encountered; a change would require deleting files. These take precedence over the "resolve each task fully" constraint: hitting one means stop and report, not push through}
 </stop_conditions>
+<budget>
+{limits for this run — default: 2 attempts per failing check, then stop; add a files-touched cap (= the <files> scope) and, when the orchestrator sets one, a wall-clock or token ceiling. Hitting any limit is a stop_conditions event: report partial with what was tried, never push through}
+</budget>
 <judgment>
 {verbatim contents of ~/.agents/judgment-compact.md — execution judgment rules that travel with the task; omit this block if the file is absent}
 </judgment>
