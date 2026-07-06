@@ -67,7 +67,7 @@ The async-vs-sync axis is **session occupancy**, not cost (codex runs on the sam
 
 ## Sync mode (default)
 
-Claude spawns Codex, waits for the structured result, keeps git + review. Read `references/codex-invocation.md` for the verified `codex exec` invocation, the `<task>/<files>/<constraints>/<non_goals>/<stop_conditions>/<judgment>/<verify>/<output_contract>` XML payload, the result schema, the sandbox-escape gate, and the single-result classification table.
+Claude spawns Codex, waits for the structured result, keeps git + review. Read `references/codex-invocation.md` for the verified `codex exec` invocation, the `<task>/<files>/<constraints>/<non_goals>/<stop_conditions>/<budget>/<judgment>/<verify>/<output_contract>` XML payload, the result schema, the sandbox-escape gate, and the single-result classification table.
 
 Flow:
 
