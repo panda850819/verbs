@@ -2,17 +2,22 @@
 name: grill
 description: |
   Adversarial requirement discovery. Ask ONE question at a time, hunting for hidden
-  requirements / unknown unknowns. Atomic 5-10 min tool, no brief output (just a
-  confirmed/open log). Use when the user says "grill me on X", "interrogate this
-  idea", "stress test this scope", "what am I missing". Skip for tasks where scope
-  is already concrete. For structured-brief output, use `/office-hours` (default
-  full mode) or `/office-hours --quick` (when context already loaded).
+  requirements / unknown unknowns. Atomic 5-10 min by default (a confirmed/open log);
+  `--brief` mode adds a structured close that writes a brief (+ executable plan) to
+  docs/. Use when the user says "grill me on X", "interrogate this idea", "stress test
+  this scope", "what am I missing", "draft a brief", "structured intake". Skip for
+  tasks where scope is already concrete.
 reads:
   - repo: lib/goal-mapping.md
   - repo: lib/push-once.md
+  - repo: lib/stop-rule.md
+  - repo: lib/output-templates.md
+  - repo: lib/skill-decision-tree.md
   - vault: knowledge/**
 writes:
   - vault: Inbox/grill-*.md
+  - vault: docs/briefs/*.md
+  - vault: docs/plans/*.md
   - cli: stdout
 domain: shared
 classification: tool
@@ -22,7 +27,7 @@ user-invocable: false
 
 Adversarial requirement discovery. Inspired by Matt Pocock's "grill me" prompt — see [[matt-pocock-agent-coding-workflow]].
 
-The point is NOT to fill a structured questionnaire (that's `/office-hours`). The point is to surface **unknown unknowns** by interrogating one angle at a time until the answer surprises you.
+The point is NOT to fill a structured questionnaire. The point is to surface **unknown unknowns** by interrogating one angle at a time until the answer surprises you. Default grill is atomic (mid-flight, no artifact); `--brief` mode (below) adds a structured close that leaves a written brief.
 
 ## Pre-step: Goal Mapping (recommended)
 
@@ -31,7 +36,7 @@ If goal mapping has not been done yet (e.g. you are running grill standalone, no
 ## When to use
 
 - Feature scope is fuzzy ("I want a points system" → backfill? retroactive? UI placement? streak rules?)
-- Before writing a PRD or feeding `/office-hours --quick` (which produces a brief from the surfaced unknowns)
+- Before writing a PRD, or run `--brief` (below) to leave with a written brief + executable plan
 - When you suspect hidden constraints (compliance, migration, downstream consumers)
 - User explicitly says "grill me", "stress test this", "what am I missing"
 
@@ -105,7 +110,7 @@ After grilling ends, produce:
 - [if any]
 
 ### Recommended next step
-- Feed into `/office-hours --quick` (if implementation track — produces a brief)
+- Re-run in `--brief` mode (below) to produce a brief + executable plan (if implementation track)
 - Feed into PRD draft (if planning track)
 - Park as memo (if not ready to act)
 ```
@@ -113,6 +118,22 @@ After grilling ends, produce:
 Save to:
 - `Inbox/grill-<slug>-<date>.md` if topic is fresh
 - Append to existing brief / PRD if drilling on a known feature
+
+## `--brief` mode (structured close)
+
+Default grill is atomic and leaves only the log above. `--brief` runs the same drilling, then adds a structured close that ends with a written brief (+ executable plan) — the replacement for the retired `office-hours`. Use when you walked in with a fuzzy idea and want to walk out with a decision on paper. After the stopping rule fires, run three stages in order; do not skip, do not reorder.
+
+**Stage A — Alternatives (forced).** @../../../lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason mapped to the dominant goal layer}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Apply to brief? [Add / Defer / Reject]` — STOP and wait on each.
+
+**Stage B — Premise refresh.** Original premise / surfaced premises (from the drilling) / revised premise / still-load-bearing [Y/N/partial]. If the revised premise differs significantly from the original, surface it — the user may want to redo Stage A with the new framing.
+
+**Stage C — Write the brief.** Write `docs/briefs/{YYYY-MM-DD}-{slug}.md` using the brief scaffold in `lib/output-templates.md`: Problem, original + revised premise, alternatives (with each Add/Defer/Reject), chosen approach + rationale, Scope (in/out), the "Next skill (recommended)" routing block (`lib/skill-decision-tree.md` 2-question test), Gotchas, OPEN_QUESTIONS. Print the path and surface the "Next skill" block verbatim. Do NOT close with "want me to start it?" — name the next skill directly.
+
+**Stage C+ — Executable plan (only when the next step is execution).** If the chosen approach routes to `/sprint` or `/handover` (there is build work, not a pure decision), ALSO write `docs/plans/{slug}.md` (NO date prefix — `/sprint --plan {slug}` and `/handover {slug}` resolve by bare slug, so write and read must match) using the plan scaffold in `lib/output-templates.md`: frontmatter + `## Tasks`, each task carrying scope / acceptance / depends-on / status. The brief is the WHY, the plan is the WHAT — keep them strictly separate, each fact in one file. `acceptance:` MUST be a concrete check (a grep, a test/lint command, a file-exists assertion) — `/sprint --plan` derives per-task done/skip from it; vibes force sprint back to the iteration counter. This one plan file is the sprint input, the cross-session resume checkpoint, and the Codex handover payload. Add one pointer to the brief under `## Chosen approach`: `Executable plan: docs/plans/{slug}.md`.
+
+### Wayfinder exit (effort too big for one session)
+
+If the drilling reveals the effort is BOTH too big for one session AND still foggy — the way to the destination isn't visible, scope keeps expanding, decisions hang on decisions not yet made — do NOT force a single brief. Mint a shared **map** on Linear instead: a Project (or parent issue) as the map, one **typed investigation sub-issue** per open decision (`research` / `prototype` / `grilling` / `task` label), wired with native blocking — mirror the Linear epic structure (Initiative / Project / Issue / Sub-issue) already in use. Three disciplines: **don't chart what you can't yet see** (fog-of-war — leave it a "not yet specified" note, not a ticket); **one ticket per session**; **each ticket's deliverable is a DECISION** written to the brain `decisions/`, not code. The map replaces the brief only for this foggy-scoping case; once the way is clear, the effort re-enters at Stage A `--brief` or goes straight to `/sprint`.
 
 ## Anti-patterns
 
@@ -124,5 +145,5 @@ Save to:
 
 ## Relationship to other skills
 
-- **For structured-brief output** — use `/office-hours` (default full mode) or `/office-hours --quick` (when context already loaded).
+- **For structured-brief output** — run `grill --brief` (below): writes a brief + executable plan to `docs/`; the retired `office-hours` folded here.
 - **Before `/ship knowledge <decisions/path>` Close stage** — if you're closing a work topic and realize scope was never grilled.

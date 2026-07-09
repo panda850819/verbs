@@ -45,7 +45,7 @@ infra would cost more than it saves and would rot in a solo repo.
 1. Pick ~6 **confusable pairs** whose trigger surfaces sit closest to the one you
    touched. Sources for the candidates: `RESOLVER.md` Disambiguation
    section, `DISPATCH.md`, each SKILL.md's `Skip` / `NOT for` frontmatter, and
-   `lib/skill-decision-tree.md`. Standing examples: grill vs office-hours,
+   `lib/skill-decision-tree.md`. Standing examples: grill vs grill --brief,
    the four review skills, ship vs handover.
 2. For each pair, write ~1 short prompt that *should* route to each side (≈6
    prompts total). Read each prompt against the two descriptions and confirm it

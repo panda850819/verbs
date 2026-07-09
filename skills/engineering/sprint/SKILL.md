@@ -46,22 +46,22 @@ user-invocable: false
 
 - 1-2 hour focused work on a specific topic
 - "Let's ship X today" / "sprint on this"
-- Coming out of `/office-hours` with an approved brief
+- Coming out of `grill --brief` with an approved brief
 - Bug fix that needs review + ship discipline (was `commands/fix.md`)
 - Quick ship on a small change with `--quick` flag (was `commands/quick.md`)
 
 ## When to skip
 
 - Trivial 1-line change (just edit + commit)
-- Multi-day project (use `/office-hours` first, then sprint per session)
-- Pure planning / scoping (use `/office-hours`, not sprint)
+- Multi-day project (use `grill --brief` first, then sprint per session)
+- Pure planning / scoping (use `grill --brief`, not sprint)
 
 ## Modes
 
 - Default: full sprint (prep → grill lite → execute → review → ship)
 - `--quick`: skip prep + grill, go execute → review → ship
 - `--design`: auto-invoke `ui` skill at execute stage (replaces `commands/design.md`)
-- `--plan {path|slug}`: execute against a durable plan at `docs/plans/{slug}.md` (the artifact `/office-hours` Stage 5b emits). Sprint reads it READ-ONLY and derives per-task progress from git — see Stage 3 plan-driven execution. Auto-detect rule: slugify the topic the same way office-hours does and check for `docs/plans/{that-slug}.md` (exact slug, no fuzzy match); if the sprint began from an office-hours brief, use the plan path office-hours printed. If none found, run conversationally.
+- `--plan {path|slug}`: execute against a durable plan at `docs/plans/{slug}.md` (the artifact `grill --brief` Stage C+ emits). Sprint reads it READ-ONLY and derives per-task progress from git — see Stage 3 plan-driven execution. Auto-detect rule: slugify the topic the same way `grill --brief` does and check for `docs/plans/{that-slug}.md` (exact slug, no fuzzy match); if the sprint began from a `grill --brief` brief, use the plan path it printed. If none found, run conversationally.
 - `--continue {slug}`: resume a PAUSED sprint. Skips prep + grill; loads the PAUSED checkpoint + `docs/plans/{slug}.md`, recomputes which U-IDs are already done (git + acceptance), and resumes at the first non-done task.
 - `--delegate codex`: in Stage 3, hand a batch of mechanical units to Codex (synchronous, in-loop) via the `/handover` invocation. OFF unless you pass this flag — sprint defaults to free Claude subagents and never auto-delegates. A batch of ≥3 mechanical units is the advisory threshold worth surfacing the flag at, NOT an auto-trigger. Requires a plan file. See `references/codex-delegation.md` for the batch loop; the single-invocation mechanics live in `skills/engineering/handover/references/codex-invocation.md`. For ASYNC handover that frees this session, use `/handover --async`.
 

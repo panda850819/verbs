@@ -2,12 +2,14 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 25e2a2b6e83c17df0220f2e38b17aea7fd3b1c9a
-evaluated_at: 2026-07-03
+evaluated_skill_hash: 3f93d22b021db04e1e5692b5dfd9efc1a510e0f5
+evaluated_at: 2026-07-09
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — sprint
+
+> 2026-07-09 re-validation (#170): SKILL.md swapped its plan-artifact source and planning/multi-day routing from office-hours to `grill --brief` (no structural change); anti-trigger route re-anchored, all L-citations re-verified against the current file, verdict unchanged.
 
 **Verdict: SOLID.** The new closure-evidence gate (Stage 6 SHIPPED step 4) turns "claim SHIPPED without proof" into a checkable failure, but it doesn't say what terminal state a sprint lands in when that evidence is missing — and the previous eval's "conformance: weak" call turns out to be a stale citation, not a real gap.
 
@@ -36,5 +38,5 @@ The closure-evidence step (L215) is a small, well-placed fix: it turns "did you 
 ## Behavioral cases
 - trigger `let's ship the auth rate-limit fix today` → expected process: Stage 0 probe → Stage 1 prep + store-agnostic learning recall (top 3-5, used in the plan) → grill-lite (3-question cap) → architect/subagent execute → review gate (≤3 iterations) → Stage 5 deploy-proof + ship-gate computes terminal state → Stage 6 SHIPPED prints closure evidence (ticket/PR URL + state transition) before the summary line.
 - trigger `/sprint --continue payments-webhook` → expected process: skip prep+grill, load the PAUSED checkpoint + `docs/plans/payments-webhook.md`, re-derive done U-IDs from git+acceptance, resume at the first non-done task (L65).
-- anti-trigger `should I even build a rate limiter? let me think out loud` → should NOT fire; no concrete topic, pure ideation routes to `office-hours` (When to skip, L57).
+- anti-trigger `should I even build a rate limiter? let me think out loud` → should NOT fire; no concrete topic, pure ideation routes to `grill --brief` (When to skip, L57).
 - anti-trigger `review this diff before I open the PR` → should NOT fire; code-diff review routes to `review`, not the full sprint flow (description routing clause, L5).

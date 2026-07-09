@@ -15,6 +15,6 @@ Anti-bypass table. Each shortcut is tied to the concrete failure it causes.
 | "My instrumentation didn't show in their screenshot, weird — anyway" | That is the pipeline alarm, not a fluke. Stop, verify the loop (R1/R2). The session this rule exists for lost days exactly here. |
 | "3 lifecycle variants failed, the 4th is my escalation" | Same-shape failure ×3 ⇒ the abstraction/loop is wrong (R4). A 4th variant of the same approach is strike 4, not escalation. Switch primitive or re-verify the loop. |
 | "Re-asking the user to re-test is just one more round" | Each contaminated human round-trip is the expensive unit. If the loop needs repeated round-trips, harden the loop first (R3), then iterate. |
-| "Let's sprint on stuff" (no single topic) | Sprint requires one concrete topic. No-topic ideation routes to `/office-hours`, not sprint. |
+| "Let's sprint on stuff" (no single topic) | Sprint requires one concrete topic. No-topic ideation routes to `grill --brief`, not sprint. |
 | "Substrate's fine, skip Stage 0 capability probe" | Probe each run — state changes between sessions. The probe block is the opening, not optional. |
 | "Sprint didn't ship, so it failed (PAUSED = failure)" | PAUSED is a legitimate terminal outcome, not a break. No extract/backflow; write the checkpoint and stop cleanly. |

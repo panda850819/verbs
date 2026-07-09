@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: |
-  Create new pandastack skills, MECE-checked against the pandastack RESOLVER.md at the repo root (the skill-overlap index, NOT the brain filing-tree RESOLVER.md). Triggers: "create a skill", "new pandastack skill", "improve this skill", "扩 skill".
+  Create new pandastack skills, MECE-checked against the pandastack RESOLVER.md at the repo root (the skill-overlap index, NOT the brain filing-tree RESOLVER.md). Also the evaluator: `--eval <name>` scores an existing skill's construction against the writing-great-skills scorecard and writes a co-located eval.md (the retired `skill-eval` folded here). Triggers: "create a skill", "new pandastack skill", "improve this skill", "eval/score this skill", "扩 skill".
 version: 1.0.0
 user-invocable: false
 type: skill
@@ -9,7 +9,11 @@ type: skill
 
 # Skill Creator
 
-Create a new pandastack skill that follows the SKILL-FRONTMATTER.md contract and the hot/cold dispatch rule. Sized to fit between `office-hours` (idea → brief) and `sprint` (brief → execution).
+Create a new pandastack skill that follows the SKILL-FRONTMATTER.md contract and the hot/cold dispatch rule. Sized to fit between `grill --brief` (idea → brief) and `sprint` (brief → execution).
+
+## `--eval <name>` mode (score an existing skill)
+
+The evaluator half of skill construction — `skill-creator` builds and self-checks; `--eval` judges an existing skill and leaves a greppable verdict next to it. Follow the scoring steps + eval.md template in [`lib/skill-eval.md`](../../../lib/skill-eval.md): read the writing-great-skills scorecard, score all 9 axes (pass/weak/fail, one cited `L<n>` each, default weak), write `skills/<bucket>/<name>/eval.md` with the hash stamped, and confirm `bash scripts/lint-eval-fresh.sh <name>` passes. `--eval all` fans out one sub-agent per skill (never score the whole corpus in one hot context). This is the same SSOT the build path binds — generator and evaluator, one verb.
 
 ## Phases
 
@@ -113,14 +117,14 @@ Run both procedures in [`skills/meta/skill-creator/lib/verify-and-route-check.md
 
 ### 7. Construction self-check (generation-moment binding)
 
-Before declaring the skill done, score it against the [`../writing-great-skills/SKILL.md`](../writing-great-skills/SKILL.md) scorecard (the construction-quality SSOT). Any axis landing **weak/fail** with no reason to keep it → revise before merge. Then run `/skill-eval <name>` to write the co-located `eval.md` (every skill carries one; `lint-eval-fresh.sh` enforces it). This mirrors how `lib/quality-rubric.md` binds at the generation moment — author knows the axes upfront and steers toward them.
+Before declaring the skill done, score it against the [`../writing-great-skills/SKILL.md`](../writing-great-skills/SKILL.md) scorecard (the construction-quality SSOT). Any axis landing **weak/fail** with no reason to keep it → revise before merge. Then run `--eval <name>` (above) to write the co-located `eval.md` (every skill carries one; `lint-eval-fresh.sh` enforces it). This mirrors how `lib/quality-rubric.md` binds at the generation moment — author knows the axes upfront and steers toward them.
 
 ## Output Format
 
 ```
 skills/<bucket>/<name>/   (bucket = engineering | productivity | writing | meta)
 ├── SKILL.md            ← created
-└── eval.md             ← created by /skill-eval
+└── eval.md             ← created by --eval
 .claude-plugin/plugin.json ← "./skills/<bucket>/<name>" added to skills array
 manifest.toml            ← [skill.<name>] entry added
 RESOLVER.md              ← row added
