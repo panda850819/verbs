@@ -123,6 +123,7 @@ Launch review passes in parallel using `context: fork` (isolated subagents — r
 - Abstractions that don't earn their complexity
 - API surface changes that break consumers
 - Missing migrations or backwards-incompatible changes
+- **Deep-module lens (refactor / replatform / keep-vs-rewrite diffs only):** judge each touched module by depth — a deep module hides substantial implementation behind a narrow interface; a shallow one leaks complexity through a wide interface, so callers carry what the module should have absorbed. Before endorsing a seam (where a strangler-fig cut lands, where a rewrite boundary goes), state the module's depth and where the seam sits; a keep-vs-rewrite verdict with no depth named is a vibe, not a review — the same bar as "can't state the bug's mechanism in one sentence → not ready to fix it". Flag a change that makes an already-shallow module shallower (more surface, same leak), or a seam drawn mid-module instead of at a natural interface. Format: `[P2] file — shallow module / seam mis-placed — Fix: name the interface the complexity should hide behind`.
 
 **Conditional passes (only when scope detected):** for each `SCOPE_*` signal from Step 4 (and Pass 8 when the diff carries writing/design artifacts), run the matching pass from `skills/engineering/review/lib/conditional-passes.md`. Skip the file entirely when no scope signal fired.
 
