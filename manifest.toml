@@ -167,6 +167,11 @@ tier = "ext"
 requires = ["cli:git", "cli:codex"]
 description = "Hand unfinished work to Codex to DO (not /ship, which closes finished work): sync (spawn codex exec now) or --async (write payload for Hermes). Codex runs on ChatGPT-subscription quota, conserving the Claude session. Needs the `codex` CLI, hence ext."
 
+[skill.advisor]
+tier = "ext"
+requires = ["cli:codex"]
+description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan (absorbs boardroom). Needs a cross-model CLI (`codex`, or `claude` on the Codex seat), hence ext."
+
 # ============================================================================
 # Notes
 # ============================================================================

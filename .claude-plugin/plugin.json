@@ -1,6 +1,6 @@
 {
   "name": "pandastack",
-  "description": "Personal AI operator OS for Claude Code. Skill-only (no agents, no commands), 20 skills organized into engineering / productivity / writing / meta buckets under skills/, tiered via manifest.toml. Covers dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop (writing-great-skills + skill-eval).",
+  "description": "Personal AI operator OS for Claude Code. Skill-only (no agents, no commands), 21 skills organized into engineering / productivity / writing / meta buckets under skills/, tiered via manifest.toml. Covers dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop (writing-great-skills + skill-eval).",
   "version": "3.4.0",
   "author": {
     "name": "Panda Zeng"
@@ -17,6 +17,7 @@
     "learning-loop"
   ],
   "skills": [
+    "./skills/engineering/advisor",
     "./skills/engineering/careful",
     "./skills/engineering/debug",
     "./skills/engineering/deepwiki",

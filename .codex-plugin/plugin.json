@@ -1,7 +1,7 @@
 {
   "name": "pandastack",
   "version": "3.4.0",
-  "description": "Personal AI operator OS: skill-only stack with 20 skills organized into engineering / productivity / writing / meta buckets under skills/, tiered via manifest.toml. Covers dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop.",
+  "description": "Personal AI operator OS: skill-only stack with 21 skills organized into engineering / productivity / writing / meta buckets under skills/, tiered via manifest.toml. Covers dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop.",
   "author": {
     "name": "Panda Zeng",
     "url": "https://github.com/panda850819"
