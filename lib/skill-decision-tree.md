@@ -1,8 +1,8 @@
 # lib/skill-decision-tree.md — Workflow shape → execution skill
 
-> Shared module. Loaded by `office-hours` (Stage 5 next-skill recommendation) and `team-orchestrate` (execution-locus choice), and any Layer 1 flow skill that needs to recommend the next execution step.
+> Shared module. Loaded by `grill --brief` (next-skill recommendation) and `team-orchestrate` (execution-locus choice), and any Layer 1 flow skill that needs to recommend the next execution step.
 >
-> Origin: 2026-05-05 — office-hours produced briefs but did not point to the next skill. v2.0.0 simplified the picture: `execute-plan` was cut (its sequential-subagent role overlapped sprint Phase 3); the only execution-locus axis left is sprint vs team-orchestrate.
+> Origin: 2026-05-05 — structured briefs did not point to the next skill. v2.0.0 simplified the picture: `execute-plan` was cut (its sequential-subagent role overlapped sprint Phase 3); the only execution-locus axis left is sprint vs team-orchestrate.
 
 ## The sharp distinction: execution locus
 
@@ -54,14 +54,14 @@ If no → reconsider. The work likely fits Q1 better, or the framing is wrong.
 
 ## Brief shape → skill mapping
 
-Use this when reading an office-hours brief:
+Use this when reading a `grill --brief` brief:
 
 | Brief shape | Skill |
 |---|---|
 | "Ship X in 1-2 hr; iteration expected" | `/sprint` |
 | "These N steps in order" | N × `/sprint` (run sequentially) |
 | "These N branches can advance independently" | `/team-orchestrate` |
-| "I need a brief / I have a fuzzy idea" | (you're earlier in the flow — `/office-hours` first) |
+| "I need a brief / I have a fuzzy idea" | (you're earlier in the flow — `/grill --brief` first) |
 
 ## Anti-patterns
 
@@ -72,7 +72,7 @@ Use this when reading an office-hours brief:
 
 ## When this lib is loaded
 
-- `office-hours` Stage 5 — read this lib to recommend next skill in the brief
+- `grill --brief` — read this lib to recommend next skill in the brief
 - `team-orchestrate` — choose the execution locus (sprint in-session vs parallel subagents)
 
 ## See also

@@ -9,7 +9,7 @@
 Skills that generate substantive user-facing prose where posture / directness affects whether the user can act on the output:
 
 - `grill` (both modes) — pushback prompts and critique synthesis
-- `office-hours` (B5) — diagnostic findings
+- `grill --brief` — diagnostic findings
 - `review` — finding write-ups
 - `write` — voice review on user drafts
 - `evening-distill`, `brief-morning` — daily note synthesis
@@ -64,6 +64,6 @@ Don't add a 5th unless you observe a 3rd repeated session where none of the 4 fi
 
 ## Origin
 
-- gstack `office-hours` 5 pushback patterns + 5 anti-sycophancy rules + EXPANSIVE framing examples (3 sections doing the same job)
+- gstack structured-brief precursor 5 pushback patterns + 5 anti-sycophancy rules + EXPANSIVE framing examples (3 sections doing the same job)
 - pandastack 2026-05-03 — distilled to 4 BAD/GOOD pairs in `~/.agents/AGENTS.md` Voice (v0.6.0)
 - pandastack 2026-05-04 — extracted to `lib/bad-good-calibration.md` for skill ref

@@ -42,13 +42,13 @@ bash scripts/bootstrap.sh --claude    # or --codex
 
 After install:
 
-1. `/pandastack:init` once inside your project
-2. `/office-hours` — bring a fuzzy idea, walk out with a written brief
+1. Add a project `AGENTS.md` / `CLAUDE.md` contract when your repo needs one.
+2. `/grill --brief` — bring a fuzzy idea, walk out with a written brief
 3. `/sprint` — 1-2h focused execution, ends in SHIPPED / PAUSED / FAILED
 4. `/ship knowledge <path>` on a finished note in your vault
 5. Stop there. You'll know if pandastack fits how you work.
 
-> **New to pandastack?** [`docs/first-session.md`](docs/first-session.md) is a 15-minute guided first run. Note `/pandastack:init` is per-project (it needs a git repo); to try pandastack vault-only with no project, see **Fresh start** under [Install § Substrate config](#substrate-config).
+> **New to pandastack?** [`docs/first-session.md`](docs/first-session.md) is a 15-minute guided first run. Project setup is manual now: add a local contract file when a repo needs one. To try pandastack vault-only with no project, see **Fresh start** under [Install § Substrate config](#substrate-config).
 
 > **Tier model**: Skills are tiered in `manifest.toml`. Core = markdown-only, runs on a fresh clone. Ext = needs a public CLI install. `capability-probe` only ABORTs when substrate is missing, not when ext CLIs are absent.
 
@@ -61,8 +61,8 @@ After install:
                   ─────────────────────
 
   dev        DEFINE ──▶ PLAN ──▶ GATE ──▶ BUILD ──▶ VERIFY ──▶ REVIEW ──▶ SHIP
-             office-h   grill   careful  build     qa         review     ship
-             or grill                                          (codex
+             grill      grill   careful  build     qa         review     ship
+             --brief                                           (codex
                                                               cross-check)
 
              Express path: /sprint chains DEFINE → SHIP internally (1-2h cap).
@@ -84,7 +84,7 @@ Cross-flow router (start here when you're not sure which composition applies):
 
 | If you're about to… | Open with | Composition |
 |---|---|---|
-| Build / fix / refactor code | `/office-hours` then `/sprint` | dev |
+| Build / fix / refactor code | `/grill --brief` then `/sprint` | dev |
 | Turn a draft into a published post | `/write` then manual publish | writing |
 | Make a raw note durable | `/ship knowledge <path>` | knowledge |
 | Close out a work topic / decision | `/ship knowledge <decisions/path>` | knowledge (decision-note variant) |
@@ -94,13 +94,13 @@ Cross-flow router (start here when you're not sure which composition applies):
 
 ## How skills connect
 
-`/office-hours` writes a brief. `/sprint` reads the brief and executes. `/sprint` ends in SHIPPED, then `/ship knowledge <path>` reads the session note and runs Close + Extract + Backflow. Each step writes an artifact the next step picks up. You decide when to fire each step; the brief, session note, and decision log are the contracts between phases.
+`/grill --brief` writes a brief. `/sprint` reads the brief and executes. `/sprint` ends in SHIPPED, then `/ship knowledge <path>` reads the session note and runs Close + Extract + Backflow. Each step writes an artifact the next step picks up. You decide when to fire each step; the brief, session note, and decision log are the contracts between phases.
 
 ## See it work
 
 ```
 You:    我想做一個 RSS curation 工具，每天整理 AI 圈新聞，但範圍我沒想清楚
-You:    /office-hours
+You:    /grill --brief
 
 Claude: [load context] rg "RSS\|digest\|curation" knowledge/ — 3 條相關 vault note 帶上來
         [grill] 6 forcing questions: 痛是「資訊過載」還是「漏掉重要的」?
@@ -223,7 +223,7 @@ After install, run `/pandastack:init` once inside your project.
 Inbox/                 # session captures, ship proposals
 knowledge/             # long-form notes
 docs/
-  briefs/              # /office-hours output
+  briefs/              # /grill --brief output
   plans/               # executable plans (/sprint --plan)
   sessions/            # session logs
   learnings/           # learnings sedimented by /review
@@ -233,7 +233,7 @@ docs/
 mkdir -p Inbox knowledge docs/{briefs,plans,sessions,learnings,checkpoints}
 ```
 
-**Fresh start (no project yet)**: `/pandastack:init` needs a git repo. To try pandastack without one, `cd` into any writable dir (or `git init` a scratch repo) and run `/office-hours --quick "<a real problem you have>"` — it produces a brief without `/init`. Full guided run: [`docs/first-session.md`](docs/first-session.md).
+**Fresh start (no project yet)**: project setup is manual now. To try pandastack without a project contract, `cd` into any writable dir and run `/grill --brief "<a real problem you have>"` — it produces a brief without the retired setup skill. Full guided run: [`docs/first-session.md`](docs/first-session.md).
 
 Re-run `bash scripts/bootstrap.sh` any time to verify substrate.
 
@@ -266,8 +266,7 @@ Skills grouped by lifecycle (core / ext tiers — see `manifest.toml`). Each ski
 
 | Skill | Your specialist | What they do |
 |---|---|---|
-| `/office-hours` | The Interrogator | Bring a fuzzy idea, walk out with a written brief. 5-stage flow: load context, adversarial grill, premise challenge, alternatives, write brief. |
-| `/grill` | The Adversary | Atomic 5-10 min adversarial discovery. One question at a time, hunting for hidden requirements and unknown unknowns. |
+| `/grill` | The Adversary | Atomic 5-10 min adversarial discovery. One question at a time, hunting for hidden requirements and unknown unknowns. Use `--brief` for a written brief + executable plan. |
 
 ### Build
 
@@ -282,7 +281,7 @@ Skills grouped by lifecycle (core / ext tiers — see `manifest.toml`). Each ski
 
 | Skill | Your specialist | What they do |
 |---|---|---|
-| `/boardroom` | The Boardroom | Blind parallel critique of a prepared plan. N mutually-blind critics, deduped + ranked findings, per-finding apply gate. |
+| `/advisor --panel` | Cross-model critics | Blind cross-model critique of a prepared plan. Deduped + ranked findings, per-finding apply gate. |
 
 ### Review / QA
 
@@ -312,11 +311,7 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 
 ### Session
 
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/init` | The Initializer | One-time pandastack init per project. Detects project type, writes config to CLAUDE.md. |
-
-`/checkpoint` and `/done` were cut from the active surface. Sprint pause/resume state now lives in sprint artifacts and external session notes.
+Project setup is manual now: add the repo-local `AGENTS.md` / `CLAUDE.md` contract directly. `/checkpoint` and `/done` were cut from the active surface. Sprint pause/resume state now lives in sprint artifacts and external session notes.
 
 ### Writing
 
@@ -326,11 +321,7 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 
 ### Tool wrappers (public CLI)
 
-| Skill | Wraps |
-|---|---|
-| `/deepwiki` | GitHub repo docs + Mermaid diagrams from a local clone |
-
-`/agent-browser` was archived 2026-06-08 — the npm `agent-browser` CLI carries its own docs; `/qa` still uses the CLI directly.
+`/agent-browser` was archived 2026-06-08 — the npm `agent-browser` CLI carries its own docs; `/qa` still uses the CLI directly. Repo-doc diagram grounding now lives in `lib/mermaid-grounding.md`.
 
 `summarize`, `notion`, `slack`, `scout`, `inbox-triage`, `work-ship`, `think-like-*` were cut in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
 
@@ -338,9 +329,7 @@ Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or �
 
 | Skill | Your specialist | What they do |
 |---|---|---|
-| `/using-pandastack` | The Router | Session-start contract: how pandastack dispatches verbs to skills, plus the private-overlay hook. |
-| `/skill-creator` | Skill Smith | Create a new pandastack skill, MECE-checked against `RESOLVER.md`, trigger-first. |
-| `/skill-eval` | Skill Examiner | Score a skill's construction against the `writing-great-skills` scorecard; write a co-located `eval.md`. |
+| `/skill-creator` | Skill Smith | Create a new pandastack skill, MECE-checked against `RESOLVER.md`, trigger-first. Use `--eval` to score an existing skill and write a co-located `eval.md`. |
 | `/writing-great-skills` | The Scorecard | Reference + scorecard for well-constructed skills; the construction-quality SSOT. |
 
 ## Lifecycle compositions
@@ -420,7 +409,7 @@ Recommended release loop:
 
 - Keep skill content in `skills/<bucket>/<name>/SKILL.md` (bucket = engineering | productivity | writing | meta); add the path to the `skills` array in `.claude-plugin/plugin.json`
 - Keep each skill concise; the current discipline is roughly under 80 lines unless the extra length clearly earns itself
-- Construction quality is scored against the scorecard in `writing-great-skills` (the SSOT). `skill-eval` scores a skill and writes a co-located hash-stamped `eval.md`; every skill carries one. `scripts/lint-eval-fresh.sh` fails if a skill is edited without re-evaling, and `scripts/lint-refs-resolve.py` checks that every internal ref in a SKILL.md resolves.
+- Construction quality is scored against the scorecard in `writing-great-skills` (the SSOT). `skill-creator --eval` scores a skill and writes a co-located hash-stamped `eval.md`; every skill carries one. `scripts/lint-eval-fresh.sh` fails if a skill is edited without re-evaling, and `scripts/lint-refs-resolve.py` checks that every internal ref in a SKILL.md resolves.
 - Run validation:
 
 ```bash

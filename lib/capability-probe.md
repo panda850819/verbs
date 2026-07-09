@@ -1,6 +1,6 @@
 # lib/capability-probe.md — Substrate availability check + graceful degradation
 
-> Shared module. Loaded by Layer-1 flow skills (`sprint`, `office-hours`, `dojo`, `team-orchestrate`) at startup. Detects what's present — identity contract, a writable work dir, declared `lib/` refs, declared CLIs — then **scaffolds or degrades**. It aborts only when there is no identity contract at all or the cwd cannot be written. Never silently fails.
+> Shared module. Loaded by Layer-1 flow skills (`sprint`, `grill --brief`, `dojo`, `team-orchestrate`) at startup. Detects what's present — identity contract, a writable work dir, declared `lib/` refs, declared CLIs — then **scaffolds or degrades**. It aborts only when there is no identity contract at all or the cwd cannot be written. Never silently fails.
 >
 > Design goal: a fresh `/plugin install` user working in their own repo (no `~/.agents/AGENTS.md`, no Obsidian vault, no ext CLIs) reaches a working first session. Missing personal substrate degrades to built-in defaults; missing write dirs are created; only a missing contract or an unwritable cwd blocks — and then with an actionable one-liner.
 
@@ -8,8 +8,8 @@
 
 At the START of every Layer-1 flow skill, before any vault read or CLI call. Atomic, <1s.
 
-- `sprint` Stage 0 · `office-hours` Stage 1 · `dojo` opening · `team-orchestrate` opening · any retro / brief run.
-- Skip for atomic skills with no substrate dependency (`init`, `freeze`, `careful`, `checkpoint`).
+- `sprint` Stage 0 · `grill --brief` brief close · `dojo` opening · `team-orchestrate` opening · any retro / brief run.
+- Skip for atomic skills with no substrate dependency (`freeze`, `careful`, `checkpoint`).
 
 ## Checks
 
@@ -77,7 +77,7 @@ There is no "≥N degraded → abort" threshold: degraded features fall back, th
 {name} needs {what is blocked}:
 
   [1] identity contract: no ~/.agents/AGENTS.md, ./CLAUDE.md, or ./AGENTS.md found.
-      Fix: run `/init` to create a project CLAUDE.md, or add one with your voice/rules.
+      Fix: add a project CLAUDE.md or AGENTS.md with your voice/rules.
 
   [2] write location: cwd is not writable.
       Fix: cd into the repo or vault you want this skill to write into.
@@ -87,7 +87,7 @@ Exit cleanly. Do not partially run.
 
 ## Fresh-install note
 
-A fresh `/plugin install` user typically shows `[4] degraded` (ext CLIs not installed) and `[5] scaffolded` (work dirs created on first write). That is the expected baseline, not a failure — core skills run markdown-only; ext skills surface their one install command. The two hard stops are a missing contract (run `/init`) and an unwritable cwd. See `README.md` § Install for the tier model.
+A fresh `/plugin install` user typically shows `[4] degraded` (ext CLIs not installed) and `[5] scaffolded` (work dirs created on first write). That is the expected baseline, not a failure — core skills run markdown-only; ext skills surface their one install command. The two hard stops are a missing contract (add a project CLAUDE.md or AGENTS.md) and an unwritable cwd. See `README.md` § Install for the tier model.
 
 ## Why probe ≠ trust
 

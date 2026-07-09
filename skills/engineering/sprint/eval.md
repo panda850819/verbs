@@ -9,7 +9,7 @@ rubric: writing-great-skills@1.1.0
 
 # Eval — sprint
 
-> 2026-07-09 re-validation (#170): SKILL.md swapped its plan-artifact source and planning/multi-day routing from office-hours to `grill --brief` (no structural change); anti-trigger route re-anchored, all L-citations re-verified against the current file, verdict unchanged.
+> 2026-07-09 re-validation (#170): SKILL.md swapped its plan-artifact source and planning/multi-day routing from the retired structured-brief skill to `grill --brief` (no structural change); anti-trigger route re-anchored, all L-citations re-verified against the current file, verdict unchanged.
 
 **Verdict: SOLID.** The new closure-evidence gate (Stage 6 SHIPPED step 4) turns "claim SHIPPED without proof" into a checkable failure, but it doesn't say what terminal state a sprint lands in when that evidence is missing — and the previous eval's "conformance: weak" call turns out to be a stale citation, not a real gap.
 

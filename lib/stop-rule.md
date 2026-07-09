@@ -2,15 +2,15 @@
 
 > Shared module. Loaded by skills that present multiple decisions and must NOT proceed by writing the recommendation in chat prose and silently continuing. Enforces explicit gates so the user's approval is load-bearing.
 >
-> Origin: gstack `office-hours` repeats "STOP. Wait for user response." 11× because long skills make the model forget halfway. pandastack lifts the rule into a shared lib so every multi-decision skill enforces it without per-skill duplication.
+> Origin: a gstack structured-brief precursor repeats "STOP. Wait for user response." 11x because long skills make the model forget halfway. pandastack lifts the rule into a shared lib so every multi-decision skill enforces it without per-skill duplication.
 
 ## When to load
 
 Skills that present:
 
-- ≥2 alternatives that need user choice (e.g. `office-hours` Stage 3)
+- ≥2 alternatives that need user choice (e.g. `grill --brief` alternatives)
 - Per-finding apply gates (`review` Step 6.5, `gatekeeper` STRIDE findings)
-- Per-stage gates inside a flow command (`sprint`, `office-hours`, `prep` / `dojo`)
+- Per-stage gates inside a flow command (`sprint`, `grill --brief`, `prep` / `dojo`)
 
 Skip for skills with single linear output (no decision branches).
 
@@ -87,10 +87,10 @@ stop-rule enforces gate per decision. escape-hatch enforces a session-wide max-s
 - stop-rule: "you must ask, not assume"
 - escape-hatch: "you must stop asking when user says enough"
 
-Both load together in interrogation skills (grill, office-hours).
+Both load together in interrogation skills (grill, `grill --brief`).
 
 ## Origin
 
-- gstack `office-hours` SKILL.md — STOP rule repeated 11×
+- gstack structured-brief precursor — STOP rule repeated 11x
 - pandastack `grill/SKILL.md` Step 4 — MANDATORY forced-alternatives + per-approach AskUserQuestion gate (2026-05-03)
-- pandastack 2026-05-04 — extracted to `lib/stop-rule.md` so other multi-decision skills (review / sprint / office-hours) ref the same contract
+- pandastack 2026-05-04 — extracted to `lib/stop-rule.md` so other multi-decision skills (review / sprint / `grill --brief`) ref the same contract

@@ -4,7 +4,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 
 | Signal | Invoke |
 |---|---|
-| Fuzzy idea / scope not locked / 想討論 | `grill` (atomic drill) or `office-hours` (structured brief) |
+| Fuzzy idea / scope not locked / 想討論 | `grill` (atomic drill; use `grill --brief` for structured brief) |
 | Prepared plan, want independent multi-angle critique | `advisor --panel` (blind cross-model critics) |
 | Load-bearing judgment / design fork / decision expensive-if-wrong, want a second opinion | `advisor` (pull a decorrelated cross-model take) |
 | Touching prod, shared infra, or harness paths (`~/.agents`, `~/.claude`, `~/.codex`) | `careful` first |
@@ -17,7 +17,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Knowledge note or decision closed | `ship knowledge <path>` |
 | External artifact before install / adopt | `gatekeeper` |
 | Run a bounded coding loop (test/build/CI until green) | hardened kickoff in `docs/loop-kickoffs.md` |
-| Non-trivial but no row matches | classify the load-bearing unknown: fact→inspect first (code/docs/knowledge base) · intent→`grill` · taste→`ui` · architecture→`office-hours` · risk→`careful` · verification→`debug` · mechanical→`handover`; still unclear → pandastack `RESOLVER.md`, pick closest |
+| Non-trivial but no row matches | classify the load-bearing unknown: fact→inspect first (code/docs/knowledge base) · intent→`grill` · taste→`ui` · architecture→`grill --brief` · risk→`careful` · verification→`debug` · mechanical→`handover`; still unclear → pandastack `RESOLVER.md`, pick closest |
 
 Miss log: 事後發現該用而沒用 → append `date | runtime | signal | skill` to `~/.agents/memory/dispatch-miss.log`. Invocations are appended automatically by the plugin's PreToolUse hook to `~/.agents/memory/dispatch-fired.log`. Both logs are reviewed periodically (e.g. at a weekly retro).
 

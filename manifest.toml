@@ -68,7 +68,7 @@ updated = "2026-07-06"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (16) — markdown-only, fresh-clone runnable
+# CORE (10) — markdown-only, fresh-clone runnable
 # Buckets on disk: engineering / productivity / writing / meta
 #
 # "No external CLI" is literal: git is the one assumed substrate CLI (a fresh
@@ -81,10 +81,6 @@ updated = "2026-07-06"
 tier = "core"
 description = "Confirmation gate before destructive commands."
 
-[skill.boardroom]
-tier = "core"
-description = "Mutually-blind parallel critique of a prepared plan: N blind critics, distinct lenses, keep lone findings, per-finding gate. Repackaged from the deleted persona-voice boardroom (no persona). NOT diff review (review) or fuzzy ideas (office-hours)."
-
 [skill.gatekeeper]
 tier = "core"
 description = "Pre-adoption trust check for external skills / MCPs / repos."
@@ -92,14 +88,6 @@ description = "Pre-adoption trust check for external skills / MCPs / repos."
 [skill.grill]
 tier = "core"
 description = "Atomic adversarial requirement discovery."
-
-[skill.init]
-tier = "core"
-description = "One-time pandastack init per project."
-
-[skill.office-hours]
-tier = "core"
-description = "5-stage flow: load context, grill, premise challenge, alternatives, brief."
 
 [skill.review]
 tier = "core"
@@ -113,27 +101,15 @@ description = "Systematic root-cause debugging: hypothesis gate, instrument-firs
 
 [skill.skill-creator]
 tier = "core"
-description = "Create new pandastack skills, MECE-checked against RESOLVER, trigger-first evolution."
-
-[skill.skill-eval]
-tier = "core"
-description = "Score a skill's construction against the writing-great-skills scorecard; write co-located eval.md."
-
-[skill.instruction-audit]
-tier = "core"
-description = "Audit live instruction surfaces (AGENTS.md, CLAUDE.md, judgment-compact, skill bodies) for stale/duplicate/overtriggered rules; candidate list only, never edits the audited files."
+description = "Create new pandastack skills, MECE-checked against RESOLVER, trigger-first evolution; --eval scores existing skills."
 
 [skill.sprint]
 tier = "core"
 description = "1-2h focused execution: scope, grill-lite, execute, review, ship."
 
-[skill.using-pandastack]
-tier = "core"
-description = "Cognitive contract loaded at session start."
-
 [skill.writing-great-skills]
 tier = "core"
-description = "Reference + scorecard for well-constructed skills; the construction-quality SSOT skill-eval binds."
+description = "Reference + scorecard for well-constructed skills; the construction-quality SSOT skill-creator --eval binds."
 
 [skill.write]
 tier = "core"
@@ -152,11 +128,6 @@ tier = "ext"
 requires = ["npm:agent-browser"]
 description = "Browser-based UI QA, real pages, real flows."
 
-[skill.deepwiki]
-tier = "ext"
-requires = ["cli:curl", "cli:jq"]
-description = "GitHub repo docs + Mermaid diagrams from a local clone."
-
 [skill.ship]
 tier = "ext"
 requires = ["cli:git", "cli:gh"]
@@ -170,7 +141,7 @@ description = "Hand unfinished work to Codex to DO (not /ship, which closes fini
 [skill.advisor]
 tier = "ext"
 requires = ["cli:codex"]
-description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan (absorbs boardroom). Needs a cross-model CLI (`codex`, or `claude` on the Codex seat), hence ext."
+description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Needs a cross-model CLI (`codex`, or `claude` on the Codex seat), hence ext."
 
 # ============================================================================
 # Notes
@@ -195,7 +166,7 @@ description = "Pull a decorrelated second opinion from a DIFFERENT model into th
 #   2. Add a [skill.<name>] entry here with tier + requires + config
 #   3. Add "./skills/<bucket>/<name>" to the "skills" array in .claude-plugin/plugin.json
 #   4. If tier=ext, add the install command in scripts/bootstrap.sh ext-install table
-#   5. Run skill-eval (writes co-located eval.md); lint-eval-fresh.sh enforces freshness
+#   5. Run skill-creator --eval (writes co-located eval.md); lint-eval-fresh.sh enforces freshness
 #   6. Update RESOLVER.md skill catalog
 #
 # Skills cut in v2.2.0 (archived under skills/_archive/<name>-<date>/):

@@ -9,7 +9,7 @@ rubric: writing-great-skills@1.1.0
 
 # Eval — grill
 
-> 2026-07-09 re-validation (#170): grill absorbed the retired `office-hours` as a new `--brief` mode (Stage A alternatives / B premise / C brief to docs/briefs/ / C+ plan to docs/plans/). Re-anchored every citation to the current SKILL.md and replaced all office-hours routing references with grill's own `--brief` close. Verdict unchanged.
+> 2026-07-09 re-validation (#170): grill absorbed the retired structured-brief skill as a new `--brief` mode (Stage A alternatives / B premise / C brief to docs/briefs/ / C+ plan to docs/plans/). Re-anchored every citation to the current SKILL.md and replaced all retired routing references with grill's own `--brief` close. Verdict unchanged.
 
 **Verdict: SOLID.** Tight, process-stable adversarial-drill tool with a clean model/user invocation split and a hard-capped stopping rule; loses points on a restated identity line (leading words / pruning) and an unnamed native baseline (native parity).
 

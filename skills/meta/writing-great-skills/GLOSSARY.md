@@ -6,7 +6,7 @@ Terms **bolded** in [`SKILL.md`](SKILL.md), defined once here (single source of 
 - **Leading word** — a compact pretrained concept (_fog of war_, _tracer bullets_, _tight_) that anchors behaviour in few tokens.
 - **Context load** — tokens a skill costs by sitting in the window every turn (chiefly a model-invoked **description**).
 - **Cognitive load** — the cost a **user-invoked** skill puts on the human, who must remember it exists.
-- **Router skill** — one user-invoked skill that names the others and when to reach for each; cures piled-up cognitive load. (pandastack: `using-pandastack` + `DISPATCH.md`.)
+- **Router contract** — one dispatch surface that names the skills and when to reach for each; cures piled-up cognitive load. (pandastack: `DISPATCH.md`.)
 - **Description** — the model-facing line that does a skill's invocation work: states what it is and lists trigger **branches**.
 - **Branch** — a distinct way the skill is used; different runs taking different paths through it.
 - **Duplication** — the same meaning in more than one place; costs maintenance and tokens and inflates a meaning's rank on the ladder.

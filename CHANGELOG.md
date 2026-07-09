@@ -9,20 +9,20 @@
 
 ## v3.2.0 — 2026-06-29
 
-> **Persona layer removed; doc surface reconciled to 25 skills.** The 5 role-persona skills are cut (the model holds those frames natively); their durable lore moves into function-named skills (`debug`, `ui`) and the intake skills. `boardroom` is rebuilt persona-free. Skill count is now **25 (23 core / 2 ext)**. This release also consolidates the post-2.2.0 work below (handover split, ship write-mode retirement, pdctx/overlay doc strip).
+> **Persona layer removed; doc surface reconciled to 25 skills.** The 5 role-persona skills are cut (the model holds those frames natively); their durable lore moves into function-named skills (`debug`, `ui`) and the intake skills. `advisor --panel` is rebuilt persona-free. Skill count is now **25 (23 core / 2 ext)**. This release also consolidates the post-2.2.0 work below (handover split, ship write-mode retirement, pdctx/overlay doc strip).
 
 ### Removed
 
-- **Persona layer** (PR #100/#101): the 5 role-persona skills (`ceo`, `product-lead`, `eng-lead`, `design-lead`, `ops-lead`) plus `lib/persona-frame.md` and `lib/outside-voice-rule.md`. Role-persona lenses were a uniform wrapper over frames the model already holds; eng-lead debug lore → new `debug`, design-lead craft → new `ui`, scope-judgment / delete-first → `grill` / `office-hours`, ops-lead → retro-week / cron. git history is the archive.
-- `ship` write mode retired (`references/modes/write-mode.md` deleted, `write-ship` alias dropped). The mode's entire input tree (obsidian-vault `Blog/_daily` / `Blog/Drafts` / `Blog/Published`) no longer exists after the 2026-06 machine rebuild, and brain owns daily content — the mode pointed at a dead path. Writing composition is now `/write` → manual publish; README lifecycle map + RESOLVER updated. Companion W24-retro GC in the same sprint scrubbed the remaining `Blog/_daily` references from `ship` SKILL.md / knowledge mode / `using-pandastack`.
+- **Persona layer** (PR #100/#101): the 5 role-persona skills (`ceo`, `product-lead`, `eng-lead`, `design-lead`, `ops-lead`) plus `lib/persona-frame.md` and `lib/outside-voice-rule.md`. Role-persona lenses were a uniform wrapper over frames the model already holds; eng-lead debug lore → new `debug`, design-lead craft → new `ui`, scope-judgment / delete-first → `grill` / `grill --brief`, ops-lead → retro-week / cron. git history is the archive.
+- `ship` write mode retired (`references/modes/write-mode.md` deleted, `write-ship` alias dropped). The mode's entire input tree (obsidian-vault `Blog/_daily` / `Blog/Drafts` / `Blog/Published`) no longer exists after the 2026-06 machine rebuild, and brain owns daily content — the mode pointed at a dead path. Writing composition is now `/write` → manual publish; README lifecycle map + RESOLVER updated. Companion W24-retro GC in the same sprint scrubbed the remaining `Blog/_daily` references from `ship` SKILL.md / knowledge mode / `DISPATCH.md contract`.
 - `pandastack-private` overlay and `pdctx` references stripped from user-facing docs: README collapsed to a single self-contained surface (no public/private tier split, no pdctx context-dispatch), `docs/telemetry.md` deleted (it documented the pdctx-only audit timeline), `docs/HERMES.md` rewritten to direct skill import. The v2.2.0 "moved to overlay" entry below is unchanged release history.
 
 ### Added
 
 - `handover` skill — hand UNFINISHED work to Codex to DO. `/handover [slug]` (sync) spawns `codex exec` now and collects the structured result; `/handover --async [slug]` writes a payload to `docs/handoffs/` for Hermes / offline. Splits cleanly from `/ship`: ship CLOSES finished work, handover DELEGATES unfinished work. Owns the single Codex-invocation SSOT (`references/codex-invocation.md`): XML payload, verified `codex exec`, sandbox-escape gate, result classification.
 - `lib/trigger-first-skill-evolution.md` — shared rule for skill evolution: trigger clarity first, inline checklist / rubric before extraction, no lens / persona / rubric registry until repeated evidence exists.
-- `debug`, `ui`, `boardroom` skills — function-named (lore + reflex-overrides, not a persona frame). `boardroom` is the deleted persona-router rebuilt as a ~30-line blind-critic forcing function: mutually-blind parallel plan critique, no persona voices.
-- Doc reconciliation + `lint-manifest-sync.sh` guard hardening (PR #103): every living doc aligned to 25 skills (23 core / 2 ext); persona / `contexts/` / pre-flatten `plugins/pandastack/` refs purged; the broken `.codex/INSTALL.md` `codex-tools.md` path fixed; the stale-claim guard now catches `26`/`28 skills` + persona refs across README / CLAUDE.md / INSTALL / marketplace / PHILOSOPHY / using-pandastack so the drift can't silently reappear.
+- `debug`, `ui`, `advisor --panel` skills — function-named (lore + reflex-overrides, not a persona frame). `advisor --panel` is the deleted persona-router rebuilt as a ~30-line blind-critic forcing function: mutually-blind parallel plan critique, no persona voices.
+- Doc reconciliation + `lint-manifest-sync.sh` guard hardening (PR #103): every living doc aligned to 25 skills (23 core / 2 ext); persona / `contexts/` / pre-flatten `plugins/pandastack/` refs purged; the broken `.codex/INSTALL.md` `codex-tools.md` path fixed; the stale-claim guard now catches `26`/`28 skills` + persona refs across README / CLAUDE.md / INSTALL / marketplace / PHILOSOPHY / DISPATCH.md contract so the drift can't silently reappear.
 
 ### Changed
 
@@ -31,7 +31,7 @@
 
 - `skill-creator` now loads the trigger-first rule before creating, splitting, merging, or extracting skills.
 - `skill-creator` verification now reflects the repo's real check surface: `git diff --check`, SKILL frontmatter scan, and manual `tests/resolver-golden.md` cases when routing changes. It no longer points at absent Bun tests.
-- `using-pandastack` now points harness edits at the trigger-first rule so skill-library changes evolve from observed use instead of upfront taxonomy.
+- `DISPATCH.md contract` now points harness edits at the trigger-first rule so skill-library changes evolve from observed use instead of upfront taxonomy.
 - `RESOLVER.md` skill-creator row now reflects the trigger-first abstraction gate.
 - `plugin.json` (Claude + Codex) aligned to the current manifest — 26 skills (24 core / 2 ext), no personal tier, no flow count — and bumped 2.1.2 → 2.2.0; dropped the stale `agents` keyword (pandastack is skill-only).
 - Hermes consumption documented as direct skill import into `~/.hermes/skills/` (Runtime support, Per-host install, Updating); the pdctx dispatch path is retired.
@@ -86,7 +86,7 @@ The mental model shift: **pandastack ≠ "personal AI operator OS that manages y
 ### Not changed
 
 - 5 role personas (ceo / product-lead / eng-lead / design-lead / ops-lead) stay as cognitive lenses
-- `/sprint`, `/office-hours`, `/grill`, `/dojo`, `/careful`, `/freeze`, `/review`, `/qa`, `/checkpoint`, `/done`, `/init`, `/boardroom`, `/team-orchestrate`, `/gatekeeper`, `/write` all unchanged in shape
+- `/sprint`, `/grill --brief`, `/grill`, `/dojo`, `/careful`, `/freeze`, `/review`, `/qa`, `/checkpoint`, `/done`, retired project setup, `/advisor --panel`, `/team-orchestrate`, `/gatekeeper`, `/write` all unchanged in shape
 - `/ship` git mode + write mode unchanged; only knowledge mode added the decision-note variant
 - `retro-week`, `retro-month` stay (per Panda's call: cadence/interview value still belongs in pandastack at this point)
 
@@ -133,7 +133,7 @@ Skill prompts still reference Panda's vault conventions (`Blog/_daily/`, `Inbox/
 - `README.md`: skill counts 39 → 38, contexts 8 → 7. Personal listing dropped `deep-research`. All `gbq` mentions in skill descriptions replaced with vault scan equivalents. Optional private overlay skills list and tier=personal CLI list trimmed (`gbq` / `gbrain` removed).
 - `ROADMAP.md`: skill counts updated. Onboarding scaffold note updated to reflect brain-index assumption removal.
 - `scripts/bootstrap.sh`: personal listing dropped `deep-research`; CLI hint dropped `gbq` / `gbrain`. (6 personal skills now.)
-- `using-pandastack/SKILL.md`: research-trigger row replaces `deep-research` with `scout`.
+- `DISPATCH.md contract/SKILL.md`: research-trigger row replaces `deep-research` with `scout`.
 - `.codex/INSTALL.md`: skill count 48 → 38; `gbq` removed from local-CLI list.
 - `flows/*.md`: `gbq` references replaced with `rg` / `find` direction.
 - `contexts/*.toml` (personal): `[gbrain]` blocks removed. Sommet entries in firewall lists removed.
@@ -166,7 +166,7 @@ The `work-sommet-abyss-po` context was inactive and pulled the substrate footpri
 - `skills/brief-morning/SKILL.md`, `skills/evening-distill/SKILL.md`: `gog calendar` and `gog gmail` calls drop the `--account "${PANDASTACK_USER_EMAIL}"` flag; rely on `gog` default.
 - `skills/curate-feeds/SKILL.md` + `scripts/curate-feeds.ts`: vault detected from cwd; aborts with vault-not-found error if cwd lacks `.obsidian/` or `Inbox/`.
 - `lib/persona-frame.md`: persona path resolution rewritten — host resolver → plugin-relative → cwd walk-up. No env var fallback.
-- `using-pandastack/SKILL.md`: overlay resolution checks for sibling `pandastack-private/` first; `PANDASTACK_OVERLAY` kept as escape hatch only.
+- `DISPATCH.md contract/SKILL.md`: overlay resolution checks for sibling `pandastack-private/` first; `PANDASTACK_OVERLAY` kept as escape hatch only.
 - `contexts/personal-writer.toml`: dropped `google_account = "${PANDASTACK_USER_EMAIL}"` line.
 - `README.md`: substrate config section rewritten — only `~/.agents/AGENTS.md` required.
 
@@ -219,10 +219,10 @@ The merged mode bodies live at `skills/ship/modes/knowledge.md` and `skills/ship
 - `flows/knowledge.md`: ship phase points at `/ship knowledge`; lint phase changed from cron-driven `wiki-lint` to on-demand `gbq` queries.
 - `flows/writing.md` + `flows/research.md`: ship references updated to `/ship write` / `/ship knowledge`.
 - `flows/work.md` + `flows/retro.md`: process-decisions references replaced with `inbox-triage` + manual notion/slack walks.
-- `office-hours/SKILL.md` Stage 5: routing block now covers sprint and team-orchestrate only (no execute-plan).
+- `grill --brief/SKILL.md` Stage 5: routing block now covers sprint and team-orchestrate only (no execute-plan).
 - `sprint/SKILL.md` Stage 3: persona routing table loses architect row; eng-lead absorbs tech-stack / DB schema / API contract signals.
 - `team-orchestrate/SKILL.md`: scope table rewritten from 3-row (sprint / execute-plan / team-orchestrate) to 2-row (sprint / team-orchestrate); "fall back to execute-plan" advice replaced with "fall back to N sequential sprints".
-- `using-pandastack/SKILL.md`: lifecycle map updated; red-flag table updated.
+- `DISPATCH.md contract/SKILL.md`: lifecycle map updated; red-flag table updated.
 - `inbox-triage/SKILL.md`: cron-report flow updated; related_skills tightened.
 - `work-ship/SKILL.md`: process-decisions references replaced with manual proposal walks.
 
@@ -280,7 +280,7 @@ User's third audit caught issues that survived v1.4.0 + v1.4.1 because each prio
 
 ## v1.4.0 — 2026-05-07
 
-> Follow-up audit on v1.3.0. Drops the `tool-` prefix on 7 wrapper skills; documents the L5 firewall as planned-not-shipped (was previously claimed as enforced); makes the `using-pandastack` overlay fallback explicit; pulls personal-tier skills out of the `personal:trader` public skill list; rewrites bootstrap's core skill listing to read from the manifest dynamically. Plugin descriptions and the Stability-scope framing in README are also synced to current reality. Skill count: 49 (unchanged).
+> Follow-up audit on v1.3.0. Drops the `tool-` prefix on 7 wrapper skills; documents the L5 firewall as planned-not-shipped (was previously claimed as enforced); makes the `DISPATCH.md contract` overlay fallback explicit; pulls personal-tier skills out of the `personal:trader` public skill list; rewrites bootstrap's core skill listing to read from the manifest dynamically. Plugin descriptions and the Stability-scope framing in README are also synced to current reality. Skill count: 49 (unchanged).
 
 ### Renamed (90-day alias grace via SKILL.md `aliases:`)
 
@@ -290,7 +290,7 @@ User's third audit caught issues that survived v1.4.0 + v1.4.1 because each prio
 | `tool-bird` | `bird` | tier=personal, private CLI |
 | `tool-slack` | `slack` | tier=personal, private CLI |
 | `tool-notion` | `notion` | tier=personal, private CLI |
-| `tool-deepwiki` | `deepwiki` | tier=ext |
+| `tool-repo-docs` | `lib/mermaid-grounding.md capability` | tier=ext |
 | `tool-summarize` | `summarize` | tier=ext, brew-installable |
 | `tool-browser` | `agent-browser` | tier=ext, name reflects upstream `agent-browser` CLI it wraps |
 
@@ -299,7 +299,7 @@ The `tool-` cluster prefix was dropped because the names already disambiguate vi
 ### Changed
 
 - `lib/persona-frame.md`, `execute-plan/SKILL.md`, `scout/SKILL.md`: persona path resolution chain unchanged (`${PANDASTACK_HOME}/skills/<persona>/SKILL.md`); scout's hardcoded layer-mapping cheat sheet removed in favor of an abstract layer description.
-- `using-pandastack/SKILL.md`: overlay fallback was previously a silent fallback to `pandastack-private`. Now the SessionStart hook MUST log which step matched (env var / repo overlay / no overlay loaded). No silent fallback.
+- `DISPATCH.md contract/SKILL.md`: overlay fallback was previously a silent fallback to `pandastack-private`. Now the SessionStart hook MUST log which step matched (env var / repo overlay / no overlay loaded). No silent fallback.
 - `personal-trader.toml`: stripped `pandastack:deep-research` and `pandastack:bird` from the public skill list; both are tier=personal and load via overlay only.
 - `scripts/bootstrap.sh`: core skill list is now read from `manifest.toml` at probe time (was hardcoded). Renames don't drift it. Also fixed the macOS BSD `awk` incompatibility (`gensub`) that broke the previous version.
 - `manifest.toml`: tool-* skill entries renamed; `pdf` requires now correctly lists `python3 + poppler + tesseract + pip:pypdf,pdfplumber,reportlab,pytesseract,pdf2image` (was incorrectly only `brew:poppler` + `brew:tesseract`).
@@ -310,7 +310,7 @@ The `tool-` cluster prefix was dropped because the names already disambiguate vi
 
 ### Why this batch
 
-User audit on v1.3.0 surfaced: (a) `tool-` prefix is filler, names work without it; (b) L5 firewall was claimed but doc + hook missing — pretending it enforces is dishonest; (c) silent overlay fallback in `using-pandastack` makes fresh-user state invisible; (d) personal-trader context loads tier=personal skills that fail on public install; (e) bootstrap hardcoded skill list drifts on rename; (f) plugin metadata claims `~37 skills` and `~50 skills` simultaneously across files. v1.4.0 fixes all six in one cut.
+User audit on v1.3.0 surfaced: (a) `tool-` prefix is filler, names work without it; (b) L5 firewall was claimed but doc + hook missing — pretending it enforces is dishonest; (c) silent overlay fallback in `DISPATCH.md contract` makes fresh-user state invisible; (d) personal-trader context loads tier=personal skills that fail on public install; (e) bootstrap hardcoded skill list drifts on rename; (f) plugin metadata claims `~37 skills` and `~50 skills` simultaneously across files. v1.4.0 fixes all six in one cut.
 
 ## v1.3.0 — 2026-05-07
 
@@ -403,7 +403,7 @@ No code or skill changes. Existing v1.x users: no action needed; behavior is ide
 ### Cross-reference updates
 
 - `RESOLVER.md` — removed `pandastack:tool-web-extract` row + updated "Added in v1" list to note removal.
-- `plugins/pandastack/skills/using-pandastack/references/codex-tools.md` — defuddle row points at url-routing rule instead of skill.
+- `plugins/pandastack/skills/DISPATCH.md contract/references/codex-tools.md` — defuddle row points at url-routing rule instead of skill.
 - `plugins/pandastack/flows/research.md` — Phase 3 + skill choreography updated to invoke `defuddle parse <url> --md` directly per url-routing rule. Same pass also fixed a stale `feed-curator` reference to `curate-feeds` (v1.1 rename followup).
 
 ### Migration
@@ -412,40 +412,40 @@ If any downstream skill or doc still references `pandastack:tool-web-extract`, t
 
 ## v1.2.0 — 2026-05-05
 
-> Surface area cleanup + decision-tree completeness. Two changes: (a) `grill --mode structured` removed, structured-brief role consolidated into `office-hours --quick`; (b) `team-orchestrate` skill built early to fill the Q3 hole in `lib/skill-decision-tree.md`. Net skill count unchanged (-1, +1).
+> Surface area cleanup + decision-tree completeness. Two changes: (a) `grill --mode structured` removed, structured-brief role consolidated into `grill --brief --quick`; (b) `team-orchestrate` skill built early to fill the Q3 hole in `lib/skill-decision-tree.md`. Net skill count unchanged (-1, +1).
 
 ### Added
 
 - `skills/team-orchestrate/SKILL.md` — Conductor-driven parallel execution. Dispatches N independent branches to subagents in a single message, each in its own git worktree, gates each branch as it returns. Mirrors `execute-plan` Phase 0-3 structure but parallel. Fills the Q3 destination of `lib/skill-decision-tree.md` (was marked "future / two-strike pending"; built early because the architecture had a structural hole, not an emergent pattern).
-- `skills/office-hours/SKILL.md` `--quick` flag — skips Stage 1 (capability probe + gbq load + goal mapping) when context is pre-loaded in-session. Reduces total time from ~30 min to ~10-15 min. Replaces the structured-brief role formerly under `grill --mode structured`.
+- `skills/grill --brief/SKILL.md` `--quick` flag — skips Stage 1 (capability probe + gbq load + goal mapping) when context is pre-loaded in-session. Reduces total time from ~30 min to ~10-15 min. Replaces the structured-brief role formerly under `grill --mode structured`.
 
 ### Removed
 
-- `grill --mode structured` body removed (was lines 162-309 of `skills/grill/SKILL.md`). Grill returns to atomic adversarial-only positioning. The "5-step structured brief flow" content is no longer needed because `office-hours` already covers the same 5 stages with better staging (capability probe → premise challenge → alternatives → premise refresh → output) and `--quick` mode handles the case where context is already loaded.
+- `grill --mode structured` body removed (was lines 162-309 of `skills/grill/SKILL.md`). Grill returns to atomic adversarial-only positioning. The "5-step structured brief flow" content is no longer needed because `grill --brief` already covers the same 5 stages with better staging (capability probe → premise challenge → alternatives → premise refresh → output) and `--quick` mode handles the case where context is already loaded.
 
 ### Why this consolidation
 
-`grill --mode structured` (added v1.1 to absorb deprecated `pandastack:brief`) and `office-hours` (5-stage flow) overlapped ~70% by the dogfood window: both did Load Context → Premise Challenge → Alternatives → Brief output. The middle ground was a naming smell — "grill" but with brief output. Single canonical structured-brief skill is `office-hours` going forward.
+`grill --mode structured` (added v1.1 to absorb deprecated `pandastack:brief`) and `grill --brief` (5-stage flow) overlapped ~70% by the dogfood window: both did Load Context → Premise Challenge → Alternatives → Brief output. The middle ground was a naming smell — "grill" but with brief output. Single canonical structured-brief skill is `grill --brief` going forward.
 
 ### Cross-reference updates
 
-- `RESOLVER.md` (rows 52, 124, 207) — split grill / office-hours rows, removed `--mode structured`.
+- `RESOLVER.md` (rows 52, 124, 207) — split grill / grill --brief rows, removed `--mode structured`.
 - `plugins/pandastack/CLAUDE.md` (lines 12, 42) — split skill list, updated goal-mapping note.
 - `plugins/pandastack/lib/push-once.md` — removed `--mode structured` from skill list.
-- `plugins/pandastack/lib/stop-rule.md` — `--mode structured` Step 4 → `office-hours` Stage 3.
-- `plugins/pandastack/lib/escape-hatch.md` — split grill / office-hours skill rows.
+- `plugins/pandastack/lib/stop-rule.md` — `--mode structured` Step 4 → `grill --brief` Stage 3.
+- `plugins/pandastack/lib/escape-hatch.md` — split grill / grill --brief skill rows.
 - `plugins/pandastack/lib/skill-decision-tree.md` — removed "future / two-strike pending" qualifiers from team-orchestrate (5 places).
 - `plugins/pandastack/lib/persona-frame.md` — removed "future" qualifier from team-orchestrate mention.
-- `plugins/pandastack/skills/execute-plan/SKILL.md` line 21 — `pandastack:grill --mode structured` → `pandastack:office-hours`.
+- `plugins/pandastack/skills/execute-plan/SKILL.md` line 21 — `pandastack:grill --mode structured` → `pandastack:grill --brief`.
 - `plugins/pandastack/skills/scout/SKILL.md` line 206 — same swap.
 - `plugins/pandastack/skills/grill/SKILL.md` — frontmatter description, in-body refs, Origin section all updated.
-- `plugins/pandastack/skills/office-hours/SKILL.md` — frontmatter description, Modes section, Stage 1 skip-on-quick, Stage 5 routing.
+- `plugins/pandastack/skills/grill --brief/SKILL.md` — frontmatter description, Modes section, Stage 1 skip-on-quick, Stage 5 routing.
 - `plugins/pandastack/flows/dev.md` — Phase 1 + skill choreography updated.
-- `tests/resolver-golden.md` T08 — `/grill --mode structured` → `/office-hours --quick`.
+- `tests/resolver-golden.md` T08 — `/grill --mode structured` → `/grill --brief --quick`.
 
 ### Migration
 
-- If you previously ran `/grill --mode structured`, run `/office-hours --quick` instead (when context is already loaded) or `/office-hours` (full mode, when starting cold).
+- If you previously ran `/grill --mode structured`, run `/grill --brief --quick` instead (when context is already loaded) or `/grill --brief` (full mode, when starting cold).
 - No alias period — `--mode structured` was added v1.1.0 (2026-05-04), removed v1.2.0 (2026-05-05). 1-day lifecycle inside dogfood window means alias overhead not justified.
 
 ## v1.1.0 — 2026-05-04
@@ -492,10 +492,10 @@ pandastack is **skill-only** as of v1.1. agents/ and commands/ entirely deleted,
   deleted). Persona content lives in `skills/{persona}/SKILL.md` only.
 - `commands/`: full directory deleted. 5 files removed:
   `sprint.md` → replaced by `skills/sprint/SKILL.md`,
-  `brainstorm.md` → replaced by `skills/office-hours/SKILL.md`,
+  `brainstorm.md` → replaced by `skills/grill --brief/SKILL.md`,
   `fix.md` / `quick.md` / `design.md` → folded into `skills/sprint/SKILL.md`
   (auto-detect bug context, `--quick` mode, design-lead auto-invoke on UI scope).
-- `skills/persona-pipeline/`: deleted. Replaced by `skills/boardroom/SKILL.md`
+- `skills/persona-pipeline/`: deleted. Replaced by `skills/advisor --panel/SKILL.md`
   (single-skill 4-voice critique, no agent chain).
 
 Rationale: user direction (2026-05-04) — pandastack is skill-first, no agent
@@ -544,14 +544,14 @@ start. Hybrid was a regression. This batch reverses the hybrid attempt.
   deleted `commands/sprint.md` + `commands/fix.md` + `commands/quick.md` +
   `commands/design.md`. Auto-invokes `design-lead` skill on UI scope detection.
 
-- **B5** — `skills/office-hours/SKILL.md`: 30-min structured pressure cooker,
+- **B5** — `skills/grill --brief/SKILL.md`: 30-min structured pressure cooker,
   5 internal stages (capability probe + load context → premise challenge with
   push-once menu → forced alternatives 2-3 named approaches with stop-rule
   per-approach gate → premise refresh → write brief). Replaces deleted
-  `commands/brainstorm.md`. Distilled from gstack `/office-hours` 943 lines
+  `commands/brainstorm.md`. Distilled from gstack `/grill --brief` 943 lines
   into ~250 lines + 5 lib refs.
 
-- **B4** — `skills/boardroom/SKILL.md`: multi-voice plan critique. Single
+- **B4** — `skills/advisor --panel/SKILL.md`: multi-voice plan critique. Single
   skill swaps between 4 voices (CEO → product → design → eng) sequentially
   via `lib/persona-frame.md` voice-switching contract. Per-finding `Apply?
   [Y/N/edit]` gate with rejected → OPEN_QUESTIONS. Replaces deprecated
@@ -560,7 +560,7 @@ start. Hybrid was a regression. This batch reverses the hybrid attempt.
 
 - **B3** — `skills/dojo/SKILL.md`: lifecycle Stage 0 — pre-action prep.
   5 internal stages (capability probe → past-case gbq → lib + pattern load →
-  gotcha surface → output prep brief). Used by `/sprint`, `/office-hours`,
+  gotcha surface → output prep brief). Used by `/sprint`, `/grill --brief`,
   any flow needing past-case lookup. Aliased as `/prep`. Codex Q6 patch
   systematizes the pre-action context that CE / gstack do implicitly.
 
@@ -574,12 +574,12 @@ start. Hybrid was a regression. This batch reverses the hybrid attempt.
 - **B2** — 6 new shared `lib/` modules + 5 new lead persona skills.
 
   Lib modules (each ~80-150 lines, all under `plugins/pandastack/lib/`):
-  - `escape-hatch.md` — 2-strike user-impatience hard cap. Ref'd by grill / office-hours / boardroom / gatekeeper / dojo.
-  - `bad-good-calibration.md` — 4 BAD → GOOD voice posture pairs (mirrors `~/.agents/AGENTS.md` Voice section). Ref'd by grill / office-hours / boardroom / review / write / brief-morning / evening-distill.
-  - `outside-voice-rule.md` — third-party finding integration with per-finding `[Y/N/edit]` gate, OPEN_QUESTIONS routing for N. Ref'd by review (Step 6.5) / boardroom / gatekeeper / scout.
-  - `stop-rule.md` — per-decision AskUserQuestion gate enforcement. "A clearly winning option is still a decision." Ref'd by grill (Step 4) / review / boardroom / sprint / office-hours.
-  - `persona-frame.md` — 6-section shared structure (Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns) for the 5 lead personas. Defines skill-mode vs agent-mode equivalence. Ref'd by 5 lead skills + boardroom (B4 will use it for voice switching).
-  - `capability-probe.md` — 8-check substrate availability probe with degraded-mode rules and abort messages (codex Q6 patch). Ref'd by all Layer 1 flow skills (sprint / office-hours / boardroom / dojo / prep) at startup.
+  - `escape-hatch.md` — 2-strike user-impatience hard cap. Ref'd by grill / grill --brief / advisor --panel / gatekeeper / dojo.
+  - `bad-good-calibration.md` — 4 BAD → GOOD voice posture pairs (mirrors `~/.agents/AGENTS.md` Voice section). Ref'd by grill / grill --brief / advisor --panel / review / write / brief-morning / evening-distill.
+  - `outside-voice-rule.md` — third-party finding integration with per-finding `[Y/N/edit]` gate, OPEN_QUESTIONS routing for N. Ref'd by review (Step 6.5) / advisor --panel / gatekeeper / scout.
+  - `stop-rule.md` — per-decision AskUserQuestion gate enforcement. "A clearly winning option is still a decision." Ref'd by grill (Step 4) / review / advisor --panel / sprint / grill --brief.
+  - `persona-frame.md` — 6-section shared structure (Soul / Iron Laws / Cognitive Models / On Invoke / Anti-patterns) for the 5 lead personas. Defines skill-mode vs agent-mode equivalence. Ref'd by 5 lead skills + advisor --panel (B4 will use it for voice switching).
+  - `capability-probe.md` — 8-check substrate availability probe with degraded-mode rules and abort messages (codex Q6 patch). Ref'd by all Layer 1 flow skills (sprint / grill --brief / advisor --panel / dojo / prep) at startup.
 
   5 lead persona skills (each ~80-100 lines):
   - `skills/ceo/SKILL.md` — strategic advisor (no `-lead` suffix; CEO already exec).
@@ -600,8 +600,8 @@ start. Hybrid was a regression. This batch reverses the hybrid attempt.
 
 - `lib/push-once.md` (B7): new shared module. 5 named pushback patterns
   (具體一點 / 證據檢查 / 反命題 / 邊界條件 / 自由發問) extracted from
-  gstack office-hours residue, refed by `grill` (now), `office-hours` (B5),
-  `boardroom` (B4). Replaces ad-hoc improvised pushes with a fixed menu so
+  gstack grill --brief residue, refed by `grill` (now), `grill --brief` (B5),
+  `advisor --panel` (B4). Replaces ad-hoc improvised pushes with a fixed menu so
   the model's pushback choice is logged + audit-able instead of drifting
   every session. Selection rules table (which pattern matches which symptom),
   output protocol (menu print → user picks → model uses literal prompt),
@@ -746,7 +746,7 @@ public stack: 3 zombie skills (CHANGELOG declared removed but files
 still shipping), 1 orphan lib module, 2 old-version flow files, plus
 several stale dispatch references in composite commands. Trimming
 ~20-30% of the dead surface area before alpha testers see the stack.
-The remaining substrate (pdctx hooks, memory firewall, using-pandastack
+The remaining substrate (pdctx hooks, memory firewall, DISPATCH.md contract
 contract, careful gate, etc.) was audited and judged justified — each
 solves something the model cannot do reliably from prompting alone.
 
@@ -792,7 +792,7 @@ Codex CLI multi-CLI support. Skill content stays Claude-first; Codex consumes vi
 - `plugins/pandastack/.codex-plugin/plugin.json` — Codex native plugin manifest
 - `plugins/pandastack/.codex/INSTALL.md` — clone + symlink install path for Codex 0.124.0+
 - `plugins/pandastack/AGENTS.md` — symlink to `CLAUDE.md` (Codex convention)
-- `plugins/pandastack/skills/using-pandastack/references/codex-tools.md` — Claude → Codex tool-name mapping (`Skill` / `Agent` / `TaskCreate` → native skill load / `spawn_agent` / `update_plan`), local CLI dependency notes, named subagent dispatch workaround
+- `plugins/pandastack/skills/DISPATCH.md contract/references/codex-tools.md` — Claude → Codex tool-name mapping (`Skill` / `Agent` / `TaskCreate` → native skill load / `spawn_agent` / `update_plan`), local CLI dependency notes, named subagent dispatch workaround
 
 ### Changed
 
@@ -816,7 +816,7 @@ Major scope expansion. The stack grows from a dev-only workflow (brief → build
 - Writing: `content-write`, `write-ship`
 - Work execution: `work-ship`, `process-decisions`
 - Retro / session: `retro-week`, `retro-month`, `done`
-- Tool wrappers: `tool-bird`, `tool-notion`, `tool-railway`, `tool-deepwiki`, `tool-pdf`, `tool-slack`, `agent-browser`
+- Tool wrappers: `tool-bird`, `tool-notion`, `tool-railway`, `tool-repo-docs`, `tool-pdf`, `tool-slack`, `agent-browser`
 - Persona thinking: `think-like-naval`, `think-like-alan-chan`, `think-like-karpathy`
 - Multi-lens: `persona-pipeline`
 - Trust evaluation: `slowmist-agent-security`

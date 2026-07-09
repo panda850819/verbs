@@ -9,7 +9,7 @@ rubric: writing-great-skills@1.1.0
 
 # Eval — skill-creator
 
-> 2026-07-09 re-validation (#170): skill-creator absorbed the retired `skill-eval` as an `--eval <name>` mode (evaluator half; scoring steps + eval.md template moved to `lib/skill-eval.md`, referenced by the new `## --eval mode` section at L14-16). Description (L4) now advertises `--eval`; Phase 7 self-check (L120) now runs `--eval` instead of `/skill-eval`. Verdict unchanged (SOLID); all axis citations re-anchored to current lines.
+> 2026-07-09 re-validation (#170): skill-creator absorbed the retired standalone evaluator as an `--eval <name>` mode (evaluator half; scoring steps + eval.md template moved to `lib/skill-eval.md`, referenced by the new `## --eval mode` section at L14-16). Description (L4) now advertises `--eval`; Phase 7 self-check (L120) now runs `--eval`. Verdict unchanged (SOLID); all axis citations re-anchored to current lines.
 
 **Verdict: SOLID.** Same checkable process every run: refuse-to-build gated upfront, hot/cold made mandatory, scorecard bound at the generation moment. The new subtract-first gate is a real completion-criteria win for Phase 2 — but it restates L42 rather than replacing it, and now that Native parity is scored, the skill still doesn't name its own delta against the model's default skill-authoring reflex. Folding the evaluator in as `--eval` strengthens Native parity (build + eval are now one verb) without disturbing the build spine.
 
@@ -21,12 +21,12 @@ _2026-07-02 re-stamp (b): added the subtract-first gate to Phase 2 (L44) and sco
 
 _2026-07-03 re-stamp: added the `docs/out-of-scope/` precedent check to Phase 2 (L39). Net movement: Completion criteria stays pass with an earlier stop condition; Pruning stays weak because Phase 2 now has three adjacent anti-sprawl gates that still need one tighter paragraph._
 
-_2026-07-09 re-stamp (#170): absorbed the retired `skill-eval` as an `--eval` mode (L14-16, L120). Net movement: Native parity's weak now has a concrete direction (generator + evaluator under one verb), and Granularity stays pass because `--eval` is a mode flag, not a claimed numbered sub-step; build spine and all other axes unchanged._
+_2026-07-09 re-stamp (#170): absorbed the retired standalone evaluator as an `--eval` mode (L14-16, L120). Net movement: Native parity's weak now has a concrete direction (generator + evaluator under one verb), and Granularity stays pass because `--eval` is a mode flag, not a claimed numbered sub-step; build spine and all other axes unchanged._
 
 | Axis | Verdict | Evidence |
 |---|---|---|
 | Predictability | pass | L20 — fixed spine (1 gap → 2 MECE, now incl. out-of-scope + subtract-first gates → 3 hot/cold → 3.5 inline/extract → 4 write → 5 resolver → 6 verify → 7 self-check); `--eval` (L14) slots in as a parallel mode without reordering the build phases. |
-| Description / invocation | pass | L4 — leading verb "Create new pandastack skills" still front-loaded; one-trigger-per-branch list now also carries the `--eval`/"eval/score this skill" trigger folded in from the retired skill-eval. |
+| Description / invocation | pass | L4 — leading verb "Create new pandastack skills" still front-loaded; one-trigger-per-branch list now also carries the `--eval`/"eval/score this skill" trigger folded in from the retired standalone evaluator. |
 | Completion criteria | pass | L39 — Phase 2 has a concrete early exit: consult the precedent directory, and if a match exists, surface it and stop. |
 | Information hierarchy | pass | L114 — the heavy verify+route procedure sits behind the `lib/verify-and-route-check.md` pointer, and the eval scoring steps sit behind the `lib/skill-eval.md` pointer (L16); the 2-line precedent gate stays inline at L39, correctly, since every Phase-2 run needs it. |
 | Leading words | weak | L44 — "subtract-first gate" is coined for this edit only (repo-wide grep finds it nowhere else: not in `GLOSSARY.md`, not reused by another skill); contrast L137's "MECE violation," which anchors an already-shared term. A leading word should compress a concept the model or repo already carries, not mint a private label in the same breath it's used. |
@@ -45,4 +45,4 @@ The skill still enforces its own thesis in order: Q0 refuse-to-build (L34) runs 
 
 ## Behavioral cases
 - trigger `create a skill for auditing stale brain pages` -> expected process: Q0 refuse-to-build first (is this a brain page or one-line script?), consult `docs/out-of-scope/`, then MECE-walk RESOLVER against `maintain`, then the subtract-first gate — name `maintain` as the skill this would extend or state why extending it was rejected, else stop; hot/cold-decide, write to the frontmatter contract, add RESOLVER/manifest rows, verify, scorecard self-check + run `--eval` to write the co-located `eval.md`.
-- trigger `score whether this skill is well-written` -> SHOULD fire: skill-creator now owns eval-scoring via `--eval <name>` (L14-16), the evaluator half folded in when `skill-eval` retired. It reads the writing-great-skills scorecard, scores all 9 axes with cited `L<n>` evidence, and writes the co-located `eval.md` with the SKILL.md hash stamped.
+- trigger `score whether this skill is well-written` -> SHOULD fire: skill-creator now owns eval-scoring via `--eval <name>` (L14-16), with the evaluator half folded in. It reads the writing-great-skills scorecard, scores all 9 axes with cited `L<n>` evidence, and writes the co-located `eval.md` with the SKILL.md hash stamped.

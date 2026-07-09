@@ -34,4 +34,4 @@ The body is pure gate-and-confirm: every pause is a concrete destructive predica
 ## Behavioral cases
 - trigger `git push --force origin main` → expected process: announce "CAREFUL mode ON" (L26), hit the Git gate (L33), emit the Confirmation Format block with Reversible: no (L68-73), wait for explicit `y`.
 - trigger `rm -rf /anywhere/node_modules` → expected process: NO gate fires — basename is a regenerable artifact and the path is explicit, so the L44 exemption applies; proceed without confirmation.
-- anti-trigger `critique this plan before I build it` → should NOT fire (routes to `office-hours` / `boardroom`); careful gates execution of destructive commands, not plan critique.
+- anti-trigger `critique this plan before I build it` → should NOT fire (routes to `grill --brief` / `advisor --panel`); careful gates execution of destructive commands, not plan critique.

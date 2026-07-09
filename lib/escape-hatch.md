@@ -1,15 +1,15 @@
 # lib/escape-hatch.md — Hard-cap user-impatience protocol
 
-> Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `office-hours`, `gatekeeper`, `prep` / `dojo`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
+> Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `grill --brief`, `gatekeeper`, `prep` / `dojo`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
 >
-> Origin: gstack `office-hours` ships an embedded escape hatch (943 lines total). pandastack lifts the rule into shared lib so every interrogation skill obeys the same hard cap, no per-skill drift.
+> Origin: a gstack structured-brief precursor shipped an embedded escape hatch (943 lines total). pandastack lifts the rule into shared lib so every interrogation skill obeys the same hard cap, no per-skill drift.
 
 ## When to load
 
 Any skill where the model asks ≥2 questions in sequence and the user might reach a "stop asking" threshold:
 
 - `grill` — adversarial drilling
-- `office-hours` (default + `--quick`) — structured 5-stage flow, diagnostic pressure cooker
+- `grill --brief` — structured brief flow, diagnostic pressure cooker
 - `gatekeeper` — `Apply? [Y/N/edit]` per-STRIDE-finding gate
 - `prep` / `dojo` (B3) — pre-action clarification
 
@@ -58,7 +58,7 @@ No follow-up question. No "are you sure?" No "one more thing". Skill proceeds to
 - ❌ Asking a 3rd time after strike 2 ("確定不問了？")
 - ❌ Hidden ask ("好，那最後一個小問題..." — that IS asking again)
 - ❌ Pretending to stop but writing more questions in the output ("Output also raises: ...")
-- ❌ Escalating to a different skill / mode without permission ("switching to office-hours 因為你說 ship it" — no, ship it means stop, not switch)
+- ❌ Escalating to a different skill / mode without permission ("switching to brief mode 因為你說 ship it" — no, ship it means stop, not switch)
 - ❌ Logging unprocessed items as completed because user said skip ("we covered axis-N: skipped" — write `axis-N: not asked, user signaled stop after Q3` instead)
 
 ## Output contract
@@ -91,6 +91,6 @@ Companion to `lib/push-once.md` (which enforces minimum 1 push per axis). Push-o
 
 ## Origin
 
-- gstack `office-hours` SKILL.md — embedded escape hatch repeated 5+ times in body
+- gstack structured-brief precursor — embedded escape hatch repeated 5+ times in body
 - pandastack 2026-05-03 `~/.agents/AGENTS.md` Response Discipline (v0.6.0) — escape hatch added at substrate layer
 - pandastack 2026-05-04 — extracted to `lib/escape-hatch.md` for skill-level reference
