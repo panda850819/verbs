@@ -14,20 +14,103 @@
 set -uo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROBE_SKILL="grill"   # core, markdown-only, exists since v1
-PROMPT="List the names of the pandastack skills available to you, plain text, one per line, nothing else."
+EXPECTED_JSON="$(python3 "$repo_root/scripts/pandastack" doctor --json | python3 -c '
+import json,sys
+print(json.dumps(json.load(sys.stdin)["checks"]["runtime_surface"]["expected"]))
+')"
+PROMPT='Return the exact basenames of every available pandastack skill, and no skills from other packs. Output one line only in this format: PANDASTACK_SKILLS_JSON=["name", "name"].'
 
 fail=0
 ran=0
 
+parse_skill_output() {
+  local out="$1"
+  printf '%s' "$out" | python3 -c '
+import json,re,sys
+expected=set(json.loads(sys.argv[1]))
+text=sys.stdin.read()
+matches=re.findall(r"PANDASTACK_SKILLS_JSON\s*=\s*(\[[^\n]*\])", text)
+if not matches:
+    print("missing PANDASTACK_SKILLS_JSON marker")
+    raise SystemExit(1)
+try:
+    raw=json.loads(matches[-1])
+except ValueError as exc:
+    print("invalid skill JSON: {}".format(exc))
+    raise SystemExit(1)
+if not isinstance(raw, list) or not all(isinstance(item, str) for item in raw):
+    print("skill JSON must be an array of strings")
+    raise SystemExit(1)
+def normalize(value):
+    name=value.strip().strip("`")
+    qualified=name.lstrip("/")
+    if ":" in qualified:
+        prefix,name=qualified.rsplit(":", 1)
+        if prefix != "pandastack":
+            raise ValueError("foreign namespace: " + prefix)
+    elif "/" in name:
+        raise ValueError("foreign path: " + name)
+    return name
+try:
+    actual={normalize(item) for item in raw}
+except ValueError as exc:
+    print(str(exc))
+    raise SystemExit(1)
+missing=sorted(expected-actual)
+extra=sorted(actual-expected)
+if missing: print("missing: " + ", ".join(missing))
+if extra: print("extra: " + ", ".join(extra))
+raise SystemExit(1 if missing or extra else 0)
+' "$EXPECTED_JSON"
+}
+
 check_output() {
   local host="$1" out="$2"
-  if echo "$out" | grep -q "$PROBE_SKILL"; then
-    echo "PASS [$host]: pandastack skills discovered (probe: $PROBE_SKILL)"
+  if parse_skill_output "$out"; then
+    echo "PASS [$host]: exact pandastack skill surface discovered"
   else
-    echo "FAIL [$host]: probe skill '$PROBE_SKILL' not in skill enumeration. Output head:"
+    echo "FAIL [$host]: discovered skill surface differs from manifest. Output head:"
     echo "$out" | head -5 | sed 's/^/  | /'
     fail=1
+  fi
+}
+
+run_parser_tests() {
+  ran=1
+  local missing extra foreign namespaced
+  if parse_skill_output "PANDASTACK_SKILLS_JSON=$EXPECTED_JSON" >/dev/null; then
+    echo "PASS [parser]: exact set accepted"
+  else
+    echo "FAIL [parser]: exact set rejected"
+    fail=1
+  fi
+  namespaced="$(python3 -c 'import json,sys; print(json.dumps(["pandastack:"+x for x in json.loads(sys.argv[1])]))' "$EXPECTED_JSON")"
+  if parse_skill_output "PANDASTACK_SKILLS_JSON=$namespaced" >/dev/null; then
+    echo "PASS [parser]: pandastack namespace accepted"
+  else
+    echo "FAIL [parser]: pandastack namespace rejected"
+    fail=1
+  fi
+  missing="$(python3 -c 'import json,sys; a=json.loads(sys.argv[1]); print(json.dumps(a[1:]))' "$EXPECTED_JSON")"
+  if parse_skill_output "PANDASTACK_SKILLS_JSON=$missing" >/dev/null; then
+    echo "FAIL [parser]: missing skill accepted"
+    fail=1
+  else
+    echo "PASS [parser]: missing skill rejected"
+  fi
+  extra="$(python3 -c 'import json,sys; a=json.loads(sys.argv[1]); a.append("checkpoint"); print(json.dumps(a))' "$EXPECTED_JSON")"
+  if parse_skill_output "PANDASTACK_SKILLS_JSON=$extra" >/dev/null; then
+    echo "FAIL [parser]: extra retired skill accepted"
+    fail=1
+  else
+    echo "PASS [parser]: extra retired skill rejected"
+  fi
+  foreign="$(python3 -c 'import json,sys; a=json.loads(sys.argv[1]); a[0]="gbrain:"+a[0]; print(json.dumps(a))' "$EXPECTED_JSON")"
+  if parse_skill_output "PANDASTACK_SKILLS_JSON=$foreign" >/dev/null; then
+    echo "FAIL [parser]: foreign namespace collision accepted"
+    fail=1
+  else
+    echo "PASS [parser]: foreign namespace collision rejected"
   fi
 }
 
@@ -75,10 +158,10 @@ run_hook() {
 
 target="${1:-all}"
 case "$target" in
-  claude) run_hook; run_claude ;;
-  codex)  run_hook; run_codex ;;
-  hook)   run_hook ;;
-  all)    run_hook; run_claude; run_codex ;;
+  claude) run_hook; run_parser_tests; run_claude ;;
+  codex)  run_hook; run_parser_tests; run_codex ;;
+  hook)   run_hook; run_parser_tests ;;
+  all)    run_hook; run_parser_tests; run_claude; run_codex ;;
   *) echo "unknown host: $target (claude|codex|hook|all)"; exit 2 ;;
 esac
 

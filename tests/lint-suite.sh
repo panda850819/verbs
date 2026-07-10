@@ -9,9 +9,9 @@
 # failure does not mask the rest, then exits nonzero if any failed.
 #
 # conformance-smoke.sh: only its `hook` subtarget runs here. That subtarget is
-# offline — it verifies hooks/session-start emits valid JSON per envelope. Its
-# claude/codex host probes make real LLM calls and need host CLIs absent from a
-# clean CI checkout, so they are deliberately excluded (suite is offline).
+# offline — it verifies hooks/session-start JSON envelopes and exact-set parser
+# rejection of missing/extra skills. Its claude/codex host probes make real LLM
+# calls and need host CLIs absent from a clean CI checkout, so they are excluded.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 

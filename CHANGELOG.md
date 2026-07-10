@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.4.2 — 2026-07-10
+
+### Fixed
+
+- Runtime discovery now exposes the same exact 14-skill set in Claude and
+  Codex; four retired skills moved outside every plugin discovery root.
+- Ticket and verify gates share one Claude/Codex event normalizer. Codex
+  `apply_patch`, successful tool outcomes, async exits, same-turn compaction,
+  later edits, and failure-masking test commands now have regression coverage.
+- `pandastack doctor --strict` compares installed skill names, plugin version,
+  `DISPATCH.md`, and the complete hook tree with source. Conformance smoke now
+  rejects missing, extra, retired, and foreign-namespace skills.
+
+### Verified
+
+- Offline Claude/Codex gate truth tables cover allowed and blocked edits,
+  passing and failing verification, stale green, and edit-after-green.
+- Synthetic source/cache fixtures fail red on skill, version, dispatch, and
+  hook drift; the canonical offline suite remains the release gate.
+
 ## v3.4.1 — 2026-07-10
 
 ### Changed
