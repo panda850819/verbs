@@ -13,9 +13,12 @@ WANT_REASON='[pandastack verify-gate] code changed this turn with no test or ver
 
 # Claude JSONL builders.
 u() { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
+ulist() { printf '{"type":"user","message":{"role":"user","content":[{"type":"text","text":"%s"}]}}\n' "$1"; }
+ulistimg() { printf '{"type":"user","message":{"role":"user","content":[{"type":"image","source":{"type":"base64","media_type":"image/png","data":"AA=="}},{"type":"text","text":"%s"}]}}\n' "$1"; }
 cedit() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"%s","input":{"file_path":"%s","old_string":"a","new_string":"b"}}]}}\n' "$1" "$2" "$3"; }
 cnbedit() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"NotebookEdit","input":{"notebook_path":"%s","new_source":"x"}}]}}\n' "$1" "$2"; }
 cbash() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"Bash","input":{"command":"%s"}}]}}\n' "$1" "$2"; }
+cbashbg() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"Bash","input":{"command":"%s","run_in_background":true}}]}}\n' "$1" "$2"; }
 cresult() { printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"%s","content":"result","is_error":%s}]}}\n' "$1" "$2"; }
 capply() {
   PATCH_TEXT="$2" python3 -c 'import json,os,sys; print(json.dumps({"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":sys.argv[1],"name":"apply_patch","input":{"command":os.environ["PATCH_TEXT"]}}]}}))' "$1"
@@ -108,6 +111,23 @@ run_gate "$T"; expect_allow "Claude successful doc edit needs no verify"
 
 { u "old"; cbash v0 "pytest -q"; cresult v0 false; u "new"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; } > "$T"
 run_gate "$T"; expect_block "Claude previous-turn green is stale"
+
+# Window boundary: a prior turn's edit must be excluded from the current window
+# (fails if _claude_window is neutralized to return all entries).
+{ u "old"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; u "new question"; } > "$T"
+run_gate "$T"; expect_allow "Claude previous-turn edit excluded from current window"
+
+# A block-form user prompt (text list) still resets the window.
+{ u "old"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; ulist "new question"; } > "$T"
+run_gate "$T"; expect_allow "Claude list-form text prompt resets the window"
+
+# An image+text block-form prompt also resets the window.
+{ u "old"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; ulistimg "look at this"; } > "$T"
+run_gate "$T"; expect_allow "Claude image+text prompt resets the window"
+
+# A backgrounded verify returns only a launch ack, so it never counts as green.
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbashbg v1 "pytest -q"; cresult v1 false; } > "$T"
+run_gate "$T"; expect_block "Claude backgrounded verify is not green"
 
 { u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pytest -q"; cresult v1 false; cedit e2 Edit /tmp/proj/app.py; cresult e2 false; } > "$T"
 run_gate "$T"; expect_block "Claude later successful edit relocks"
