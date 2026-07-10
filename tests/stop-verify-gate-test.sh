@@ -1,34 +1,59 @@
 #!/usr/bin/env bash
-# Offline tests for hooks/stop-verify-gate.py (Stop-hook verify gate).
-# Each case writes a small hand-made JSONL transcript fixture into a mktemp
-# dir, pipes a Stop-hook stdin payload into the gate, and keys pass/fail on
-# exit code + stdout. Fully offline; nothing in the fixtures is executed.
-#
-# Run: bash tests/stop-verify-gate-test.sh
+# Offline Claude + Codex transcript truth table for the Stop verify gate.
 set -uo pipefail
 
 GATE="$(cd "$(dirname "$0")/.." && pwd)/hooks/stop-verify-gate.py"
 [ -f "$GATE" ] || { echo "gate not found: $GATE" >&2; exit 1; }
 
-WORK="$(mktemp -d)"
-trap 'rm -rf "$WORK"' EXIT
+WORK=$(mktemp -d)
+trap '/bin/rm -rf "$WORK"' EXIT
 pass=0 fail=0
 
 WANT_REASON='[pandastack verify-gate] code changed this turn with no test or verify run — run the relevant check, or state the change is not yet verified.'
 
-# --- fixture line builders (one JSONL entry per call; args must not contain ") ---
-u()       { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
-edit()    { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t","name":"%s","input":{"file_path":"%s","old_string":"a","new_string":"b"}}]}}\n' "$1" "$2"; }
-nbedit()  { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t","name":"NotebookEdit","input":{"notebook_path":"%s","new_source":"x"}}]}}\n' "$1"; }
-bashcmd() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t","name":"Bash","input":{"command":"%s"}}]}}\n' "$1"; }
-toolres() { printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t","content":"ok"}]}}\n'; }
+# Claude JSONL builders.
+u() { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
+cedit() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"%s","input":{"file_path":"%s","old_string":"a","new_string":"b"}}]}}\n' "$1" "$2" "$3"; }
+cnbedit() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"NotebookEdit","input":{"notebook_path":"%s","new_source":"x"}}]}}\n' "$1" "$2"; }
+cbash() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"Bash","input":{"command":"%s"}}]}}\n' "$1" "$2"; }
+cresult() { printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"%s","content":"result","is_error":%s}]}}\n' "$1" "$2"; }
+capply() {
+  PATCH_TEXT="$2" python3 -c 'import json,os,sys; print(json.dumps({"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":sys.argv[1],"name":"apply_patch","input":{"command":os.environ["PATCH_TEXT"]}}]}}))' "$1"
+}
 
-# run_gate <transcript-path> [stop_hook_active] [PANDASTACK_VERIFY_GATE value]
-# -> sets OUT (stdout) and RC (exit code)
+# Codex rollout JSONL builders.
+cturn() { printf '{"type":"turn_context","payload":{"turn_id":"%s","cwd":"/tmp/proj"}}\n' "$1"; }
+cpatch() {
+  PATCH_TEXT="$2" python3 -c 'import json,os,sys; print(json.dumps({"type":"response_item","payload":{"type":"custom_tool_call","call_id":sys.argv[1],"name":"apply_patch","input":os.environ["PATCH_TEXT"]}}))' "$1"
+}
+cpatch_result() { printf '{"type":"event_msg","payload":{"type":"patch_apply_end","call_id":"%s","turn_id":"turn-current","success":%s,"status":"completed"}}\n' "$1" "$2"; }
+cexec() {
+  CMD_TEXT="$2" python3 -c 'import json,os,sys; args=json.dumps({"cmd":os.environ["CMD_TEXT"]}); print(json.dumps({"type":"response_item","payload":{"type":"function_call","call_id":sys.argv[1],"name":"exec_command","arguments":args}}))' "$1"
+}
+cwrite_stdin() {
+  python3 -c 'import json,sys; args=json.dumps({"session_id":int(sys.argv[2])}); print(json.dumps({"type":"response_item","payload":{"type":"function_call","call_id":sys.argv[1],"name":"write_stdin","arguments":args}}))' "$1" "$2"
+}
+cout() {
+  OUT_TEXT="$2" python3 -c 'import json,os,sys; print(json.dumps({"type":"response_item","payload":{"type":"function_call_output","call_id":sys.argv[1],"output":os.environ["OUT_TEXT"]}}))' "$1"
+}
+cunknown_exec() { printf '{"type":"response_item","payload":{"type":"custom_tool_call","call_id":"%s","name":"exec","input":"tools.exec_command({cmd: \\"pytest -q\\"})"}}\n' "$1"; }
+capp_exec() {
+  python3 -c 'import json,sys; print(json.dumps({"type":"response_item","payload":{"type":"custom_tool_call","call_id":sys.argv[1],"name":"exec","input":sys.argv[2]}}))' "$1" "$2"
+}
+capp_patch_result() {
+  python3 -c 'import json,sys; print(json.dumps({"type":"event_msg","payload":{"type":"patch_apply_end","call_id":sys.argv[1],"turn_id":"turn-current","success":True,"status":"completed","changes":{sys.argv[2]:{"type":"update"}}}}))' "$1" "$2"
+}
+capp_out() {
+  python3 -c 'import json,sys; print(json.dumps({"type":"response_item","payload":{"type":"custom_tool_call_output","call_id":sys.argv[1],"output":[{"type":"input_text","text":sys.argv[2]}]}}))' "$1" "$2"
+}
+
+CODE_PATCH=$'*** Begin Patch\n*** Update File: app.py\n@@\n-old\n+new\n*** End Patch'
+DOC_PATCH=$'*** Begin Patch\n*** Update File: README.md\n@@\n-old\n+new\n*** End Patch'
+
+# run_gate <transcript> [stop_hook_active] [gate env] [turn id]
 run_gate() {
-  local transcript="$1" active="${2:-false}" gate_env="${3:-}"
-  local payload
-  payload=$(printf '{"session_id":"t","hook_event_name":"Stop","stop_hook_active":%s,"transcript_path":"%s"}' "$active" "$transcript")
+  local transcript="$1" active="${2:-false}" gate_env="${3:-}" turn_id="${4:-turn-current}" payload
+  payload=$(python3 -c 'import json,sys; print(json.dumps({"session_id":"t","turn_id":sys.argv[3],"hook_event_name":"Stop","stop_hook_active":sys.argv[2]=="true","transcript_path":sys.argv[1],"cwd":"/tmp/proj"}))' "$transcript" "$active" "$turn_id")
   if [ -n "$gate_env" ]; then
     OUT=$(printf '%s' "$payload" | PANDASTACK_VERIFY_GATE="$gate_env" python3 "$GATE" 2>/dev/null)
   else
@@ -43,7 +68,7 @@ expect_allow() {
     pass=$((pass+1))
   else
     fail=$((fail+1))
-    printf 'FAIL  %-48s expected silent exit 0, got rc=%s out=%s\n' "$desc" "$RC" "$OUT"
+    printf 'FAIL  %-58s expected silent exit 0, got rc=%s out=%s\n' "$desc" "$RC" "$OUT"
   fi
 }
 
@@ -52,109 +77,128 @@ expect_block() {
   if [ "$RC" = 0 ] && printf '%s' "$OUT" | REASON="$WANT_REASON" python3 -c '
 import json, os, sys
 d = json.loads(sys.stdin.read())
-ok = d.get("decision") == "block" and d.get("reason") == os.environ["REASON"]
-sys.exit(0 if ok else 1)
+sys.exit(0 if d.get("decision") == "block" and d.get("reason") == os.environ["REASON"] else 1)
 '; then
     pass=$((pass+1))
   else
     fail=$((fail+1))
-    printf 'FAIL  %-48s expected block JSON, got rc=%s out=%s\n' "$desc" "$RC" "$OUT"
+    printf 'FAIL  %-58s expected block JSON, got rc=%s out=%s\n' "$desc" "$RC" "$OUT"
   fi
 }
 
-# --- case 1: code edit, no test command -> block JSON on stdout ---
-for tool in Edit MultiEdit; do
-  T="$WORK/c1.jsonl"
-  { u "fix the bug"; edit "$tool" /tmp/proj/app.py; toolres; } > "$T"
-  run_gate "$T"
-  expect_block "c1 code edit, no test cmd ($tool)"
+# Claude: outcomes, ordering, and current-turn boundary.
+T="$WORK/claude.jsonl"
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; } > "$T"
+run_gate "$T"; expect_block "Claude successful code edit without verify"
+
+{ u "fix"; capply e1 "$CODE_PATCH"; cresult e1 false; } > "$T"
+run_gate "$T"; expect_block "Claude-envelope apply_patch without verify"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pytest -q"; cresult v1 false; } > "$T"
+run_gate "$T"; expect_allow "Claude successful edit then passing verify"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pytest -q"; cresult v1 true; } > "$T"
+run_gate "$T"; expect_block "Claude failing verify never becomes green"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 true; } > "$T"
+run_gate "$T"; expect_allow "Claude failed edit does not count as changed"
+
+{ u "docs"; cedit e1 Write /tmp/proj/README.md; cresult e1 false; } > "$T"
+run_gate "$T"; expect_allow "Claude successful doc edit needs no verify"
+
+{ u "old"; cbash v0 "pytest -q"; cresult v0 false; u "new"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; } > "$T"
+run_gate "$T"; expect_block "Claude previous-turn green is stale"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pytest -q"; cresult v1 false; cedit e2 Edit /tmp/proj/app.py; cresult e2 false; } > "$T"
+run_gate "$T"; expect_block "Claude later successful edit relocks"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pytest -q"; cresult v1 false; cedit e2 Edit /tmp/proj/app.py; cresult e2 false; cbash v2 "pytest -q"; cresult v2 false; } > "$T"
+run_gate "$T"; expect_allow "Claude reverify after later edit"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pytest -q"; cresult v1 false; cbash v2 "pytest -q"; cresult v2 true; } > "$T"
+run_gate "$T"; expect_block "Claude later failing verify invalidates green"
+
+{ u "notebook"; cnbedit e1 /tmp/proj/analysis.ipynb; cresult e1 false; } > "$T"
+run_gate "$T"; expect_block "Claude notebook edit is code"
+
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "pip install pytest"; cresult v1 false; } > "$T"
+run_gate "$T"; expect_block "Claude test-framework mention is not verify"
+
+for cmd in "pytest -q || true" "pytest -q; true" "pytest --version" \
+           "pytest -q | tee test.log" "pytest -q & echo done" \
+           "pytest -q&"; do
+  { u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "$cmd"; cresult v1 false; } > "$T"
+  run_gate "$T"; expect_block "Claude masked/no-op verify rejected: $cmd"
 done
 
-# --- case 2: code edit + verify command after the edit -> silent exit 0 ---
-for cmd in "python3 -m pytest tests/ -v" "bun test" "bash tests/x.sh" "bash scripts/lint-suite.sh"; do
-  T="$WORK/c2.jsonl"
-  { u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "$cmd"; toolres; } > "$T"
-  run_gate "$T"
-  expect_allow "c2 verify after edit: $cmd"
+for cmd in "pytest -q && echo passed" "pytest -q 2>&1" \
+           "pytest -q &>test.log" "pytest -q 1>&2"; do
+  { u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbash v1 "$cmd"; cresult v1 false; } > "$T"
+  run_gate "$T"; expect_allow "Claude status-preserving verify accepted: $cmd"
 done
 
-# --- case 3: doc-only edits (.md/.json) -> silent exit 0 ---
-T="$WORK/c3.jsonl"
-{ u "update the docs"; edit Write /tmp/proj/README.md; toolres; edit Edit /tmp/proj/config.json; toolres; } > "$T"
-run_gate "$T"
-expect_allow "c3 md/json-only edits"
+# Codex: canonical rollout calls, explicit patch/test outcomes, and turn_id.
+T="$WORK/codex.jsonl"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; } > "$T"
+run_gate "$T"; expect_block "Codex successful apply_patch without verify"
+run_gate "$T" false "" turn-missing; expect_allow "Unknown Codex turn id fails open"
 
-# --- case 4: stop_hook_active=true -> silent exit 0 even with unverified edit ---
-T="$WORK/c4.jsonl"
-{ u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; } > "$T"
-run_gate "$T" true
-expect_allow "c4 stop_hook_active soft pass"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_allow "Codex passing exec_command verifies"
 
-# --- case 5: missing / malformed transcript -> fail-open silent exit 0 ---
-run_gate "$WORK/nonexistent.jsonl"
-expect_allow "c5a missing transcript fails open"
-T="$WORK/c5.jsonl"
-printf 'NOT-JSON-LINE\n{broken\n' > "$T"
-run_gate "$T"
-expect_allow "c5b malformed transcript fails open"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process exited with code 1"; } > "$T"
+run_gate "$T"; expect_block "Codex failing exec_command never verifies"
 
-# --- case 6: PANDASTACK_VERIFY_GATE=off -> silent exit 0 on a would-block fixture ---
-T="$WORK/c6.jsonl"
-{ u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; } > "$T"
-run_gate "$T" false off
-expect_allow "c6 kill switch off"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 false; } > "$T"
+run_gate "$T"; expect_allow "Codex failed patch does not count as changed"
 
-# --- case 7: test ran BEFORE the last user prompt, edit after -> stale green, block ---
-T="$WORK/c7.jsonl"
-{ u "run the suite"; bashcmd "python3 -m pytest tests/ -v"; toolres; u "now fix the bug"; edit Edit /tmp/proj/app.py; toolres; } > "$T"
-run_gate "$T"
-expect_block "c7 stale green before last prompt"
+{ cturn turn-current; cpatch p1 "$DOC_PATCH"; cpatch_result p1 true; } > "$T"
+run_gate "$T"; expect_allow "Codex doc-only patch needs no verify"
 
-# --- extra: local-command entries after the edit are not a turn boundary -> still block ---
-T="$WORK/c8.jsonl"
-{ u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; u "<command-name>/model</command-name>"; u "<local-command-stdout>Set model</local-command-stdout>"; } > "$T"
-run_gate "$T"
-expect_block "c8 local-command entries keep turn open"
+{ cturn turn-old; cpatch p0 "$CODE_PATCH"; cpatch_result p0 true; cexec v0 "pytest -q"; cout v0 "Process exited with code 0"; cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; } > "$T"
+run_gate "$T" false "" turn-current; expect_block "Codex turn_id excludes previous green"
 
-# --- extra: pure Q&A turn, no tool use -> silent exit 0 ---
-T="$WORK/c9.jsonl"
-u "what does this function do" > "$T"
-run_gate "$T"
-expect_allow "c9 pure Q&A"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process exited with code 0"; cpatch p2 "$CODE_PATCH"; cpatch_result p2 true; } > "$T"
+run_gate "$T"; expect_block "Codex later successful patch relocks"
 
-# --- extra: green THEN a later code edit, same window -> verification reset, block ---
-T="$WORK/c10.jsonl"
-{ u "fix the bug"; bashcmd "python3 -m pytest tests/ -v"; toolres; edit Edit /tmp/proj/app.py; toolres; } > "$T"
-run_gate "$T"
-expect_block "c10 edit after green voids verification"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process running with session ID 42"; cwrite_stdin w1 42; cout w1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_allow "Codex async exec verified after write_stdin exit 0"
 
-# --- extra: edit, verify, re-edit, re-verify -> final green counts, allow ---
-T="$WORK/c11.jsonl"
-{ u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "pytest -q"; toolres; edit Edit /tmp/proj/app.py; toolres; bashcmd "pytest -q"; toolres; } > "$T"
-run_gate "$T"
-expect_allow "c11 re-verify after re-edit"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process running with session ID 42"; cwrite_stdin w1 42; cout w1 "Process exited with code 1"; } > "$T"
+run_gate "$T"; expect_block "Codex async exec failure never verifies"
 
-# --- extra: NotebookEdit on .ipynb, no test -> block (notebook_path plumbing) ---
-T="$WORK/c12.jsonl"
-{ u "edit the notebook"; nbedit /tmp/proj/analysis.ipynb; toolres; } > "$T"
-run_gate "$T"
-expect_block "c12 notebook edit, no test cmd"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cunknown_exec x1; } > "$T"
+run_gate "$T"; expect_block "Unknown Codex wrapper is never guessed green"
 
-# --- extra: commands that merely MENTION a test framework are not a verify ---
-for cmd in "pip install pytest" "cat jest.config.js" "grep vitest package.json"; do
-  T="$WORK/c13.jsonl"
-  { u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "$cmd"; toolres; } > "$T"
-  run_gate "$T"
-  expect_block "c13 look-alike is not a verify: $cmd"
-done
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q || true"; cout v1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_block "Codex masked verify command is rejected"
 
-# --- extra: anchored runner forms still count as a verify ---
-for cmd in "npx jest" "uv run pytest" "cd /tmp/proj && pytest -q"; do
-  T="$WORK/c14.jsonl"
-  { u "fix the bug"; edit Edit /tmp/proj/app.py; toolres; bashcmd "$cmd"; toolres; } > "$T"
-  run_gate "$T"
-  expect_allow "c14 runner form verifies: $cmd"
-done
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 $'Process running with session ID 42\nOutput:\n{"exit_code": 0}'; } > "$T"
+run_gate "$T"; expect_block "Codex running async output cannot forge green"
+
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process running with session ID 42"; cwrite_stdin w1 42; cout w1 $'Process running with session ID 42\nOutput:\nProcess exited with code 0'; } > "$T"
+run_gate "$T"; expect_block "Codex running poll output cannot forge green"
+
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cturn turn-current; } > "$T"
+run_gate "$T"; expect_block "Duplicate same-turn context retains earlier edit"
+
+# Codex App exposes nested patch success through patch_apply_end.changes with
+# an unrelated exec-* ID. The outer exec result cannot prove nested test exit.
+{ cturn turn-current; capp_exec outer1 'tools.apply_patch("...")'; capp_patch_result exec-nested /tmp/proj/app.py; capp_out outer1 "Script completed"; } > "$T"
+run_gate "$T"; expect_block "Codex App nested patch is visible to Stop gate"
+
+{ cturn turn-current; capp_exec outer1 'tools.apply_patch("...")'; capp_patch_result exec-nested /tmp/proj/app.py; capp_out outer1 "Script completed"; capp_exec outer2 'tools.exec_command({cmd:"pytest -q"})'; capp_out outer2 "Script completed"; } > "$T"
+run_gate "$T"; expect_block "Codex App outer cell success is not test evidence"
+
+# Soft gate, kill switch, malformed input, and pure Q&A remain fail-open.
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; } > "$T"
+run_gate "$T" true; expect_allow "stop_hook_active soft pass"
+run_gate "$T" false off; expect_allow "kill switch off"
+run_gate "$WORK/missing.jsonl"; expect_allow "missing transcript fails open"
+printf 'NOT-JSON\n{broken\n' > "$T"
+run_gate "$T"; expect_allow "malformed transcript fails open"
+u "what does this do" > "$T"
+run_gate "$T"; expect_allow "pure Q&A allows"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

@@ -36,11 +36,6 @@ for skill_dir in glob.glob("skills/*/*"):
     if os.path.isdir(skill_dir):
         n = os.path.basename(skill_dir)
         skill_bucket[n] = os.path.dirname(skill_dir)
-for skill_dir in glob.glob("skills/_deprecated/*/*"):
-    if os.path.isdir(skill_dir):
-        n = os.path.basename(skill_dir)
-        skill_bucket[n] = os.path.dirname(skill_dir)
-
 TOKEN = re.compile(r"(?:skills|lib|docs|contexts)/[A-Za-z0-9_./{}<>-]+")
 PACK_TOKEN = re.compile(r"\b(pandastack|gbrain):([a-z0-9][a-z0-9-]*)\b")
 SLASH_COMMAND = re.compile(r"`(/(?:pandastack:)?[a-z0-9][a-z0-9-]*)`")

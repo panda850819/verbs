@@ -7,7 +7,7 @@ check or state the change is unverified. Soft gate: the second stop
 (stop_hook_active=true) always passes, and any internal failure fails open
 with exit 0 and no output — the gate must never break a session.
 
-stdin: Claude Code Stop-hook JSON (transcript_path, stop_hook_active).
+stdin: Claude Code or Codex Stop-hook JSON (transcript_path, stop_hook_active).
 stdout: exactly one {"decision":"block","reason":...} object, or nothing.
 Kill switch: PANDASTACK_VERIFY_GATE=off. Python 3.9+, stdlib only, no
 network, no file writes. Design ported from fable-harness verify_gate.py
@@ -15,40 +15,9 @@ network, no file writes. Design ported from fable-harness verify_gate.py
 """
 import json
 import os
-import re
 import sys
-from pathlib import PurePath
 
-CODE_EXTS = {
-    ".py", ".ipynb", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs",
-    ".sh", ".ps1", ".psm1", ".vbs",
-    ".go", ".rs", ".java", ".c", ".cpp", ".h", ".hpp", ".cs", ".rb", ".sql", ".php",
-}
-
-# Test / verify commands across ecosystems, plus this repo's own conventions
-# (bash tests/<x>.sh suites, bash scripts/lint-<x>.sh linters). Word/position
-# anchors keep look-alikes out (make testdata, npm run testbed, cat tox.ini).
-TEST_CMD_RE = re.compile(
-    r"((^|[;&|\n]\s*)(uv\s+run\s+|poetry\s+run\s+)?pytest\b"
-    r"|python[3]?(\.exe)?\s+-m\s+pytest\b"
-    r"|python[3]?(\.exe)?\s+(-m\s+unittest|(\S*[/\\])?(test\S*\.py|\S*_test\.py))"
-    r"|npm\s+(run\s+)?test\b|yarn\s+test\b|pnpm\s+(run\s+)?test\b|bun\s+test\b|node\s+--test"
-    r"|go\s+test|cargo\s+test"
-    r"|(^|[;&|\n]\s*)(npx\s+|bunx\s+|yarn\s+|pnpm\s+)?(vitest|jest)\b"
-    r"|mvnw?(\.cmd)?\s+(\S+\s+)*test(\s|$)|gradlew?(\.bat)?\s+(\S+\s+)*test(\s|$)|dotnet\s+test(\s|$)"
-    r"|\brspec\b|\bphpunit\b|\bctest\b|make\s+test\b|rake\s+(\S+\s+)*test\b|mix\s+test\b"
-    r"|(^|[;&|]\s*)(tox|nox)\b|deno\s+test|rails\s+test"
-    r"|\b(ba)?sh\s+(\S*[/\\])?tests?[/\\]\S+\.sh"
-    r"|\b(ba)?sh\s+(\S*[/\\])?lint-\S+\.sh)",
-    re.IGNORECASE,
-)
-
-EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
-SHELL_TOOLS = {"Bash", "PowerShell"}
-LOCAL_COMMAND_PREFIXES = (
-    "<command-name>", "<local-command-stdout>",
-    "<local-command-stderr>", "<local-command-caveat>",
-)
+from runtime_events import current_turn_events, is_code_path
 
 BLOCK_REASON = (
     "[pandastack verify-gate] code changed this turn with no test or verify "
@@ -56,51 +25,23 @@ BLOCK_REASON = (
 )
 
 
-def is_real_user_prompt(entry):
-    """A turn boundary is a user entry with plain-string content that is not
-    a local-command echo. tool_result lists arrive as type=user too and must
-    not count."""
-    if entry.get("type") != "user":
-        return False
-    content = entry.get("message", {}).get("content")
-    if not isinstance(content, str):
-        return False
-    return not content.lstrip().startswith(LOCAL_COMMAND_PREFIXES)
-
-
-def iter_tool_uses(entries):
-    for entry in entries:
-        if entry.get("type") != "assistant":
-            continue
-        content = entry.get("message", {}).get("content")
-        if not isinstance(content, list):
-            continue
-        for block in content:
-            if isinstance(block, dict) and block.get("type") == "tool_use":
-                yield block.get("name", ""), block.get("input", {}) or {}
-
-
-def analyze(entries):
+def analyze(entries, hook_payload=None):
     """Return (code_edited, verified) for the window after the last real
     user prompt. A test run before that prompt is stale green and does not
     count — and a code edit AFTER the last test run resets verification
     (a green recorded before a change proves nothing about the code after
     it), so only a verify that follows the final code edit counts."""
-    last_prompt_idx = -1
-    for i, entry in enumerate(entries):
-        if is_real_user_prompt(entry):
-            last_prompt_idx = i
     code_edited = False
     verified = False
-    for name, tool_input in iter_tool_uses(entries[last_prompt_idx + 1:]):
-        if name in EDIT_TOOLS:
-            path = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
-            if PurePath(path).suffix.lower() in CODE_EXTS:
+    for event in current_turn_events(entries, hook_payload or {}):
+        if event.kind == "edit":
+            if event.success is True and any(is_code_path(path) for path in event.paths):
                 code_edited = True
                 verified = False  # later edit voids the earlier green
-        elif name in SHELL_TOOLS:
-            if TEST_CMD_RE.search(tool_input.get("command", "")):
-                verified = True
+        elif event.kind == "verify" and code_edited:
+            # A failed later verify invalidates an earlier green. Unknown/custom
+            # wrappers never become green because their success is None.
+            verified = event.success is True
     return code_edited, verified
 
 
@@ -121,7 +62,7 @@ def main():
                     entries.append(json.loads(line))
                 except json.JSONDecodeError:
                     continue
-        code_edited, verified = analyze(entries)
+        code_edited, verified = analyze(entries, data)
         if code_edited and not verified:
             print(json.dumps(
                 {"decision": "block", "reason": BLOCK_REASON},

@@ -10,40 +10,36 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-manifest="$repo_root/manifest.toml"
-skills_dir="$repo_root/skills"
-
 fail=0
 
-manifest_skills="$(grep -o '^\[skill\.[a-z0-9-]*\]' "$manifest" | sed 's/^\[skill\.//; s/\]$//' | sort)"
-# Bucket layout: a skill dir is at depth 2 (skills/<bucket>/<skill>). Archived
-# skills under skills/.archive/ and deprecated skills under skills/_deprecated/
-# are excluded by path.
-disk_skills="$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' ! -path '*/_deprecated/*' -exec basename {} \; | sort)"
-
-missing_on_disk="$(comm -23 <(echo "$manifest_skills") <(echo "$disk_skills"))"
-missing_in_manifest="$(comm -13 <(echo "$manifest_skills") <(echo "$disk_skills"))"
-
-if [ -n "$missing_on_disk" ]; then
-  echo "FAIL: in manifest.toml but no skills/<bucket>/<name>/ directory:"
-  echo "$missing_on_disk" | sed 's/^/  - /'
+# scripts/pandastack owns skill discovery for every loader. Consume its source
+# result here so doctor and CI cannot disagree about the exact active set.
+surface_json="$(python3 "$repo_root/scripts/pandastack" doctor --json)" || {
+  echo "FAIL: doctor could not build the runtime surface"
+  exit 1
+}
+if ! surface_drift="$(printf '%s' "$surface_json" | python3 -c '
+import json,sys
+s=json.load(sys.stdin)["checks"]["runtime_surface"]["source"]
+if s["ok"]:
+    raise SystemExit(0)
+for key in ("source_recursive", "claude_registration", "codex_registration"):
+    item=s[key]
+    if item["missing"]: print("{} missing: {}".format(key, ", ".join(item["missing"])))
+    if item["extra"]: print("{} extra: {}".format(key, ", ".join(item["extra"])))
+    for issue in item["issues"]: print("{}: {}".format(key, issue))
+if s["version_drift"]: print("version drift: " + ", ".join(s["version_drift"]))
+for issue in s["issues"]: print(issue)
+raise SystemExit(1)
+')"; then
+  echo "FAIL: runtime skill surface differs from manifest.toml:"
+  printf '%s\n' "$surface_drift" | sed 's/^/  /'
   fail=1
 fi
-
-if [ -n "$missing_in_manifest" ]; then
-  echo "FAIL: on disk but missing a [skill.<name>] manifest entry:"
-  echo "$missing_in_manifest" | sed 's/^/  - /'
-  fail=1
-fi
-
-# Every skill dir must have a SKILL.md.
-while IFS= read -r dir; do
-  [ -n "$dir" ] || continue
-  if [ ! -f "$dir/SKILL.md" ]; then
-    echo "FAIL: ${dir#"$repo_root"/}/ has no SKILL.md"
-    fail=1
-  fi
-done <<< "$(find "$skills_dir" -mindepth 2 -maxdepth 2 -type d ! -path '*/.archive/*' ! -path '*/_deprecated/*')"
+count="$(printf '%s' "$surface_json" | python3 -c '
+import json,sys
+print(len(json.load(sys.stdin)["checks"]["runtime_surface"]["expected"]))
+')"
 
 # Retired claims must not reappear in living docs. The persona layer (PR
 # #100/#101) and the driver split (PR #92) are gone, retro-week/retro-month moved
@@ -100,7 +96,6 @@ if [ -f "$repo_root/scripts/pandastack-state" ] && [ ! -f "$repo_root/docs/state
 fi
 
 if [ "$fail" -eq 0 ]; then
-  count=$(echo "$disk_skills" | wc -l | tr -d ' ')
   echo "OK: manifest and skills/ in sync ($count skills), no stale claims."
 fi
 exit "$fail"

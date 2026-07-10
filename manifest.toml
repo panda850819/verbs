@@ -30,7 +30,7 @@
 # This file is hand-curated. When you add or rename a skill, update here.
 
 [manifest]
-version = "3.4.1"
+version = "3.4.2"
 schema  = "skill-tier-v1"
 updated = "2026-07-10"
 
