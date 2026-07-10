@@ -2,14 +2,16 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 3f93d22b021db04e1e5692b5dfd9efc1a510e0f5
-evaluated_at: 2026-07-09
+evaluated_skill_hash: ff6eddebfe623ac7af9dc1fd6067f50e47ac0da6
+evaluated_at: 2026-07-10
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — sprint
 
 > 2026-07-09 re-validation (#170): SKILL.md swapped its plan-artifact source and planning/multi-day routing from the retired structured-brief skill to `grill --brief` (no structural change); anti-trigger route re-anchored, all L-citations re-verified against the current file, verdict unchanged.
+>
+> 2026-07-10 re-validation (#172): Codex delegation now declares and loads `lib/model-anchors.md`; the cold batch-loop reference owns per-batch mechanical/risky selection and the shared minimum-version gate. The lifecycle shape and verdict are unchanged.
 
 **Verdict: SOLID.** The new closure-evidence gate (Stage 6 SHIPPED step 4) turns "claim SHIPPED without proof" into a checkable failure, but it doesn't say what terminal state a sprint lands in when that evidence is missing — and the previous eval's "conformance: weak" call turns out to be a stale citation, not a real gap.
 
@@ -20,12 +22,12 @@ _2026-07-02 re-eval: T03 (#145) inserted a closure-evidence step ahead of the SH
 | Predictability | pass | L179 — terminal state is still computed from booleans (`if review_clean AND deploy_proven AND user_approves_ship: state = SHIPPED`) before Stage 6 ever runs; the new evidence check doesn't touch this core computation. |
 | Description / invocation | pass | L5 — front-loads "Focused execution session", lists `/sprint` + phrase triggers, carries anti-trigger reach clauses (UI → `ui`, bugs → `debug`). |
 | Completion criteria | weak | L215 — "Closure evidence before claiming SHIPPED: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done" is checkable but not exhaustive: it names the failure (evidence missing) without naming the resulting terminal state, so a sprint that hits this branch can dead-end outside the four states the contract at L43 promises. |
-| Information hierarchy | pass | L216 — the SHIPPED summary line sits directly after the closure-evidence gate (L215) with no reference-file indirection, and doesn't collide with the Stage 5 deploy-proof precondition (L166-174), which gates a different fact (artifact-tested vs ticket-closed). |
+| Information hierarchy | pass | L121 — the hot Stage 3 body points to `lib/model-anchors.md` and the cold `references/codex-delegation.md`; per-batch model selection stays out of the 301-line lifecycle body. The SHIPPED summary remains directly after its closure-evidence gate. |
 | Leading words | pass | L118 — "'Faster if I just write it myself' is the failure mode this default exists to prevent" anchors the architect/subagent split in one pretraining concept. |
 | Pruning | weak | L243 — "Only SHIPPED runs ship/extract/backflow" restates L43 near-verbatim; the new step doesn't add duplication but doesn't remove this pre-existing one either. |
 | Native parity | pass | L118 — names the native default the skill overrides ("just write it myself") and the delta that earns the architect/subagent split its slot; the previous eval's table omitted this axis entirely. |
 | Granularity | pass | L84 — the learnings recall stays a `lib/` pointer rather than an inlined glob or a new skill; unaffected by this edit, still the right cut. |
-| pandastack conformance | pass | L11 — `reads:` already declares `- repo: lib/learning-recall.md`, and every referenced `lib/`, `skills/`, and `references/` path resolves on disk (verified: capability-probe, escape-hatch, push-once, gate-contract, learning-recall, rationalizations, aggregator-test-checklist, codex-delegation, docs/state-schema.md, scripts/pandastack-state). The prior eval's "reads: block not updated" claim does not hold against either the current file or the HEAD commit it was allegedly scored against (identical hash) — corrected here. |
+| pandastack conformance | pass | L12 — `reads:` declares `lib/model-anchors.md`; every referenced `lib/`, `skills/`, and `references/` path resolves, and the batch-loop reference consumes the same invocation SSOT as handover. |
 
 ## Why it's good
 The closure-evidence step (L215) is a small, well-placed fix: it turns "did you actually open the ticket/PR" from an implicit expectation into a printed, checkable gate, using the exact same wording as `ship/SKILL.md`'s own step 4 (`skills/engineering/ship/SKILL.md:143`) so the two skills fail the same way at their respective closure points. It sits one line above the thing it gates (the SHIPPED summary, L216) instead of a separate stage, so the information hierarchy stays flat and legible.

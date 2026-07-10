@@ -9,6 +9,7 @@ reads:
   - repo: lib/push-once.md
   - repo: lib/gate-contract.md
   - repo: lib/learning-recall.md
+  - repo: lib/model-anchors.md
   - repo: skills/productivity/grill/SKILL.md
   - repo: skills/productivity/ui/SKILL.md
   - repo: skills/engineering/debug/SKILL.md
@@ -117,7 +118,7 @@ Carve-outs:
 
 Rationale: the architect's context window and judgment are the scarce resource; spend them on spec, review, and integration, not keystrokes. "Faster if I just write it myself" is the failure mode this default exists to prevent — it was true for the single unit and false for the sprint.
 
-**Codex delegation:** when `--delegate codex` is set (the rule lives in Modes, above), Stage 3 hands the batch of mechanical units to Codex via `/handover` instead of dispatching to free subagents — planning / review / git stay on Claude. It is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async`. Gate, batching, and circuit breaker: `references/codex-delegation.md`.
+**Codex delegation:** when `--delegate codex` is set (the rule lives in Modes, above), Stage 3 hands the batch of mechanical units to Codex via `/handover` instead of dispatching to free subagents — planning / review / git stay on Claude. It is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async`. Load `lib/model-anchors.md`; gate, anchor selection, batching, and circuit breaker live in `references/codex-delegation.md`.
 
 Stage 3 runs with baseline engineering discipline — root cause before fix, minimal diff, verify before done, 3-strike escalation — from `~/.agents/AGENTS.md` § Coding Discipline plus `careful` and `review`. For a UI build, follow `ui`; for a bug, follow `debug`. There is no separate persona-lens step.
 

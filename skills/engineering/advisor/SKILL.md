@@ -7,6 +7,7 @@ description: |
   Fires only on a LOAD-BEARING judgment (expensive-if-wrong: a design fork, a plan before you commit, an irreversible or outward-facing decision, keep-vs-rewrite) — reversible small calls just decide, no consult. Reach for the MOST INDEPENDENT model, not the nominally highest tier: from an Opus seat a different provider (Codex/GPT) usually gives more new signal than a same-family model. "get a second opinion", "red-team this", "多角度審". NOT code-diff review (use review), NOT sending mechanical build work out to Codex (use handover), NOT self-interview to sharpen a fuzzy idea (use grill).
 reads:
   - repo: lib/gate-contract.md
+  - repo: lib/model-anchors.md
   - cli: codex
   - cli: claude
 writes:
@@ -42,20 +43,39 @@ The economics flip by which runtime you are on, so detect it first — the direc
 - `CLAUDECODE=1` in env → **Claude seat** (metered). Your tokens are expensive; reach OUT to a flat-rate model for the opinion.
 - otherwise → **Codex seat** (flat-rate). Your tokens are cheap; keep the bulk local, reach OUT only for the judgment.
 
-## Step 1: Tool-parity probe (fail loud, never silently self-review)
+## Step 1: Select roles, then probe (fail loud, never silently self-review)
 
-Before crossing the boundary, assert the target binary is on PATH — Claude seat needs `command -v codex`, Codex seat needs `command -v claude`. If missing, print `ADVISOR: no cross-model binary on PATH (<name>) — judgment stays local, NOT self-reviewed` and stop. A self-issued second opinion is not a second opinion; do not fake decorrelation by asking the same model.
+Select the complete role set before probing: default uses the one seat-derived
+role from Step 2; `--panel` uses `advisor.panel.fast`, `advisor.openai`, and the
+optional `advisor.panel.deep`. For every unique transport in that set, assert
+the target binary is on PATH. Then read each row's minimum CLI version from
+`lib/model-anchors.md`, parse `<name> --version`, and stop with
+`ADVISOR: <name> <have> is below verified minimum <need> — upgrade required`
+when it is missing, unparseable, or older. If a binary is missing, print
+`ADVISOR: no cross-model binary on PATH (<name>) — judgment stays local, NOT self-reviewed`
+and stop. A self-issued second opinion is not a second opinion; do not fake
+decorrelation by asking the same model.
 
-**Codex→claude gate (unverified arm):** the Codex-seat `claude -p` path is not yet verified on this machine (only the Hermes gateway print-mode path is known-good). On the Codex seat, additionally run `claude -p 'ping'` once; if it does not return cleanly, emit the banner above and keep the judgment local. Ship this arm only after the probe is green — until then the Codex seat degrades to "judgment stays local", loudly, never to self-review.
+If the anchored call itself fails, emit the same banner with the command's
+actionable error and keep the judgment local. Do not retry through the current
+model or through an unpinned default.
 
 ## Step 2: Default — one cross-model consult
 
-Pass the question + the minimum context + the specific fork. Narrow in, structured out.
+Read `lib/model-anchors.md`, select `advisor.openai` from a Claude seat or
+`advisor.anthropic` from a Codex seat, and pass both its model and effort
+explicitly. Pass the question + the minimum context + the specific fork. Narrow
+in, structured out.
 
-- Claude seat → `codex exec` a one-shot prompt (GPT, flat-rate, maximum decorrelation), or a Fable subagent when same-provider depth is what you want.
-- Codex seat → `claude -p` a narrow prompt. The Claude side is metered, so keep the call tight: one question, smallest sufficient context, a structured answer back.
+- Claude seat → direct `codex exec` with the `advisor.openai` anchor and its
+  read-only sandbox guard.
+- Codex seat → direct `claude -p` with the `advisor.anthropic` anchor. The
+  Claude side is metered and runs with tools disabled plus session persistence
+  off. Keep the call tight: one question, smallest sufficient context, a
+  structured answer back.
 
-Return the outside view AS an outside view. The caller owns the decision.
+Done when the outside view is returned as outside-voice, unincorporated. The
+caller owns the decision.
 
 ## Step 3: --panel — blind cross-model critique (absorbs boardroom)
 
@@ -63,7 +83,9 @@ Only for a plan that is **expensive if wrong** (irreversible, outward-facing, mu
 
 Spawn 2-3 mutually-blind critics, each a **different model** and a **distinct lens** (correctness / does-it-reproduce · the user outcome · simplicity, is it over-built · what's-missing · failure-modes + reversal). Cross-model is the point: same-model critics decorrelate only the prompt, not the model's own priors. Pick the lenses the plan is most likely to fail on, one per critic.
 
-- Default composition: 1 sonnet + 1 `codex exec` (GPT, flat-rate) + at most 1 opus. Synthesis and the per-finding gate stay in the main loop.
+- Default composition: `advisor.panel.fast` + `advisor.openai` + at most one
+  `advisor.panel.deep`. Use every row's model, effort, minimum version, and guard
+  exactly. Synthesis and the per-finding gate stay in the main loop.
 - Each critic gets the plan + its one lens + "find the strongest objection; default to finding a real problem", never the others' output. Inline any hard rule a critic needs — the subagent does not read your global config.
 - **Keep every lone-critic finding.** A problem only one lens caught is the whole reason for the panel; never drop it as an outlier.
 - Dedup across critics, rank by severity, present each as finding / evidence / suggested change, then per-finding gate (`lib/gate-contract.md`): `Apply? [Y / N / edit]`. Outside-voice findings are informational; the caller decides each.

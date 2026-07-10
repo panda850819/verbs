@@ -7,6 +7,7 @@ description: |
   Use when a plan has several rote, file-scoped build units and you deliberately want Codex subscription quota used. NOT for plan writing, closing finished work, PR/ship flow, or exploratory judgment-heavy work (pull a cross-model take with advisor instead).
 reads:
   - repo: docs/plans/**
+  - repo: lib/model-anchors.md
   - repo: skills/engineering/handover/references/codex-invocation.md
   - cli: git
   - cli: codex
@@ -60,27 +61,48 @@ The async-vs-sync axis is **session occupancy**, not cost (codex runs on the sam
 1. **Platform** — orchestrator must be Claude Code. Under Codex / Gemini, this skill is a no-op (delegation would recurse).
 2. **Env guard** — `[ -n "$CODEX_SANDBOX" ] || [ -n "$CODEX_SESSION_ID" ]` → already inside a sandbox, stop ("already inside Codex").
 3. **Availability** — `command -v codex` must print an absolute path. Missing → stop ("Codex CLI not found").
-4. **Repo-root** — run from `git rev-parse --show-toplevel`. A git repo is required: sync mode commits the result, and both modes resolve the plan + write handoffs under the repo's `docs/`. Not a git repo → stop ("handover needs a git repo").
-5. **Plan precondition** — resolve the slug (arg, else current branch, else latest `docs/plans/*.md`). The plan's U-IDs + acceptance criteria ARE the payload. No plan → stop ("handover needs a plan file — its U-IDs/acceptance are the payload").
+4. **Version** — read the minimum Codex version from `lib/model-anchors.md`, parse
+   `codex --version`, and stop with the installed and required versions when it
+   is unparseable or older.
+5. **Repo-root** — run from `git rev-parse --show-toplevel`. A git repo is required: sync mode commits the result, and both modes resolve the plan + write handoffs under the repo's `docs/`. Not a git repo → stop ("handover needs a git repo").
+6. **Plan precondition** — resolve the slug (arg, else current branch, else latest `docs/plans/*.md`). The plan's U-IDs + acceptance criteria ARE the payload. No plan → stop ("handover needs a plan file — its U-IDs/acceptance are the payload").
+7. **Model anchor** — select `handover.mechanical` by default and
+   `handover.risky` only for the risk classes in `lib/model-anchors.md`. This
+   selection happens before mode dispatch and applies to sync and async.
 
 ## Sync mode (default)
 
-Claude spawns Codex, waits for the structured result, keeps git + review. Read `references/codex-invocation.md` for the verified `codex exec` invocation, the `<task>/<files>/<constraints>/<non_goals>/<stop_conditions>/<budget>/<judgment>/<verify>/<output_contract>` XML payload, the result schema, the sandbox-escape gate, and the single-result classification table.
+Claude spawns Codex, waits for the structured result, keeps git + review. Read
+`references/codex-invocation.md` for the verified `codex exec` invocation, the
+`<task>/<files>/<constraints>/<non_goals>/<stop_conditions>/<budget>/<judgment>/<verify>/<output_contract>`
+XML payload, the result schema, the sandbox-escape gate, and the single-result
+classification table.
 
 Flow:
 
 1. Derive remaining work: for each U-ID in the plan, run its `acceptance:` check and include ONLY the U-IDs that do NOT already pass (do not trust the plan's `status:` field — it is always `todo`; state is derived from git). Fall back to all U-IDs if acceptance can't be run here.
 2. Build the XML payload + result schema into a `mktemp -d` scratch dir.
-3. Spawn `codex exec` per `references/codex-invocation.md` (background Bash to clear the 2-min ceiling).
+3. Spawn `codex exec` with the selected model anchor per
+   `references/codex-invocation.md` (background Bash to clear the 2-min ceiling).
 4. Poll for the result file in separate foreground Bash calls, then classify + act per the status→action table in `references/codex-invocation.md` (the SSOT — do not restate divergent actions here): `completed` → `git add {scope} && git commit`; `partial` → KEEP the diff, finish the remaining units locally; `failed` / CLI-failure → scoped rollback, finish locally.
 5. Git, review (`/review`), and ship stay on Claude — never delegated.
 
 ## Async mode (`--async`)
 
-Write ONE self-contained handoff to `docs/handoffs/{YYYY-MM-DD}-{slug}-codex.md` using the same XML contract (so the same payload drives either path — they differ only in async-vs-sync). Then print:
+Write ONE self-contained handoff to `docs/handoffs/{YYYY-MM-DD}-{slug}-codex.md`
+using the same XML contract, including the selected role, model, effort, minimum
+CLI, and permission guard in its `<runtime>` block. Then print:
 
 - the handoff path;
-- the dispatch one-liner — **Hermes (default):** hand the file to Hermes, it runs on `provider: openai-codex` (`~/.hermes/config.yaml`); **direct headless:** `codex exec -s workspace-write - < docs/handoffs/{...}-codex.md` (must run at repo root).
+- the verified **direct headless** dispatch one-liner: first compare the
+  execution machine's `codex --version` against `<runtime>.minimum_cli` and fail
+  loud when older or unparseable; only then render the selected handover anchor
+  into the command shape from `lib/model-anchors.md` and append
+  `- < docs/handoffs/{...}-codex.md` (must run at repo root);
+- **Hermes alternative:** use only when its `openai-codex` adapter can prove it
+  applied every `<runtime>` field: model, effort, minimum CLI, and guard. If it cannot, print
+  `HANDOVER: Hermes cannot honor the pinned model anchor — use direct headless`
+  and do not dispatch through Hermes.
 
 Async mode NEVER spawns codex and NEVER touches git — it only emits the artifact (vault-only, like ship's knowledge mode).
 

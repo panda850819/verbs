@@ -30,9 +30,9 @@
 # This file is hand-curated. When you add or rename a skill, update here.
 
 [manifest]
-version = "3.4.0"
+version = "3.4.1"
 schema  = "skill-tier-v1"
-updated = "2026-07-06"
+updated = "2026-07-10"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
@@ -136,12 +136,12 @@ description = "Multi-mode ship verb: git (default), knowledge (incl. decision-no
 [skill.handover]
 tier = "ext"
 requires = ["cli:git", "cli:codex"]
-description = "Hand unfinished work to Codex to DO (not /ship, which closes finished work): sync (spawn codex exec now) or --async (write payload for Hermes). Codex runs on ChatGPT-subscription quota, conserving the Claude session. Needs the `codex` CLI, hence ext."
+description = "Hand unfinished work to Codex to DO (not /ship, which closes finished work): sync (spawn codex exec now) or --async (write an anchored payload). Codex runs on ChatGPT-subscription quota, conserving the Claude session. Needs Codex CLI >=0.144.1, hence ext."
 
 [skill.advisor]
 tier = "ext"
 requires = ["cli:codex"]
-description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Needs a cross-model CLI (`codex`, or `claude` on the Codex seat), hence ext."
+description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206."
 
 # ============================================================================
 # Notes

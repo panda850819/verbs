@@ -82,11 +82,40 @@ ext_check() {
   fi
 }
 
+version_ge() {
+  awk -v have="$1" -v need="$2" 'BEGIN {
+    nh = split(have, h, "."); nn = split(need, n, "."); max = nh > nn ? nh : nn
+    for (i = 1; i <= max; i++) {
+      hv = h[i] + 0; nv = n[i] + 0
+      if (hv > nv) exit 0
+      if (hv < nv) exit 1
+    }
+    exit 0
+  }'
+}
+
+ext_check_version() {
+  local skill="$1" cmd="$2" minimum="$3" install="$4" have
+  if ! check_cmd "$cmd"; then
+    printf "      %-18s \033[33m%-9s\033[0m %s\n" "$skill" "missing" "$install"
+    return
+  fi
+  have="$("$cmd" --version 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+){2}' | head -1 || true)"
+  if [ -z "$have" ] || ! version_ge "$have" "$minimum"; then
+    printf "      %-18s \033[33m%-9s\033[0m need >=%s, found %s; %s\n" \
+      "$skill" "outdated" "$minimum" "${have:-unparseable}" "$install"
+    return
+  fi
+  printf "      %-18s \033[32m%-9s\033[0m %s\n" "$skill" "ready" "(installed $have)"
+}
+
 ext_check "agent-browser"  "agent-browser" "npm install -g agent-browser"
 ext_check "deepwiki"       "curl"          "(curl + jq, usually preinstalled)"
 ext_check "qa"             "agent-browser" "npm install -g agent-browser"
 ext_check "ship"           "gh"            "brew install gh  (GitHub CLI, for the PR step)"
-ext_check "handover"       "codex"         "npm install -g @openai/codex  (Codex CLI)"
+ext_check_version "handover"       "codex"  "0.144.1" "codex update"
+ext_check_version "advisor/codex"  "codex"  "0.144.1" "codex update"
+ext_check_version "advisor/claude" "claude" "2.1.206" "claude update"
 
 echo
 

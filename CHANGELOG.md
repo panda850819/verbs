@@ -1,5 +1,34 @@
 # Changelog
 
+## v3.4.1 — 2026-07-10
+
+### Changed
+
+- Added `lib/model-anchors.md` as the shared execution contract for `advisor`,
+  `handover`, and sprint Codex delegation. Every delegated call now pins model,
+  effort, minimum CLI version, and permission guard instead of inheriting host
+  defaults.
+- Bootstrap readiness is version-aware for handover and both advisor directions;
+  older installed CLIs report `outdated` instead of a false-green `ready`.
+- Anchored judgment calls to Sol/high or Opus/high, mechanical handover to
+  Luna/medium, and risk-sensitive handover to Sol/high. Advisor panel critics
+  now use role keys instead of model names in the skill body.
+- Async handoffs now embed a `<runtime>` block. Direct headless dispatch is the
+  verified default; Hermes must prove its adapter applied both model and effort
+  or fail loud.
+
+### Verified
+
+- Codex CLI 0.144.1: direct read-only fixed-token probes passed for Sol/high,
+  Terra/medium, and Luna/medium.
+- Claude Code 2.1.206: direct Opus/high fixed-token probe passed with tools
+  disabled and session persistence off.
+- Claude Code 2.1.206: direct Sonnet/medium fixed-token probe passed with tools
+  disabled and session persistence off; nested calls clear `CLAUDECODE`.
+- Companion limitation remains explicit: Luna/medium and Sol above high were
+  rejected on the app-server path, so pandastack does not route those calls
+  through the companion.
+
 ## v3.3.0 — 2026-06-30
 
 ### Changed

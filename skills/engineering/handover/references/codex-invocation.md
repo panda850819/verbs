@@ -1,6 +1,6 @@
 # Codex invocation — the single SSOT
 
-> How to invoke Codex once: build the payload, spawn `codex exec`, collect + classify ONE structured result. Both `/handover` (sync) and `/sprint --delegate codex` (batch loop) call this. Verified against codex-cli 0.130.0 on this machine. Ported from EveryInc Compound Engineering `ce-work-beta`.
+> How to invoke Codex once: build the payload, spawn `codex exec`, collect + classify ONE structured result. Both `/handover` (sync) and `/sprint --delegate codex` (batch loop) call this. Verified against codex-cli 0.144.1 on this machine. Ported from EveryInc Compound Engineering `ce-work-beta`.
 
 ## The XML payload
 
@@ -10,6 +10,13 @@ Write the prompt + the result schema into a `mktemp -d` scratch dir (capture its
 <task>
 {each remaining, non-done U-ID: its Goal + acceptance criterion}
 </task>
+<runtime>
+role: {selected role key from lib/model-anchors.md}
+model: {selected role model}
+effort: {selected role effort}
+minimum_cli: {selected role minimum CLI}
+guard: {selected role permission guard}
+</runtime>
 <files>
 {combined scope paths from those U-IDs}
 </files>
@@ -46,11 +53,19 @@ not fixes.
 Result schema (`additionalProperties: false`, all required):
 `{status: completed|partial|failed, files_modified[], issues[], summary, verification_summary}`
 
-## Verified invocation (codex 0.130.0)
+## Verified invocation (codex 0.144.1)
+
+Resolve `{model}` and `{effort}` from the selected handover role in
+`lib/model-anchors.md`. Both are mandatory; never defer a delegated call to the
+global Codex defaults. The command values, installed CLI version, and sandbox
+must match the payload's `<runtime>` block so async dispatchers can verify the
+same contract.
 
 ```bash
 SD="$(mktemp -d -t handover-codex-XXXXXX)"   # use the echoed absolute path everywhere below
 codex exec \
+  -m "{model}" \
+  -c 'model_reasoning_effort="{effort}"' \
   -s workspace-write \
   --output-schema "$SD/result-schema.json" \
   -o "$SD/result.json" \
@@ -58,7 +73,9 @@ codex exec \
 ```
 
 - Launch as a Bash tool call with `run_in_background: true` (the tool PARAMETER, not a shell `&`) to clear the 2-minute timeout ceiling.
-- Risky payload (auth / payments / migrations): insert `-c 'model_reasoning_effort="high"'` before `-s`. Default defers to `~/.codex/config.toml`.
+- Risky payload (auth / payments / migrations): select `handover.risky` before
+  rendering the same command. Do not change only the effort; model and effort
+  move together as one verified anchor.
 
 ## Sandbox-escape gate (mandatory)
 

@@ -16,6 +16,9 @@ Cost note: codex runs on the ChatGPT subscription here (`~/.codex/auth.json`, no
 Run the `/handover` gate (platform / env-guard / availability / repo-root — see `skills/engineering/handover/SKILL.md`), plus:
 
 - **Clean-baseline preflight** before the first batch: `git diff --quiet HEAD`. This makes the scoped rollback in `codex-invocation.md` sufficient.
+- **Model anchor** — read `lib/model-anchors.md`, enforce its minimum Codex
+  version, and select `handover.mechanical` by default. Select
+  `handover.risky` only for a batch containing one of the shared risk classes.
 
 ## Batching
 
@@ -25,8 +28,11 @@ Delegate units in batches of ~3-5. If the plan has more, split at phase boundari
 
 For each batch, invoke Codex per `skills/engineering/handover/references/codex-invocation.md`:
 
-1. Build the XML payload + result schema for the batch's non-done U-IDs into a `mktemp -d` scratch dir.
-2. Spawn `codex exec` (background Bash to clear the 2-min ceiling).
+1. Build the XML payload + result schema for the batch's non-done U-IDs into a
+   `mktemp -d` scratch dir, including the selected role, model, effort, minimum
+   CLI, and permission guard in `<runtime>`.
+2. Render that anchor into the `codex exec` command (background Bash to clear
+   the 2-min ceiling).
 3. Poll + classify the one result, then act per the status→action table in `codex-invocation.md` (the SSOT). On `completed`: `git add {scope} && git commit`, reset `consecutive_failures = 0`. On `partial`: KEEP the diff, finish the batch's remaining units locally, `consecutive_failures++`. On `failed` / CLI-failure: scoped rollback, `consecutive_failures++`.
 
 The orchestrator does NOT re-run tests per batch (Codex runs + fixes its own inside the payload; doubles cost otherwise). Safety net = the self-reported result + the circuit breaker + Stage 4 review on the whole diff.
