@@ -1,6 +1,16 @@
 # Changelog
 
-## v3.4.2 — 2026-07-10
+## v3.4.2 — Parity
+
+Released: 2026-07-10
+
+### Added
+
+- Deterministic tag preflight and a tag-only, least-privilege GitHub Actions
+  release workflow produce exact release metadata, an archive, and its SHA-256
+  checksum. Publishing stays draft-only until every asset upload succeeds.
+- Root `LICENSE` and `THIRD_PARTY_NOTICES.md` files make the project terms and
+  third-party notices visible in both fresh clones and release archives.
 
 ### Fixed
 

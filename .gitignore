@@ -13,3 +13,6 @@ secrets.env
 # Python bytecode caches (e.g. scripts/__pycache__ from running tests)
 __pycache__/
 *.py[cod]
+
+# local release artifacts
+/dist/

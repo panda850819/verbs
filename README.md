@@ -392,16 +392,44 @@ Recommended release loop:
 
 1. Update skill content in the repo.
 2. Update user-facing docs, especially `README.md` and install notes.
-3. Bump visible version markers when behavior changed:
-   - `CHANGELOG.md`
-   - `.claude-plugin/plugin.json`
-   - `.codex-plugin/plugin.json`
-   - `.claude-plugin/marketplace.json`, if marketplace metadata changed
-4. Verify in the real hosts you claim to support:
+3. Edit the version only in `manifest.toml`, then regenerate the derived loader
+   metadata:
+
+   ```bash
+   scripts/pandastack sync
+   ```
+
+4. Name the release in `CHANGELOG.md` with a heading such as
+   `## vX.Y.Z — Release name` and add its `Released: YYYY-MM-DD` line.
+5. Verify in the real hosts you claim to support:
    - Claude Code local marketplace install
    - Codex clone + symlink install
    - Hermes import/symlink path, if relevant to the change
-5. Push the branch, open a PR, merge, then tell users which update path to run.
+6. Candidate mode can be run from any clean, committed worktree:
+
+   ```bash
+   git status --short  # must print nothing
+   bash scripts/release-preflight.sh --candidate vX.Y.Z
+   ```
+
+7. Push the feature branch, open a PR, let CI pass, and merge it. Feature-branch
+   `/ship` stops at this PR boundary: it does not tag or publish a release. That
+   is why the repo config remains `tag: none` and `release: false`.
+8. For the actual tag flow, start from a clean, updated `main`. Create the
+   annotated tag, validate it, then push only that tag:
+
+   ```bash
+   git switch main
+   git pull --ff-only
+   git status --short  # must print nothing
+   git tag -a vX.Y.Z -m "vX.Y.Z — Release name"
+   bash scripts/release-preflight.sh --tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+9. The tag-only release workflow reruns the preflight and publishes the exact
+   title, notes, archive, and checksum it produces. The release remains a draft
+   until all four artifacts upload successfully.
 
 ## Contributing
 
@@ -446,7 +474,8 @@ Repository issues: [github.com/panda850819/pandastack/issues](https://github.com
 
 ## License
 
-MIT
+[MIT License](LICENSE). See [Third-party notices](THIRD_PARTY_NOTICES.md) for
+attributions and included or adapted license terms.
 
 ## Acknowledgements
 

@@ -1,0 +1,70 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  preflight:
+    permissions:
+      contents: read
+    runs-on: macos-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Run release preflight
+        run: bash scripts/release-preflight.sh --tag "$GITHUB_REF_NAME"
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-artifacts
+          if-no-files-found: error
+          path: |
+            dist/release-title.txt
+            dist/release-notes.md
+            dist/pandastack-${{ github.ref_name }}.tar.gz
+            dist/pandastack-${{ github.ref_name }}.tar.gz.sha256
+
+  publish:
+    needs: preflight
+    permissions:
+      contents: write
+    runs-on: macos-latest
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-artifacts
+          path: dist
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          existing_draft="$(
+            gh release view "$GITHUB_REF_NAME" \
+              --json isDraft \
+              --jq '.isDraft' 2>/dev/null || true
+          )"
+          case "$existing_draft" in
+            "")
+              ;;
+            true)
+              gh release delete "$GITHUB_REF_NAME" --yes
+              ;;
+            *)
+              echo "ERROR: release $GITHUB_REF_NAME already exists and is not a draft" >&2
+              exit 1
+              ;;
+          esac
+
+          gh release create "$GITHUB_REF_NAME" --verify-tag --draft \
+            --title "$(cat dist/release-title.txt)" \
+            --notes-file dist/release-notes.md \
+            "dist/pandastack-$GITHUB_REF_NAME.tar.gz" \
+            "dist/pandastack-$GITHUB_REF_NAME.tar.gz.sha256"
+          gh release edit "$GITHUB_REF_NAME" --draft=false
