@@ -146,8 +146,30 @@ def normalize_pretool(payload: Dict[str, Any]) -> Dict[str, Any]:
 def _is_real_claude_prompt(entry: Dict[str, Any]) -> bool:
     if entry.get("type") != "user":
         return False
+    if entry.get("isMeta") is True:
+        return False
     content = entry.get("message", {}).get("content")
-    return isinstance(content, str) and not content.lstrip().startswith(LOCAL_COMMAND_PREFIXES)
+    if isinstance(content, str):
+        return not content.lstrip().startswith(LOCAL_COMMAND_PREFIXES)
+    if isinstance(content, list):
+        # A genuine user turn may arrive block-form (image paste, image+text,
+        # or text blocks). It is a real prompt when it carries a non-tool_result
+        # block; a tool_result-only entry is tool output, not a new turn.
+        found = False
+        for block in content:
+            if not isinstance(block, dict):
+                continue
+            block_type = block.get("type")
+            if block_type == "tool_result":
+                continue
+            if block_type == "text":
+                text = block.get("text", "")
+                if isinstance(text, str) and not text.lstrip().startswith(LOCAL_COMMAND_PREFIXES):
+                    found = True
+            else:
+                found = True
+        return found
+    return False
 
 
 def _claude_window(entries: Sequence[Dict[str, Any]]) -> Sequence[Dict[str, Any]]:
@@ -163,6 +185,7 @@ def _claude_events(
 ) -> List[RuntimeEvent]:
     calls: List[Tuple[str, Dict[str, Any]]] = []
     outcomes: Dict[str, bool] = {}
+    background: set = set()
     cwd = hook_payload.get("cwd") or os.getcwd()
 
     for entry in _claude_window(entries):
@@ -185,6 +208,11 @@ def _claude_events(
                 elif name in CLAUDE_SHELL_TOOLS and isinstance(tool_input, dict):
                     command = tool_input.get("command", "")
                     if isinstance(command, str) and is_verify_command(command):
+                        # A backgrounded run returns only a launch ack, not the
+                        # runner's exit status, so its outcome is unknown — mirror
+                        # the Codex still-running path and keep success=None.
+                        if tool_input.get("run_in_background"):
+                            background.add(call_id)
                         calls.append((call_id, {
                             "kind": "verify", "paths": (), "command": command,
                         }))
@@ -197,7 +225,8 @@ def _claude_events(
 
     return [
         RuntimeEvent(
-            kind=data["kind"], call_id=call_id, success=outcomes.get(call_id),
+            kind=data["kind"], call_id=call_id,
+            success=None if call_id in background else outcomes.get(call_id),
             paths=data["paths"], command=data["command"],
         )
         for call_id, data in calls
