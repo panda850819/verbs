@@ -1,7 +1,7 @@
 {
   "name": "verbs",
-  "version": "0.6.1",
-  "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills.",
+  "version": "0.7.0",
+  "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 11 composable skills.",
   "author": {
     "name": "Panda Zeng",
     "url": "https://github.com/panda850819"
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Verbs",
     "shortDescription": "Hard-won ways of working, encoded as composable skills for coding agents.",
-    "longDescription": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills. Marketplace Plugin is recommended for Claude Code and Codex; portable npx installs are hook-free. Hermes supports selective manual import. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
+    "longDescription": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 11 composable skills. Marketplace Plugin is recommended for Claude Code and Codex; portable npx installs are hook-free. Hermes supports selective manual import. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
     "developerName": "Panda Zeng",
     "category": "Developer Tools",
     "capabilities": [

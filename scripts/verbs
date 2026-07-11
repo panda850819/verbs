@@ -1000,8 +1000,6 @@ def _load_resource_index(root):
 
 def _validate_stale_resource_deletions(root, stale_paths, manifest_data):
     """Authorize stale deletion only for unchanged copies of canonical resources."""
-    # upgrade: index schema v2 must record source + hash before safely handling
-    # canonical resource rename/delete or whole-skill removal.
     skill_dirs = list(_manifest_skill_dirs(manifest_data).values())
     deletions = []
     for relative in sorted(stale_paths):
@@ -1012,6 +1010,14 @@ def _validate_stale_resource_deletions(root, stale_paths, manifest_data):
                 break
             except ValueError:
                 continue
+        # A whole-skill retirement removes its directory from the current
+        # manifest before sync can prune the old portable resource copies. In
+        # that case derive only the resource tail below
+        # skills/<bucket>/<skill>/ and keep the same canonical-byte proof used
+        # for active skills. A poisoned index still fails when REPO_ROOT/tail
+        # is absent or the destination bytes differ.
+        if tail is None and len(relative.parts) >= 4:
+            tail = Path(*relative.parts[3:])
         if tail is None or not tail.parts or tail.name == "SKILL.md":
             raise ValueError(
                 f"stale resource is outside a known skill directory: {relative}"

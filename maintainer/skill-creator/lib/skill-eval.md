@@ -6,8 +6,7 @@
 
 ### 1. Load criteria → read the target
 
-Resolve the installed skill whose frontmatter `name` is
-`writing-great-skills` and read its scorecard axes. Resolve the target:
+Read the co-located `writing-great-skills.md` scorecard axes. Resolve the target:
 `skills/<bucket>/<name>/SKILL.md` (bucket =
 engineering|productivity|writing|meta). Read it whole, plus any sibling
 reference files it points at. `--eval all` fans out one sub-agent per skill

@@ -1,10 +1,13 @@
 ---
 name: skill-creator
 description: |
-  Create or improve Verbs skills, MECE-checked against the repo-root RESOLVER.md. `--eval <name>` scores an existing skill against the writing-great-skills scorecard and writes a co-located eval.md. Triggers: "create a skill", "improve this skill", "eval/score this skill".
+  Maintainer-only workflow to create or improve Verbs skills, MECE-checked
+  against the repo-root RESOLVER.md. `--eval <name>` scores an existing skill
+  against the co-located writing-great-skills library and writes eval.md.
 version: 1.0.0
 user-invocable: false
 type: skill
+classification: maintainer-only
 ---
 
 # Skill Creator
@@ -25,7 +28,13 @@ contracts; the installed skill's own runtime references remain co-located.
 
 ## `--eval <name>` mode (score an existing skill)
 
-The evaluator half of skill construction — `skill-creator` builds and self-checks; `--eval` judges an existing skill and leaves a greppable verdict next to it. Follow the scoring steps + eval.md template in [`lib/skill-eval.md`](lib/skill-eval.md): resolve the installed skill whose frontmatter `name` is `writing-great-skills`, read its scorecard, score all 9 axes (pass/weak/fail, one cited `L<n>` each, default weak), write `skills/<bucket>/<name>/eval.md` with the hash stamped, and confirm `bash scripts/lint-eval-fresh.sh <name>` passes. `--eval all` fans out one sub-agent per skill (never score the whole corpus in one hot context). This is the same SSOT the build path binds — generator and evaluator, one verb.
+The evaluator half of skill construction — `skill-creator` builds and
+self-checks; `--eval` judges an existing skill and leaves a greppable verdict
+next to it. Follow [`lib/skill-eval.md`](lib/skill-eval.md), read
+[`lib/writing-great-skills.md`](lib/writing-great-skills.md), score all 9 axes,
+write `skills/<bucket>/<name>/eval.md`, and confirm
+`bash scripts/lint-eval-fresh.sh <name>` passes. `--eval all` fans out one
+sub-agent per skill. The workflow stays out of normal runtime discovery.
 
 ## Phases
 
@@ -140,9 +149,9 @@ Run both procedures in [`lib/verify-and-route-check.md`](lib/verify-and-route-ch
 
 ### 7. Construction self-check (generation-moment binding)
 
-Before declaring the skill done, resolve the installed skill whose frontmatter
-`name` is `writing-great-skills` and score against its scorecard (the
-construction-quality SSOT). Any axis landing **weak/fail** with no reason to
+Before declaring the skill done, read `lib/writing-great-skills.md` and score
+against its scorecard (the construction-quality SSOT). Any axis landing
+**weak/fail** with no reason to
 keep it → revise before merge. Then run `--eval <name>` (above) to write the
 co-located `eval.md` (every skill carries one; `lint-eval-fresh.sh` enforces
 it). This mirrors how `lib/quality-rubric.md` binds at the generation moment —
@@ -177,3 +186,4 @@ Verification checks pass (`lint-manifest-sync.sh`, `lint-eval-fresh.sh`, and `re
 
 - `SKILL-FRONTMATTER.md` — the contract this skill enforces
 - `RESOLVER.md` — the index this skill updates
+- `lib/writing-great-skills.md` — the construction scorecard resource

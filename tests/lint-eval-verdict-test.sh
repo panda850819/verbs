@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-scorecard="skills/meta/writing-great-skills/SKILL.md"
+scorecard="maintainer/skill-creator/lib/writing-great-skills.md"
 scorecard_version="$(sed -n 's/^version:[[:space:]]*//p' "$scorecard" | head -1 | tr -d '"[:space:]')"
 expected_rubric="writing-great-skills@$scorecard_version"
 

@@ -1,0 +1,6 @@
+Give a hypothetical execution response only; do not edit or use tools.
+
+Request: migrate storage from SQLite to Postgres. No success criterion, data
+migration policy, cutover, or rollback choice is given.
+
+State the next action.

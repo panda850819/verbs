@@ -20,12 +20,9 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:careful` | core | Confirmation gate before destructive commands (prod, rm -rf, force-push). |
 | `/verbs:debug` | core | Root-cause debugging: hypothesis → instrument → bisect → scope-blast. NOT diff review. |
 | `/verbs:ui` | core | Build/fix UI with a point of view. NOT browser-test (qa) or render-bug (debug). |
-| `/verbs:review` | core | 3-pass review + cross-model adversarial check. |
-| `/verbs:sprint` | core | 1-2h focused execution: scope → grill-lite → execute → review → ship. |
-| `/verbs:write` | core | Voice-aware drafting + slop detection. |
+| `/verbs:review` | core | Risk-adaptive diff review with scoped evidence and cold-context escalation. |
+| `/verbs:sprint` | core | Acceptance-driven execution with bounded review and delivery evidence. |
 | `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
-| `/verbs:skill-creator` | core | Create new Verbs skills. `--eval` scores existing skills. |
-| `/verbs:writing-great-skills` | core | Reference + scorecard for well-constructed skills. |
 | `/verbs:qa` | core | Browser-based UI QA when the host provides browser automation. |
 | `/verbs:ship` | ext | Test + commit + push + PR for completed code work. Needs cli:gh. |
 | `/verbs:handover` | ext | Hand unfinished work to Codex (sync or async). Needs cli:codex. |
@@ -122,7 +119,7 @@ claude plugin marketplace add "/absolute/path/to/verbs" --scope user
 claude plugin install verbs@verbs --scope user
 ```
 
-Run `/reload-plugins`, verify `0.6.1`, then repeat for Codex using the exact
+Run `/reload-plugins`, verify `0.7.0`, then repeat for Codex using the exact
 commands in the install guide. `/pandastack:*` has no alias.
 
 ## Development and verification
@@ -135,10 +132,9 @@ claude plugin validate .
 bash tests/run-all.sh
 ```
 
-Score a skill against the construction quality SSOT:
-```bash
-/verbs:skill-creator --eval <skill-name>
-```
+Pack maintainers load `maintainer/skill-creator/SKILL.md` explicitly. Its
+construction scorecard is a library resource and is not exposed in normal
+runtime sessions.
 
 ## Release
 

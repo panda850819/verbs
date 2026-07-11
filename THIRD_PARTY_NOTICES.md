@@ -6,19 +6,6 @@ retains the upstream copyright notices and MIT license references below.
 
 ## Adapted or Included MIT Material
 
-### tw93/Waza
-
-Copyright (c) 2026 Tw93
-
-MIT license: https://github.com/tw93/Waza/blob/main/LICENSE
-
-Affected files:
-
-- `skills/writing/write/references/slop-zh-residue.md`
-- `skills/writing/write/references/slop-zh-translation.md`
-- `skills/writing/write/references/prose-zh-structure.md`
-- `skills/writing/write/references/slop-zh-report-tone.md`
-
 ### mattpocock/skills
 
 Copyright (c) 2026 Matt Pocock
@@ -27,8 +14,8 @@ MIT license: https://github.com/mattpocock/skills/blob/main/LICENSE
 
 Affected files:
 
-- `skills/meta/writing-great-skills/SKILL.md`
-- `skills/meta/writing-great-skills/GLOSSARY.md`
+- `maintainer/skill-creator/lib/writing-great-skills.md`
+- `maintainer/skill-creator/lib/writing-great-skills-glossary.md`
 - `skills/productivity/grill/SKILL.md`
 
 ### garrytan/gstack
@@ -43,16 +30,6 @@ Affected files:
 - `lib/escape-hatch.md`
 - `lib/stop-rule.md`
 - `lib/bad-good-calibration.md`
-
-### op7418/Humanizer-zh
-
-Copyright (c) 2026 歸藏
-
-MIT license: https://github.com/op7418/Humanizer-zh/blob/main/LICENSE
-
-Affected file:
-
-- `skills/writing/write/references/zh-slop-patterns.md`
 
 ### obra/superpowers
 
