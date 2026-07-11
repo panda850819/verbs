@@ -4,14 +4,16 @@ Reference procedure for skill-creator Phases 6 and 6.5. Run both before declarin
 
 ## Phase 6 — Verify
 
-Run the checks that exist in this repo. Pandastack currently has a manual resolver golden file, not Bun test files.
+Run the checks that exist in this repo. Verbs has an executable resolver route test, not Bun test files.
 
 ```bash
-cd "$PANDASTACK_ROOT"
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
 
 git diff --check
+scripts/verbs sync --check
 
-python - <<'PY'
+python3 - <<'PY'
 from pathlib import Path
 import re, sys
 root = Path('skills')
@@ -29,8 +31,7 @@ if errors:
 print('OK skill frontmatter')
 PY
 
-# If you changed routing / descriptions, manually run the affected cases in:
-# tests/resolver-golden.md
+python3 tests/resolver-routes-test.py
 ```
 
 Do not use `bun test tests/` unless actual `.test` / `.spec` files have been added. If a check fails, read the error and fix the frontmatter / RESOLVER / body before merging.
@@ -39,7 +40,7 @@ Do not use `bun test tests/` unless actual `.test` / `.spec` files have been add
 
 Whenever you add or edit a skill's trigger / description, manually confirm it did
 not start stealing a **near-neighbor's** traffic (route confusion). This is a
-~5-minute manual pass, not a runner + fixture + CI gate — at pandastack's N the
+~5-minute manual pass, not a runner + fixture + CI gate — at Verbs' size the
 infra would cost more than it saves and would rot in a solo repo.
 
 1. Pick ~6 **confusable pairs** whose trigger surfaces sit closest to the one you

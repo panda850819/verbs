@@ -1,35 +1,34 @@
 {
-  "name": "pandastack",
-  "description": "Personal AI operator OS for Claude Code. Skill-only (no agents, no commands), 14 skills organized into engineering / productivity / writing / meta buckets under skills/, tiered via manifest.toml. Covers dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop (writing-great-skills + skill-creator --eval).",
-  "version": "3.4.2",
+  "name": "verbs",
+  "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills.",
+  "version": "0.6.0",
   "author": {
     "name": "Panda Zeng"
   },
-  "homepage": "https://github.com/panda850819/pandastack",
-  "repository": "https://github.com/panda850819/pandastack",
+  "homepage": "https://github.com/panda850819/verbs",
+  "repository": "https://github.com/panda850819/verbs",
   "keywords": [
-    "skills",
-    "workflows",
-    "lifecycle",
-    "personal-os",
+    "agent-skills",
+    "coding-agents",
+    "software-engineering",
     "review",
     "ship",
-    "learning-loop"
+    "debug"
   ],
   "skills": [
     "./skills/engineering/advisor",
     "./skills/engineering/careful",
     "./skills/engineering/debug",
+    "./skills/meta/gatekeeper",
+    "./skills/productivity/grill",
     "./skills/engineering/handover",
     "./skills/engineering/qa",
     "./skills/engineering/review",
     "./skills/engineering/ship",
+    "./skills/meta/skill-creator",
     "./skills/engineering/sprint",
-    "./skills/productivity/grill",
     "./skills/productivity/ui",
     "./skills/writing/write",
-    "./skills/meta/gatekeeper",
-    "./skills/meta/skill-creator",
     "./skills/meta/writing-great-skills"
   ]
 }

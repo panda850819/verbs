@@ -1,76 +1,44 @@
-# Installing pandastack for Codex
+# Install Verbs in Codex
 
-Enable pandastack skills in Codex via native skill discovery. Just clone and symlink.
+See [`INSTALL_FOR_AGENTS.md`](../INSTALL_FOR_AGENTS.md) for the install and
+migration source of truth.
 
-## Prerequisites
-
-- Git
-- Codex CLI
-
-## Installation
-
-1. **Clone the pandastack repository:**
-   ```bash
-   git clone https://github.com/panda850819/pandastack.git ~/.codex/pandastack
-   ```
-
-2. **Create the skills symlink:**
-   ```bash
-   ln -s ~/.codex/pandastack/skills ~/.codex/skills/pandastack
-   ```
-
-   This points Codex's native skill discovery (`$CODEX_HOME/skills/`) at the pandastack skill directory. Tested with Codex CLI 0.124.0.
-
-   **Windows (PowerShell):**
-   ```powershell
-   cmd /c mklink /J "$env:USERPROFILE\.codex\skills\pandastack" "$env:USERPROFILE\.codex\pandastack\skills"
-   ```
-
-3. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
-
-## Optional: private overlay
-
-Pandastack's `using-pandastack` skill supports a private overlay that adds personal vault paths, private skill triggers, and active experiment windows. To enable:
+Recommended Marketplace Plugin:
 
 ```bash
-export PANDASTACK_OVERLAY=$HOME/.agents/overlays/using-pandastack.md
+codex plugin marketplace add panda850819/verbs --json
+codex plugin add verbs@verbs --json
 ```
 
-The SessionStart hook appends the overlay file to the public contract. If the overlay is missing, the public contract still works on its own.
+It registers SessionStart dispatch, the Bash PreToolUse destructive guard, and
+the Stop verification gate.
 
-## Verify
+Local checkout for development:
 
 ```bash
-ls -la ~/.codex/skills/pandastack
-codex exec --skip-git-repo-check 'List the pandastack skills you can see.'
+cd /absolute/path/to/verbs
+codex plugin marketplace add "$PWD" --json
+codex plugin add verbs@verbs --json
 ```
 
-You should see a symlink pointing to your pandastack skills directory, and Codex should enumerate 23 skills as `pandastack:<name>`.
-
-## Updating
+Restart Codex, then verify:
 
 ```bash
-cd ~/.codex/pandastack && git pull
+codex plugin list --json
+python3 scripts/verbs doctor --host codex --strict
+bash scripts/conformance-smoke.sh codex
 ```
 
-Skills update instantly through the symlink.
-
-## Uninstalling
+Portable, hook-free alternative:
 
 ```bash
-rm ~/.codex/skills/pandastack
+npx skills@latest add panda850819/verbs -a claude-code codex -g -y
 ```
 
-Optionally delete the clone: `rm -rf ~/.codex/pandastack`.
+The portable surface contains self-contained skills without marketplace
+metadata or hooks. Do not install both surfaces in one Codex profile.
 
-## Cross-CLI compatibility
-
-Pandastack is designed Claude-Code-first but the lifecycle skills are CLI-agnostic. Compatibility breakdown:
-
-- **Fully portable** (no CLI-specific tools): `careful`, `ship` (git / knowledge modes incl. decision-note variant), `review`, `checkpoint`, `write`, `grill`, `init`, `freeze`, `office-hours`, `dojo`, `sprint`, `boardroom`, `debug`, `ui`, `gatekeeper`
-- **Needs Codex tool mapping** (uses `Skill` / `Agent` / subagent dispatch): see `skills/meta/using-pandastack/references/codex-tools.md`
-- **Local-environment-bound** (depends on local CLIs): `qa` (npm `agent-browser`), `deepwiki` (curl + jq). These will fail with clear "command not found" errors if dependencies are missing — that's intentional, not a bug.
-
-Personal-tier skills (`bird`, `brief-morning`, `evening-distill`, `curate-feeds`) and Notion / Slack ops moved to the personal overlay (`~/.agents/skills/`) or to Claude.ai MCP servers in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
-
-If you want to use only the portable subset, you can symlink individual skill directories instead of the whole `skills/` folder.
+To migrate from `v4.0.0-rc.1`, follow the root guide's explicit
+uninstall/reinstall path. `0.6.0` sorts below the RC and cannot be installed as
+an ordinary upgrade. Do not use a bare skill-directory symlink as a substitute
+for either documented surface.

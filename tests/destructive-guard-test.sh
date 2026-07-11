@@ -11,18 +11,23 @@ set -uo pipefail
 GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-destructive-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
 pass=0 fail=0
+WANT_NOTICE='BLOCKED by Verbs destructive-guard:'
 
-# check <expect 0|2> <description> <command-string>
+# check <expect 0|2> <description> <command-string> [ENV=val]
 check() {
-  local expect="$1" desc="$2" cmd="$3" json got
+  local expect="$1" desc="$2" cmd="$3" envkv="${4:-}" json got notice
   json=$(printf '%s' "$cmd" | python3 -c 'import sys,json;print(json.dumps({"tool_name":"Bash","tool_input":{"command":sys.stdin.read()}}))')
-  printf '%s' "$json" | "$GUARD" >/dev/null 2>&1
+  if [ -n "$envkv" ]; then
+    notice=$(printf '%s' "$json" | env "$envkv" "$GUARD" 2>&1 >/dev/null)
+  else
+    notice=$(printf '%s' "$json" | "$GUARD" 2>&1 >/dev/null)
+  fi
   got=$?
-  if [ "$got" = "$expect" ]; then
+  if [ "$got" = "$expect" ] && { [ "$expect" != 2 ] || printf '%s' "$notice" | grep -qF "$WANT_NOTICE"; }; then
     pass=$((pass+1))
   else
     fail=$((fail+1))
-    printf 'FAIL  %-34s expected exit %s, got %s\n' "$desc" "$expect" "$got"
+    printf 'FAIL  %-34s expected exit %s with Verbs notice, got %s out=%s\n' "$desc" "$expect" "$got" "$notice"
   fi
 }
 
@@ -77,6 +82,19 @@ check 0 "rm -r dir has -f substr"    'rm -r ./build-final-output'
 
 # --- bypass still works ---
 check 0 "FORCE_OK trailing override" 'git push --force  # FORCE_OK'
+check 0 "VERBS_FORCE override" 'git push --force' 'VERBS_FORCE=1'
+check 0 "guard kill switch off" 'git push --force' 'VERBS_DESTRUCTIVE_GUARD=off'
+
+malformed_notice=$(printf 'NOT-JSON' | "$GUARD" 2>&1 >/dev/null)
+malformed_rc=$?
+if [ "$malformed_rc" = 0 ] && printf '%s' "$malformed_notice" | grep -qF \
+    '[verbs destructive-guard] unavailable: malformed PreToolUse input; allowing command.'; then
+  pass=$((pass+1))
+else
+  fail=$((fail+1))
+  printf 'FAIL  %-34s expected visible fail-open, got %s out=%s\n' \
+    "malformed hook payload" "$malformed_rc" "$malformed_notice"
+fi
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

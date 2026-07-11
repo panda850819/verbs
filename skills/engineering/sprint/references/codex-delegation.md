@@ -1,21 +1,22 @@
 # Sprint — Codex delegation (the batch loop)
 
-> Hand a sprint's mechanical build units to Codex, batch by batch, keeping planning + review + git on Claude. SYNCHRONOUS: it occupies the Claude turn polling for each result. This file owns the BATCHING LOOP + circuit breaker; the single-invocation mechanics (XML payload, verified `codex exec`, sandbox gate, result classification) live in `skills/engineering/handover/references/codex-invocation.md` — this loop calls that per batch. For a one-shot or ASYNC handover, use `/handover` directly. Ported from EveryInc Compound Engineering `ce-work-beta`.
+> Hand a sprint's mechanical build units to Codex, batch by batch, keeping planning + review + git in the source host. SYNCHRONOUS: it occupies the foreground turn while polling each result. This file owns the BATCHING LOOP + circuit breaker; the installed skill whose frontmatter `name` is `handover` owns the single-invocation mechanics (XML payload, verified `codex exec`, sandbox gate, result classification), and this loop invokes it per batch. For a one-shot or ASYNC handover, use `/handover` directly. Ported from EveryInc Compound Engineering `ce-work-beta`.
 
 ## Gate — explicit opt-in only
 
-Default: execute with FREE Claude subagents. Delegation is **never auto-triggered** — it turns on only when BOTH hold:
+Default: execute with the host's normal mechanism. Cross-runtime delegation is **never auto-triggered** — it turns on only when BOTH hold:
 
-1. The user passed `--delegate codex` explicitly. Delegation has side effects (spends ChatGPT quota, runs Codex in a sandbox, the orchestrator owns the git collection), so it is opt-in, not inferred. **≥3 mechanical units is an advisory threshold, not a trigger:** below 3 the per-batch orchestration overhead ~4-5k tokens isn't worth it, so don't even suggest the flag; at 3+ it is worth *surfacing* "this batch is delegation-sized — pass `--delegate codex` if you want Codex to take it." The switch is always the explicit flag.
+1. The user passed `--delegate codex` explicitly. Delegation runs a second runtime in a sandbox and leaves git collection with the source host, so it is opt-in, not inferred. **≥3 mechanical units is an advisory threshold, not a trigger:** below 3 the per-batch orchestration overhead is not worth it, so do not suggest the flag; at 3+ it is worth surfacing "this batch is delegation-sized — pass `--delegate codex` if you want Codex to take it." The switch is always the explicit flag.
 2. The input is a **plan file** (`docs/plans/{slug}.md`). NO plan → NO delegation: "Codex delegation needs a plan file — using standard mode." The plan's U-IDs + acceptance ARE the delegation payload.
-
-Cost note: codex runs on the ChatGPT subscription here (`~/.codex/auth.json`, no API key), so delegation is ~free at the margin. It is NOT the metered-API path the `prefer-cc-subagents` rule warns against. The reason to use it is conserving the Claude session + batch economics.
 
 ## Pre-delegation checks (run once, before the first batch)
 
-Run the `/handover` gate (platform / env-guard / availability / repo-root — see `skills/engineering/handover/SKILL.md`), plus:
+Run the gate from the installed skill whose frontmatter `name` is `handover`
+(platform / env-guard / availability / repo-root), plus:
 
-- **Clean-baseline preflight** before the first batch: `git diff --quiet HEAD`. This makes the scoped rollback in `codex-invocation.md` sufficient.
+- **Clean-baseline preflight** before the first batch: require
+  `git status --porcelain=v1 --untracked-files=all` to be empty. This proves
+  scoped rollback cannot erase pre-existing tracked or untracked work.
 - **Model anchor** — read `lib/model-anchors.md`, enforce its minimum Codex
   version, and select `handover.mechanical` by default. Select
   `handover.risky` only for a batch containing one of the shared risk classes.
@@ -26,7 +27,8 @@ Delegate units in batches of ~3-5. If the plan has more, split at phase boundari
 
 ## Per-batch loop
 
-For each batch, invoke Codex per `skills/engineering/handover/references/codex-invocation.md`:
+For each batch, invoke the installed `handover` skill's single-invocation
+contract:
 
 1. Build the XML payload + result schema for the batch's non-done U-IDs into a
    `mktemp -d` scratch dir, including the selected role, model, effort, minimum
@@ -39,8 +41,8 @@ The orchestrator does NOT re-run tests per batch (Codex runs + fixes its own ins
 
 ## Circuit breaker
 
-After 3 consecutive failed batches: set delegation off, finish remaining units in standard Claude mode. "Codex delegation disabled after 3 consecutive failures."
+After 3 consecutive failed batches: set delegation off, finish remaining units with the source host's normal mechanism. "Codex delegation disabled after 3 consecutive failures."
 
 ## Git ownership
 
-Codex never commits/pushes (enforced in the payload `<constraints>`). All git stays with the Claude orchestrator. Stage 4 review and Stage 5 ship always run on Claude, never delegated.
+Codex never commits or pushes (enforced in the payload `<constraints>`). All git stays with the source host. Stage 4 review and Stage 5 ship stay in the foreground, never delegated.

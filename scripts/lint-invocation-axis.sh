@@ -9,7 +9,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
 checked=0
 
-surface_json="$(python3 "$repo_root/scripts/pandastack" doctor --json)" || {
+surface_json="$(python3 "$repo_root/scripts/verbs" doctor --json)" || {
   echo "FAIL: doctor could not build the runtime surface"
   exit 1
 }

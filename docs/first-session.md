@@ -1,54 +1,56 @@
-# First session — a 15-minute guided run
+# First session — a 15-minute software-work walkthrough
 
-New to pandastack? Run this once. Assumes you've installed the plugin (README § Install) and you're in Claude Code (or Codex).
+New to Verbs? This 15-minute pass proves discovery, routing, and artifact
+creation. Finishing the resulting build may take a full sprint.
 
-## 0. Where you are (1 min)
+## 0. Where you are (2 min)
 
-Skills write into your **current directory** — any writable repo or vault, not only an Obsidian vault. Work dirs (`Inbox/`, `docs/briefs/` …) are created on first write; you don't pre-make them.
+Start in a writable software repository. Confirm the host sees the plugin:
 
-The one thing a flow skill needs is an **identity contract**: `~/.agents/AGENTS.md`, a project `./CLAUDE.md`, or `./AGENTS.md`. Have none? Run `/pandastack:init` inside a git repo to create a `CLAUDE.md`. A flow skill aborts only on (a) no contract, or (b) an unwritable cwd — everything else degrades with a one-line note.
+```bash
+python3 /absolute/path/to/verbs/scripts/verbs doctor --host claude --strict
+# Or replace claude with codex.
+```
 
-## 1. Bring a real problem to office hours (5 min)
+## 1. Drill a problem (7 min)
 
 `cd` into a repo or scratch dir, then:
 
 ```
-/office-hours --quick "<a real, specific problem you're chewing on>"
+/verbs:grill --brief "<a real problem you're working on>"
 ```
 
-Not a hypothetical — a real one. `office-hours` challenges your premise one question at a time, forces 2-3 named alternatives, and writes a brief to `docs/briefs/`. You walk in with a fuzzy idea and leave with a written brief. Read the brief it prints — that's the core loop.
+Bring a small real change, not a hypothetical. `grill --brief` challenges the
+premise one question at a time, names alternatives, and writes a brief plus an
+executable plan under `docs/`. Read both paths it prints.
 
-## 2. (optional) Execute the brief (5 min)
+## 2. Inspect the handoff (3 min)
 
-If the brief routes to build work, run the plan it named:
+The brief owns the reason and scope. The plan owns file-scoped tasks,
+dependencies, and runnable acceptance checks. If either artifact mixes those
+roles, fix it before execution.
 
-```
-/sprint --plan <the-slug-it-printed>
-```
+## 3. Choose the next verb (3 min)
 
-`sprint` runs a focused execution loop and ends in one of four terminal states: **SHIPPED / PAUSED / FAILED / ABORTED_BY_USER**. PAUSED is a legitimate stop, not a failure.
-
-## 3. (optional) Close a note (2 min)
-
-On a finished note in your vault:
+If the plan is ready for foreground execution:
 
 ```
-/ship knowledge <path>
+/verbs:sprint --plan <slug>
 ```
 
-This extracts any reusable learning and files it. It never writes to external systems.
+Use the slug printed by `grill --brief`. A sprint can take 1-2 hours and ends in
+`SHIPPED`, `PAUSED`, `FAILED`, or `ABORTED_BY_USER`. For at least three bounded
+mechanical units, `/verbs:handover <slug>` is the explicit delegated path.
 
-## What "done" looks like
+## What done looks like
 
-- **office-hours** → a brief file in `docs/briefs/` ending with a "Next skill (recommended)" line.
-- **sprint** → a printed terminal state (SHIPPED/PAUSED/FAILED/ABORTED_BY_USER), not a vibe.
-- Each run opens with a **capability-probe** block telling you what's available. Ext CLIs you haven't installed show as a one-line install hint, not an error.
-
-## If a skill aborts
-
-Only two things hard-stop a flow skill: **no identity contract** (run `/pandastack:init`) or an **unwritable cwd** (`cd` somewhere writable). Everything else degrades. See README § Install for the tier model.
+- `grill --brief` wrote a brief and executable plan with checkable acceptance.
+- `doctor --strict` confirmed the installed host matches the checkout.
+- You selected `sprint` or `handover`; the 15-minute walkthrough does not claim
+  that longer build work is already shipped.
 
 ## Next
 
-- README § Skills — the full catalog by bucket.
-- `RESOLVER.md` — "which skill for X" routing.
+- README § Skills — the 14-skill catalog.
+- `RESOLVER.md` — routing guide ("which skill for X?").
+- `INSTALL_FOR_AGENTS.md` — host install and migration truth.

@@ -1,4 +1,4 @@
-# pandastack Philosophy
+# Verbs Philosophy
 
 ## Core Belief
 
@@ -10,24 +10,30 @@ Each unit of engineering work should make subsequent units easier — not harder
 
 The intelligence lives in the model plus the skill's own lore, not in swappable
 persona agents. A skill is a short sequence of steps that frames the task, loads the
-relevant lore, and manages the learnings loop. There is no agent layer to swap —
-pandastack is skill-only.
+relevant lore, and manages the learnings loop. Verbs ships skills and thin host
+adapters. The recommended Marketplace Plugin registers only SessionStart
+dispatch, the Bash PreToolUse destructive guard, and the Stop verification
+gate. The portable skill surface is self-contained and hook-free. The host owns
+identity, brain or memory, scheduling, project truth, and global model routing.
 
 ### 2. Close the Loop
 
-```
-build → review → learn → apply
-  ↑                        ↓
-  └────────────────────────┘
-```
+`build → review → learning candidate → host decision`
 
-Every review searches past learnings. Every review can write new learnings.
-The system gets smarter with every cycle. This is the only feature that matters.
+Every review may search a project-provided learning path and surface a new
+candidate. The host owns persistence and reuse; the skill owns the evidence and
+candidate format.
 
-### 3. Zero Dependencies
+### 3. Markdown for Judgment, Scripts for Determinism
 
-Pure markdown. No compiled binaries, no runtime requirements, no build step.
-If you have Claude Code and git, pandastack works.
+Core skill behavior stays in readable markdown with no package build step.
+Small scripts are appropriate when parsing, validation, fetching, or formatting
+must be repeatable. Prefer standard-library implementations, keep helpers local
+to the capability they serve, and declare their runtime explicitly. A helper
+needed by one skill must not become an install prerequisite for every skill.
+The same source is verified as a Marketplace Plugin and as portable skills on
+Claude Code and Codex; Hermes supports selective manual import. One host profile
+uses one install surface.
 
 ### 4. Less Is More
 
@@ -59,9 +65,8 @@ assume the next stage has context it wasn't given.
 
 - **Inputs declared**: each skill declares what prior outputs it reads (e.g.,
   `/review` reads the brief's Problem + Success Metric + Scope).
-- **Model per pass**: when a skill runs multiple passes, hint which model
-  fits each pass (correctness→sonnet, architecture→opus). Don't pay Opus
-  tokens for mechanical work; don't starve synthesis with Haiku.
+- **Delegation per pass**: when a skill explicitly delegates, pin the verified
+  role anchor for that operation. Model choice outside that skill stays with the host.
 - **Gates standardized**: user-facing decisions use the four-option contract
   (approve / edit / reject / skip). See `lib/gate-contract.md`.
 
@@ -69,9 +74,9 @@ Without explicit contracts, quality degrades silently through the chain —
 later stages lose nuance from earlier ones (telephone effect) and budget
 gets misallocated across passes (model overbuild).
 
-## What pandastack Is Not
+## What Verbs Is Not
 
 - Not a replacement for thinking. It's a tool for structured thinking.
-- Not a fixed pipeline. Skills are composable. Use what you need.
-- Not a framework that locks you in. Every file is readable markdown.
-  Fork it, change it, delete what you don't need.
+- Not an agent runtime, identity layer, brain or memory, scheduler, project
+  source of truth, or global model router.
+- Not a fixed pipeline. Skills are composable and readable. Fork or delete what you do not need.

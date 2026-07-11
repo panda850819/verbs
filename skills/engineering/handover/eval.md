@@ -2,40 +2,42 @@
 type: skill-eval
 skill: handover
 bucket: engineering
-evaluated_skill_hash: 5c6dcff8ed377402a5bb7842e2566a5e70abdcc5
-evaluated_at: 2026-07-10
+evaluated_skill_hash: 133525a3a129c16e81a04ea35f91774c4fbd86bc
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — handover
 
-> 2026-07-09 re-validation (#170): the Boundary list shed its dead Hermes-era routing refs (`plan` / `writing-plans` / `subagent-driven-development` / `claude-code` / `opencode`), kept the raw-`codex exec` native competitor, and gained an `advisor` cross-reference (judgment IN vs build OUT). Axis evidence re-anchored; scores and verdict unchanged.
->
-> 2026-07-10 re-validation (#172): both sync and async paths now select a shared, transport-tested model anchor before mode dispatch and forbid inherited model, effort, and permission defaults. Async payloads carry a `<runtime>` block; direct-headless rechecks its minimum CLI on the execution machine, while Hermes fails loud unless its adapter proves it honored the whole block. The invocation reference was re-verified against Codex CLI 0.144.1.
+**Verdict: STRONG.** The hot Claude-only platform gate, seven-part preflight, pinned payload, and one-shot terminal classification now give sync and async handovers explicit ownership without invented cross-run state. Batch counter belongs only in sprint, not in handover's single result.
 
-**Verdict: SOLID.** Fail-closed 7-gate preflight plus a clean hot/cold split keep the body a pure orchestration layer; costs one point for restating the Codex-quota economics across three sections.
+Grounding sample: L91 — "Stop when that one-shot table returns its"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L59 — the seven-check "Gate (both modes)" runs before either mode; version and model anchor are explicit gates (L64-71) before the existing derive→payload→spawn→classify path. |
-| Description / invocation | pass | L4 — front-loads "Explicit Codex handover workflow", lists one trigger per branch (`/handover [slug]` L5, `--async` L6), and the NOT-clause (L7) fences plan-writing / ship / judgment-heavy work, cross-referencing `advisor` for the last. |
-| Completion criteria | pass | L112 — state-emission carries a checkable, exhaustive done-condition: "Done when EITHER the `delegated` event is appended OR `scripts/pandastack-state` is confirmed absent" with the `[ -x ]` test named and "never skip silently". |
-| Information hierarchy | pass | L69 — volatile model/effort/version/guard values live in `lib/model-anchors.md`; the XML payload, schema, sandbox gate, and classification table remain in `references/codex-invocation.md`. The body keeps selection and orchestration. |
-| Leading words | pass | L56 — "session occupancy, not cost" anchors the async/sync axis in one pretrained concept; L61 "already inside a sandbox… (delegation would recurse)" anchors the env/platform gate. |
-| Pruning | weak | L40 — the "separate Codex quota / not double-paying" economic point recurs at L44 ("rather spend Codex quota") and L56 ("session occupancy… same subscription either way"); one meaning, three touches, collapsible to a single anchor. |
-| Native parity | pass | L34 — names direct `codex exec` as the native competitor, while L59-103 gives the delta: version-gated anchor selection, verified payload, result schema, sandbox gate, and async fail-loud behavior. |
-| Granularity | pass | L68 — the cold split earns its load: the reference's own header shows both `/handover` (sync) and `/sprint --delegate codex` (batch loop) reach it, so the cut serves independent reach, not a single-use push. |
-| pandastack conformance | pass | L30 — de-personalized: "an explicit pandastack `/handover`", description "you" (L7), Boundaries "the orchestrator" (L112) are generic/redistributable; `name: handover` (L2) matches the folder and `references/codex-invocation.md` (~1K tokens, under the 5K hot threshold) resolves. |
+| Predictability | pass | L91 — every collected sync result flows through one referenced status table whose current actions are terminal and contain no undefined counter or persistent state. |
+| Description / invocation | weak | L6 — the hot description carries sync mechanics, async mechanics, seat restrictions, use cases, and four exclusions; keep the two mode triggers and seat guard, then move transport detail to the body. |
+| Completion criteria | pass | L92 — sync stops on an exhaustive one-shot `success`, `partial`, or `failed` result, while async separately ends after emitting its artifact and dispatch command. |
+| Information hierarchy | pass | L77 — command shape, payload schema, sandbox escalation, and classification remain in the branch-specific invocation reference instead of being duplicated in the main flow. |
+| Leading words | pass | L57 — "session occupancy" cleanly anchors the sync-versus-async distinction without conflating it with cost, model, or git ownership. |
+| Pruning | pass | L34 — the skill now keeps one consistent Routing Boundary; the unfinished-versus-finished distinction does not repeat after the preceding exclusion list already routes closing work to `ship`. |
+| Native parity | pass | L35 — raw `codex exec` is named as the nearest native path, and the payload contract, preflight, pinned model, sandbox gate, and terminal classification are the concrete delta. |
+| Granularity | pass | L57 — sync and async share plan resolution, model selection, and payload construction; one skill is justified because their only mode axis is whether this turn remains occupied. |
+| Verbs conformance | pass | L77 — required and advisory frontmatter match current behavior, both references resolve, the long body is earned by two modes plus seven safety gates, and the result classification is one-shot with no batch counter. |
 
 ## Why it's good
-The Gate (L59-71) is exhaustive — platform, recursion, availability, version, repo-root, plan, and model anchor — and each check fails closed. Anchor selection happens before mode dispatch, preventing sync and async runs from inheriting defaults. The async artifact carries the same role/model/effort in `<runtime>` and refuses an unproven Hermes adapter (L92-103). Reference extraction stays disciplined: volatile values live in `lib/model-anchors.md`, while brittle `codex exec` mechanics remain in the invocation reference.
+
+The workflow fails closed on platform, recursion, CLI, version, repo, plan, and model anchor before dispatch. Sync preserves a clean baseline and source-host git ownership through one terminal result. Async writes one self-contained handoff and never spawns Codex or touches git. Neither mode carries a batch counter; that belongs to sprint's loop semantics only.
 
 ## Top fixes
-1. L40 / L44 / L56 — collapse the three restatements of the Codex-quota economics into one anchored sentence; keep the L56 "session occupancy, not cost" framing and drop the repeats in Routing Boundary (L40) and When-to-use (L44).
-2. `references/codex-invocation.md:50` — the de-personalization missed the reference: it still reads "explicit one-time confirmation from Panda this session", contradicting SKILL.md L112's "the orchestrator". Same SSOT, one voice — sync the reference.
-3. L104-106 — the "this reduces to `status: in_progress, owner: codex`" gloss is explanatory sediment the appended event already implies; trim it so the State-emission section earns its ~20 lines.
+
+1. L92 — the result classification is one-shot: success, partial, or failed. No batch counter or retry logic lives here; per-batch attempts belong in sprint's delegation loop, not in the single handover invocation.
+2. L34 — collapse the unfinished-versus-finished explanation into the Routing Boundary so it has one source of truth without duplication.
 
 ## Behavioral cases
-- trigger `/handover pro-31` (plan with ≥3 rote, file-scoped build units) -> expected process: run the L59 gate, select and version-check the model anchor, derive non-passing U-IDs from acceptance checks (L83), build the XML payload, spawn the pinned `codex exec` call, classify the result, keep review/ship on Claude, then append the `delegated` state event (L107).
-- anti-trigger `ship this finished work / open the PR` -> should NOT fire; routes to `ship` (L34 excludes closing finished work, PR, publishing).
-- anti-trigger `give me a second opinion on this design fork` -> should NOT fire; routes to `advisor` (L35), which pulls judgment IN — handover sends build work OUT to Codex and never reasons on your behalf.
+
+- trigger `/handover checkout-cleanup` from Claude Code with at least three mechanical plan units → run all seven gates, require a clean baseline, derive unfinished units from acceptance checks, invoke pinned Codex, classify one terminal result, and let only the source host commit a completed batch.
+- trigger `/handover --async checkout-cleanup` → write one self-contained file under `docs/handoffs/`, print the version-checking direct dispatch command, and stop without spawning Codex or touching git.
+- trigger `/handover checkout-cleanup` from a Codex seat → no-op immediately to avoid recursive delegation.
+- anti-trigger `close this finished branch and open the PR` → should NOT fire; route to `ship`.
+- anti-trigger `decide whether we should rewrite this architecture` → should NOT fire; route judgment to `advisor`.

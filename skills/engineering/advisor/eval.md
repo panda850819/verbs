@@ -2,38 +2,42 @@
 type: skill-eval
 skill: advisor
 bucket: engineering
-evaluated_skill_hash: a1e0238cab55ca430be0ceaf69a1597f44f7736e
-evaluated_at: 2026-07-10
+evaluated_skill_hash: 8b07a04457472b640ad04ab211ab95866c75f3ec
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — advisor
 
-**Verdict: STRONG.** A 93-line, opinionated cross-model consult primitive whose load-bearing assets are a fail-loud guard and explicit, transport-tested model anchors. It probes every transport required by the selected mode, never inherits runtime model or permission defaults, and ends both default and panel paths on checkable handoff artifacts.
+**Verdict: STRONG.** Seat-filtered role selection, pinned transports, fail-loud decorrelation, and exact four-option decision gates now make both consult modes deterministic without granting the outside model execution authority.
+
+Grounding sample: L99 — "use the exact per-finding gate from"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L38-47 — Step 0 seat-locate is a deterministic env check (`CLAUDECODE=1` → Claude seat, else Codex seat), Step 1 is a deterministic `command -v` gate; the direction is derived, never hardcoded, so every run takes the same shape regardless of which runtime invokes it. |
-| Description / invocation | pass | L4 — front-loads the load-bearing-judgment trigger ("design fork", "a plan before you commit", "second opinion", "red-team this", "多角度審") and reciprocates boundaries: NOT code-diff review (`review`), NOT sending build work out (`handover`), NOT self-interview (`grill`). |
-| Completion criteria | pass | L77 — the default path is done only when the outside view is returned as outside-voice and remains unincorporated; the panel path separately stops after the gated list (L93). |
-| Information hierarchy | pass | L26 — the Routing Boundary and four numbered steps stay hot; volatile model, effort, version, and guard choices live in `lib/model-anchors.md` (L65-67), while per-finding mechanics remain behind `lib/gate-contract.md` (L91). |
-| Leading words | pass | L47 — strong coined anchors carry the behaviour: "fail loud, never silently self-review", "judgment stays local, NOT self-reviewed", "A self-issued second opinion is not a second opinion", "Cross-model is the point" (L64), and "Keep every lone-critic finding" (L68). |
-| Pruning | pass | whole file — 93 lines, above the ~80 guideline; the extra lines earn their load by checking the complete mode-specific role set plus fail-loud version and permission guards while volatile values stay in one shared reference. |
-| Native parity | pass | L47 — names the native competitor directly: the model answering the judgment itself, or spawning a same-model critic. The delta is cross-MODEL decorrelation, and the skill refuses the native fallback loudly ("do not fake decorrelation by asking the same model") instead of silently degrading to it. |
-| Granularity | pass | L51/L60 — the default single-consult vs `--panel` blind-critique split earns its load: one is a narrow read for a fork, the other a decorrelated panel for an expensive-if-wrong plan; the panel is explicitly frequency-gated, not a gratuitous mode. |
-| pandastack conformance | pass | frontmatter — `name` = folder (`advisor`), required fields present (`name`/`description`/`user-invocable: false`); the `lib/gate-contract.md` pointer resolves repo-root (same as `review`); advisory `reads`/`writes`/`forbids`/`domain` declared; paired with `handover` as inbound/outbound halves without overlapping its exec role. |
+| Predictability | pass | L52 — panel roles are selected from an explicit seat-specific pair before probing, so every run has a fixed opposite-family composition instead of a generic provider mix. |
+| Description / invocation | weak | L7 — the hot description repeats load-bearing examples, provider-selection rationale, three trigger synonyms, and four anti-routes in one line; keep the two branches and anti-routes, but move selection rationale to the body. |
+| Completion criteria | pass | L81 — the default branch ends only when an outside voice is returned unincorporated and decision ownership remains with the caller; the panel has its own explicit terminal list. |
+| Information hierarchy | pass | L57 — volatile role, model, effort, minimum-version, and guard values remain in the shared anchor file while the skill owns selection and failure behavior. |
+| Leading words | pass | L61 — "self-issued second opinion" compresses the core false-decorrelation failure into a memorable execution guard. |
+| Pruning | pass | L51 — the default and panel branches are cleanly separated with a completion criterion for each, and the hot description now correctly states the exact two-role seat-filtered composition. |
+| Native parity | pass | L61 — same-model self-review is named as the nearest default behavior, and the skill's delta is a pinned different-family transport that refuses silent fallback. |
+| Granularity | pass | L86 — the panel stays inside the consult skill because it shares transport and caller-owned decisions, while the expensive-if-wrong threshold prevents a routine second workflow. |
+| Verbs conformance | pass | L100 — the current gate reference resolves to lib/gate-contract.md with its exact `approve / edit / reject / skip` options; all seat-filtered role keys also exist in the current anchor table. |
 
 ## Why it's good
-The asset is the anti-fake-decorrelation guard. The failure mode a cross-model consult must never hit is "the binary wasn't reachable so I quietly asked the same model and called it a second opinion" — that produces false confidence, the worst outcome. The skill hard-stops on that (L48), and an anchored-call failure cannot retry through an unpinned default (L50-52). Zero-config seat detection (L41) means the same skill works from either runtime without a mode flag, while `lib/model-anchors.md` keeps transport-tested model choices out of the skill body. `--panel` retains mutual blindness, lone findings, and per-finding gates while adding cross-model decorrelation.
+
+The default branch locates the seat, pins the opposite-family role, probes the transport, and returns a read-only outside view. The panel preserves family separation for both seats, keeps critics blind, retains lone findings, and leaves every application decision with the caller through the shared four-option gate contract.
 
 ## Top fixes
-1. L4-7 — the model-facing description remains dense; a future pruning pass could shorten examples without weakening the trigger boundary.
-2. L48-57 — minimum-version parsing is described as a process rather than a shared shell helper; extract one only if multiple real hosts mis-parse versions.
-3. L86-88 — panel composition now has explicit role keys; keep it at three roles unless observed usage proves another critic earns the cost.
+
+1. L100 — the gate now uses the exact `approve / edit / reject / skip` contract from lib/gate-contract.md, making all finding decisions explicit and reversible.
+2. L52 — seat-filtered role composition guarantees that Claude seats consult OpenAI and Codex seats consult Anthropic, eliminating guesswork and self-review.
 
 ## Behavioral cases
-- trigger `I'm about to commit to this schema design — am I sure?` -> expected process: recognise a load-bearing, expensive-if-wrong fork -> Step 0 locate seat (`CLAUDECODE=1` → Claude) -> Step 1 `command -v codex` -> Step 2 load `advisor.openai`, invoke a narrow pinned `codex exec` call with the fork + minimal context -> return the outside view as outside-voice, caller decides; never auto-incorporate.
-- trigger `red-team this replatform plan before I start` -> expected process: expensive-if-wrong plan -> Step 3 `--panel` with `advisor.panel.fast` + `advisor.openai` + optional `advisor.panel.deep`, distinct lenses, keep every lone finding, per-finding gate; stop after the gated list.
-- anti-trigger `review my branch before the PR` -> should NOT fire (routes to `review`, code-diff review; advisor is judgment consult, not diff review).
-- anti-trigger `finish building these three files` -> should NOT fire (routes to `handover`, which sends mechanical build work OUT to Codex; advisor pulls judgment IN, never executes).
-- degrade case `Codex seat, claude not on PATH` -> Step 1 prints `ADVISOR: no cross-model binary on PATH (claude) — judgment stays local, NOT self-reviewed` and stops; does not ask GPT to critique its own output.
+
+- trigger `get a second opinion on this irreversible schema fork` → detect the seat, select the pinned opposite-family default role, probe its CLI, return one outside voice, and leave incorporation to the caller.
+- trigger `--panel on this prepared migration plan` from a Claude seat → run the two OpenAI roles with distinct lenses; from a Codex seat, run the two Anthropic roles; gate every deduplicated finding with `approve / edit / reject / skip`.
+- anti-trigger `review this branch before the PR` → should NOT fire; route to `review`.
+- anti-trigger `finish these mechanical plan units` → should NOT fire; route execution-out work to `handover`.
+- degrade case `the opposite transport binary is missing` → print the documented failure banner, keep judgment local, and do not substitute the current model or an unpinned default.

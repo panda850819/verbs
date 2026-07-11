@@ -9,7 +9,7 @@ WORK=$(mktemp -d)
 trap '/bin/rm -rf "$WORK"' EXIT
 pass=0 fail=0
 
-WANT_REASON='[pandastack verify-gate] code changed this turn with no test or verify run — run the relevant check, or state the change is not yet verified.'
+WANT_REASON='[verbs verify-gate] code changed this turn with no test or verify run — run the relevant check, or state the change is not yet verified.'
 
 # Claude JSONL builders.
 u() { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
@@ -53,15 +53,15 @@ capp_out() {
 CODE_PATCH=$'*** Begin Patch\n*** Update File: app.py\n@@\n-old\n+new\n*** End Patch'
 DOC_PATCH=$'*** Begin Patch\n*** Update File: README.md\n@@\n-old\n+new\n*** End Patch'
 
-# run_gate <transcript> [stop_hook_active] [gate env] [turn id]
+# run_gate <transcript> [active] [canonical env] [turn] [panda legacy] [stack legacy]
 run_gate() {
-  local transcript="$1" active="${2:-false}" gate_env="${3:-}" turn_id="${4:-turn-current}" payload
+  local transcript="$1" active="${2:-false}" new_gate_env="${3:-}" turn_id="${4:-turn-current}" panda_gate_env="${5:-}" stack_gate_env="${6:-}" payload
+  local env_args=(-u VERBS_VERIFY_GATE -u PANDA_VERBS_VERIFY_GATE -u PANDASTACK_VERIFY_GATE)
   payload=$(python3 -c 'import json,sys; print(json.dumps({"session_id":"t","turn_id":sys.argv[3],"hook_event_name":"Stop","stop_hook_active":sys.argv[2]=="true","transcript_path":sys.argv[1],"cwd":"/tmp/proj"}))' "$transcript" "$active" "$turn_id")
-  if [ -n "$gate_env" ]; then
-    OUT=$(printf '%s' "$payload" | PANDASTACK_VERIFY_GATE="$gate_env" python3 "$GATE" 2>/dev/null)
-  else
-    OUT=$(printf '%s' "$payload" | env -u PANDASTACK_VERIFY_GATE python3 "$GATE" 2>/dev/null)
-  fi
+  [ -n "$new_gate_env" ] && env_args+=("VERBS_VERIFY_GATE=$new_gate_env")
+  [ -n "$panda_gate_env" ] && env_args+=("PANDA_VERBS_VERIFY_GATE=$panda_gate_env")
+  [ -n "$stack_gate_env" ] && env_args+=("PANDASTACK_VERIFY_GATE=$stack_gate_env")
+  OUT=$(printf '%s' "$payload" | env "${env_args[@]}" python3 "$GATE" 2>/dev/null)
   RC=$?
 }
 
@@ -213,7 +213,10 @@ run_gate "$T"; expect_block "Codex App outer cell success is not test evidence"
 # Soft gate, kill switch, malformed input, and pure Q&A remain fail-open.
 { u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; } > "$T"
 run_gate "$T" true; expect_allow "stop_hook_active soft pass"
-run_gate "$T" false off; expect_allow "kill switch off"
+run_gate "$T" false off; expect_allow "VERBS_VERIFY_GATE kill switch off"
+run_gate "$T" false "" turn-current off; expect_allow "PANDA_VERBS_VERIFY_GATE remains a 0.x fallback"
+run_gate "$T" false "" turn-current "" off; expect_allow "PANDASTACK_VERIFY_GATE remains a legacy fallback"
+run_gate "$T" false on turn-current off off; expect_block "VERBS_VERIFY_GATE wins over legacy env"
 run_gate "$WORK/missing.jsonl"; expect_allow "missing transcript fails open"
 printf 'NOT-JSON\n{broken\n' > "$T"
 run_gate "$T"; expect_allow "malformed transcript fails open"

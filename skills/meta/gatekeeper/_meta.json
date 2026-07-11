@@ -1,7 +1,7 @@
 {
   "name": "gatekeeper",
-  "version": "0.3.0",
-  "description": "Pre-adoption trust check for external artifacts before they touch your system: skill/MCP installs, GitHub repos, URLs/documents, on-chain addresses, DeFi protocol governance/admin risk, products/services, social shares. Triggers on /gatekeeper, /slowmist-agent-security (alias), \"is this safe to install\", \"check this repo\", \"看這個協議的中央化風險\".",
+  "version": "0.4.0",
+  "description": "Pre-adoption trust check for software artifacts before they touch your system:\nskill/MCP installs, GitHub repositories, URLs/documents, packages, APIs, SDKs,\nand software services. Triggers on /gatekeeper, /slowmist-agent-security\n(alias), \"is this safe to install\", \"check this repo\".",
   "author": "evilcos",
   "license": "MIT",
   "homepage": "https://github.com/slowmist/slowmist-agent-security",
@@ -10,13 +10,11 @@
     "security",
     "audit",
     "review",
-    "aml",
-    "blockchain",
     "skill-security",
     "prompt-injection",
     "social-engineering"
   ],
-  "categories": ["security", "blockchain", "audit"],
+  "categories": ["security", "audit"],
   "requires": {
     "bins": []
   },

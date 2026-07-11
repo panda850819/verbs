@@ -2,36 +2,42 @@
 type: skill-eval
 skill: review
 bucket: engineering
-evaluated_skill_hash: 774286f5d55c4bbf326f5802dd75ececff52dad1
-evaluated_at: 2026-07-09
+evaluated_skill_hash: f50e1cbfb4a7b120a5813343d67965290538e1b7
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — review
 
-**Verdict: SOLID.** A fixed, decorrelated review pipeline (Step 0 audit -> parallel lenses -> cold review -> cross-model Codex) now front-loaded by mandatory learning recall and closed with propose-only guard escalation for recurring/checkable bug classes; only Pruning (length + one soft step) still trails.
+**Verdict: SOLID.** A fixed audit, scoped parallel lenses, cold-context review, and an internal opposite-seat transport make the review process unusually resistant to confirmation bias; the main construction costs are its long hot body and an implicit native-parity claim.
+
+Grounding sample: L105 — "Verbs defines the three review lenses and their output contract"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L69 — the once-dead recall step ("measured: 0 fires across 375 sessions") is now "mandatory and must **change the review, not just list titles**"; with the L32 "Do not skip" opener and `{main}`/`{learnings_dir}` bound at L55, every run takes the same shape and conditional passes gate on deterministic `SCOPE_*` signals, not model whim. |
-| Description / invocation | pass | L4 — front-loads the "review"/"check my code"/"before creating a PR" triggers and reciprocates boundaries: NOT UI/browser (`qa`), plan critique (`boardroom`), or lightweight single-pass diff checks. |
-| Completion criteria | pass | L242 — "Before exiting, print a single ASCII box" forces per-step accounting (audit ran/skipped, P0-P3 counts, COLD/CODEX catches, OPEN_QUESTIONS, CRITICAL_GAPS); abort still prints the box with unrun steps marked `skipped (user)` (L265), and Step 2 now ends on a checkable criterion (`(no relevant prior learning)` vs a per-learning bearing line). |
-| Information hierarchy | pass | L62 — the recall mechanics are pushed behind the `lib/learning-recall.md` context pointer and resolved store-agnostically (gbrain filtered to `learnings/`, else ranked grep over `{learnings_dir}`), while Pass 4-8 catalogs stay cold behind `lib/conditional-passes.md` (L128, "Skip the file entirely when no scope signal fired") and rationalizations behind a pointer (L269). Steps hot, mechanics/catalogs cold. |
-| Leading words | pass | L119 — strong pretrained/coined anchors carry the behaviour: "Grounding requirement (anti-hallucination)", plus "AUTO-FIX \| ASK" (L134), "COLD-CATCH", "CROSS-MODEL CONFIRMED", "needs-trace", "Deep-module lens" (L126), and "Guard escalation (propose-only)" (L226); restatements collapse into merge tags instead of re-prose. |
-| Pruning | weak | L102 — "Model routing" stays soft ("the orchestrator judges which model fits", "decide by task nature at dispatch time") with no concrete anchor, the one near-no-op the prune left in; the body also runs 269 lines (~3x the ~80 guideline), so the axis is improved (recall mechanics moved to lib), not resolved. |
-| Native parity | weak | L170 — nearest native feature is a single in-context review pass or platform review command; the delta is cold-context plus cross-model decorrelation, but the skill does not name that native competitor directly. |
-| Granularity | pass | L168 — the Step 6 / Step 6.5 split earns its load: cold-context (same model, zero intent) and cross-model (GPT, different reasoning) are distinct decorrelation axes, and the `.5` numbering signals run-in-parallel-with-6, not a gratuitous sequence split. |
-| pandastack conformance | pass | L62 — the `../../../lib/learning-recall.md` pointer resolves (worktree-root `lib/`), as do the other refs (`conditional-passes`/`rationalizations` skill-local; `gate-contract`/`learning-format`/`trigger-first-skill-evolution` repo-root `lib/`); name=folder (`review`) and hot/cold honoured via `context: fork` (L100) / `isolation: "worktree"` (L146) dispatch. |
+| Predictability | pass | L102 — the skill fixes the parallel-review mechanism and gives every pass the same diff, so the process is stable even though findings vary. |
+| Description / invocation | pass | L4 — the description front-loads review triggers and excludes UI QA, prepared-plan critique, and lightweight checks. |
+| Completion criteria | pass | L229 — the mandatory completion box makes every stage, count, skipped gate, and open question observable before exit. |
+| Information hierarchy | pass | L130 — conditional lenses live behind a pointer and load only when a deterministic scope signal fires. |
+| Leading words | pass | L121 — “Grounding requirement” and `needs-trace` compress the security-review standard into memorable execution anchors. |
+| Pruning | weak | L121 — the attacker-control rule is load-bearing but occupies one very dense paragraph; the overall hot body remains far beyond the usual size budget. |
+| Native parity | weak | L146 — cold review clearly adds decorrelation, but the skill never names the nearest native single-pass review feature and states the earned delta only implicitly. |
+| Granularity | pass | L172 — cross-model review stays an internal parallel transport, preserving `review` as the one code-diff verb instead of leaking into `advisor`. |
+| Verbs conformance | weak | L256 — references resolve and heavy reads use isolated agents, but the 227-line body substantially exceeds the normal guideline without an explicit size justification. |
 
 ## Why it's good
-The decorrelation architecture is the asset: in-session passes, a zero-context cold reviewer, and a cross-model Codex pass each attack a different blind-spot class, and the merge tags (COLD-CATCH / CROSS-MODEL CONFIRMED / needs-trace) keep their signals separable instead of mushed. The Step 2 rewire is a real strengthening, not a defect: a step measured dead (0 fires / 375 sessions) is now a mandatory, store-agnostic recall that must change the plan or be explicitly dismissed, with confidence decay applied inline (L69). The Completion Summary box (L242), guard escalation clause (L226), and anti-hallucination grounding requirement (L119, named-and-traced exploit path plus the third `needs-trace` outcome) turn close-out from prose into checkable artifacts. Pass 3 now carries a concrete deep-module reflex (L126, refactor/replatform/keep-vs-rewrite-gated: name module depth and seam placement before endorsing a cut) instead of generic architecture bullets alone — a reflex-override anchored to a stated house-rule analog, not a fixed checklist.
+
+The skill attacks three distinct blind spots: in-context lens coverage, zero-intent cold review, and an opposite-seat model reached through a bounded internal transport. Its completion box prevents unavailable or skipped review paths from being silently reported as clean, while learning and skill-edit outputs remain candidates owned by the host.
 
 ## Top fixes
-1. L102 — give model-routing one concrete anchor (mechanical pattern pass -> cheaper model, architectural-reasoning pass -> reasoning model) so the line stops reading as "use judgment"; it is the softest line in the body and the only real no-op the slim missed.
-2. L4 — add the missing `verify` edge to the anti-trigger list ("NOT runtime-behavior verification (use `verify`)"); `qa` already draws the review/verify/qa triangle, so review should reciprocate the third edge it omits.
-3. L44/L89 — body still ~3x the 80-line guideline (269 lines); the next prune candidates are the inline report-bullet prose (L44-49) and per-step log lines that the L242 completion box already accounts for.
+
+1. L4 — state the native-parity delta directly: this workflow adds scoped parallel lenses, zero-context review, and opposite-seat adversarial review beyond a host's ordinary single-pass diff check.
+2. L121 — extract the full exploit-path decision tree behind a focused pointer while keeping the attacker-control and `needs-trace` gate inline.
+3. L172 — keep “internal transport, not advisor” as the single boundary statement and trim later merge prose that restates the same ownership split.
 
 ## Behavioral cases
-- trigger `review my branch before I open the PR` -> expected process: Step 0 system audit (5 cmds, no skip) -> Step 1 scope/diff (binds `{main}`/`{learnings_dir}`) -> Step 2 mandatory store-agnostic learnings recall that changes the review (or `(no relevant prior learning)`) -> Step 3 brief drift+coverage -> Step 4 detect `SCOPE_*` -> Step 5 parallel correctness/security/architecture (incl. the deep-module lens on refactor/replatform diffs) + conditional passes -> Step 6 cold review -> Step 6.5 Codex (or mark unavailable) -> Step 7 learnings + guard proposal when recurring/checkable -> Step 7.5 flaw routing -> Step 8 completion box; stops without pushing (`git push` / `gh pr create` forbidden, L16-18).
-- anti-trigger `QA this page / check the UI flow` -> should NOT fire (routes to `qa`, browser-based UI testing; review is code-diff only — stated at L4).
-- anti-trigger `poke holes in this plan / red-team this approach` -> should NOT fire (routes to `boardroom`, plan critique; review needs a diff, not a plan — stated at L4).
+
+- trigger `review my branch before I open a PR` → expected process: audit branch state, bind the full diff, inject relevant learnings, check brief coverage, run scoped parallel passes, run cold review and the internal opposite-seat transport, then emit candidates and the completion box.
+- trigger `review this auth diff` from a Codex seat → expected process: code-review ownership stays here; Step 6.5 uses the verified Claude transport from the sibling reference and treats its findings as outside voice requiring approval.
+- anti-trigger `QA this page in the browser` → should NOT fire; route to `qa`.
+- anti-trigger `red-team this prepared plan` → should NOT fire; route to `advisor --panel`.

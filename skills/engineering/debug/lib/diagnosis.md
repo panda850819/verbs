@@ -1,7 +1,7 @@
 # lib/diagnosis.md — debug detail (catalogs the SKILL.md points to)
 
-Loaded by `debug` when the cause is not obvious. SKILL.md carries the three reflex-overrides; this
-file is the reference: the few method-specifics worth consulting when stuck, plus the lore.
+Loaded by `debug` when the cause is not obvious. SKILL.md carries the momentum
+reflex overrides; this file holds the method-specifics worth consulting when stuck.
 
 ## Diagnosis discipline (reach here only when the obvious pass failed)
 
@@ -98,7 +98,7 @@ through the formatter before blaming the classifier.
   (`sectors` / `themes`); filter generic phrases out of concrete fields.
 - Smoke: a formatting test that asserts generic buckets do not render under concrete labels.
 
-### CLI archetypes (Panda's surface: Mole bash, bird/defuddle Node, gbrain, reporting bots)
+### CLI archetypes
 - **PATH / wrapper drift** — a tool resolves to a different binary under cron / a subshell / a stripped
   env than in your interactive shell. Symptom: "works when I run it, fails from the bot." Print
   `command -v <tool>` and the effective `PATH` from inside the failing context before blaming the tool.
@@ -113,6 +113,7 @@ through the formatter before blaming the classifier.
 
 ## Cross-references
 
-- `../../../lib/learning-format.md` — the `type: learning` / `type: pitfall` shape for the On-close gate.
-- `review` owns the build/deploy test-loop trust rules (`../review/lib/...` and the shared
-  `../../../lib/verify-the-test-loop.md`); debug owns the diagnosis method. No overlap: trust-the-loop vs find-the-cause.
+- `lib/learning-format.md` — the host-owned candidate/seen-again output
+  shape; debug never writes the store.
+- The shared `lib/verify-the-test-loop.md` owns build/deploy identity
+  trust; debug owns diagnosis. No overlap: trust-the-loop vs find-the-cause.

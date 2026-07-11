@@ -10,7 +10,6 @@ forbids:
   - cli: git push --force
   - cli: git reset --hard
   - cli: git clean -f
-  - cli: rm -rf
   - cli: npm publish
   - cli: cargo publish
 domain: shared
@@ -19,7 +18,8 @@ user-invocable: false
 ---
 # Careful Mode
 
-Adds a confirmation gate before destructive or high-risk actions.
+Ordinary model caution can still proceed without an answer. Careful blocks the
+listed destructive or high-risk action until explicit confirmation arrives.
 
 ## On Invoke
 
@@ -52,16 +52,10 @@ Before executing any of the following, pause and ask the user for explicit confi
 - DROP, TRUNCATE, DELETE without WHERE
 - Schema migrations on production
 
-### Verification integrity (@../../../lib/verify-the-test-loop.md)
-- Before asking a human to manually test a build, or claiming done based
-  on their manual test: prove the deployed artifact embeds the change
-  (content marker / source-not-newer / pinned path / stable identity).
-  Unproven ⇒ the bug is the pipeline; fix the loop, don't ask them to
-  re-test. ("BUILD SUCCEEDED" is not deploy-proof.)
-- Instrumentation you added not visible in their output ⇒ STOP, that is
-  a pipeline alarm, not a fluke.
-- 3 same-shape failures ⇒ switch abstraction / re-verify the loop, not a
-  4th variant of the same approach.
+### Verification integrity (@lib/verify-the-test-loop.md)
+- Before asking a human to test a build, or claiming done from that test, apply
+  the complete proof and stopping contract in `lib/verify-the-test-loop.md`.
+  An unproven artifact identity blocks the request and the completion claim.
 
 ## Confirmation Format
 
@@ -74,7 +68,7 @@ CAREFUL: About to {action}.
 
 ## Stopping discipline
 
-The destructive-action gates above are the *only* legit pauses. A stop-to-ask that is neither a gate nor a genuine external dependency (credentials / preference / judgment call) is a Lopopolo "continue" failure: context I should have pulled myself. Before any such stop, run the self-check, and log every genuine ask — see `skills/engineering/careful/lib/stopping-discipline.md`.
+The destructive-action gates above are the *only* automatic pauses. Before any other stop, run the self-check in `lib/stopping-discipline.md`. Ask only when credentials, a preference, or a judgment unavailable from project evidence changes the outcome.
 
 ## Deactivate
 
@@ -82,4 +76,4 @@ User says "careful off" or starts a new session. Announce: "CAREFUL mode OFF."
 
 ## Common Rationalizations
 
-Anti-bypass table tying each shortcut to the failure it causes: `@skills/engineering/careful/lib/rationalizations.md`.
+Anti-bypass table tying each shortcut to the failure it causes: `@lib/rationalizations.md`.

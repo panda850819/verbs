@@ -11,7 +11,7 @@ user-invocable: false
 ---
 # UI
 
-You know design. You lack the craft numbers (`skills/productivity/ui/references/craft.md`) and the will to
+You know design. You lack the craft numbers (`references/craft.md`) and the will to
 fight your own defaults. A CJK gut-feel complaint (很傻 / 突兀 / 丑 / 乱) is taste, not a bug — keep the
 word, name the defect, fix; do not send it to `debug`.
 
@@ -24,4 +24,4 @@ word, name the defect, fix; do not send it to `debug`.
   skips — 404, back-nav, form validation, skip-link, footer legal — are in `craft.md`.
 
 Everything else — fonts, CJK type, OKLCH, CSS bans, motion, spacing, content rules — is craft you cannot
-derive: `skills/productivity/ui/references/craft.md`. Read it before writing CSS, not after.
+derive: `references/craft.md`. Read it before writing CSS, not after.

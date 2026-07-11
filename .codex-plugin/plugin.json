@@ -1,39 +1,38 @@
 {
-  "name": "pandastack",
-  "version": "3.4.2",
-  "description": "Personal AI operator OS: skill-only stack with 14 skills organized into engineering / productivity / writing / meta buckets under skills/, tiered via manifest.toml. Covers dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop.",
+  "name": "verbs",
+  "version": "0.6.0",
+  "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills.",
   "author": {
     "name": "Panda Zeng",
     "url": "https://github.com/panda850819"
   },
-  "homepage": "https://github.com/panda850819/pandastack",
-  "repository": "https://github.com/panda850819/pandastack",
+  "homepage": "https://github.com/panda850819/verbs",
+  "repository": "https://github.com/panda850819/verbs",
   "license": "MIT",
   "keywords": [
-    "skills",
-    "workflows",
-    "lifecycle",
-    "personal-os",
+    "agent-skills",
+    "coding-agents",
+    "software-engineering",
     "review",
     "ship",
-    "learning-loop"
+    "debug"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Pandastack",
-    "shortDescription": "Personal AI operator OS for lifecycle workflows: dev, writing, knowledge.",
-    "longDescription": "Use Pandastack to guide work through dev, writing, and knowledge lifecycles with skills for careful gates, review, ship, knowledge extraction, parallel research, retros, and a self-evolving learning loop.",
+    "displayName": "Verbs",
+    "shortDescription": "Hard-won ways of working, encoded as composable skills for coding agents.",
+    "longDescription": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills. Marketplace Plugin is recommended for Claude Code and Codex; portable npx installs are hook-free. Hermes supports selective manual import. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
     "developerName": "Panda Zeng",
-    "category": "Personal OS",
+    "category": "Developer Tools",
     "capabilities": [
       "Interactive",
       "Read",
       "Write"
     ],
     "defaultPrompt": [
-      "I want to start a new feature.",
-      "Let's review and ship this branch.",
-      "Help me close out this knowledge note."
+      "Help me clarify and plan this change.",
+      "Review and ship this branch with evidence.",
+      "Find the root cause before changing the code."
     ]
   }
 }

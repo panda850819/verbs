@@ -9,12 +9,13 @@
 #   bash scripts/lint-eval-fresh.sh           # check every skill
 #   bash scripts/lint-eval-fresh.sh <name>    # check one skill (exit 0/1)
 #
-# Skills live at skills/<bucket>/<skill>/. Fix a failure with /skill-eval <name>.
+# Skills live at skills/<bucket>/<skill>/. Fix a failure with
+# /verbs:skill-creator --eval <name>.
 
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-skills_dir="${PANDASTACK_LINT_SKILLS_DIR:-$repo_root/skills}"
+skills_dir="${VERBS_LINT_SKILLS_DIR:-${PANDA_VERBS_LINT_SKILLS_DIR:-$repo_root/skills}}"
 only="${1:-}"
 scorecard="$repo_root/skills/meta/writing-great-skills/SKILL.md"
 scorecard_version="$(sed -n 's/^version:[[:space:]]*//p' "$scorecard" | head -1 | tr -d '"[:space:]')"
@@ -33,19 +34,6 @@ allowlisted=0
 allowlist_summary=""
 
 verdict_allowlist_reason() {
-  case "$1" in
-    skills/engineering/deepwiki)
-      # Allowlist expires 2026-07-10; deepwiki must be re-evaluated after fixes in
-      # eval.md top-fixes (L158/L178 dedup, L168 phase fold, L124/L150 lib move)
-      local today="$(date +%Y-%m-%d)"
-      if [ "$today" \< "2026-07-10" ]; then
-        echo "WEAK eval allowlist expires 2026-07-10; re-evaluate after applying top-fixes"
-        return 0
-      else
-        return 1
-      fi
-      ;;
-  esac
   return 1
 }
 
@@ -76,7 +64,7 @@ while IFS= read -r skdir; do
   esac
 
   if [ ! -f "$eval_md" ]; then
-    echo "FAIL: $rel/ has no eval.md  (run: /skill-eval $name)"
+    echo "FAIL: $rel/ has no eval.md  (run: /verbs:skill-creator --eval $name)"
     fail=1
     continue
   fi
@@ -90,7 +78,7 @@ while IFS= read -r skdir; do
     echo "FAIL: $rel/eval.md missing evaluated_skill_hash"
     fail=1
   elif [ "$current" != "$recorded" ]; then
-    echo "FAIL: $rel/ eval is stale — SKILL.md changed since eval (run: /skill-eval $name)"
+    echo "FAIL: $rel/ eval is stale — SKILL.md changed since eval (run: /verbs:skill-creator --eval $name)"
     echo "       SKILL.md=$current  eval=$recorded"
     fail=1
   fi
@@ -127,6 +115,19 @@ while IFS= read -r skdir; do
     done <<< "$axis_fails"
   fi
 
+  axis_weak_or_fail_count="$(
+    awk -F '|' '
+      $0 ~ /^\|/ {
+        gsub(/^[ \t]+|[ \t]+$/, "", $3)
+        if ($3 == "weak" || $3 == "fail") count++
+      }
+      END { print count + 0 }
+    ' "$eval_md"
+  )"
+  if [ "$axis_weak_or_fail_count" -eq 0 ]; then
+    allowlist_or_fail "$rel" "has an all-pass scorecard — cite at least one honest weak or failing axis"
+  fi
+
   for axis in "${scorecard_axes[@]}"; do
     if ! grep -Fq "| $axis |" "$eval_md"; then
       echo "FAIL: $rel/eval.md missing scorecard axis: $axis"
@@ -140,7 +141,7 @@ if [ -n "$only" ] && [ "$checked" -eq 0 ]; then
   exit 1
 fi
 
-# A skills dir that resolves to zero skills (typo'd PANDASTACK_LINT_SKILLS_DIR,
+# A skills dir that resolves to zero skills (typo'd VERBS_LINT_SKILLS_DIR,
 # deleted fixture) must never produce a green gate.
 if [ "$checked" -eq 0 ]; then
   echo "FAIL: no skills found under $skills_dir — refusing to pass an empty gate"

@@ -20,7 +20,7 @@ If you can't identify the spine, stop and ask: "What's the ONE thing holding thi
 
 | Pattern | Rating | Example |
 |---|---|---|
-| Number-first hook | Best for Panda | "53 個 AI 技能、11 個 CLI 工具" |
+| Number-first hook | Strong when the source has real numbers | "53 skills, 11 tools" |
 | Thesis-first (先講結論) | Strong | "先講結論：越懶的人越能發揮出 AI 真正的價值。" |
 | Scene/anecdote | OK if short | "昨天半夜兩點我發現..." (max 2 sentences) |
 | Generic topic intro | REJECT | "在 AI 快速發展的今天..." |
@@ -53,7 +53,7 @@ For long-form pieces (>500 words) and X long posts (>200 words), every major sec
 
 Missing 2+ quadrants → piece reads like commentary, not operator's log. Flag to user with which quadrant(s) are missing and suggest fix direction. Do NOT auto-fill quadrants with generic content.
 
-**Short pieces exemption**: Skip this check for posts under 200 words. Short-form is Panda's natural voice main stage — forcing four quadrants makes it read like a KOL template.
+**Short pieces exemption**: Skip this check for posts under 200 words. Forcing four quadrants into short-form creates a template-shaped result.
 
 ## Source
 

@@ -42,7 +42,7 @@ printf 'details\n' >"$reads_clean/skills/engineering/demo/lib/detail.md"
 write_skill "$reads_clean" engineering demo "---
 name: demo
 reads:
-  - repo: skills/engineering/demo/lib/detail.md
+  - skill: lib/detail.md
 ---
 # Demo
 Load \`lib/detail.md\`."
@@ -59,6 +59,56 @@ reads:
 # Demo
 Load \`lib/detail.md\`."
 fail_case reads-drift python3 scripts/lint-reads-block.py "$reads_drift"
+
+reads_root_fallback="$tmp/reads-root-fallback"
+mkdir -p "$reads_root_fallback/lib"
+printf 'root-only details\n' >"$reads_root_fallback/lib/detail.md"
+write_skill "$reads_root_fallback" engineering demo "---
+name: demo
+reads:
+  - repo: lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case reads-root-fallback \
+  python3 scripts/lint-reads-block.py "$reads_root_fallback"
+
+reads_escape="$tmp/reads-escape"
+write_skill "$reads_escape" engineering demo "---
+name: demo
+reads:
+  - skill: ../lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case reads-escape python3 scripts/lint-reads-block.py "$reads_escape"
+
+reads_body_escape="$tmp/reads-body-escape"
+mkdir -p "$reads_body_escape/skills/engineering/lib"
+printf 'outside skill\n' >"$reads_body_escape/skills/engineering/lib/detail.md"
+write_skill "$reads_body_escape" engineering demo "---
+name: demo
+reads:
+  - repo: skills/engineering/lib/detail.md
+---
+# Demo
+Load \`../lib/detail.md\`."
+fail_case reads-body-escape \
+  python3 scripts/lint-reads-block.py "$reads_body_escape"
+
+reads_symlink="$tmp/reads-symlink"
+mkdir -p "$reads_symlink/skills/engineering/demo/lib"
+printf 'outside\n' >"$reads_symlink/outside.md"
+ln -s "$reads_symlink/outside.md" \
+  "$reads_symlink/skills/engineering/demo/lib/detail.md"
+write_skill "$reads_symlink" engineering demo "---
+name: demo
+reads:
+  - skill: lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case reads-symlink python3 scripts/lint-reads-block.py "$reads_symlink"
 
 meta_clean="$tmp/meta-clean"
 write_skill "$meta_clean" meta demo "---
@@ -87,50 +137,56 @@ name: real
 # Real"
 write_skill "$refs_clean" meta demo "---
 name: demo
+reads:
+  - skill: real
 ---
 # Demo
-Use \`pandastack:real\` and \`/real\`."
+Use \`verbs:real\` and \`/real\`."
 pass_case refs-clean python3 scripts/lint-refs-resolve.py "$refs_clean"
 
 refs_drift="$tmp/refs-drift"
 write_skill "$refs_drift" meta demo "---
 name: demo
+reads:
+  - skill: ghost
 ---
 # Demo
-Use \`pandastack:ghost\` and \`/ghost-command\`."
+Use \`verbs:ghost\` and \`/ghost-command\`."
 fail_case refs-drift python3 scripts/lint-refs-resolve.py "$refs_drift"
 
-# gbrain refs must be gated even with the pack absent (the CI condition):
-# resolution runs against the checked-in scripts/gbrain-skills.list snapshot.
-gbrain_clean="$tmp/gbrain-clean"
-mkdir -p "$gbrain_clean/scripts"
-printf 'query\n' >"$gbrain_clean/scripts/gbrain-skills.list"
-write_skill "$gbrain_clean" meta demo "---
+refs_root_fallback="$tmp/refs-root-fallback"
+mkdir -p "$refs_root_fallback/lib"
+printf 'root-only details\n' >"$refs_root_fallback/lib/detail.md"
+write_skill "$refs_root_fallback" meta demo "---
 name: demo
+reads:
+  - skill: lib/detail.md
 ---
 # Demo
-Use \`gbrain:query\`."
-pass_case gbrain-clean env PANDASTACK_GBRAIN_SKILLS="$tmp/absent-pack" python3 scripts/lint-refs-resolve.py "$gbrain_clean"
+Load \`lib/detail.md\`."
+fail_case refs-root-fallback \
+  python3 scripts/lint-refs-resolve.py "$refs_root_fallback"
 
-gbrain_drift="$tmp/gbrain-drift"
-mkdir -p "$gbrain_drift/scripts"
-printf 'query\n' >"$gbrain_drift/scripts/gbrain-skills.list"
-write_skill "$gbrain_drift" meta demo "---
+refs_escape="$tmp/refs-escape"
+write_skill "$refs_escape" meta demo "---
 name: demo
----
-# Demo
-Use \`gbrain:ghost\`."
-fail_case gbrain-drift env PANDASTACK_GBRAIN_SKILLS="$tmp/absent-pack" python3 scripts/lint-refs-resolve.py "$gbrain_drift"
-
-# and when the pack IS present, a stale snapshot entry must fail (freshness).
-gbrain_stale="$tmp/gbrain-stale"
-mkdir -p "$gbrain_stale/scripts" "$tmp/mini-pack/query"
-printf 'query\nghost-skill\n' >"$gbrain_stale/scripts/gbrain-skills.list"
-write_skill "$gbrain_stale" meta demo "---
-name: demo
+reads:
+  - skill: ../lib/detail.md
 ---
 # Demo"
-fail_case gbrain-stale env PANDASTACK_GBRAIN_SKILLS="$tmp/mini-pack" python3 scripts/lint-refs-resolve.py "$gbrain_stale"
+fail_case refs-escape python3 scripts/lint-refs-resolve.py "$refs_escape"
+
+refs_symlink="$tmp/refs-symlink"
+mkdir -p "$refs_symlink/skills/meta/demo/lib"
+printf 'outside\n' >"$refs_symlink/outside.md"
+ln -s "$refs_symlink/outside.md" "$refs_symlink/skills/meta/demo/lib/detail.md"
+write_skill "$refs_symlink" meta demo "---
+name: demo
+reads:
+  - skill: lib/detail.md
+---
+# Demo"
+fail_case refs-symlink python3 scripts/lint-refs-resolve.py "$refs_symlink"
 
 quotes_clean="$tmp/quotes-clean"
 write_skill "$quotes_clean" meta demo "---
@@ -143,7 +199,7 @@ cat >"$quotes_clean/skills/meta/demo/eval.md" <<'EOF'
 type: skill-eval
 skill: demo
 ---
-Evidence quote L5: "This exact current sentence is present."
+Grounding sample: L5 — "This exact current sentence is present."
 EOF
 pass_case quotes-clean python3 scripts/lint-eval-quotes.py "$quotes_clean"
 
@@ -158,9 +214,24 @@ cat >"$quotes_drift/skills/meta/demo/eval.md" <<'EOF'
 type: skill-eval
 skill: demo
 ---
-Evidence quote L5: "This stale quoted sentence is absent."
+Grounding sample: L5 — "This stale quoted sentence is absent."
 EOF
 fail_case quotes-drift python3 scripts/lint-eval-quotes.py "$quotes_drift"
+
+quotes_missing="$tmp/quotes-missing"
+write_skill "$quotes_missing" meta demo "---
+name: demo
+---
+# Demo
+This exact current sentence is present."
+cat >"$quotes_missing/skills/meta/demo/eval.md" <<'EOF'
+---
+type: skill-eval
+skill: demo
+---
+No grounding sample is present.
+EOF
+fail_case quotes-missing python3 scripts/lint-eval-quotes.py "$quotes_missing"
 
 if [ "$fail" -ne 0 ]; then
   echo "lint-blind-classes-test: one or more seeded checks failed"

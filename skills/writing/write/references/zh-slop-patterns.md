@@ -24,7 +24,7 @@
 | Rule-of-three | "更快、更高、更強" pattern everywhere | Break the rhythm, use 1 or 2 |
 | Synonym cycling | Rotating "重要/關鍵/核心/至關重要" | Pick one, don't repeat the point |
 | False scope | "從X到Y，從A到B" | Just state the scope directly |
-| Dash / em dash | "AI——這個時代的..." / "X — Y" | **Banned.** Replace with comma, period, or line break. Panda never uses em dashes. |
+| Dash / em dash | "AI——這個時代的..." / "X — Y" | Flag when the resolved profile bans it; otherwise check whether punctuation obscures the sentence. |
 | Bold overuse | Every key term bolded | Bold only 1-2 per section max |
 | Inline headers as emphasis | "**核心觀點：**" mid-paragraph | Restructure into actual sections or remove |
 

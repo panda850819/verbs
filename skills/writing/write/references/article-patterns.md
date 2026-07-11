@@ -1,6 +1,6 @@
 # Article Patterns Library
 
-> Extracted from articles Panda admires. Use as structure references during sparring/structuring.
+> Extracted technique library. Use as structure references during sparring and structuring; do not treat any entry as the current author's identity.
 
 ## Chase Wang - AI is Here. And Who Am I Now?
 
@@ -330,7 +330,7 @@ The blog is a living document of intellectual growth:
 
 ### How to Use This Profile
 
-**For sparring/structuring Panda's articles:**
+**For sparring/structuring articles:**
 - Does the piece open with its conclusion? (Alan's 先講結論 pattern)
 - Is there a single framework holding the piece together?
 - Are there specific numbers/data as evidence, not just opinions?
@@ -345,65 +345,5 @@ The blog is a living document of intellectual growth:
 - Any conclusion that restates the intro needs a twist or new insight
 
 **When to reference:** Use "Alan Chan style" when writing startup reflections, learning methodology articles, product vision pieces, or personal growth essays. Especially relevant for pieces that need intellectual framework + personal honesty.
-
----
-
-## Panda - 回顧式月報 (很忙，但好像什麼都還沒做)
-
-- **Source**: Blog/monthly/ (2026-04)
-- **Type**: Personal retrospective / monthly review with narrative flow
-
-### Techniques
-
-1. **Narrative flow over section isolation**: Sections exist but connect to each other through transitional sentences ("做完 X 之後，我開始想 Y"). No `---` horizontal rules. Each topic leads naturally to the next, like someone sitting down and thinking back through the month.
-2. **One topic per paragraph**: Never cram multiple subjects into one paragraph. When the subject shifts (even slightly), start a new paragraph. Dense paragraphs kill the retrospective rhythm.
-3. **Numbers embedded in story, not tables**: Instead of markdown tables, weave data into narrative prose. "94 個 skills 砍到 83 個再砍到 23 個" reads better than a table. Reserve tables only for data that truly needs comparison.
-4. **Dates as texture, not timestamps**: Use "二月中", "三月初", "某天凌晨" instead of "2/13", "3/25". The retrospective voice remembers feelings and sequences, not exact dates.
-5. **Title as closing line**: The title restates as the final sentence (as a blockquote), creating a circular structure. No additional conclusion needed. The reflection sections before it do the emotional work.
-6. **Honest self-diagnosis in the final section**: The last major section before closing isn't a to-do list but a genuine examination of underlying patterns and anxieties. Frame it as discovery, not confession.
-7. **生活 section with personal voice**: Life events told as bullet-point anecdotes with personality (parenthetical asides, humor). Not a flat timeline but small stories.
-8. **有趣的事與物 as curated appendix**: A pseudoyu-inspired section at the very end, organized by category (文章/工具/影片/Crypto/值得關注的人), each item with a one-line reason why it's interesting. Functions as a newsletter appendix.
-9. **Data visualization cards**: Key data points (e.g., 954 notes vs 0 published, skill count reduction) rendered as dark-themed PNG cards for X/social sharing. Dramatic typography, before/after contrast.
-
-### Structure
-
-```
-1. Opening -- conversational re-entry, what happened in summary [Task: set the tone, show self-awareness]
-2. Project sections (2-3) -- narrative flow, each connecting to the next [Task: show what was built/explored]
-3. Knowledge/research section -- input volume vs output gap [Task: honest accounting]
-4. Work + trading (if applicable) -- brief, operational [Task: completeness without oversharing]
-5. 生活 -- personal anecdotes with voice [Task: remind reader a real person is writing]
-6. Reflection/next month -- self-diagnosis of underlying patterns [Task: depth, not planning]
-7. Title callback as closing line [Task: circular structure, emotional landing]
-8. 有趣的事與物 -- curated links appendix [Task: share value beyond the personal narrative]
-```
-
-### Key Structural Insight
-
-The piece is NOT a status report. It's a retrospective where the author discovers something about themselves through the act of reviewing. The structure moves from "what I did" (sections 1-5) to "what it means" (section 6) to "what I still don't know" (closing). The 有趣的事與物 appendix is deliberately placed AFTER the emotional close, functioning as a separate layer that doesn't dilute the reflection.
-
-### Anti-Patterns
-
-- No `---` horizontal rules between sections (they fragment the flow)
-- No markdown tables for data (embed in prose)
-- No "下個月要做的事" as numbered OKR list (fold into reflection)
-- No forced metaphors or analogies (if it doesn't come naturally, don't force it)
-- No AI-slop closings ("在這個快速變化的時代...")
-- No em dashes
-
-### Best For
-
-- Monthly/quarterly personal retrospectives
-- "What I shipped + what I learned" reviews
-- Pieces where the real insight is self-discovery, not project updates
-- When the author has data to share but the story matters more than the numbers
-
-### Pairing Notes
-
-- Combine with **Ping Chen techniques** for narrative flow: cross-domain one-liners, unresolved forks, physical/sensory grounding
-- Combine with **Alan Chan techniques** for framework-as-spine when one theme dominates the month
-- Data visualization cards (HTML → PNG) for social sharing of key metrics
-
----
 
 *Add new patterns below as articles are analyzed.*

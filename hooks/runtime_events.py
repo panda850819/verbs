@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Normalize Claude Code and Codex hook events into one small contract.
-
-The pure helpers are shared by the ticket PreToolUse guard and the Stop verify
-gate. The only CLI surface is ``ticket-gate``, used by the legacy shell hook
-path so existing plugin manifests do not need a command-path migration.
-"""
+"""Normalize Claude Code and Codex hook events for the Stop verify gate."""
 
 from dataclasses import dataclass
 import json
@@ -12,8 +7,6 @@ import os
 from pathlib import Path, PurePath
 import re
 import shlex
-import subprocess
-import sys
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 
@@ -54,7 +47,6 @@ LOCAL_COMMAND_PREFIXES = (
 )
 PATCH_PATH_RE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File:\s*(.+?)\s*$")
 PATCH_MOVE_RE = re.compile(r"^\*\*\* Move to:\s*(.+?)\s*$")
-ISSUE_BRANCH_RE = re.compile(r"(?:^|/)(?:[a-z][a-z0-9]*-[0-9]+|[0-9]+-)", re.I)
 EXIT_CODE_RE = re.compile(r"^Process exited with code\s+(-?\d+)\s*$", re.I | re.M)
 SESSION_ID_RES = (
     re.compile(r"Process running with session ID\s+(\d+)", re.I),
@@ -455,131 +447,3 @@ def current_turn_events(
     if any(entry.get("type") in {"turn_context", "response_item"} for entry in entries):
         return _codex_events(entries, hook_payload)
     return _claude_events(entries, hook_payload)
-
-
-def _inside(path: str, root: str) -> bool:
-    try:
-        return os.path.commonpath((path, root)) == root
-    except ValueError:
-        return False
-
-
-def _existing_parent(path: str) -> Path:
-    current = Path(path).parent
-    while not current.is_dir() and current != current.parent:
-        current = current.parent
-    return current
-
-
-def _git(directory: Path, *args: str) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(directory), *args],
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        text=True,
-        timeout=2,
-    )
-    return result.stdout.strip() if result.returncode == 0 else ""
-
-
-def _linked_worktree(directory: Path) -> bool:
-    git_dir = _git(directory, "rev-parse", "--absolute-git-dir")
-    common_dir = _git(directory, "rev-parse", "--path-format=absolute", "--git-common-dir")
-    if not common_dir:
-        raw_common = _git(directory, "rev-parse", "--git-common-dir")
-        if raw_common:
-            raw_path = Path(raw_common)
-            common_dir = str(
-                raw_path.resolve(strict=False) if raw_path.is_absolute()
-                else (directory / raw_path).resolve(strict=False)
-            )
-    if not git_dir or not common_dir:
-        return False
-    return Path(git_dir).resolve(strict=False) != Path(common_dir).resolve(strict=False)
-
-
-def ticket_gate(payload: Dict[str, Any], home: str) -> Tuple[bool, Optional[Dict[str, str]]]:
-    """Return (allow, first_violation) for an edit PreToolUse payload."""
-    intent = normalize_pretool(payload)
-    if intent["kind"] != "edit" or not intent["paths"]:
-        return True, None
-
-    exempt_roots = [
-        str(Path(home, "site/knowledge/brain").resolve(strict=False)),
-        str(Path(home, ".agents").resolve(strict=False)),
-        str(Path(home, ".claude").resolve(strict=False)),
-        str(Path(home, ".codex").resolve(strict=False)),
-    ]
-    for path in intent["paths"]:
-        if not is_code_path(path):
-            continue
-        absolute = str(Path(path).resolve(strict=False))
-        if any(_inside(absolute, root) for root in exempt_roots):
-            continue
-        directory = _existing_parent(absolute)
-        top = _git(directory, "rev-parse", "--show-toplevel")
-        if not top:
-            continue
-        branch = _git(directory, "rev-parse", "--abbrev-ref", "HEAD")
-        linked = _linked_worktree(directory)
-        if branch and branch != "HEAD" and ISSUE_BRANCH_RE.search(branch) and linked:
-            continue
-        return False, {
-            "file": absolute,
-            "branch": branch or "<unknown>",
-            "repo": top,
-            "linked": "yes" if linked else "no",
-        }
-    return True, None
-
-
-def ticket_gate_main() -> int:
-    if os.environ.get("PSTICKET_FORCE") == "1" or os.environ.get("PANDA_FORCE") == "1":
-        return 0
-    home = os.environ.get("HOME", "")
-    if not home:
-        return 0
-    try:
-        payload = json.loads(sys.stdin.read() or "{}")
-        if not isinstance(payload, dict):
-            return 0
-        allow, violation = ticket_gate(payload, home)
-    except Exception:
-        return 0
-    if allow or not violation:
-        return 0
-    print(
-        "BLOCKED by pandastack ticket-gate guard: code edit requires an "
-        "issue-keyed linked worktree.",
-        file=sys.stderr,
-    )
-    print(f"  file:   {violation['file']}", file=sys.stderr)
-    print(
-        f"  branch: {violation['branch']}   repo: {violation['repo']}   "
-        f"linked-worktree: {violation['linked']}",
-        file=sys.stderr,
-    )
-    print("Open a linked worktree first, e.g.:", file=sys.stderr)
-    print(
-        f"  git -C \"{violation['repo']}\" worktree add -b "
-        "feat/<key>-<slug> ../<key>-<slug> main",
-        file=sys.stderr,
-    )
-    print(
-        "Exempt: brain repo, ~/.agents|~/.claude|~/.codex. "
-        "Bypass: PSTICKET_FORCE=1.",
-        file=sys.stderr,
-    )
-    return 2
-
-
-def main(argv: Optional[Sequence[str]] = None) -> int:
-    args = list(argv if argv is not None else sys.argv[1:])
-    if args == ["ticket-gate"]:
-        return ticket_gate_main()
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

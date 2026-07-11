@@ -22,26 +22,6 @@
             "async": false
           }
         ]
-      },
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/pretooluse-skill-fired-log.sh\"",
-            "async": false
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write|MultiEdit|NotebookEdit|apply_patch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/pretooluse-ticket-gate-guard.sh\"",
-            "async": false
-          }
-        ]
       }
     ],
     "Stop": [

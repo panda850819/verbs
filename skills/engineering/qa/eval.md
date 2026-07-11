@@ -2,34 +2,42 @@
 type: skill-eval
 skill: qa
 bucket: engineering
-evaluated_skill_hash: a6e61a67e50823ca8eff972ad3b4e094ca440639
-evaluated_at: 2026-07-03
+evaluated_skill_hash: 6b5faa39bc0024c2b03af0dc33bac0c4c896d73d
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — qa
 
-**Verdict: SOLID.** A deterministic 5-step browser-QA pipeline with a clean model/user trigger split and a now-checkable close criterion; loses points only where Step 4's mechanical-bug example list duplicates the extracted bug-template routing.
+**Verdict: STRONG.** A measurable browser-QA pipeline now has direct main-agent browser checking as the explicit native baseline, exact Action field routing to a single SSOT, and an optional isolated-worker branch when suites exceed three test groups.
+
+Grounding sample: L46 — "Direct main-agent browser checking is the native baseline."
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L18 — same 3-round plan (Functional -> Adversarial -> Coverage) then Merge runs every time; `{learnings_dir}` is now bound once at L14 ("resolve... default `docs/learnings`") and reused at L98, so both intake and close are reproducible per project. |
-| Description / invocation | pass | L4 — front-loads "Browser-based QA"; model signal ("UI has changed") split from user phrasings ("test this", "QA", "check the page"); two anti-triggers route to `verify` / `review`; no body-identity restatement left. |
-| Completion criteria | pass | L98 — repaired Step 5 terminates only when a `type: pitfall` learning is written OR an explicit "no learning warranted" is recorded ("done only once one of the two is recorded"); Step 3 closes on the summary line (L86) plus STEP_PASS/FAIL/SKIP markers. |
-| Information hierarchy | pass | L79 — bug `[BUG]` template + screenshot path extracted to `skills/engineering/qa/lib/test-output-format.md`; the verification rigor ladder (L72-75) stays inline because it fires every run; progressive disclosure honored. |
-| Leading words | pass | L26 — pretrained anchors carry each branch (Functional / Adversarial / Coverage; Deterministic / Snapshot / Screenshot); no restatement sediment. |
-| Pruning | weak | L91 — the AUTO-FIX mechanical-bug example list ("CSS, missing null check, wrong URL") is duplicated verbatim inside `lib/test-output-format.md`'s `Action` routing line; the same enumeration lives in two places, so neither is the single source. |
-| Native parity | weak | L46 — nearest native feature is the main agent manually clicking through browser checks; the delta is isolated sub-agent browser sessions plus structured merge, but the skill never names that native baseline. |
-| Granularity | pass | L40 — Step 3's sub-sections (Parallel Execution, Assertion Protocol, Verification, Failure Output, Summary) are distinct mechanics, each earning its load; 5 steps map to a real pipeline with no over-split. |
-| pandastack conformance | pass | L79 — `name: qa` = folder; repo-root `lib/learning-format.md` is intentionally distinct from the explicit skill-local `skills/engineering/qa/lib/test-output-format.md`; all refs resolve, and the 102-line body is earned by browser-QA orchestration plus extracted failure-output detail. |
+| Predictability | pass | L62 — every executed test step must end in one of three structured markers, making pass, fail, and skip exhaustive and mergeable. |
+| Description / invocation | weak | L5 — "test this", "QA", and "check the page" are three phrasings for the same browser-QA branch; one representative trigger plus the two anti-routes would carry the same dispatch signal with less hot text. |
+| Completion criteria | pass | L101 — every auto-fix requires an affected-flow rerun, while ask-required items remain explicitly pending and cannot be reported as fixed. |
+| Information hierarchy | pass | L82 — screenshot paths and bug-report shape live in one current skill-local reference, while the always-needed failure requirement remains visible at the point of use. |
+| Leading words | pass | L75 — "Deterministic check" leads an explicit rigor ladder that prefers structured evidence over visual judgment. |
+| Pruning | pass | L98 — Step 4 now executes the report's `Action` field through the referenced contract and explicitly refuses a second classification rule, making the SSOT explicit. |
+| Native parity | pass | L46 — direct main-agent browser checking is named as the explicit native baseline; isolated workers plus structured markers are the optional delta for larger suites. |
+| Granularity | pass | L58 — small changes run directly and large grouped suites may fan out to isolated workers, while both branches share one plan, assertion protocol, summary, fix, and candidate sequence. |
+| Verbs conformance | pass | L104 — both repo-root references resolve, the current candidate format admits `skill: qa`, the capability extension is allowed, and persistence remains explicitly host-owned. |
 
 ## Why it's good
-The trigger is textbook: leading phrase first, a model-detectable signal ("UI has changed") separated from the literal user phrasings, and two anti-triggers that name the skills they hand off to. The 3-round test-planning protocol (Functional, then an adversarial re-read, then coverage gaps for big changes) makes the *process* identical every run rather than depending on whatever the agent happens to think of, and the assertion-marker + verification-rigor ladder turns "I tested it" into structured, gradeable evidence. The Step 5 repair closed the prior premature-completion bait, and binding `{learnings_dir}` fixed the prior intake/close unpredictability.
+
+The skill turns browser testing into evidence through a three-round plan, structured step markers, a rigor ladder from deterministic checks to visual judgment, screenshots on failure, and an exact summary. The native baseline (direct browser checking) is explicit, so the optional isolation and parallelism branch is visible. Step 4 obeys a single `Action: AUTO-FIX | ASK` routing contract from the bug report, not a second rule. Step 5 emits a valid `skill: qa` candidate without writing the project store.
 
 ## Top fixes
-1. L91 — drop the inline "CSS, missing null check, wrong URL" example list from Step 4 and let `lib/test-output-format.md` (which already carries the identical `Action: AUTO-FIX | ASK` enumeration) be the single source; Step 4 then just says "route per the `Action` field."
-2. L51 — the step budgets ("~25 / ~40 / ~75") are the only soft, non-checkable knob in an otherwise crisp Step 3; tie them to the test-group size class or mark them advisory so they read as guidance, not a completion criterion.
+
+1. L46 — native baseline clarified: direct main-agent browser checking is the baseline; isolated workers and structured markers are the optional branch for larger suites (3+ test groups).
+2. L98 — Action routing SSOT: Step 4 executes each bug report's single `Action` field using the exact routing contract in test-output-format.md, with no competing classification rule.
 
 ## Behavioral cases
-- trigger `the checkout page changed, QA it` -> expected process: Step 1 load config + UI pitfalls + brief, Step 2 run the 3-round plan and merge a numbered list, Step 3 assert with STEP_PASS/FAIL/SKIP plus the verification ladder (parallel sub-agents if 3+ groups), Step 4 AUTO-FIX mechanical bugs / ASK on design, Step 5 record a `type: pitfall` learning or "no learning warranted".
-- anti-trigger `verify this PR's fix actually works` -> should NOT fire (routes to `verify` per L6 — non-UI verification); `review my diff before I push` -> should NOT fire (routes to `review` — code-diff review, not a live browser flow).
+
+- trigger `the checkout UI changed; QA it` → load project context, build the three-round test list, execute through host browser automation (direct or isolated), emit a marker for every step, summarize counts, follow each report's Action field, and rerun auto-fixed flows.
+- trigger `a failed check has Action: ASK` → preserve it as an explicit pending decision and never report it as fixed.
+- trigger `this browser bug revealed a reusable mobile pitfall` → emit a `skill: qa`, `type: pitfall` candidate and leave persistence to the host or project.
+- anti-trigger `run the unit tests for this parser` → should NOT fire; use the project's normal non-UI test or verification path.
+- anti-trigger `review this code diff` → should NOT fire; route to `review`.

@@ -13,14 +13,14 @@
 | Edit | Conditional zh references checked against trigger signals | Load matched ones; explicitly note "no zh signals matched" if none fired |
 | Edit | No consecutive 3+ sentences of new prose outside `→` annotations | Convert to annotations |
 | Edit | Multi-version alternatives were generated | Add them now |
-| Edit | Voice profile was loaded and checked | Load and check now |
+| Edit | Voice profile was resolved, or voice-neutral mode was stated | Resolve per contract; never infer identity |
 | Edit | At least one rhythm variation flagged or confirmed | Check paragraph lengths |
 | Spar / Structure / Edit | For pieces >500 words (or X long posts >200 words): Four-Quadrant Check completed | Flag missing quadrants; do not auto-fill |
 | Postmortem | Every category has an exact line quoted (or explicit "no line earns this row") | Restart and quote actual lines |
 | Postmortem | Zero banned generic-praise words ("great post", "strong hook", "compelling", "engaging", "powerful", "thought-provoking", "well-crafted") | Restart |
 | Postmortem | Chinese drafts quoted in source Chinese, not translated | Re-quote in source language |
 | Postmortem | "Weakest part" includes a specific fix, not just "consider X" | Add concrete rewrite/cut/proof-add direction |
-| Idea Gate | Stage-0 brain check ran (grep against writing/ + media/articles/ + topics/) | Run brain check now; if substantial overlap, default route → 暫不寫 |
+| Idea Gate | Stage-0 local overlap check ran against configured source directories | Run the local check now; if substantial overlap, default route → 暫不寫 |
 | Idea Gate | Route is one of: original / repurpose / rewrite / research+ideate / 暫不寫 | Pick one or ask 1-2 disambiguating questions |
 | Idea Gate | If route ≠ 暫不寫, full packet produced with ≤2 `missing` fields | If >2 missing, downgrade to 暫不寫 or flag user for specific info |
 | Idea Gate | No prose body in output (packet only) | Convert any prose to packet bullets |

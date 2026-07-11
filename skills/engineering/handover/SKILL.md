@@ -2,13 +2,14 @@
 name: handover
 description: |
   Explicit Codex handover workflow for unfinished mechanical build units from an existing plan.
+  Runs only from a Claude Code orchestrator; Codex/Gemini seats no-op to avoid recursive delegation.
   - /handover [slug]: sync handoff, spawn `codex exec`, poll, collect structured result.
   - /handover --async [slug]: write a self-contained payload to docs/handoffs/ only; does not spawn Codex or touch git.
-  Use when a plan has several rote, file-scoped build units and you deliberately want Codex subscription quota used. NOT for plan writing, closing finished work, PR/ship flow, or exploratory judgment-heavy work (pull a cross-model take with advisor instead).
+  Use when a plan has several rote, file-scoped build units and you explicitly want a bounded Codex execution. NOT for plan writing, closing finished work, PR/ship flow, or exploratory judgment-heavy work (pull a cross-model take with advisor instead).
 reads:
   - repo: docs/plans/**
-  - repo: lib/model-anchors.md
-  - repo: skills/engineering/handover/references/codex-invocation.md
+  - skill: lib/model-anchors.md
+  - skill: references/codex-invocation.md
   - cli: git
   - cli: codex
 writes:
@@ -28,7 +29,7 @@ user-invocable: false
 
 ## Routing Boundary
 
-Use this skill only for an explicit pandastack `/handover`: unfinished mechanical build units from an existing plan are delegated to Codex, while the orchestrator keeps planning, review, and git ownership.
+Use this skill only for an explicit Verbs `/handover`: unfinished mechanical build units from an existing plan are delegated to Codex, while the orchestrator keeps planning, review, and git ownership.
 
 Do not use it for:
 - Direct `codex exec` outside the handover protocol — raw CLI use skips the payload contract, the preflight gate, and the result classification this skill adds.
@@ -36,13 +37,11 @@ Do not use it for:
 - Exploratory or judgment-heavy work where a model should reason, not execute — pull a cross-model take with `advisor`; do not hand the thinking to Codex.
 - Multi-step sequential plan-and-build in one runtime — use `sprint`.
 
-`/handover` gives a unit of work to **Codex** to execute. The distinction from `/ship`: ship *closes* work that is already done (commit, PR, file a note); handover *delegates* work that is not done yet to a second runtime.
-
-Codex runs on the ChatGPT subscription (`~/.codex/auth.json`, no API key) — a **separate quota** from Claude, so delegating a batch conserves the Claude session rather than double-paying. The `prefer-cc-subagents` rule targets gbrain skills that spin up a *metered Anthropic API* runtime; Codex is not that, so it is a legitimate opt-in here.
+This is an explicit cross-runtime invocation contract. Verbs defines the payload, safety gate, and result classification; the host owns runtime availability, authentication, model choice outside the pinned invocation, and cost policy.
 
 ## When to use
 
-- A plan has **≥3 mechanical build units** (rote, well-specified, file-scoped) and you would rather spend Codex quota than the Claude session on them.
+- A plan has **≥3 mechanical build units** (rote, well-specified, file-scoped) that benefit from one bounded fresh execution context.
 - You planned + partially built and want the rest done by Codex while you review / move on.
 
 Skip a single trivial edit — it stays on Claude. (Judgment-heavy / exploratory work is already out of scope per Routing Boundary.)
@@ -51,10 +50,10 @@ Skip a single trivial edit — it stays on Claude. (Judgment-heavy / exploratory
 
 | Invocation | Mode | Session | Git |
 |---|---|---|---|
-| `/handover [slug]` (default) | sync — spawn codex now, poll, collect | occupies this turn | Claude commits the completed diff |
-| `/handover --async [slug]` | async — write payload for Hermes / offline | frees this session | nobody touches git until the human runs it |
+| `/handover [slug]` (default) | sync — spawn codex now, poll, collect | occupies this turn | source host commits the completed diff |
+| `/handover --async [slug]` | async — write payload only | frees this session | nobody touches git until the human runs it |
 
-The async-vs-sync axis is **session occupancy**, not cost (codex runs on the same subscription either way): sync keeps this turn busy polling; async drops an artifact and lets Hermes run it on subscription quota while you do something else.
+The async-vs-sync axis is **session occupancy**: sync keeps this turn busy polling; async writes a runnable artifact and stops.
 
 ## Gate (both modes)
 
@@ -80,12 +79,18 @@ classification table.
 
 Flow:
 
-1. Derive remaining work: for each U-ID in the plan, run its `acceptance:` check and include ONLY the U-IDs that do NOT already pass (do not trust the plan's `status:` field — it is always `todo`; state is derived from git). Fall back to all U-IDs if acceptance can't be run here.
-2. Build the XML payload + result schema into a `mktemp -d` scratch dir.
-3. Spawn `codex exec` with the selected model anchor per
+1. Require `git status --porcelain=v1 --untracked-files=all` to be empty. Stop
+   and ask the source host to commit or isolate existing work before delegation;
+   scoped rollback is safe only from a fully clean baseline.
+2. Derive remaining work: for each U-ID in the plan, run its `acceptance:` check and include ONLY the U-IDs that do NOT already pass (do not trust the plan's `status:` field — it is always `todo`; state is derived from git). Fall back to all U-IDs if acceptance can't be run here.
+3. Build the XML payload + result schema into a `mktemp -d` scratch dir.
+4. Spawn `codex exec` with the selected model anchor per
    `references/codex-invocation.md` (background Bash to clear the 2-min ceiling).
-4. Poll for the result file in separate foreground Bash calls, then classify + act per the status→action table in `references/codex-invocation.md` (the SSOT — do not restate divergent actions here): `completed` → `git add {scope} && git commit`; `partial` → KEEP the diff, finish the remaining units locally; `failed` / CLI-failure → scoped rollback, finish locally.
-5. Git, review (`/review`), and ship stay on Claude — never delegated.
+5. Poll for the result file in separate foreground Bash calls, then classify
+   and act only through the status→action table in
+   `references/codex-invocation.md`. Stop when that one-shot table returns its
+   terminal `success`, `partial`, or `failed` result.
+6. Git, review (`/review`), and ship stay in the source host — never delegated.
 
 ## Async mode (`--async`)
 
@@ -99,36 +104,10 @@ CLI, and permission guard in its `<runtime>` block. Then print:
   loud when older or unparseable; only then render the selected handover anchor
   into the command shape from `lib/model-anchors.md` and append
   `- < docs/handoffs/{...}-codex.md` (must run at repo root);
-- **Hermes alternative:** use only when its `openai-codex` adapter can prove it
-  applied every `<runtime>` field: model, effort, minimum CLI, and guard. If it cannot, print
-  `HANDOVER: Hermes cannot honor the pinned model anchor — use direct headless`
-  and do not dispatch through Hermes.
-
-Async mode NEVER spawns codex and NEVER touches git — it only emits the artifact (vault-only, like ship's knowledge mode).
-
-## State emission (loop-in-agent)
-
-After the delegation actually happens — sync: once the codex result is collected
-(any status); async: once the handoff file is written — append one `delegated`
-event to the lifecycle store so a scheduler can see this item is being executed
-by Codex (schema: `docs/state-schema.md`). Done when EITHER the `delegated`
-event is appended OR `scripts/pandastack-state` is confirmed absent (test
-`[ -x scripts/pandastack-state ]` first; if it fails, report "state binary
-absent, event skipped" — never skip silently). `slug` = repo basename,
-`item` = handover slug.
-
-```
-scripts/pandastack-state append --slug {repo} --item {slug} \
-  --event delegated --skill handover --runtime codex \
-  --ref {commit-or-handoff-path}
-```
-
-This reduces to `status: in_progress, owner: codex` — the loop's Claude-orchestrates /
-Codex-executes split becomes visible in the state file. A later `/review` or
-`/ship` event (if the work continues on Claude) supersedes it.
+Async mode NEVER spawns codex and NEVER touches git — it only emits the file artifact.
 
 ## Boundaries
 
-- `docs/plans/{slug}.md` stays the source of truth for WHAT. The handoff is a derived snapshot — do not copy the brief's rationale into it.
-- Codex never commits / pushes / opens PRs — the Claude orchestrator owns git (enforced in the payload's `<constraints>`). In sync mode Claude commits on a completed batch; in async mode the human owns git entirely.
+- `docs/plans/{slug}.md` is the input contract for WHAT. The handoff is a derived snapshot — do not copy the brief's rationale into it.
+- Codex never commits, pushes, or opens PRs. The source host owns git (enforced in the payload's `<constraints>`). In sync mode the source host commits a completed batch; in async mode the human owns git entirely.
 - Escalating Codex past `-s workspace-write` (e.g. `--dangerously-bypass-approvals-and-sandbox` for network / dep-install) is NEVER auto-selected from plan/task content — it needs an explicit one-time confirmation from the orchestrator this session. See `references/codex-invocation.md`.

@@ -30,4 +30,4 @@ Run a pass ONLY when its scope signal fired in Step 4 (`SCOPE_*`), or — for Pa
 - Load `lib/quality-rubric.md`. Evaluator-side binding per governance moment #2.
 - Score each changed artifact 1-5 on the 4 axes (coherence / originality / craft / functionality).
 - Any axis < 3 = fail the gate. Include the specific anti-pattern hit (e.g. "Originality 2 — symmetric bullet structure, LLM diversity collapse").
-- Use per-skill weighting table from the rubric when artifact came from `pandastack:write` / `pandastack:ui` output.
+- Use per-skill weighting table from the rubric when artifact came from `verbs:write` / `verbs:ui` output.

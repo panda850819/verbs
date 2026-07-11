@@ -11,8 +11,8 @@ user-invocable: false
 ---
 # Debug
 
-You already know how to debug. This skill is not the method. It overrides the three reflexes you get
-wrong under momentum, and points you to lore you cannot derive.
+You already know how to debug. This skill is not the method. It overrides the
+momentum reflexes you get wrong and points you to lore you cannot derive.
 
 ## Override
 
@@ -29,9 +29,13 @@ wrong under momentum, and points you to lore you cannot derive.
 
 ## Lore (consult when the cause is not obvious)
 
-`skills/engineering/debug/lib/diagnosis.md` — known bug classes (listener-owns-lifetime, O(N²)
+`lib/diagnosis.md` — known bug classes (listener-owns-lifetime, O(N²)
 accumulators, schema category-leak, and CLI archetypes: PATH drift, stdout/stderr contract, pipe
 backpressure, cold-start), instrument-first-by-bug-class, bisect with worktree safety, and the
 3-failed-hypotheses handoff template.
 
-Recall first per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md) (store-agnostic): pull learnings matching the symptom / bug class before hypothesizing. Root cause is a bug class not in that file and with no matching learning → write a learning (`lib/learning-format.md`). Matches an existing one → bump its `recurrence` + `last_seen` (bug classes genuinely recur, so debug is where the recurrence ratchet earns its keep).
+Recall first per [`@lib/learning-recall.md`](lib/learning-recall.md):
+pull from the repo learning path configured by the host project, matching the symptom / bug class before
+hypothesizing. A new reusable bug class emits a candidate using
+`lib/learning-format.md`; a match emits a one-line `seen again` candidate. Never
+write or update the learning store here. Persistence belongs to the host/project.

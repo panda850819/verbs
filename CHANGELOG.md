@@ -1,6 +1,204 @@
 # Changelog
 
-## v3.4.2 — 2026-07-10
+## v0.6.0 — Portable Skills, Native Hooks
+
+Released: 2026-07-11
+
+### Added
+
+- The recommended Marketplace Plugin surface for Claude Code and Codex now
+  registers the SessionStart dispatch adapter, Bash PreToolUse destructive
+  guard, and Stop verification gate.
+- The full 14-skill pack is self-contained for portable installation. Each
+  skill carries its declared resources and composition edges without depending
+  on shared root files.
+
+### Install
+
+Recommended Marketplace Plugin:
+
+```bash
+claude plugin marketplace add panda850819/verbs --scope user
+claude plugin install verbs@verbs --scope user
+
+codex plugin marketplace add panda850819/verbs --json
+codex plugin add verbs@verbs --json
+```
+
+Portable, hook-free skills:
+
+```bash
+npx skills@latest add panda850819/verbs -a claude-code codex -g -y
+```
+
+Choose one surface per host profile. Installing both creates duplicate skill
+discovery and an ambiguous hook contract.
+
+### Boundary
+
+- Verbs owns the skill pack and its narrow native hook adapters. The host owns
+  identity, brain or memory, scheduling, project truth, and global model
+  routing. Hermes remains a selective manual import.
+
+### Distribution
+
+- The GitHub release remains metadata-only with zero custom release assets.
+  GitHub's standard source archives remain available.
+
+### Verified
+
+- The public `npx skills` command found and installed all 14 skills into
+  disposable Claude Code and Codex targets. All 36 declared resources and 7
+  directional companion edges resolved inside the installed payload.
+- Claude Code and Codex both passed a same-profile
+  `v0.5.0 → v0.6.0 → v0.5.0` reinstall cycle. The installed v0.6 hook tree
+  passed all 27 contract checks; Claude's component inventory reported exactly
+  three registered hooks, and Codex discovered the same three hooks and
+  triggered SessionStart from the installed plugin.
+
+## v0.5.0 — Verbs
+
+Released: 2026-07-11
+
+### Changed
+
+- The product name is **Verbs**. The repository, display name, and canonical
+  environment prefix are now `panda850819/verbs`, `Verbs`, and `VERBS_`.
+- The active roadmap now tracks a small 0.x evidence line and explicit v1.0
+  gates. The retired persona, vault, personal-OS, and lifecycle milestones no
+  longer appear as current work.
+- `v0.5.0` begins a new Verbs version epoch. Existing `v1.*` and
+  `v4.0.0-rc.1` tags/releases remain immutable legacy history.
+
+### Install
+
+Claude Code:
+
+```bash
+claude plugin marketplace add panda850819/verbs --scope user
+claude plugin install verbs@verbs --scope user
+```
+
+Codex:
+
+```bash
+codex plugin marketplace add panda850819/verbs --json
+codex plugin add verbs@verbs --json
+```
+
+Generic `npx skills` installation is not advertised yet. It discovers the 14
+skills but drops shared root contracts when it installs each skill directory in
+isolation. Self-contained generic installs are tracked in
+[#189](https://github.com/panda850819/verbs/issues/189).
+
+### Compatibility
+
+- Moving from `4.0.0-rc.1` to `0.5.0` is an explicit uninstall/reinstall;
+  SemVer sorts `0.5.0` below the RC, so an ordinary upgrade is unsafe.
+- `VERBS_*` is canonical. Documented `PANDA_VERBS_*` path and verify-gate
+  variables remain read-only fallbacks through v0.5.x. The retired
+  `scripts/pandastack` shim also forwards its two legacy path variables.
+- The plugin selector and namespace stay `verbs@verbs` and `/verbs:*`.
+
+Claude Code reinstall:
+
+```bash
+claude plugin uninstall verbs@verbs --scope user --keep-data
+claude plugin marketplace remove verbs --scope user
+claude plugin marketplace add panda850819/verbs --scope user
+claude plugin install verbs@verbs --scope user
+```
+
+Codex reinstall:
+
+```bash
+codex plugin remove verbs@verbs --json
+codex plugin marketplace remove verbs
+codex plugin marketplace add panda850819/verbs --json
+codex plugin add verbs@verbs --json
+```
+
+### Distribution
+
+- GitHub Releases contain the changelog and install commands, with no custom
+  tarball or checksum. GitHub's standard source archives remain available.
+- Exact-tag archive extraction stays an internal test of the packaged tree; an
+  asset is added only when a separate consumer needs its own format.
+
+### Verified
+
+- Manifest-driven Claude, Codex, and Agents metadata agree on version `0.5.0`,
+  repository identity, and the exact 14-skill surface.
+- Release preflight extracts and tests the exact tagged tree before the
+  annotated tag is pushed, while the public release remains metadata-only.
+- Disposable Claude and Codex profiles install and invoke the exact tagged
+  artifact; real profiles use the same explicit reinstall path.
+
+## v4.0.0-rc.1 — Verbs
+
+Released: 2026-07-11
+
+> **Release candidate.** Panda Verbs is the public skill pack. Personal context,
+> memory, runtimes, schedulers, connectors, and project truth stay with the host.
+
+### Breaking
+
+- Product, repository, plugin, and namespace rename to **Panda Verbs**,
+  `panda-verbs`, `verbs@verbs`, and `/verbs:*`.
+- `/pandastack:*` has no alias. Claude Code and Codex must remove the old plugin
+  before installing `verbs@verbs`; otherwise stale v3 policies remain active.
+- `/ship knowledge` and the `knowledge-ship` alias moved out of the public pack.
+  Knowledge lifecycle and persistence belong to the host's knowledge system.
+- `scripts/verbs-state`, `scripts/pandastack-state`, and the project lifecycle
+  store are removed. State belongs to the host/project.
+
+### Changed
+
+- The product definition is now one sentence: "An opinionated skill pack for
+  taking software work from ambiguity to verified delivery."
+- `manifest.toml` owns the complete product dictionary. `scripts/verbs sync`
+  deterministically generates all Claude, Codex, and Agents loader metadata.
+- Automatic plugin hooks are removed. `DISPATCH.md` and the reference guard
+  scripts remain available for hosts that opt in explicitly.
+- `verbs doctor` checks the 14-skill source surface and installed plugin parity.
+  The retired capability map, ticket/worktree policy hook, lifecycle state
+  helper, and `/loop` driver kickoff are gone.
+- Claude Code and Codex both use their real local marketplace installers.
+  Hermes remains selective manual import; OpenClaw is experimental.
+
+### Compatibility
+
+- `scripts/pandastack` remains a one-line RC forwarding shim with a deprecation
+  notice on stderr. The old state CLI has no v4 replacement.
+- `PANDASTACK_VERIFY_GATE` remains an RC fallback when the new variable is
+  unset for hosts that wire the optional verify adapter.
+- GitHub's old repository URL redirects after the rename. Recreating the old
+  repository name is intentionally unsupported because it breaks that redirect.
+- Migration pins v3.4.2 commit
+  `8d9a382b74d5b3e0ef0b6e91375fab3a172a916f` as an immutable rollback
+  checkout through the RC dogfood window.
+
+### Verified
+
+- Generated metadata fails red on product id, repository, hero, category,
+  version, or skill-surface drift.
+- Automated preflight proves the packaged tree and synthetic cache scanner.
+  The RC operator gate separately installs the exact tagged checkout in
+  disposable Claude and Codex profiles before the tag is pushed.
+- Prerelease tags publish with `--prerelease --latest=false`; archives and their
+  SHA-256 checksums use the `panda-verbs-v<version>` prefix.
+
+## v3.4.2 — Parity
+
+Released: 2026-07-10
+
+### Added
+
+- Deterministic tag preflight and a tag-only, least-privilege GitHub Actions
+  release workflow produce exact release metadata, an archive, and its SHA-256
+  checksum. Publishing stays draft-only until every asset upload succeeds.
+- Root `LICENSE` and `THIRD_PARTY_NOTICES.md` files make the project terms and
+  third-party notices visible in both fresh clones and release archives.
 
 ### Fixed
 

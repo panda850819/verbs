@@ -1,20 +1,20 @@
 {
-  "name": "pandastack",
+  "name": "verbs",
   "interface": {
-    "displayName": "Pandastack"
+    "displayName": "Verbs"
   },
   "plugins": [
     {
-      "name": "pandastack",
+      "name": "verbs",
       "source": {
         "source": "local",
-        "path": "./plugins/pandastack"
+        "path": "."
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Personal OS"
+      "category": "Developer Tools"
     }
   ]
 }

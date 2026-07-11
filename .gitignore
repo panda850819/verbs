@@ -1,15 +1,16 @@
 .DS_Store
 
-# secrets — never commit. Real secrets live outside the repo
-# (~/.config/pandastack/secrets.env); these patterns guard against anything
-# being dropped into the repo by mistake.
+# secrets — never commit
 *.env
 secrets.env
 .env.local
 
-# local capability-map state (machine-generated, host-specific)
-.pandastack/local/
+# local event/log state (machine-generated, host-specific)
+.pandastack/
 
 # Python bytecode caches (e.g. scripts/__pycache__ from running tests)
 __pycache__/
 *.py[cod]
+
+# local release artifacts
+/dist/

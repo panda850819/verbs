@@ -2,46 +2,50 @@
 name: sprint
 type: skill
 description: |
-  Focused execution session: from "I want to do X" to shipped or explicitly paused/failed/aborted. Internal flow: prep, grill (lite), execute, review, ship; only SHIPPED triggers backflow. Triggers on /sprint, "sprint on this", "let's ship X", "focused session". Routes UI work to `ui`, bugs to `debug`.
+  Focused execution session: from "I want to do X" to shipped or explicitly paused/failed/aborted. Internal flow: prep, grill (lite), execute, review, ship. Triggers on /sprint, "sprint on this", "let's ship X", "focused session". Routes UI work to `ui`, bugs to `debug`.
 reads:
-  - repo: lib/capability-probe.md
-  - repo: lib/escape-hatch.md
-  - repo: lib/push-once.md
-  - repo: lib/gate-contract.md
-  - repo: lib/learning-recall.md
-  - repo: lib/model-anchors.md
-  - repo: skills/productivity/grill/SKILL.md
-  - repo: skills/productivity/ui/SKILL.md
-  - repo: skills/engineering/debug/SKILL.md
-  - repo: skills/engineering/review/SKILL.md
-  - repo: skills/engineering/ship/SKILL.md
-  - repo: lib/verify-the-test-loop.md
-  - repo: skills/engineering/sprint/lib/rationalizations.md
-  - repo: skills/engineering/sprint/lib/aggregator-test-checklist.md
-  - repo: skills/engineering/sprint/references/codex-delegation.md
-  - vault: knowledge/**
-  - vault: docs/learnings/**
-  - vault: docs/plans/**
+  - skill: lib/capability-probe.md
+  - skill: lib/escape-hatch.md
+  - skill: lib/push-once.md
+  - skill: lib/gate-contract.md
+  - skill: lib/learning-recall.md
+  - skill: lib/model-anchors.md
+  - skill: grill
+  - skill: ui
+  - skill: debug
+  - skill: review
+  - skill: ship
+  - skill: handover
+  - skill: lib/verify-the-test-loop.md
+  - skill: lib/rationalizations.md
+  - skill: lib/aggregator-test-checklist.md
+  - skill: references/codex-delegation.md
+  - repo: knowledge/**
+  - repo: docs/learnings/**
+  - repo: docs/plans/**
 writes:
-  - vault: Inbox/sprint-*.md
-  - vault: docs/sessions/*.md
   - cli: stdout
   - git: commits via /ship
 domain: shared
 classification: lifecycle-flow
 capability_required:
-  - agents.md
-  - vault
+  - writable-cwd
   - lib/capability-probe.md
   - lib/escape-hatch.md
-  - skills/productivity/grill
-  - skills/engineering/review
-  - skills/engineering/ship
+  - skill: grill
+  - skill: ui
+  - skill: debug
+  - skill: review
+  - skill: ship
+  - skill: handover
 user-invocable: false
 ---
 # Sprint — focused 1-2 hour execution
 
-> A sprint has a whistle and a finish line. You walk in with a topic. You walk out with one of four states: SHIPPED, PAUSED, FAILED, or ABORTED_BY_USER. Only SHIPPED triggers ship/extract/backflow. The other three write a checkpoint and stop cleanly.
+> A sprint has a whistle and a finish line. You walk in with a topic. You walk
+> out with one of four states: SHIPPED, PAUSED, FAILED, or ABORTED_BY_USER.
+> Only a fully approved run attempts `ship`; SHIPPED is recorded only after
+> delivery succeeds. Other outcomes emit a checkpoint candidate to the host.
 
 ## When to invoke
 
@@ -63,14 +67,23 @@ user-invocable: false
 - `--quick`: skip prep + grill, go execute → review → ship
 - `--design`: auto-invoke `ui` skill at execute stage (replaces `commands/design.md`)
 - `--plan {path|slug}`: execute against a durable plan at `docs/plans/{slug}.md` (the artifact `grill --brief` Stage C+ emits). Sprint reads it READ-ONLY and derives per-task progress from git — see Stage 3 plan-driven execution. Auto-detect rule: slugify the topic the same way `grill --brief` does and check for `docs/plans/{that-slug}.md` (exact slug, no fuzzy match); if the sprint began from a `grill --brief` brief, use the plan path it printed. If none found, run conversationally.
-- `--continue {slug}`: resume a PAUSED sprint. Skips prep + grill; loads the PAUSED checkpoint + `docs/plans/{slug}.md`, recomputes which U-IDs are already done (git + acceptance), and resumes at the first non-done task.
-- `--delegate codex`: in Stage 3, hand a batch of mechanical units to Codex (synchronous, in-loop) via the `/handover` invocation. OFF unless you pass this flag — sprint defaults to free Claude subagents and never auto-delegates. A batch of ≥3 mechanical units is the advisory threshold worth surfacing the flag at, NOT an auto-trigger. Requires a plan file. See `references/codex-delegation.md` for the batch loop; the single-invocation mechanics live in `skills/engineering/handover/references/codex-invocation.md`. For ASYNC handover that frees this session, use `/handover --async`.
+- `--continue {slug}`: resume a PAUSED sprint. Skips prep + grill, loads
+  `docs/plans/{slug}.md`, re-derives completed U-IDs from git + acceptance, and
+  resumes at the first non-done task. A host-provided prior checkpoint may add
+  context, but the skill does not select or persist a state file.
+- `--delegate codex`: in Stage 3, hand a batch of mechanical units to Codex (synchronous, in-loop) through the installed skill whose frontmatter `name` is `handover`. OFF unless you pass this flag; sprint otherwise uses the host's normal execution mechanism and never auto-delegates across runtimes. A batch of ≥3 mechanical units is the advisory threshold worth surfacing the flag at, NOT an auto-trigger. Requires a plan file. See `references/codex-delegation.md` for the batch loop; `handover` owns the single-invocation mechanics. For ASYNC handover that frees this session, use `/handover --async`.
 
 ## Stages
 
 ### Stage 0: Capability probe
 
-@../../../lib/capability-probe.md
+@lib/capability-probe.md
+
+Resolve installed skills by their frontmatter `name`, independent of any host
+namespace. The complete-pack contract requires `debug`, `grill`, `handover`,
+`review`, `ship`, and `ui`. If any companion is absent, stop before Stage 1 and
+emit `FAILED: incomplete Verbs pack; missing companions: <sorted names>. Reinstall
+the complete pack.` A selective `sprint` install never degrades silently.
 
 Abort or degrade per probe rules. Output probe block as opening.
 
@@ -82,17 +95,18 @@ Run a minimal in-session prep pass:
 2. Surface only concrete gotchas, half-built attempts, and relevant prior decisions. No fabricated pattern matching.
 3. If no useful history exists, say "No relevant prior context found" and continue.
 
-Run the learnings recall per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md): surface the top 3-5 learnings relevant to the sprint topic so plan-time context carries past lessons, and use them in the plan, not just list them. Store-agnostic — `gbrain query` filtered to `learnings/` when present, else ranked grep over `docs/learnings/`, else skip with a note. This closes the write→read loop the auto-sedimented learnings exist for.
+Run the learnings recall per [`@lib/learning-recall.md`](lib/learning-recall.md): surface the top 3-5 learnings relevant to the sprint topic so plan-time context carries past lessons, and use them in the plan, not just list them. Resolve the repo's configured learning directory; if none exists, skip with a note.
 
 ### Stage 2: Grill (lite, skip if `--quick`)
 
-Run `skills/productivity/grill/SKILL.md` in default (adversarial) mode with **3-question cap** (not full 7). Cover:
+Invoke the installed skill whose frontmatter `name` is `grill` in default
+(adversarial) mode with **3-question cap** (not full 7). Cover:
 
 - Existence (does this exist already? half-built somewhere?)
 - Scope boundary (what's IN, what's OUT)
 - Reversibility (two-way / one-way door?)
 
-@../../../lib/push-once.md applies. @../../../lib/escape-hatch.md applies. If user signals stop, log and skip to Stage 3.
+@lib/push-once.md applies. @lib/escape-hatch.md applies. If user signals stop, log and skip to Stage 3.
 
 ### Stage 3: Execute
 
@@ -100,15 +114,17 @@ Run `skills/productivity/grill/SKILL.md` in default (adversarial) mode with **3-
 
 - Do NOT edit the plan body during the sprint. Per-task `status:` is DERIVED, never hand-written. The only writes go to code + git. (This guards the two-runtime drift AGENTS.md warns about — a fresh Claude session or a Codex handoff must re-derive state from git + the plan, never from a mutable progress field.)
 - Before executing each `{slug}-T0N` task, run an idempotency check: (1) does the task's `acceptance:` check already pass (grep / run it)? (2) is its scope already present in the git diff/tree? If yes → mark that U-ID done and SKIP it, no silent reimplementation. Respect `depends-on:` ordering.
-- For `--continue`: load `Inbox/sprint-{slug}-*.md` (PAUSED checkpoint) + the plan, run the idempotency check across all U-IDs, resume at the first non-done task. Skip Stage 1 (prep) and Stage 2 (grill).
+- For `--continue`: load the plan and any checkpoint the host explicitly
+  supplied, run the idempotency check across all U-IDs, and resume at the first
+  non-done task. Git + acceptance remain authoritative. Skip Stage 1 and Stage 2.
 - If a task has no checkable `acceptance:`, fall back to the `iteration` counter for that task and flag it in the narrate line.
 
 When no plan file is present, execute conversationally. Done-condition for the conversational path: each build unit's acceptance condition (Execution mode step 1) is re-verified by the architect — subagent-reported green is never trusted. Execute is not complete until every unit's acceptance re-verifies, matching the plan-driven path's idempotency check.
 
-**Execution mode (default: architect + subagent build — Panda directive 2026-06-12):** the main session is the ARCHITECT, not the typist. For each non-trivial build unit:
+**Execution mode (default: architect + delegated build when the host supports it):** the main session owns architecture, review, and integration. For each non-trivial build unit:
 
 1. Main session writes a tight spec: files in scope, seams/interfaces, hard constraints, style anchor (which existing file to imitate), and a checkable acceptance condition per unit.
-2. Dispatch the unit to a runtime-native subagent (Claude Code: `Agent` tool; one unit = one agent; parallel dispatch ONLY when units are file-disjoint). The subagent gets the spec, not the architect's full context. The architect judges which model/agent fits each unit by its nature — a deep-reasoning seam vs a mechanical edit — and passes `model:` accordingly. Decide per task at dispatch time; do not hardcode a fixed tier mapping. Codex delegation still targets the Codex runtime.
+2. When the host exposes isolated subagents, dispatch one unit per subagent and parallelize ONLY file-disjoint units. The subagent gets the spec, not the architect's full context. Model choice and global dispatch policy remain host concerns; this skill defines the work-unit contract only.
 3. Main session reviews the returned diff against the spec, re-verifies acceptance itself (build/test — subagent-reported green is never trusted), fixes integration seams, and owns all git operations.
 
 Carve-outs:
@@ -118,9 +134,9 @@ Carve-outs:
 
 Rationale: the architect's context window and judgment are the scarce resource; spend them on spec, review, and integration, not keystrokes. "Faster if I just write it myself" is the failure mode this default exists to prevent — it was true for the single unit and false for the sprint.
 
-**Codex delegation:** when `--delegate codex` is set (the rule lives in Modes, above), Stage 3 hands the batch of mechanical units to Codex via `/handover` instead of dispatching to free subagents — planning / review / git stay on Claude. It is SYNCHRONOUS (occupies this turn polling); for ASYNC fire-and-forget that frees the session, use `/handover --async`. Load `lib/model-anchors.md`; gate, anchor selection, batching, and circuit breaker live in `references/codex-delegation.md`.
+**Codex delegation:** when `--delegate codex` is set (the rule lives in Modes, above), Stage 3 hands the batch of mechanical units to Codex via `/handover`; planning, review, and git stay in the foreground host. It is SYNCHRONOUS (occupies this turn polling); for an artifact-only async handoff, use `/handover --async`. Read `lib/model-anchors.md`; gate, invocation contract, batching, and circuit breaker live in `references/codex-delegation.md`.
 
-Stage 3 runs with baseline engineering discipline — root cause before fix, minimal diff, verify before done, 3-strike escalation — from `~/.agents/AGENTS.md` § Coding Discipline plus `careful` and `review`. For a UI build, follow `ui`; for a bug, follow `debug`. There is no separate persona-lens step.
+Stage 3 runs with the host's active engineering discipline plus `careful` and `review`: root cause before fix, minimal diff, and verify before done. For a UI build, follow `ui`; for a bug, follow `debug`. There is no separate persona-lens step.
 
 Track `iteration` counter starting at 1.
 
@@ -132,11 +148,11 @@ done: {what was completed} | verified: {what was checked} | remaining: {next sub
 
 Mirrors background-session protocol (`result:` / `needs input:` / `failed:`) but applied to foreground sprint. Purpose: at 50-min mark, model + user both know where the sprint is even if context drifts. Skip ONLY for trivial 1-line edits (`--quick` mode auto-skips). If you completed something you can't summarize back, stop — you've drifted past the last known-good state.
 
-**Multi-source aggregator dispatch-branch test**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator, the handler-level integration test for the new branch is part of Stage 3 implementation, NOT Stage 4 review iter 2. Read `skills/engineering/sprint/lib/aggregator-test-checklist.md` for the trigger shapes and test shape.
+**Multi-source aggregator dispatch-branch test**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator, the handler-level integration test for the new branch is part of Stage 3 implementation, NOT Stage 4 review iter 2. Read `lib/aggregator-test-checklist.md` for the trigger shapes and test shape.
 
-### Stage 4: Review + verify gate (skip if `--quick`)
+### Stage 4: Review + verify gate
 
-Invoke `skills/engineering/review/SKILL.md`. Parse output for:
+Invoke the installed skill whose frontmatter `name` is `review`. Parse output for:
 
 - P0 + P1 findings (excluding entries already AUTO-FIXED by review skill)
 - `COVERAGE GAP` entries
@@ -144,7 +160,7 @@ Invoke `skills/engineering/review/SKILL.md`. Parse output for:
 
 Three branches:
 
-1. **All counts = 0** (clean review) → proceed to Stage 5 (ship gate, state=SHIPPED)
+1. **All counts = 0** (clean review) → proceed to Stage 5 (ship gate)
 2. **`iteration >= 3` and any non-zero** → terminal state = FAILED, do NOT auto-loop
 3. **`iteration < 3` and any non-zero** → present 4-option gate per `lib/gate-contract.md`:
 
@@ -155,7 +171,7 @@ Three branches:
    [approve] feed findings to execute context, return to Stage 3, iteration++
    [edit]    user supplies modified findings, return to Stage 3, iteration++
    [reject]  log findings as OPEN_QUESTIONS, proceed to Stage 5 with state=PAUSED
-   [skip]    log findings as OPEN_QUESTIONS, proceed to Stage 5 (review-clean assumption)
+   [skip]    log findings as OPEN_QUESTIONS, proceed to Stage 5 with state=PAUSED
    ```
 
 **Auto-loop semantics**: approve/edit increment iteration counter and loop back to Stage 3. Stage 3 receives findings as additional context, then re-runs execute. Stage 4 fires again at end. Max 3 loops; iteration=3 with non-zero count → FAILED.
@@ -165,8 +181,8 @@ Three branches:
 ### Stage 5: Ship gate (terminal state decision)
 
 **Deploy-proof precondition (if the deliverable was validated by a human
-manually exercising a build/deploy).** Before `state = SHIPPED` or before
-asking the user to do that validation: @../../../lib/verify-the-test-loop.md
+manually exercising a build/deploy).** Before `state = READY_TO_SHIP` or before
+asking the user to do that validation: @lib/verify-the-test-loop.md
 — prove the artifact the user tested embeds this change (content marker /
 source-not-newer / pinned path / stable identity). If unproven, the bug
 is the pipeline: do NOT ask the user to test and do NOT mark SHIPPED —
@@ -178,46 +194,37 @@ This is the critical gate. Compute terminal state:
 
 ```
 if review_clean AND deploy_proven AND user_approves_ship:
-    state = SHIPPED
+    state = READY_TO_SHIP
 elif user_signals_pause ("park this" / "暫停" / "later"):
     state = PAUSED
 elif execute_failed OR review_iteration_exceeded:
     state = FAILED
 elif user_signals_abort ("stop" / "abort" / "cancel"):
     state = ABORTED_BY_USER
+else:
+    state = PAUSED  # name the unmet ship precondition
 ```
 
-Print computed state to user. User can override (e.g. "actually let's pause this even though review is clean").
+Print the computed gate state. `READY_TO_SHIP` is intermediate, not a terminal
+result. The user can override it before delivery.
 
 ### Stage 6: Terminal state handling
 
-**State emission (loop-in-agent).** At each terminal state, append one event to
-the machine-readable lifecycle store so a scheduler can see where this item
-landed (schema: `docs/state-schema.md`). Best-effort: if the
-binary is absent or the runtime can't reach it, skip silently — the log is
-gap-tolerant. `slug` = repo basename, `item` = sprint slug.
-
-```
-scripts/pandastack-state append --slug {repo} --item {slug} \
-  --event {shipped|paused|failed|aborted} --phase {last phase} \
-  --skill sprint --runtime {claude-code|codex} [--ref {session-note}]
-```
-
-Emit AFTER the per-state handling below (so `--ref` can point at the written
-checkpoint / session note). SHIPPED emits `shipped`; PAUSED emits `paused` with
-the phase it parked in; FAILED/ABORTED emit `failed`/`aborted`.
-
-#### SHIPPED
-1. Invoke `skills/engineering/ship/SKILL.md` — runs commit + push + PR if applicable
-2. Trigger Extract + Backflow (writes to docs/sessions/, docs/learnings/,
-   `{brain}/sessions/` + `gbrain sync` + announce path when a brain runtime
-   is present — skip silently when not, possibly Inbox/ship-log/)
-3. Route deferred work: append any deferred follow-ups / OPEN_QUESTIONS to the repo's canonical next-work tracker (`ROADMAP.md` or `TODOS.md`) with a date + source PR. Do NOT park deferred work in a CLI's private memory (it is per-runtime — Codex / Gemini / Claude diverge — and drifts), and do NOT leave it only in the dated session note (not discoverable as "what's next"). If the repo has no tracker, say so in the summary rather than defaulting to memory.
-4. Closure evidence before claiming SHIPPED: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done.
-5. Output sprint summary: `Stage 1-6 complete, SHIPPED. {commit-hash}, {PR-url if any}, {extract summary}.`
+#### READY_TO_SHIP → SHIPPED or PAUSED
+1. Invoke the installed skill whose frontmatter `name` is `ship` — it runs commit + push + PR if applicable.
+2. If ship succeeds and returns its required PR + pushed commit/branch evidence,
+   set terminal state to SHIPPED. If ship fails or evidence is missing, set
+   terminal state to PAUSED, name the blocker, and continue with the PAUSED
+   handler. Never report SHIPPED before delivery evidence exists.
+3. Emit a compact evidence summary, any learning candidates, and a `DEFERRED`
+   list. Do not persist them or mutate a project tracker; the host/project owns
+   those destinations.
+4. Output sprint summary only after success: `Stage 1-6 complete, SHIPPED.
+   {commit-hash}, {PR-url}, {evidence summary}.`
 
 #### PAUSED
-1. Write `Inbox/sprint-{slug}-{date}.md` checkpoint:
+1. Emit this checkpoint candidate to stdout for the host/project to persist if
+   desired:
    ```
    state: PAUSED
    stages_completed: [0, 1, 2, 3]
@@ -225,25 +232,19 @@ the phase it parked in; FAILED/ABORTED emit `failed`/`aborted`.
    plan: docs/plans/{slug}.md   # if one exists; --continue re-derives done/todo from it + git
    resume_with: /sprint --continue {slug}
    ```
-2. Do NOT run ship. Do NOT run backflow. Do NOT modify docs/learnings.
+2. Do NOT retry ship or persist learning candidates.
 3. Output: `Sprint PAUSED. Resume with: /sprint --continue {slug}.`
 
 #### FAILED
-1. Write checkpoint with state: FAILED, plus failure reason and stuck-point.
-2. Append to `docs/learnings/pitfalls/{date}-{slug}-failed.md` IF the failure reveals a pattern (e.g. "review keeps catching same class of bug after 3 iterations" → write the pattern).
+1. Emit a checkpoint candidate with state: FAILED, failure reason, and stuck-point.
+2. Emit a pitfall candidate IF the failure reveals a reusable pattern. Do not persist it.
 3. Do NOT run ship.
-4. Output: `Sprint FAILED at {stage}. Failure: {reason}. Checkpoint at {path}. Manual intervention required.`
+4. Output: `Sprint FAILED at {stage}. Failure: {reason}. Checkpoint candidate emitted. Manual intervention required.`
 
 #### ABORTED_BY_USER
-1. Write checkpoint with state: ABORTED_BY_USER, plus abort reason if user provided.
-2. Do NOT run ship. Do NOT extract. Do NOT backflow.
-3. Output: `Sprint ABORTED. Checkpoint at {path}. No backflow performed.`
-
-## Terminal state contract
-
-**Only SHIPPED runs ship/extract/backflow.** This is non-negotiable. The other three states are first-class outcomes, not failures of the sprint mechanism.
-
-PAUSED is OK. FAILED is OK. ABORTED is OK. The point of explicit terminal states is to make "sprint didn't ship" not equal "sprint broke" — sometimes the right outcome is to pause.
+1. Emit a checkpoint candidate with state: ABORTED_BY_USER and any supplied reason.
+2. Do NOT run ship or persist learning candidates.
+3. Output: `Sprint ABORTED. Checkpoint candidate emitted.`
 
 ## Output format
 
@@ -274,8 +275,8 @@ tags: [sprint, {state-lowercase}]
 | 2 grill (lite) | done / escape-hatch / skipped | {n questions, log path} |
 | 3 execute | done / failed | {iteration} |
 | 4 review | done / iteration-exceeded / skipped | {findings count, P0/P1 remaining} |
-| 5 ship gate | SHIPPED / PAUSED / FAILED / ABORTED | {state rationale} |
-| 6 terminal | {handled per state} | {commit/checkpoint path} |
+| 5 ship gate | READY_TO_SHIP / PAUSED / FAILED / ABORTED | {state rationale} |
+| 6 terminal | {handled per state} | {commit evidence / checkpoint candidate} |
 
 ## Findings (review Stage 4)
 
@@ -294,8 +295,9 @@ tags: [sprint, {state-lowercase}]
 {any axes not addressed}
 ```
 
-Save to `Inbox/sprint-{slug}-{date}.md` regardless of terminal state.
+Emit this block to stdout. The host/project may persist it; Verbs does not
+select or write a project-state path.
 
 ## Common Rationalizations
 
-Anti-bypass table tying each shortcut to the failure it causes: `@skills/engineering/sprint/lib/rationalizations.md`.
+Anti-bypass table tying each shortcut to the failure it causes: `@lib/rationalizations.md`.
