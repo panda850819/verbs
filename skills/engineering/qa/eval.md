@@ -2,7 +2,7 @@
 type: skill-eval
 skill: qa
 bucket: engineering
-evaluated_skill_hash: 99c5e7b27084d74012e15aef31edce99d1846a76
+evaluated_skill_hash: 6b5faa39bc0024c2b03af0dc33bac0c4c896d73d
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---

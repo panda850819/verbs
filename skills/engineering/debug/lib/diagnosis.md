@@ -113,7 +113,7 @@ through the formatter before blaming the classifier.
 
 ## Cross-references
 
-- `../../../lib/learning-format.md` — the host-owned candidate/seen-again output
+- `lib/learning-format.md` — the host-owned candidate/seen-again output
   shape; debug never writes the store.
-- The shared `../../../lib/verify-the-test-loop.md` owns build/deploy identity
+- The shared `lib/verify-the-test-loop.md` owns build/deploy identity
   trust; debug owns diagnosis. No overlap: trust-the-loop vs find-the-cause.

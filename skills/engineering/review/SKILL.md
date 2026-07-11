@@ -8,13 +8,14 @@ reads:
   - repo: AGENTS.md
   - repo: docs/briefs/**
   - repo: docs/learnings/**
-  - repo: lib/gate-contract.md
-  - repo: lib/learning-format.md
-  - repo: lib/learning-recall.md
-  - repo: lib/model-anchors.md
-  - repo: lib/trigger-first-skill-evolution.md
-  - repo: skills/engineering/review/lib/cross-model-transport.md
-  - repo: skills/engineering/review/lib/rationalizations.md
+  - skill: lib/gate-contract.md
+  - skill: lib/learning-format.md
+  - skill: lib/learning-recall.md
+  - skill: lib/model-anchors.md
+  - skill: lib/trigger-first-skill-evolution.md
+  - skill: lib/conditional-passes.md
+  - skill: lib/cross-model-transport.md
+  - skill: lib/rationalizations.md
   - cli: git
   - cli: grep
 writes:
@@ -61,7 +62,7 @@ If output for any command is > 30 lines, summarize. Don't dump raw output into t
 
 ## Step 2: Load Learnings (recall)
 
-Run the learnings recall per [`lib/learning-recall.md`](../../../lib/learning-recall.md): derive the review topic from the changed files + diff keywords, pull the top 3-5 relevant learnings from `{learnings_dir}`, and INJECT them:
+Run the learnings recall per [`lib/learning-recall.md`](lib/learning-recall.md): derive the review topic from the changed files + diff keywords, pull the top 3-5 relevant learnings from `{learnings_dir}`, and INJECT them:
 
 ```bash
 grep -rl "relevant-file-path" {learnings_dir}/ 2>/dev/null   # by changed path
@@ -127,7 +128,7 @@ Use the host's available isolated-agent mechanism. Verbs defines the three revie
 - Missing migrations or backwards-incompatible changes
 - **Deep-module lens (refactor / replatform / keep-vs-rewrite diffs only):** judge each touched module by depth — a deep module hides substantial implementation behind a narrow interface; a shallow one leaks complexity through a wide interface, so callers carry what the module should have absorbed. Before endorsing a seam (where a strangler-fig cut lands, where a rewrite boundary goes), state the module's depth and where the seam sits; a keep-vs-rewrite verdict with no depth named is a vibe, not a review — the same bar as "can't state the bug's mechanism in one sentence → not ready to fix it". Flag a change that makes an already-shallow module shallower (more surface, same leak), or a seam drawn mid-module instead of at a natural interface. Format: `[P2] file — shallow module / seam mis-placed — Fix: name the interface the complexity should hide behind`.
 
-**Conditional passes (only when scope detected):** for each `SCOPE_*` signal from Step 4 (and Pass 8 when the diff carries writing/design artifacts), run the matching pass from `skills/engineering/review/lib/conditional-passes.md`. Skip the file entirely when no scope signal fired.
+**Conditional passes (only when scope detected):** for each `SCOPE_*` signal from Step 4 (and Pass 8 when the diff carries writing/design artifacts), run the matching pass from `lib/conditional-passes.md`. Skip the file entirely when no scope signal fired.
 
 Each pass outputs findings in the same format:
 ```
@@ -172,7 +173,7 @@ Merge cold review findings with Step 5 findings:
 **Launch in parallel with Step 6.** This is an internal review transport, not an
 `advisor` invocation. `advisor` rejects code-diff review by design. Materialize
 the raw diff and use the file/stdin, size, isolation, and opposite-seat contract
-in `skills/engineering/review/lib/cross-model-transport.md`, which resolves the
+in `lib/cross-model-transport.md`, which resolves the
 verified role from `lib/model-anchors.md`. Never embed a raw diff in a command
 argument and never truncate it silently.
 
@@ -253,4 +254,4 @@ If the user aborts mid-review, still print the box. Mark unrun steps as `skipped
 
 ## Common Rationalizations
 
-Anti-bypass table tying each shortcut to the failure it causes: `@skills/engineering/review/lib/rationalizations.md`.
+Anti-bypass table tying each shortcut to the failure it causes: `@lib/rationalizations.md`.

@@ -83,7 +83,7 @@ STEP_SKIP|<step-id>|<reason>
 
 ### Failure Output
 
-Every `STEP_FAIL` gets a screenshot and a bug report. See `skills/engineering/qa/lib/test-output-format.md` for the screenshot location and the `[BUG]` template (its `Action: AUTO-FIX | ASK` field feeds Step 4).
+Every `STEP_FAIL` gets a screenshot and a bug report. See `lib/test-output-format.md` for the screenshot location and the `[BUG]` template (its `Action: AUTO-FIX | ASK` field feeds Step 4).
 
 ### Summary
 
@@ -96,7 +96,7 @@ Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
 ## Step 4: Fix
 
 Execute each bug report's `Action` field using the routing contract in
-`skills/engineering/qa/lib/test-output-format.md`. Do not reclassify it from a
+`lib/test-output-format.md`. Do not reclassify it from a
 second rule here.
 
 After an AUTO-FIX, re-run the affected flow. ASK items remain explicit pending

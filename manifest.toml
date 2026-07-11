@@ -23,6 +23,12 @@
 #   pipx:<pkg>          — pipx install <pkg>
 #
 # This file is hand-curated. When you add or rename a skill, update here.
+#
+# Portable payload fields:
+#   resources = ["<repo-relative canonical file>"]
+#       scripts/verbs sync copies each file to the same skill-relative path.
+#   composes = ["<frontmatter name>"]
+#       directional companion edges; the supported generic install is the full pack.
 
 [product]
 id = "verbs"
@@ -87,48 +93,70 @@ updated = "2026-07-11"
 
 [skill.careful]
 tier = "core"
+resources = ["lib/verify-the-test-loop.md"]
+composes = []
 description = "Confirmation gate before destructive commands."
 
 [skill.gatekeeper]
 tier = "core"
+resources = []
+composes = []
 description = "Pre-adoption trust check for external skills / MCPs / repos."
 
 [skill.grill]
 tier = "core"
+resources = ["lib/goal-mapping.md", "lib/push-once.md", "lib/stop-rule.md", "lib/output-templates.md", "lib/skill-decision-tree.md"]
+composes = []
 description = "Atomic adversarial requirement discovery."
 
 [skill.review]
 tier = "core"
 requires = ["cli:git"]
+resources = ["lib/gate-contract.md", "lib/learning-format.md", "lib/learning-recall.md", "lib/model-anchors.md", "lib/trigger-first-skill-evolution.md", "lib/quality-rubric.md"]
+composes = []
 description = "Parallel 3-pass review (correctness, security, architecture)."
 
 [skill.debug]
 tier = "core"
 requires = ["cli:git"]
+resources = ["lib/learning-format.md", "lib/learning-recall.md", "lib/verify-the-test-loop.md"]
+composes = []
 description = "Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui)."
 
 [skill.skill-creator]
 tier = "core"
+resources = ["SKILL-FRONTMATTER.md", "lib/quality-rubric.md", "lib/skill-decision-tree.md", "lib/skill-eval.md", "lib/trigger-first-skill-evolution.md"]
+composes = ["writing-great-skills"]
 description = "Create new Verbs skills, MECE-checked against RESOLVER, trigger-first evolution; --eval scores existing skills."
 
 [skill.sprint]
 tier = "core"
+resources = ["lib/capability-probe.md", "lib/escape-hatch.md", "lib/gate-contract.md", "lib/learning-recall.md", "lib/model-anchors.md", "lib/push-once.md", "lib/verify-the-test-loop.md"]
+composes = ["debug", "grill", "handover", "review", "ship", "ui"]
 description = "1-2h focused execution: scope, grill-lite, execute, review, ship."
 
 [skill.writing-great-skills]
 tier = "core"
+resources = ["SKILL-FRONTMATTER.md", "lib/quality-rubric.md"]
+composes = []
 description = "Reference + scorecard for well-constructed skills; the construction-quality SSOT skill-creator --eval binds."
 
 [skill.write]
 tier = "core"
+resources = ["lib/quality-rubric.md"]
+composes = []
 description = "Voice-aware drafting + slop detection."
 
 [skill.ui]
 tier = "core"
+resources = []
+composes = []
 description = "Build/fix UI with a committed point of view. Four override reflexes + craft lore in references (reflex-font blocklist, CJK+Latin type, OKLCH, CSS bans+rewrites, strategic omissions). NOT browser-test (qa) or render-bug debugging (debug)."
 
 [skill.qa]
 tier = "core"
+resources = ["lib/learning-format.md"]
+composes = []
 description = "Browser-based UI QA through a host-provided browser automation capability."
 
 # ============================================================================
@@ -138,16 +166,22 @@ description = "Browser-based UI QA through a host-provided browser automation ca
 [skill.ship]
 tier = "ext"
 requires = ["cli:git", "cli:gh"]
+resources = ["lib/learning-format.md", "lib/trigger-first-skill-evolution.md"]
+composes = []
 description = "Close completed code work through test, commit, push, and PR. Needs `gh`, hence ext."
 
 [skill.handover]
 tier = "ext"
 requires = ["cli:git", "cli:codex"]
+resources = ["lib/model-anchors.md"]
+composes = []
 description = "Hand unfinished mechanical work to Codex through a bounded invocation contract: sync (spawn codex exec now) or --async (write an anchored payload). Needs Codex CLI >=0.144.1, hence ext."
 
 [skill.advisor]
 tier = "ext"
 requires = ["cli:codex", "cli:claude"]
+resources = ["lib/gate-contract.md", "lib/model-anchors.md"]
+composes = []
 description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206."
 
 # ============================================================================

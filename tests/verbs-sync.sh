@@ -28,7 +28,8 @@ fi
 root="$tmp/root"
 man="$root/manifest.toml"
 mkdir -p "$root/.claude-plugin" "$root/.codex-plugin" \
-         "$root/.agents/plugins" "$root/skills/engineering"
+         "$root/.agents/plugins" "$root/skills/engineering" "$root/lib"
+printf '%s\n' '# shared fixture resource' >"$root/lib/shared.md"
 
 cat >"$man" <<'EOF'
 [product]
@@ -49,12 +50,18 @@ version = "9.9.9"
 
 [skill.alpha]
 tier = "core"
+resources = ["lib/shared.md"]
+composes = ["beta"]
 
 [skill.beta]
 tier = "core"
+resources = []
+composes = ["gamma"]
 
 [skill.gamma]
 tier = "ext"
+resources = []
+composes = []
 EOF
 
 write_skill() {
@@ -66,6 +73,9 @@ write_skill() {
 write_skill alpha
 write_skill beta
 write_skill gamma
+mkdir -p "$root/skills/engineering/alpha/lib"
+printf '%s\n' '# handwritten local helper' \
+  >"$root/skills/engineering/alpha/lib/handwritten.md"
 
 printf '%s\n' '{"sentinel":"claude-plugin"}' >"$root/.claude-plugin/plugin.json"
 printf '%s\n' '{"sentinel":"claude-marketplace"}' >"$root/.claude-plugin/marketplace.json"
@@ -121,6 +131,7 @@ fi
 if "$PY3" - "$root" <<'PY'
 import json
 import pathlib
+import stat
 import sys
 
 root = pathlib.Path(sys.argv[1])
@@ -168,11 +179,25 @@ assert agents["plugins"][0]["name"] == "fixture-verbs"
 assert agents["plugins"][0]["source"] == {"source": "local", "path": "."}
 assert agents["plugins"][0]["category"] == "Fixture Developer Tools"
 assert "version" not in agents
+
+resource = root / "skills/engineering/alpha/lib/shared.md"
+assert resource.read_text() == "# shared fixture resource\n"
+resource_index = json.loads(
+    (root / "skills/.verbs-resource-index.json").read_text()
+)
+assert resource_index == {
+    "schema": 1,
+    "files": ["skills/engineering/alpha/lib/shared.md"],
+}
+assert stat.S_IMODE(resource.stat().st_mode) == 0o644
+assert stat.S_IMODE(
+    (root / "skills/.verbs-resource-index.json").stat().st_mode
+) == 0o644
 PY
 then
-  pass "generated loader docs match product identity/repo/hero/category and skill paths"
+  pass "generated loaders and skill-local resource match the manifest"
 else
-  fail_t "generated loader docs do not match the complete [product] fixture"
+  fail_t "generated loaders/resources do not match the complete manifest fixture"
 fi
 
 mutate_json() {
@@ -222,7 +247,143 @@ expect_drift "category" "$root/.agents/plugins/marketplace.json" \
   "plugins.0.category" "Personal OS"
 
 # ---------------------------------------------------------------------------
-# S04 -- restored fixture is clean and re-apply is idempotent
+# S04 -- resource drift, stale cleanup, composition, and symlink safety
+# ---------------------------------------------------------------------------
+resource="$root/skills/engineering/alpha/lib/shared.md"
+printf '%s\n' 'stale resource bytes' >"$resource"
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "resource byte drift should fail sync --check"
+elif grep -qF 'stale resource bytes' "$resource"; then
+  pass "sync --check detects resource byte drift without mutating it"
+else
+  fail_t "sync --check mutated a drifted resource"
+fi
+if run_sync >/dev/null 2>&1 && cmp -s "$resource" "$root/lib/shared.md"; then
+  pass "sync restores a drifted resource from the canonical source"
+else
+  fail_t "sync should restore canonical resource bytes"
+fi
+
+chmod +x "$resource"
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "executable generated resource mode should fail sync --check"
+elif run_sync >/dev/null 2>&1 && [ ! -x "$resource" ]; then
+  pass "sync restores generated resource mode to 0644"
+else
+  fail_t "sync should restore generated resource mode to 0644"
+fi
+
+cp "$man" "$tmp/manifest-with-resource.toml"
+"$PY3" - "$man" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+old = 'resources = ["lib/shared.md"]'
+assert text.count(old) == 1
+path.write_text(text.replace(old, 'resources = []'))
+PY
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "removing a manifest resource should make sync --check fail"
+elif run_sync >/dev/null 2>&1 && [ ! -e "$resource" ]; then
+  pass "ordinary sync removes a stale generated resource"
+else
+  fail_t "ordinary sync should remove the stale generated resource"
+fi
+cp "$tmp/manifest-with-resource.toml" "$man"
+if run_sync >/dev/null 2>&1 && cmp -s "$resource" "$root/lib/shared.md"; then
+  pass "sync re-adds a restored manifest resource"
+else
+  fail_t "sync should re-add a restored manifest resource"
+fi
+
+cp "$man" "$tmp/manifest-valid-compose.toml"
+"$PY3" - "$man" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+old = 'composes = ["gamma"]'
+assert text.count(old) == 1
+path.write_text(text.replace(old, 'composes = ["missing"]'))
+PY
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "missing composed skill should fail sync --check"
+else
+  pass "sync rejects a missing composed skill"
+fi
+cp "$tmp/manifest-valid-compose.toml" "$man"
+
+printf '%s\n' '# must never overwrite a skill verdict' >"$root/eval.md"
+cp "$man" "$tmp/manifest-no-eval-collision.toml"
+"$PY3" - "$man" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+old = 'resources = ["lib/shared.md"]'
+assert text.count(old) == 1
+path.write_text(text.replace(old, 'resources = ["eval.md"]'))
+PY
+if run_sync --check >"$tmp/eval-collision.out" 2>&1; then
+  fail_t "eval.md resource collision should fail sync --check"
+elif grep -qF 'resource collides with eval.md' "$tmp/eval-collision.out"; then
+  pass "sync rejects a resource that would overwrite eval.md"
+else
+  fail_t "eval.md collision failed without the expected diagnostic"
+fi
+cp "$tmp/manifest-no-eval-collision.toml" "$man"
+rm -f "$root/eval.md"
+
+mv "$root/lib" "$root/lib-real"
+ln -s lib-real "$root/lib"
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "symlinked source parent should fail sync --check"
+else
+  pass "sync rejects a symlinked source parent"
+fi
+unlink "$root/lib"
+mv "$root/lib-real" "$root/lib"
+
+mv "$root/skills/engineering/alpha/lib" \
+   "$root/skills/engineering/alpha/lib-real"
+ln -s lib-real "$root/skills/engineering/alpha/lib"
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "symlinked destination parent should fail sync --check"
+else
+  pass "sync rejects a symlinked destination parent"
+fi
+unlink "$root/skills/engineering/alpha/lib"
+mv "$root/skills/engineering/alpha/lib-real" \
+   "$root/skills/engineering/alpha/lib"
+
+index="$root/skills/.verbs-resource-index.json"
+cp "$index" "$tmp/resource-index-clean.json"
+"$PY3" - "$index" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+data = json.loads(path.read_text())
+data["files"].append("skills/engineering/alpha/lib/handwritten.md")
+path.write_text(json.dumps(data, indent=2) + "\n")
+PY
+if run_sync >/dev/null 2>&1; then
+  fail_t "poisoned resource index should not authorize local-file deletion"
+elif grep -qF '# handwritten local helper' \
+  "$root/skills/engineering/alpha/lib/handwritten.md"; then
+  pass "poisoned resource index cannot delete a handwritten local helper"
+else
+  fail_t "poisoned resource index deleted or changed a handwritten helper"
+fi
+cp "$tmp/resource-index-clean.json" "$index"
+
+# ---------------------------------------------------------------------------
+# S05 -- restored fixture is clean and re-apply is idempotent
 # ---------------------------------------------------------------------------
 if run_sync --check >/dev/null 2>&1; then
   pass "sync --check is clean after generator restoration"
@@ -237,7 +398,7 @@ case "$reapply" in
 esac
 
 # ---------------------------------------------------------------------------
-# S05 -- product contract and manifest version fail clearly
+# S06 -- product contract and manifest version fail clearly
 # ---------------------------------------------------------------------------
 no_version="$tmp/no-version.toml"
 cat >"$no_version" <<'EOF'

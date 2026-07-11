@@ -20,7 +20,7 @@ Two choices, trading different costs:
 - **Model-invoked** keeps a **description**, so the agent fires it autonomously and other skills can reach it. It pays **context load** — the description sits in the window every turn. Mechanics: write a model-facing description with rich trigger phrasing.
 - **User-invoked** strips the description from the agent's reach: only the human, by name. Zero context load, but it spends **cognitive load** — _you_ are the index that must remember it. Mechanics: `user-invocable: true`; the `description` becomes a human-facing one-liner.
 
-Pick model-invocation only when the agent must reach the skill on its own, or another skill must. When user-invoked skills multiply past memory, use the pack's `DISPATCH.md` as the routing table instead of adding another router skill.
+Pick model-invocation only when the agent must reach the skill on its own, or another skill must. When user-invoked skills multiply past memory, use the host pack's routing table instead of adding another router skill.
 
 ## Writing the description
 

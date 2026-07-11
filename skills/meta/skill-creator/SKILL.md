@@ -15,15 +15,24 @@ Native drafting can produce a SKILL.md. This workflow earns its slot by
 refusing non-skills, preventing trigger overlap, enforcing hot/cold placement,
 and syncing every loader from the manifest source of truth.
 
+## Repository precondition
+
+Resolve the current git root and confirm `manifest.toml` declares
+`[product].id = "verbs"` before any write. Also require `RESOLVER.md`,
+`SKILL-FRONTMATTER.md`, and `scripts/verbs`. If any contract is absent, stop
+with `FAILED: skill-creator requires a Verbs checkout.` These are target-repo
+contracts; the installed skill's own runtime references remain co-located.
+
 ## `--eval <name>` mode (score an existing skill)
 
-The evaluator half of skill construction — `skill-creator` builds and self-checks; `--eval` judges an existing skill and leaves a greppable verdict next to it. Follow the scoring steps + eval.md template in [`lib/skill-eval.md`](../../../lib/skill-eval.md): read the writing-great-skills scorecard, score all 9 axes (pass/weak/fail, one cited `L<n>` each, default weak), write `skills/<bucket>/<name>/eval.md` with the hash stamped, and confirm `bash scripts/lint-eval-fresh.sh <name>` passes. `--eval all` fans out one sub-agent per skill (never score the whole corpus in one hot context). This is the same SSOT the build path binds — generator and evaluator, one verb.
+The evaluator half of skill construction — `skill-creator` builds and self-checks; `--eval` judges an existing skill and leaves a greppable verdict next to it. Follow the scoring steps + eval.md template in [`lib/skill-eval.md`](lib/skill-eval.md): resolve the installed skill whose frontmatter `name` is `writing-great-skills`, read its scorecard, score all 9 axes (pass/weak/fail, one cited `L<n>` each, default weak), write `skills/<bucket>/<name>/eval.md` with the hash stamped, and confirm `bash scripts/lint-eval-fresh.sh <name>` passes. `--eval all` fans out one sub-agent per skill (never score the whole corpus in one hot context). This is the same SSOT the build path binds — generator and evaluator, one verb.
 
 ## Phases
 
 ### 1. Identify the gap
 
-Load `lib/trigger-first-skill-evolution.md` (repo root) before deciding whether to create, split, merge, or extract a skill.
+Load the co-located `lib/trigger-first-skill-evolution.md` before deciding
+whether to create, split, merge, or extract a skill.
 
 What user intent has no existing skill? Be explicit:
 - What phrase / trigger will invoke this?
@@ -123,7 +132,7 @@ If no existing category fits, add a new section AND justify in commit message. C
 
 ### 6. Verify + near-neighbor route check
 
-Run both procedures in [`skills/meta/skill-creator/lib/verify-and-route-check.md`](skills/meta/skill-creator/lib/verify-and-route-check.md):
+Run both procedures in [`lib/verify-and-route-check.md`](lib/verify-and-route-check.md):
 - **6. Verify** — `git diff --check` + `scripts/verbs sync --check` + the
   frontmatter linter + `python3 tests/resolver-routes-test.py`. Do not `bun test`
   unless `.test`/`.spec` files exist. Must pass before merge.
@@ -131,7 +140,13 @@ Run both procedures in [`skills/meta/skill-creator/lib/verify-and-route-check.md
 
 ### 7. Construction self-check (generation-moment binding)
 
-Before declaring the skill done, score it against the [`../writing-great-skills/SKILL.md`](../writing-great-skills/SKILL.md) scorecard (the construction-quality SSOT). Any axis landing **weak/fail** with no reason to keep it → revise before merge. Then run `--eval <name>` (above) to write the co-located `eval.md` (every skill carries one; `lint-eval-fresh.sh` enforces it). This mirrors how `lib/quality-rubric.md` binds at the generation moment — author knows the axes upfront and steers toward them.
+Before declaring the skill done, resolve the installed skill whose frontmatter
+`name` is `writing-great-skills` and score against its scorecard (the
+construction-quality SSOT). Any axis landing **weak/fail** with no reason to
+keep it → revise before merge. Then run `--eval <name>` (above) to write the
+co-located `eval.md` (every skill carries one; `lint-eval-fresh.sh` enforces
+it). This mirrors how `lib/quality-rubric.md` binds at the generation moment —
+author knows the axes upfront and steers toward them.
 
 ## Output Format
 

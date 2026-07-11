@@ -4,21 +4,22 @@ type: skill
 description: |
   Focused execution session: from "I want to do X" to shipped or explicitly paused/failed/aborted. Internal flow: prep, grill (lite), execute, review, ship. Triggers on /sprint, "sprint on this", "let's ship X", "focused session". Routes UI work to `ui`, bugs to `debug`.
 reads:
-  - repo: lib/capability-probe.md
-  - repo: lib/escape-hatch.md
-  - repo: lib/push-once.md
-  - repo: lib/gate-contract.md
-  - repo: lib/learning-recall.md
-  - repo: lib/model-anchors.md
-  - repo: skills/productivity/grill/SKILL.md
-  - repo: skills/productivity/ui/SKILL.md
-  - repo: skills/engineering/debug/SKILL.md
-  - repo: skills/engineering/review/SKILL.md
-  - repo: skills/engineering/ship/SKILL.md
-  - repo: lib/verify-the-test-loop.md
-  - repo: skills/engineering/sprint/lib/rationalizations.md
-  - repo: skills/engineering/sprint/lib/aggregator-test-checklist.md
-  - repo: skills/engineering/sprint/references/codex-delegation.md
+  - skill: lib/capability-probe.md
+  - skill: lib/escape-hatch.md
+  - skill: lib/push-once.md
+  - skill: lib/gate-contract.md
+  - skill: lib/learning-recall.md
+  - skill: lib/model-anchors.md
+  - skill: grill
+  - skill: ui
+  - skill: debug
+  - skill: review
+  - skill: ship
+  - skill: handover
+  - skill: lib/verify-the-test-loop.md
+  - skill: lib/rationalizations.md
+  - skill: lib/aggregator-test-checklist.md
+  - skill: references/codex-delegation.md
   - repo: knowledge/**
   - repo: docs/learnings/**
   - repo: docs/plans/**
@@ -31,9 +32,12 @@ capability_required:
   - writable-cwd
   - lib/capability-probe.md
   - lib/escape-hatch.md
-  - skills/productivity/grill
-  - skills/engineering/review
-  - skills/engineering/ship
+  - skill: grill
+  - skill: ui
+  - skill: debug
+  - skill: review
+  - skill: ship
+  - skill: handover
 user-invocable: false
 ---
 # Sprint — focused 1-2 hour execution
@@ -67,13 +71,19 @@ user-invocable: false
   `docs/plans/{slug}.md`, re-derives completed U-IDs from git + acceptance, and
   resumes at the first non-done task. A host-provided prior checkpoint may add
   context, but the skill does not select or persist a state file.
-- `--delegate codex`: in Stage 3, hand a batch of mechanical units to Codex (synchronous, in-loop) via the `/handover` invocation. OFF unless you pass this flag; sprint otherwise uses the host's normal execution mechanism and never auto-delegates across runtimes. A batch of ≥3 mechanical units is the advisory threshold worth surfacing the flag at, NOT an auto-trigger. Requires a plan file. See `references/codex-delegation.md` for the batch loop; the single-invocation mechanics live in `skills/engineering/handover/references/codex-invocation.md`. For ASYNC handover that frees this session, use `/handover --async`.
+- `--delegate codex`: in Stage 3, hand a batch of mechanical units to Codex (synchronous, in-loop) through the installed skill whose frontmatter `name` is `handover`. OFF unless you pass this flag; sprint otherwise uses the host's normal execution mechanism and never auto-delegates across runtimes. A batch of ≥3 mechanical units is the advisory threshold worth surfacing the flag at, NOT an auto-trigger. Requires a plan file. See `references/codex-delegation.md` for the batch loop; `handover` owns the single-invocation mechanics. For ASYNC handover that frees this session, use `/handover --async`.
 
 ## Stages
 
 ### Stage 0: Capability probe
 
-@../../../lib/capability-probe.md
+@lib/capability-probe.md
+
+Resolve installed skills by their frontmatter `name`, independent of any host
+namespace. The complete-pack contract requires `debug`, `grill`, `handover`,
+`review`, `ship`, and `ui`. If any companion is absent, stop before Stage 1 and
+emit `FAILED: incomplete Verbs pack; missing companions: <sorted names>. Reinstall
+the complete pack.` A selective `sprint` install never degrades silently.
 
 Abort or degrade per probe rules. Output probe block as opening.
 
@@ -85,17 +95,18 @@ Run a minimal in-session prep pass:
 2. Surface only concrete gotchas, half-built attempts, and relevant prior decisions. No fabricated pattern matching.
 3. If no useful history exists, say "No relevant prior context found" and continue.
 
-Run the learnings recall per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md): surface the top 3-5 learnings relevant to the sprint topic so plan-time context carries past lessons, and use them in the plan, not just list them. Resolve the repo's configured learning directory; if none exists, skip with a note.
+Run the learnings recall per [`@lib/learning-recall.md`](lib/learning-recall.md): surface the top 3-5 learnings relevant to the sprint topic so plan-time context carries past lessons, and use them in the plan, not just list them. Resolve the repo's configured learning directory; if none exists, skip with a note.
 
 ### Stage 2: Grill (lite, skip if `--quick`)
 
-Run `skills/productivity/grill/SKILL.md` in default (adversarial) mode with **3-question cap** (not full 7). Cover:
+Invoke the installed skill whose frontmatter `name` is `grill` in default
+(adversarial) mode with **3-question cap** (not full 7). Cover:
 
 - Existence (does this exist already? half-built somewhere?)
 - Scope boundary (what's IN, what's OUT)
 - Reversibility (two-way / one-way door?)
 
-@../../../lib/push-once.md applies. @../../../lib/escape-hatch.md applies. If user signals stop, log and skip to Stage 3.
+@lib/push-once.md applies. @lib/escape-hatch.md applies. If user signals stop, log and skip to Stage 3.
 
 ### Stage 3: Execute
 
@@ -137,11 +148,11 @@ done: {what was completed} | verified: {what was checked} | remaining: {next sub
 
 Mirrors background-session protocol (`result:` / `needs input:` / `failed:`) but applied to foreground sprint. Purpose: at 50-min mark, model + user both know where the sprint is even if context drifts. Skip ONLY for trivial 1-line edits (`--quick` mode auto-skips). If you completed something you can't summarize back, stop — you've drifted past the last known-good state.
 
-**Multi-source aggregator dispatch-branch test**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator, the handler-level integration test for the new branch is part of Stage 3 implementation, NOT Stage 4 review iter 2. Read `skills/engineering/sprint/lib/aggregator-test-checklist.md` for the trigger shapes and test shape.
+**Multi-source aggregator dispatch-branch test**: if this sprint adds a new dispatch branch / per-source handler / per-source filter to a multi-source aggregator, the handler-level integration test for the new branch is part of Stage 3 implementation, NOT Stage 4 review iter 2. Read `lib/aggregator-test-checklist.md` for the trigger shapes and test shape.
 
 ### Stage 4: Review + verify gate
 
-Invoke `skills/engineering/review/SKILL.md`. Parse output for:
+Invoke the installed skill whose frontmatter `name` is `review`. Parse output for:
 
 - P0 + P1 findings (excluding entries already AUTO-FIXED by review skill)
 - `COVERAGE GAP` entries
@@ -171,7 +182,7 @@ Three branches:
 
 **Deploy-proof precondition (if the deliverable was validated by a human
 manually exercising a build/deploy).** Before `state = READY_TO_SHIP` or before
-asking the user to do that validation: @../../../lib/verify-the-test-loop.md
+asking the user to do that validation: @lib/verify-the-test-loop.md
 — prove the artifact the user tested embeds this change (content marker /
 source-not-newer / pinned path / stable identity). If unproven, the bug
 is the pipeline: do NOT ask the user to test and do NOT mark SHIPPED —
@@ -200,7 +211,7 @@ result. The user can override it before delivery.
 ### Stage 6: Terminal state handling
 
 #### READY_TO_SHIP → SHIPPED or PAUSED
-1. Invoke `skills/engineering/ship/SKILL.md` — runs commit + push + PR if applicable.
+1. Invoke the installed skill whose frontmatter `name` is `ship` — it runs commit + push + PR if applicable.
 2. If ship succeeds and returns its required PR + pushed commit/branch evidence,
    set terminal state to SHIPPED. If ship fails or evidence is missing, set
    terminal state to PAUSED, name the blocker, and continue with the PAUSED
@@ -289,4 +300,4 @@ select or write a project-state path.
 
 ## Common Rationalizations
 
-Anti-bypass table tying each shortcut to the failure it causes: `@skills/engineering/sprint/lib/rationalizations.md`.
+Anti-bypass table tying each shortcut to the failure it causes: `@lib/rationalizations.md`.

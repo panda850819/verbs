@@ -42,7 +42,7 @@ printf 'details\n' >"$reads_clean/skills/engineering/demo/lib/detail.md"
 write_skill "$reads_clean" engineering demo "---
 name: demo
 reads:
-  - repo: skills/engineering/demo/lib/detail.md
+  - skill: lib/detail.md
 ---
 # Demo
 Load \`lib/detail.md\`."
@@ -59,6 +59,56 @@ reads:
 # Demo
 Load \`lib/detail.md\`."
 fail_case reads-drift python3 scripts/lint-reads-block.py "$reads_drift"
+
+reads_root_fallback="$tmp/reads-root-fallback"
+mkdir -p "$reads_root_fallback/lib"
+printf 'root-only details\n' >"$reads_root_fallback/lib/detail.md"
+write_skill "$reads_root_fallback" engineering demo "---
+name: demo
+reads:
+  - repo: lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case reads-root-fallback \
+  python3 scripts/lint-reads-block.py "$reads_root_fallback"
+
+reads_escape="$tmp/reads-escape"
+write_skill "$reads_escape" engineering demo "---
+name: demo
+reads:
+  - skill: ../lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case reads-escape python3 scripts/lint-reads-block.py "$reads_escape"
+
+reads_body_escape="$tmp/reads-body-escape"
+mkdir -p "$reads_body_escape/skills/engineering/lib"
+printf 'outside skill\n' >"$reads_body_escape/skills/engineering/lib/detail.md"
+write_skill "$reads_body_escape" engineering demo "---
+name: demo
+reads:
+  - repo: skills/engineering/lib/detail.md
+---
+# Demo
+Load \`../lib/detail.md\`."
+fail_case reads-body-escape \
+  python3 scripts/lint-reads-block.py "$reads_body_escape"
+
+reads_symlink="$tmp/reads-symlink"
+mkdir -p "$reads_symlink/skills/engineering/demo/lib"
+printf 'outside\n' >"$reads_symlink/outside.md"
+ln -s "$reads_symlink/outside.md" \
+  "$reads_symlink/skills/engineering/demo/lib/detail.md"
+write_skill "$reads_symlink" engineering demo "---
+name: demo
+reads:
+  - skill: lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case reads-symlink python3 scripts/lint-reads-block.py "$reads_symlink"
 
 meta_clean="$tmp/meta-clean"
 write_skill "$meta_clean" meta demo "---
@@ -87,6 +137,8 @@ name: real
 # Real"
 write_skill "$refs_clean" meta demo "---
 name: demo
+reads:
+  - skill: real
 ---
 # Demo
 Use \`verbs:real\` and \`/real\`."
@@ -95,10 +147,46 @@ pass_case refs-clean python3 scripts/lint-refs-resolve.py "$refs_clean"
 refs_drift="$tmp/refs-drift"
 write_skill "$refs_drift" meta demo "---
 name: demo
+reads:
+  - skill: ghost
 ---
 # Demo
 Use \`verbs:ghost\` and \`/ghost-command\`."
 fail_case refs-drift python3 scripts/lint-refs-resolve.py "$refs_drift"
+
+refs_root_fallback="$tmp/refs-root-fallback"
+mkdir -p "$refs_root_fallback/lib"
+printf 'root-only details\n' >"$refs_root_fallback/lib/detail.md"
+write_skill "$refs_root_fallback" meta demo "---
+name: demo
+reads:
+  - skill: lib/detail.md
+---
+# Demo
+Load \`lib/detail.md\`."
+fail_case refs-root-fallback \
+  python3 scripts/lint-refs-resolve.py "$refs_root_fallback"
+
+refs_escape="$tmp/refs-escape"
+write_skill "$refs_escape" meta demo "---
+name: demo
+reads:
+  - skill: ../lib/detail.md
+---
+# Demo"
+fail_case refs-escape python3 scripts/lint-refs-resolve.py "$refs_escape"
+
+refs_symlink="$tmp/refs-symlink"
+mkdir -p "$refs_symlink/skills/meta/demo/lib"
+printf 'outside\n' >"$refs_symlink/outside.md"
+ln -s "$refs_symlink/outside.md" "$refs_symlink/skills/meta/demo/lib/detail.md"
+write_skill "$refs_symlink" meta demo "---
+name: demo
+reads:
+  - skill: lib/detail.md
+---
+# Demo"
+fail_case refs-symlink python3 scripts/lint-refs-resolve.py "$refs_symlink"
 
 quotes_clean="$tmp/quotes-clean"
 write_skill "$quotes_clean" meta demo "---

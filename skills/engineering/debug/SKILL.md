@@ -29,12 +29,12 @@ momentum reflexes you get wrong and points you to lore you cannot derive.
 
 ## Lore (consult when the cause is not obvious)
 
-`skills/engineering/debug/lib/diagnosis.md` — known bug classes (listener-owns-lifetime, O(N²)
+`lib/diagnosis.md` — known bug classes (listener-owns-lifetime, O(N²)
 accumulators, schema category-leak, and CLI archetypes: PATH drift, stdout/stderr contract, pipe
 backpressure, cold-start), instrument-first-by-bug-class, bisect with worktree safety, and the
 3-failed-hypotheses handoff template.
 
-Recall first per [`@../../../lib/learning-recall.md`](../../../lib/learning-recall.md):
+Recall first per [`@lib/learning-recall.md`](lib/learning-recall.md):
 pull from the repo learning path configured by the host project, matching the symptom / bug class before
 hypothesizing. A new reusable bug class emits a candidate using
 `lib/learning-format.md`; a match emits a one-line `seen again` candidate. Never

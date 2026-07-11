@@ -18,12 +18,13 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 # Non-deterministic / external-dependency tests, excluded from the blocking gate.
-# (none today — the suite is offline by design; listed here so future additions
-#  that touch network/secrets/LLM are quarantined explicitly, not silently.)
+# skills-sh-installer-external.sh fetches a pinned npm CLI and is executed as
+# explicit release evidence; the blocking suite keeps its offline contract.
 # NB: the scripts/ semantic linters run offline via tests/lint-suite.sh, which
 # invokes only conformance-smoke.sh's offline `adapter` subtarget; host probes
-# run only in explicit installer/release evidence, so nothing is quarantined.
-EXCLUDE=""
+# run only in explicit installer/release evidence. The pinned npm installer
+# proof below is the only quarantined test.
+EXCLUDE="skills-sh-installer-external.sh"
 
 TIMEOUT="${VERBS_TEST_TIMEOUT:-${PANDA_VERBS_TEST_TIMEOUT:-240}}"
 TO=""

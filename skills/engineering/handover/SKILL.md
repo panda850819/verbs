@@ -8,8 +8,8 @@ description: |
   Use when a plan has several rote, file-scoped build units and you explicitly want a bounded Codex execution. NOT for plan writing, closing finished work, PR/ship flow, or exploratory judgment-heavy work (pull a cross-model take with advisor instead).
 reads:
   - repo: docs/plans/**
-  - repo: lib/model-anchors.md
-  - repo: skills/engineering/handover/references/codex-invocation.md
+  - skill: lib/model-anchors.md
+  - skill: references/codex-invocation.md
   - cli: git
   - cli: codex
 writes:

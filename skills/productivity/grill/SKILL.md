@@ -8,11 +8,11 @@ description: |
   this scope", "what am I missing", "draft a brief", "structured intake". Skip for
   tasks where scope is already concrete.
 reads:
-  - repo: lib/goal-mapping.md
-  - repo: lib/push-once.md
-  - repo: lib/stop-rule.md
-  - repo: lib/output-templates.md
-  - repo: lib/skill-decision-tree.md
+  - skill: lib/goal-mapping.md
+  - skill: lib/push-once.md
+  - skill: lib/stop-rule.md
+  - skill: lib/output-templates.md
+  - skill: lib/skill-decision-tree.md
   - repo: knowledge/**
 writes:
   - repo: docs/briefs/*.md
@@ -128,7 +128,7 @@ Default grill is atomic and leaves only the log above. `--brief` runs the same
 drilling, then adds a structured close with a written brief and executable plan.
 After the stopping rule fires, run three stages in order; do not skip or reorder.
 
-**Stage A — Alternatives (forced).** @../../../lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason mapped to the dominant goal layer}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Apply to brief? [Add / Defer / Reject]` — STOP and wait on each.
+**Stage A — Alternatives (forced).** @lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason mapped to the dominant goal layer}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Apply to brief? [Add / Defer / Reject]` — STOP and wait on each.
 
 **Stage B — Premise refresh.** Original premise / surfaced premises (from the drilling) / revised premise / still-load-bearing [Y/N/partial]. If the revised premise differs significantly from the original, surface it — the user may want to redo Stage A with the new framing.
 

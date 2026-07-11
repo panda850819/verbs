@@ -6,8 +6,8 @@ description: |
   - --panel: two mutually-blind cross-model critics on a PREPARED plan.
   Fires only on a LOAD-BEARING judgment (expensive-if-wrong: a design fork, a plan before you commit, an irreversible or outward-facing decision, keep-vs-rewrite) — reversible small calls just decide, no consult. Reach for the MOST INDEPENDENT model, not the nominally highest tier: from an Opus seat a different provider (Codex/GPT) usually gives more new signal than a same-family model. "get a second opinion", "red-team this", "多角度審". NOT code-diff review (use review), NOT sending mechanical build work out to Codex (use handover), NOT self-interview to sharpen a fuzzy idea (use grill).
 reads:
-  - repo: lib/gate-contract.md
-  - repo: lib/model-anchors.md
+  - skill: lib/gate-contract.md
+  - skill: lib/model-anchors.md
   - cli: codex
   - cli: claude
 writes:

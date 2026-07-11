@@ -24,6 +24,8 @@ import re
 import sys
 import glob
 
+from skill_path_utils import skill_local_path
+
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 
@@ -32,7 +34,11 @@ for skill_dir in glob.glob("skills/*/*"):
     if os.path.isdir(skill_dir):
         n = os.path.basename(skill_dir)
         skill_bucket[n] = os.path.dirname(skill_dir)
-TOKEN = re.compile(r"(?:skills|lib|docs|contexts)/[A-Za-z0-9_./{}<>-]+")
+TOKEN = re.compile(
+    r"(?:skills|lib|references|patterns|reviews|templates|docs|contexts)/"
+    r"[A-Za-z0-9_./{}<>-]+"
+)
+SKILL_READ = re.compile(r"^\s*-\s*skill:\s*([^\s#]+)\s*$", re.MULTILINE)
 PACK_TOKEN = re.compile(r"\bverbs:([a-z0-9][a-z0-9-]*)\b")
 RETIRED_PACK_TOKEN = re.compile(r"\bpandastack:([a-z0-9][a-z0-9-]*)\b")
 SLASH_COMMAND = re.compile(r"`(/(?:verbs:)?[a-z0-9][a-z0-9-]*)`")
@@ -61,9 +67,15 @@ for f in glob.glob("skills/**/SKILL.md", recursive=True):
     if "/.archive/" in f or "/_deprecated/" in f:
         continue
     text = open(f, encoding="utf-8").read()
+    skill_dir = os.path.dirname(f)
     for m in set(TOKEN.findall(text)):
         tok = m.rstrip(".,):;`")
-        if accepted(tok) or os.path.exists(tok):
+        local = tok.startswith(("lib/", "references/", "patterns/", "reviews/", "templates/"))
+        candidate = skill_local_path(skill_dir, tok) if local else tok
+        if local and candidate is None:
+            broken.setdefault(f, []).append((tok, "unsafe skill-local path"))
+            continue
+        if accepted(tok) or os.path.exists(candidate):
             continue
         mm = re.match(r"skills/([A-Za-z0-9_-]+)(/.*)?$", tok)
         hint = "does not resolve"
@@ -71,6 +83,23 @@ for f in glob.glob("skills/**/SKILL.md", recursive=True):
             n = mm.group(1)
             hint = f"flat ref — bucket it: skills/{skill_bucket[n]}/{n}"
         broken.setdefault(f, []).append((tok, hint))
+
+    for raw in set(SKILL_READ.findall(text)):
+        value = raw.strip().strip('"\'')
+        if "/" in value or value.endswith(".md"):
+            candidate = skill_local_path(skill_dir, value)
+            if candidate is None:
+                broken.setdefault(f, []).append(
+                    (f"skill: {value}", "unsafe skill-local read")
+                )
+            elif not os.path.exists(candidate):
+                broken.setdefault(f, []).append(
+                    (f"skill: {value}", "skill-local read does not resolve")
+                )
+        elif value not in skill_bucket:
+            broken.setdefault(f, []).append(
+                (f"skill: {value}", "no matching installed companion skill")
+            )
 
     for name in set(PACK_TOKEN.findall(text)):
         if name not in skill_bucket:

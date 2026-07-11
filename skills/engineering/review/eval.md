@@ -2,7 +2,7 @@
 type: skill-eval
 skill: review
 bucket: engineering
-evaluated_skill_hash: 546fb61add742113be42bdb80af20ca62f8923c4
+evaluated_skill_hash: f50e1cbfb4a7b120a5813343d67965290538e1b7
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -11,7 +11,7 @@ rubric: writing-great-skills@1.1.0
 
 **Verdict: SOLID.** A fixed audit, scoped parallel lenses, cold-context review, and an internal opposite-seat transport make the review process unusually resistant to confirmation bias; the main construction costs are its long hot body and an implicit native-parity claim.
 
-Grounding sample: L104 — "Verbs defines the three review lenses and their output contract"
+Grounding sample: L105 — "Verbs defines the three review lenses and their output contract"
 
 | Axis | Verdict | Evidence |
 |---|---|---|

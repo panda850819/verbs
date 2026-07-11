@@ -49,7 +49,7 @@ Before routing to a review template, classify the artifact under STRIDE. STRIDE 
 6. Floors raise, never lower: if independent signals already rate the artifact higher than the STRIDE floor, keep the higher rating. A `suspect`-count floor can only ratchet scrutiny up; it must never downgrade a risk level that another signal already set higher.
 7. Categories carry forward to the routed review template (Step 1+) — each finding cites its STRIDE category.
 
-Worked example and why STRIDE runs before routing → [`skills/meta/gatekeeper/lib/stride-rationale.md`](skills/meta/gatekeeper/lib/stride-rationale.md).
+Worked example and why STRIDE runs before routing → [`lib/stride-rationale.md`](lib/stride-rationale.md).
 
 ### Gate completion
 

@@ -2,7 +2,7 @@
 type: skill-eval
 skill: advisor
 bucket: engineering
-evaluated_skill_hash: b2b337f04cdee28a8212d5799925055458739718
+evaluated_skill_hash: 8b07a04457472b640ad04ab211ab95866c75f3ec
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---

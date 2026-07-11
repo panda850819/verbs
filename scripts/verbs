@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shlex
+import stat
 import sys
 from pathlib import Path
 
@@ -30,6 +31,7 @@ MANIFEST_PATH = Path(_env_value(
 ))
 DISPATCH_PATH = REPO_ROOT / "DISPATCH.md"
 SKILLS_DIR = REPO_ROOT / "skills"
+RESOURCE_INDEX = Path("skills/.verbs-resource-index.json")
 
 _PRODUCT_KEYS = (
     "id", "display_name", "marketplace_id", "repository", "homepage",
@@ -789,8 +791,8 @@ def _sync_root():
     return Path(override) if override else REPO_ROOT
 
 
-def _manifest_skill_paths(manifest_data):
-    """Return deterministic Claude registration paths for manifest skills."""
+def _manifest_skill_dirs(manifest_data):
+    """Return manifest skill names mapped to repo-relative directories."""
     expected = set(manifest_data.get("skill", {}))
     found = {}
     for skill_file in SKILLS_DIR.rglob("SKILL.md"):
@@ -804,7 +806,175 @@ def _manifest_skill_paths(manifest_data):
         missing = sorted(expected - set(found))
         extra = sorted(set(found) - expected)
         raise ValueError(f"manifest skill paths drift: missing={missing} extra={extra}")
-    return [f"./{found[name]}" for name in sorted(expected)]
+    return {name: Path(found[name]) for name in sorted(expected)}
+
+
+def _manifest_skill_paths(manifest_data):
+    """Return deterministic Claude registration paths for manifest skills."""
+    directories = _manifest_skill_dirs(manifest_data)
+    return [f"./{directories[name].as_posix()}" for name in sorted(directories)]
+
+
+def _generated_resources(manifest_data):
+    """Render committed skill-local resource copies from manifest.toml."""
+    skill_specs = manifest_data.get("skill", {})
+    skill_dirs = _manifest_skill_dirs(manifest_data)
+    known_skills = set(skill_specs)
+    generated = {}
+
+    for name in sorted(skill_specs):
+        spec = skill_specs[name]
+        if not isinstance(spec, dict):
+            raise ValueError(f"manifest skill {name} must be a table")
+        resources = spec.get("resources")
+        composes = spec.get("composes")
+        if not isinstance(resources, list):
+            raise ValueError(f"manifest skill {name} resources must be a list")
+        if not isinstance(composes, list):
+            raise ValueError(f"manifest skill {name} composes must be a list")
+        if any(not isinstance(resource, str) for resource in resources):
+            raise ValueError(
+                f"manifest skill {name} resource paths must be strings"
+            )
+        if any(not isinstance(companion, str) for companion in composes):
+            raise ValueError(
+                f"manifest skill {name} composed skills must be strings"
+            )
+        if len(resources) != len(set(resources)):
+            raise ValueError(f"manifest skill {name} has duplicate resources")
+        if len(composes) != len(set(composes)):
+            raise ValueError(f"manifest skill {name} has duplicate composes")
+
+        for companion in composes:
+            if companion == name:
+                raise ValueError(f"manifest skill {name} cannot compose itself")
+            if companion not in known_skills:
+                raise ValueError(
+                    f"manifest skill {name} composes missing skill {companion}"
+                )
+
+        for resource in resources:
+            if not resource:
+                raise ValueError(
+                    f"manifest skill {name} resource paths must be strings"
+                )
+            relative = Path(resource)
+            if relative.is_absolute() or ".." in relative.parts:
+                raise ValueError(
+                    f"manifest skill {name} resource escapes repo: {resource}"
+                )
+            source = REPO_ROOT / relative
+            try:
+                _assert_no_symlink_components(REPO_ROOT, source)
+            except ValueError as exc:
+                raise ValueError(
+                    f"manifest skill {name} resource is unsafe: {exc}"
+                ) from exc
+            if not source.is_file():
+                raise ValueError(
+                    f"manifest skill {name} resource missing: {resource}"
+                )
+            destination = skill_dirs[name] / relative
+            if destination.name in {"SKILL.md", "eval.md"}:
+                raise ValueError(
+                    f"manifest skill {name} resource collides with {destination.name}"
+                )
+            if destination in generated:
+                raise ValueError(
+                    f"generated resource collision at {destination.as_posix()}"
+                )
+            generated[destination] = source.read_bytes()
+
+    return generated
+
+
+def _resource_index_data(resources):
+    """Return the generated-resource ownership index."""
+    return {
+        "schema": 1,
+        "files": [path.as_posix() for path in sorted(resources)],
+    }
+
+
+def _load_resource_index(root):
+    """Read and validate the previous generated-resource ownership index."""
+    path = root / RESOURCE_INDEX
+    try:
+        _assert_no_symlink_components(root, path)
+    except ValueError as exc:
+        raise ValueError(f"resource index is unsafe: {exc}") from exc
+    if not path.exists():
+        return _resource_index_data({})
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ValueError(f"cannot read resource index: {exc}") from exc
+    if not isinstance(data, dict) or data.get("schema") != 1:
+        raise ValueError("resource index must use schema 1")
+    files = data.get("files")
+    if not isinstance(files, list) or any(not isinstance(item, str) for item in files):
+        raise ValueError("resource index files must be a string list")
+    if len(files) != len(set(files)):
+        raise ValueError("resource index has duplicate files")
+    for item in files:
+        relative = Path(item)
+        if (
+            relative.is_absolute()
+            or ".." in relative.parts
+            or not relative.parts
+            or relative.parts[0] != "skills"
+            or relative.name == "SKILL.md"
+        ):
+            raise ValueError(f"resource index has unsafe path: {item}")
+    return data
+
+
+def _validate_stale_resource_deletions(root, stale_paths, manifest_data):
+    """Authorize stale deletion only for unchanged copies of canonical resources."""
+    # upgrade: index schema v2 must record source + hash before safely handling
+    # canonical resource rename/delete or whole-skill removal.
+    skill_dirs = list(_manifest_skill_dirs(manifest_data).values())
+    deletions = []
+    for relative in sorted(stale_paths):
+        tail = None
+        for skill_dir in skill_dirs:
+            try:
+                tail = relative.relative_to(skill_dir)
+                break
+            except ValueError:
+                continue
+        if tail is None or not tail.parts or tail.name == "SKILL.md":
+            raise ValueError(
+                f"stale resource is outside a known skill directory: {relative}"
+            )
+
+        source = REPO_ROOT / tail
+        try:
+            _assert_no_symlink_components(REPO_ROOT, source)
+        except ValueError as exc:
+            raise ValueError(
+                f"stale resource canonical source is unsafe: {exc}"
+            ) from exc
+        if not source.is_file():
+            raise ValueError(
+                f"stale resource has no canonical source: {relative}"
+            )
+
+        destination = root / relative
+        try:
+            _assert_no_symlink_components(root, destination)
+        except ValueError as exc:
+            raise ValueError(f"stale generated resource is unsafe: {exc}") from exc
+        if not destination.exists():
+            continue
+        if not destination.is_file():
+            raise ValueError(f"stale generated resource is not a file: {relative}")
+        if destination.read_bytes() != source.read_bytes():
+            raise ValueError(
+                f"stale generated resource differs from canonical source: {relative}"
+            )
+        deletions.append(relative)
+    return deletions
 
 
 def _generated_loaders(manifest_data):
@@ -901,9 +1071,42 @@ def _write_json_nofollow(path, data):
     if path.is_symlink():
         raise OSError(f"refusing to write through symlink: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW)
+    fd = os.open(
+        str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644
+    )
     with os.fdopen(fd, "w") as fh:
+        os.fchmod(fh.fileno(), 0o644)
         fh.write(json.dumps(data, indent=2) + "\n")
+
+
+def _assert_no_symlink_components(root, path):
+    """Reject a path when it escapes root or any existing component is a symlink."""
+    root = Path(root)
+    path = Path(path)
+    try:
+        relative = path.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"path escapes root: {path}") from exc
+    current = root
+    if current.is_symlink():
+        raise ValueError(f"symlink component: {current}")
+    for part in relative.parts:
+        current = current / part
+        if current.is_symlink():
+            raise ValueError(f"symlink component: {current}")
+
+
+def _write_bytes_nofollow(path, data):
+    """Write bytes while refusing to follow a destination symlink."""
+    if path.is_symlink():
+        raise OSError(f"refusing to write through symlink: {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(
+        str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644
+    )
+    with os.fdopen(fd, "wb") as fh:
+        os.fchmod(fh.fileno(), 0o644)
+        fh.write(data)
 
 
 def run_sync(args):
@@ -919,12 +1122,35 @@ def run_sync(args):
         sys.exit(1)
     try:
         generated = _generated_loaders(manifest_data)
+        resources = _generated_resources(manifest_data)
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
     check = getattr(args, "check", False)
     root = _sync_root()
+    try:
+        previous_resource_index = _load_resource_index(root)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+    expected_resource_index = _resource_index_data(resources)
+    resource_index_path = root / RESOURCE_INDEX
+    resource_index_mode_drift = (
+        resource_index_path.is_file()
+        and stat.S_IMODE(resource_index_path.stat().st_mode) != 0o644
+    )
+    previous_resource_paths = {
+        Path(item) for item in previous_resource_index["files"]
+    }
+    stale_resource_paths = previous_resource_paths - set(resources)
+    try:
+        stale_resource_deletions = _validate_stale_resource_deletions(
+            root, stale_resource_paths, manifest_data
+        )
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
     all_issues = []
     written = []
     for relative, data in generated.items():
@@ -945,6 +1171,53 @@ def run_sync(args):
                 print(f"ERROR: {exc}", file=sys.stderr)
                 sys.exit(1)
             written.append(str(relative))
+
+    for relative, data in resources.items():
+        path = root / relative
+        try:
+            _assert_no_symlink_components(root, path)
+        except ValueError as exc:
+            print(f"ERROR: generated resource is unsafe: {exc}", file=sys.stderr)
+            sys.exit(1)
+        try:
+            current = path.read_bytes() if path.is_file() else None
+        except OSError as exc:
+            all_issues.append(f"{relative}: cannot read generated resource: {exc}")
+            current = None
+        mode_drift = (
+            path.is_file() and stat.S_IMODE(path.stat().st_mode) != 0o644
+        )
+        if current == data and not mode_drift:
+            continue
+        issue = "mode differs from 0644" if current == data else "differs from canonical resource"
+        all_issues.append(f"{relative}: {issue}")
+        if not check:
+            try:
+                _write_bytes_nofollow(path, data)
+            except OSError as exc:
+                print(f"ERROR: {exc}", file=sys.stderr)
+                sys.exit(1)
+            written.append(str(relative))
+
+    if previous_resource_index != expected_resource_index or resource_index_mode_drift:
+        all_issues.append(f"{RESOURCE_INDEX}: differs from manifest resources")
+        for relative in sorted(stale_resource_paths):
+            all_issues.append(f"{relative}: stale generated resource")
+
+    if not check:
+        for relative in stale_resource_deletions:
+            path = root / relative
+            path.unlink()
+            written.append(f"removed:{relative}")
+        if previous_resource_index != expected_resource_index or resource_index_mode_drift:
+            index_path = root / RESOURCE_INDEX
+            try:
+                _assert_no_symlink_components(root, index_path)
+                _write_json_nofollow(index_path, expected_resource_index)
+            except (OSError, ValueError) as exc:
+                print(f"ERROR: {exc}", file=sys.stderr)
+                sys.exit(1)
+            written.append(str(RESOURCE_INDEX))
 
     if check:
         if all_issues:

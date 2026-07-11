@@ -52,7 +52,7 @@ Before executing any of the following, pause and ask the user for explicit confi
 - DROP, TRUNCATE, DELETE without WHERE
 - Schema migrations on production
 
-### Verification integrity (@../../../lib/verify-the-test-loop.md)
+### Verification integrity (@lib/verify-the-test-loop.md)
 - Before asking a human to test a build, or claiming done from that test, apply
   the complete proof and stopping contract in `lib/verify-the-test-loop.md`.
   An unproven artifact identity blocks the request and the completion claim.
@@ -68,7 +68,7 @@ CAREFUL: About to {action}.
 
 ## Stopping discipline
 
-The destructive-action gates above are the *only* automatic pauses. Before any other stop, run the self-check in `skills/engineering/careful/lib/stopping-discipline.md`. Ask only when credentials, a preference, or a judgment unavailable from project evidence changes the outcome.
+The destructive-action gates above are the *only* automatic pauses. Before any other stop, run the self-check in `lib/stopping-discipline.md`. Ask only when credentials, a preference, or a judgment unavailable from project evidence changes the outcome.
 
 ## Deactivate
 
@@ -76,4 +76,4 @@ User says "careful off" or starts a new session. Announce: "CAREFUL mode OFF."
 
 ## Common Rationalizations
 
-Anti-bypass table tying each shortcut to the failure it causes: `@skills/engineering/careful/lib/rationalizations.md`.
+Anti-bypass table tying each shortcut to the failure it causes: `@lib/rationalizations.md`.

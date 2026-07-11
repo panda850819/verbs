@@ -23,8 +23,12 @@ for row in "${expected_rows[@]}"; do
 done
 
 for skill in skills/engineering/advisor/SKILL.md skills/engineering/handover/SKILL.md skills/engineering/review/SKILL.md skills/engineering/sprint/SKILL.md; do
-  grep -Fq -- '- repo: lib/model-anchors.md' "$skill" || {
+  grep -Fq -- '- skill: lib/model-anchors.md' "$skill" || {
     echo "FAIL: $skill does not declare the model anchor read"
+    exit 1
+  }
+  cmp -s "$anchor" "$(dirname "$skill")/lib/model-anchors.md" || {
+    echo "FAIL: $skill does not carry the canonical model anchor resource"
     exit 1
   }
   body="$(awk 'NR == 1 && $0 == "---" { fm=1; next } fm && $0 == "---" { fm=0; next } !fm { print }' "$skill")"
@@ -34,9 +38,9 @@ for skill in skills/engineering/advisor/SKILL.md skills/engineering/handover/SKI
   }
 done
 
-if rg -n 'gpt-5\.6-(sol|terra|luna)|[0-9]+ (sonnet|opus)|--model[[:space:]].*(sonnet|opus)' skills/ >/dev/null; then
+if rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|terra|luna)|[0-9]+ (sonnet|opus)|--model[[:space:]].*(sonnet|opus)' skills/ >/dev/null; then
   echo "FAIL: runtime model selectors must stay in lib/model-anchors.md"
-  rg -n 'gpt-5\.6-(sol|terra|luna)|[0-9]+ (sonnet|opus)|--model[[:space:]].*(sonnet|opus)' skills/
+  rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|terra|luna)|[0-9]+ (sonnet|opus)|--model[[:space:]].*(sonnet|opus)' skills/
   exit 1
 fi
 

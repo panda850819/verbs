@@ -1,6 +1,6 @@
 # Sprint — Codex delegation (the batch loop)
 
-> Hand a sprint's mechanical build units to Codex, batch by batch, keeping planning + review + git in the source host. SYNCHRONOUS: it occupies the foreground turn while polling each result. This file owns the BATCHING LOOP + circuit breaker; the single-invocation mechanics (XML payload, verified `codex exec`, sandbox gate, result classification) live in `skills/engineering/handover/references/codex-invocation.md` — this loop calls that per batch. For a one-shot or ASYNC handover, use `/handover` directly. Ported from EveryInc Compound Engineering `ce-work-beta`.
+> Hand a sprint's mechanical build units to Codex, batch by batch, keeping planning + review + git in the source host. SYNCHRONOUS: it occupies the foreground turn while polling each result. This file owns the BATCHING LOOP + circuit breaker; the installed skill whose frontmatter `name` is `handover` owns the single-invocation mechanics (XML payload, verified `codex exec`, sandbox gate, result classification), and this loop invokes it per batch. For a one-shot or ASYNC handover, use `/handover` directly. Ported from EveryInc Compound Engineering `ce-work-beta`.
 
 ## Gate — explicit opt-in only
 
@@ -11,7 +11,8 @@ Default: execute with the host's normal mechanism. Cross-runtime delegation is *
 
 ## Pre-delegation checks (run once, before the first batch)
 
-Run the `/handover` gate (platform / env-guard / availability / repo-root — see `skills/engineering/handover/SKILL.md`), plus:
+Run the gate from the installed skill whose frontmatter `name` is `handover`
+(platform / env-guard / availability / repo-root), plus:
 
 - **Clean-baseline preflight** before the first batch: require
   `git status --porcelain=v1 --untracked-files=all` to be empty. This proves
@@ -26,7 +27,8 @@ Delegate units in batches of ~3-5. If the plan has more, split at phase boundari
 
 ## Per-batch loop
 
-For each batch, invoke Codex per `skills/engineering/handover/references/codex-invocation.md`:
+For each batch, invoke the installed `handover` skill's single-invocation
+contract:
 
 1. Build the XML payload + result schema for the batch's non-done U-IDs into a
    `mktemp -d` scratch dir, including the selected role, model, effort, minimum

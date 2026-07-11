@@ -13,6 +13,8 @@ import os
 import re
 import sys
 
+from skill_path_utils import skill_local_path
+
 
 def split_frontmatter(text):
     if not text.startswith("---\n"):
@@ -23,8 +25,9 @@ def split_frontmatter(text):
     return text[4:end], text[end + 5 :]
 
 
-def frontmatter_reads(fm):
+def frontmatter_reads(fm, skill_dir, root):
     reads = set()
+    unsafe = []
     in_reads = False
     for line in fm.splitlines():
         if re.match(r"^[A-Za-z0-9_-]+:", line):
@@ -32,15 +35,24 @@ def frontmatter_reads(fm):
             continue
         if not in_reads:
             continue
-        m = re.match(r"\s*-\s*(?:repo:\s*)?(.+?)\s*$", line)
+        m = re.match(r"\s*-\s*(?:(repo|skill):\s*)?(.+?)\s*$", line)
         if not m:
             continue
-        value = m.group(1).strip().strip('"').strip("'")
+        kind = m.group(1) or "repo"
+        value = m.group(2).strip().strip('"').strip("'")
         if value.startswith(("vault:", "cli:", "git:", "external:", "brain:")):
             continue
+        if kind == "skill":
+            if "/" not in value and not value.endswith(".md"):
+                continue
+            candidate = skill_local_path(skill_dir, value)
+            if candidate is None:
+                unsafe.append(value)
+                continue
+            value = os.path.relpath(candidate, root)
         if value:
             reads.add(value)
-    return reads
+    return reads, unsafe
 
 
 def skill_dirs(root):
@@ -60,15 +72,13 @@ def canonical_ref(skill_dir, token):
     if token.startswith("./"):
         token = token[2:]
     if token.startswith("../"):
-        joined = os.path.normpath(os.path.join(skill_dir, token))
-        return os.path.relpath(joined, ROOT)
+        return f"UNSAFE:{token}"
     if token.startswith("references/"):
-        return os.path.relpath(os.path.normpath(os.path.join(skill_dir, token)), ROOT)
+        candidate = skill_local_path(skill_dir, token)
+        return os.path.relpath(candidate, ROOT) if candidate else f"UNSAFE:{token}"
     if token.startswith("lib/"):
-        local = os.path.relpath(os.path.normpath(os.path.join(skill_dir, token)), ROOT)
-        if os.path.exists(os.path.join(ROOT, local)):
-            return local
-        return token
+        candidate = skill_local_path(skill_dir, token)
+        return os.path.relpath(candidate, ROOT) if candidate else f"UNSAFE:{token}"
     if token.startswith("skills/") or token.startswith("lib/"):
         return token
     return None
@@ -95,7 +105,7 @@ def body_refs(root, skill_path, body):
         if ref:
             refs.add(ref)
 
-    return {r for r in refs if os.path.exists(os.path.join(root, r))}
+    return refs
 
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -107,13 +117,17 @@ for path in skill_dirs(ROOT):
     fm, body = split_frontmatter(text)
     if not re.search(r"^reads:", fm, re.M):
         continue
-    declared = frontmatter_reads(fm)
+    declared, unsafe = frontmatter_reads(fm, os.path.dirname(path), ROOT)
     actual = body_refs(ROOT, path, body)
 
     missing = actual - declared
     unused = {r for r in declared - actual if r.startswith(("lib/", "skills/", "references/"))}
     if missing:
         failures[os.path.relpath(path, ROOT)] = sorted(missing)
+    if unsafe:
+        failures.setdefault(os.path.relpath(path, ROOT), []).extend(
+            f"unsafe skill read: {value}" for value in sorted(unsafe)
+        )
     if unused:
         warnings[os.path.relpath(path, ROOT)] = sorted(unused)
 

@@ -2,7 +2,7 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 39f2c5db8d995c6ec0f83c98f407792a0ff1409c
+evaluated_skill_hash: 201beed3e1d1ba86acf82a45cdf28ba4e7b1d902
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -11,7 +11,7 @@ rubric: writing-great-skills@1.1.0
 
 **Verdict: SOLID.** The lifecycle has an explicit intermediate `READY_TO_SHIP`, an unconditional review gate, evidence-gated delivery, and host-owned checkpoint candidates; the very large hot body remains its main construction cost.
 
-Grounding sample: L202 — "READY_TO_SHIP → SHIPPED or PAUSED"
+Grounding sample: L213 — "READY_TO_SHIP → SHIPPED or PAUSED"
 
 | Axis | Verdict | Evidence |
 |---|---|---|

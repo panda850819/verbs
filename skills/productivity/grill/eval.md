@@ -2,7 +2,7 @@
 type: skill-eval
 skill: grill
 bucket: productivity
-evaluated_skill_hash: e1c455ad36ab79ff3d33eb6d1b5dcf8ed9fe330c
+evaluated_skill_hash: e79ea48630d25c43923035a500726229bdeedb3d
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---

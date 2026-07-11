@@ -10,10 +10,10 @@ reads:
   - repo: AGENTS.md
   - repo: docs/briefs/**
   - repo: docs/learnings/**
-  - repo: lib/learning-format.md
-  - repo: lib/trigger-first-skill-evolution.md
-  - repo: skills/engineering/ship/lib/quote-gate.md
-  - repo: skills/engineering/ship/lib/rationalizations.md
+  - skill: lib/learning-format.md
+  - skill: lib/trigger-first-skill-evolution.md
+  - skill: lib/quote-gate.md
+  - skill: lib/rationalizations.md
   - cli: git
 writes:
   - repo: "**"
@@ -139,7 +139,7 @@ Emit a learning candidate ONLY if a concrete artifact surfaced during this ship:
 a test that caught a subtle bug, a deploy pattern worth remembering, or a CI
 gotcha. If none surfaced, skip. Use the `lib/learning-format.md` fields in the
 response and apply the quote gate before quoting:
-`@skills/engineering/ship/lib/quote-gate.md`. Do not persist the candidate;
+`@lib/quote-gate.md`. Do not persist the candidate;
 storage belongs to the host/project.
 
 For recurring or mechanically checkable bug classes, apply review Step 7's guard-escalation wording: propose the exact guard file only, never create it here.
@@ -148,4 +148,4 @@ For recurring or mechanically checkable bug classes, apply review Step 7's guard
 
 ## Common Rationalizations
 
-Anti-bypass table tying each ship shortcut to the failure it causes: `@skills/engineering/ship/lib/rationalizations.md`.
+Anti-bypass table tying each ship shortcut to the failure it causes: `@lib/rationalizations.md`.

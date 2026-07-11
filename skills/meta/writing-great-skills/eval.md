@@ -2,7 +2,7 @@
 type: skill-eval
 skill: writing-great-skills
 bucket: meta
-evaluated_skill_hash: 5202b60d05eed0002fb3412c1ab0f162f41e442b
+evaluated_skill_hash: 018db389a706f6c93d6e0161a3753d5e95066239
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
