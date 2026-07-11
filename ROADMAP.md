@@ -26,8 +26,8 @@ The baseline is deliberately small:
 
 ## v0.6.0 — portable skills, native hooks
 
-Release target: `v0.6.0`. The tag and GitHub Release are created only after the
-exact-tag installer gates pass.
+Status: shipped on 2026-07-11 as
+[`v0.6.0`](https://github.com/panda850819/verbs/releases/tag/v0.6.0).
 
 The same 14-skill payload now has two explicit install surfaces:
 
