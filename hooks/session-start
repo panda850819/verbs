@@ -4,7 +4,16 @@
 # Injects only the dispatch table. Identity, memory, and project policy belong
 # to the host, not this skill pack.
 
-set -euo pipefail
+set -uo pipefail
+
+case "${VERBS_SESSION_ADAPTER:-}" in
+  [oO][fF][fF]) exit 0 ;;
+esac
+
+fail_open() {
+  printf '[verbs session-adapter] unavailable: %s; continuing without dispatch injection.\n' "$1" >&2
+  exit 0
+}
 
 escape_for_json() {
   local s="$1"
@@ -18,14 +27,19 @@ escape_for_json() {
 
 # Append the dispatch table (single source: DISPATCH.md).
 # Strip the HTML maintenance comment to keep the injected payload compact.
-plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; then
+  fail_open "unable to resolve plugin root"
+fi
 dispatch_file="${plugin_root}/DISPATCH.md"
 [ -f "$dispatch_file" ] || {
-  echo "Verbs session adapter: missing $dispatch_file" >&2
-  exit 1
+  fail_open "missing DISPATCH.md"
 }
-dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"
-dispatch_escaped=$(escape_for_json "$dispatch_content")
+if ! dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"; then
+  fail_open "unable to read DISPATCH.md"
+fi
+if ! dispatch_escaped=$(escape_for_json "$dispatch_content"); then
+  fail_open "unable to encode DISPATCH.md"
+fi
 session_context="<IMPORTANT>\n${dispatch_escaped}\n</IMPORTANT>"
 
 # Platform-specific JSON output. Same content, different envelope per CLI.
@@ -33,12 +47,16 @@ session_context="<IMPORTANT>\n${dispatch_escaped}\n</IMPORTANT>"
 # - Claude Code sets CLAUDE_PLUGIN_ROOT without COPILOT_CLI
 # - Copilot CLI (v1.0.11+) sets COPILOT_CLI=1
 # - Codex CLI / unknown — SDK standard format with top-level additionalContext
-if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
-  printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
-elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
-  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
-else
-  printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
+if ! {
+  if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+    printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
+  elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+    printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+  else
+    printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
+  fi
+}; then
+  fail_open "unable to emit dispatch context"
 fi
 
 exit 0

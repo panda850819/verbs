@@ -13,6 +13,8 @@
 # reach an actually-invoked client (seen stripped), so a bare mention passes.
 # Bypass: a TRAILING `# FORCE_OK` comment (not a substring anywhere), or
 # VERBS_FORCE=1 in the environment.
+# Kill switch: VERBS_DESTRUCTIVE_GUARD=off. Infrastructure failures emit a
+# visible notice and allow the command; only a positive danger match exits 2.
 #
 # Known residuals (fail-safe, rare — bias is over-block-not-under, except these):
 #   - A danger token inside a QUOTED payload handed to an executing interpreter
@@ -30,12 +32,44 @@
 #   bash tests/destructive-guard-test.sh   # full positive/negative suite
 set -euo pipefail
 
-INPUT=$(cat)
-TOOL=$(printf '%s' "$INPUT" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("tool_name",""))' 2>/dev/null || true)
+case "${VERBS_DESTRUCTIVE_GUARD:-}" in
+  [oO][fF][fF]) exit 0 ;;
+esac
+
+fail_open() {
+  trap - ERR
+  printf '[verbs destructive-guard] unavailable: %s; allowing command.\n' "$1" >&2
+  exit 0
+}
+trap 'fail_open "internal guard error"' ERR
+
+INPUT=$(cat) || fail_open "unable to read PreToolUse input"
+if ! TOOL=$(printf '%s' "$INPUT" | python3 -c '
+import json, sys
+data = json.load(sys.stdin)
+if not isinstance(data, dict):
+    raise ValueError("hook payload must be an object")
+print(data.get("tool_name", ""))
+' 2>/dev/null); then
+  fail_open "malformed PreToolUse input"
+fi
 [ "$TOOL" = "Bash" ] || exit 0
 
-CMD=$(printf '%s' "$INPUT" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("tool_input",{}).get("command",""))' 2>/dev/null || true)
-[ -n "$CMD" ] || exit 0
+if ! CMD=$(printf '%s' "$INPUT" | python3 -c '
+import json, sys
+data = json.load(sys.stdin)
+tool_input = data.get("tool_input")
+if not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):
+    raise ValueError("Bash payload requires tool_input.command")
+print(tool_input["command"], end="")
+' 2>/dev/null); then
+  fail_open "malformed Bash tool input"
+fi
+[ -n "$CMD" ] || fail_open "empty Bash command"
+
+# From here on, a defect in the danger detector must surface as a hook error;
+# it must never be converted into an exit-0 bypass by the parsing fail-open.
+trap - ERR
 
 # Bypass: marker must be a TRAILING comment, not a mention mid-command.
 printf '%s' "$CMD" | grep -qE '#[[:space:]]*FORCE_OK[[:space:]]*$' && exit 0

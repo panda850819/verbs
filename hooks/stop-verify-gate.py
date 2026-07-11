@@ -5,7 +5,7 @@ Blocks the session's first stop when the current turn edited code files but
 never ran a test or verify command; the model gets one chance to run the
 check or state the change is unverified. Soft gate: the second stop
 (stop_hook_active=true) always passes, and any internal failure fails open
-with exit 0 and no output — the gate must never break a session.
+with exit 0 plus a visible stderr notice — the gate must never break a session.
 
 stdin: Claude Code or Codex Stop-hook JSON (transcript_path, stop_hook_active).
 stdout: exactly one {"decision":"block","reason":...} object, or nothing.
@@ -18,11 +18,23 @@ import json
 import os
 import sys
 
-from runtime_events import current_turn_events, is_code_path
+try:
+    from runtime_events import current_turn_events, is_code_path
+    RUNTIME_IMPORT_OK = True
+except Exception:
+    RUNTIME_IMPORT_OK = False
 
 BLOCK_REASON = (
     "[verbs verify-gate] code changed this turn with no test or verify "
     "run — run the relevant check, or state the change is not yet verified."
+)
+FAIL_OPEN_NOTICE = (
+    "[verbs verify-gate] unavailable: malformed or missing hook input; "
+    "allowing stop."
+)
+RUNTIME_FAIL_OPEN_NOTICE = (
+    "[verbs verify-gate] unavailable: runtime event adapter missing; "
+    "allowing stop."
 )
 
 
@@ -55,11 +67,20 @@ def main():
             gate_setting = os.environ.get("PANDASTACK_VERIFY_GATE", "")
         if gate_setting.strip().lower() == "off":
             return 0
+        if not RUNTIME_IMPORT_OK:
+            print(RUNTIME_FAIL_OPEN_NOTICE, file=sys.stderr)
+            return 0
         data = json.loads(sys.stdin.read() or "{}")
+        if not isinstance(data, dict):
+            raise ValueError("hook payload must be an object")
         if data.get("stop_hook_active"):
             return 0
+        transcript_path = data.get("transcript_path")
+        if not isinstance(transcript_path, str) or not transcript_path:
+            raise ValueError("missing transcript_path")
         entries = []
-        with open(data["transcript_path"], encoding="utf-8") as f:
+        malformed_lines = 0
+        with open(transcript_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -67,14 +88,17 @@ def main():
                 try:
                     entries.append(json.loads(line))
                 except json.JSONDecodeError:
+                    malformed_lines += 1
                     continue
+        if malformed_lines:
+            raise ValueError("transcript contains malformed events")
         code_edited, verified = analyze(entries, data)
         if code_edited and not verified:
             print(json.dumps(
                 {"decision": "block", "reason": BLOCK_REASON},
                 ensure_ascii=False, separators=(",", ":")))
     except Exception:
-        pass  # fail-open: a broken gate must never block the session
+        print(FAIL_OPEN_NOTICE, file=sys.stderr)
     return 0
 
 

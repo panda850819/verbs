@@ -83,6 +83,18 @@ check 0 "rm -r dir has -f substr"    'rm -r ./build-final-output'
 # --- bypass still works ---
 check 0 "FORCE_OK trailing override" 'git push --force  # FORCE_OK'
 check 0 "VERBS_FORCE override" 'git push --force' 'VERBS_FORCE=1'
+check 0 "guard kill switch off" 'git push --force' 'VERBS_DESTRUCTIVE_GUARD=off'
+
+malformed_notice=$(printf 'NOT-JSON' | "$GUARD" 2>&1 >/dev/null)
+malformed_rc=$?
+if [ "$malformed_rc" = 0 ] && printf '%s' "$malformed_notice" | grep -qF \
+    '[verbs destructive-guard] unavailable: malformed PreToolUse input; allowing command.'; then
+  pass=$((pass+1))
+else
+  fail=$((fail+1))
+  printf 'FAIL  %-34s expected visible fail-open, got %s out=%s\n' \
+    "malformed hook payload" "$malformed_rc" "$malformed_notice"
+fi
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

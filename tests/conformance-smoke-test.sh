@@ -20,10 +20,11 @@ grep -Fq "FAIL: no requested host was tested" "$tmp/out"
 mkdir -p "$tmp/adapter-root/hooks"
 cp scripts/conformance-smoke.sh "$tmp/adapter-root/conformance-smoke.sh"
 cp hooks/session-start "$tmp/adapter-root/hooks/session-start"
-if bash "$tmp/adapter-root/hooks/session-start" >"$tmp/adapter.out" 2>"$tmp/adapter.err"; then
-  echo "FAIL: reference adapter accepted a missing DISPATCH.md" >&2
+if ! bash "$tmp/adapter-root/hooks/session-start" >"$tmp/adapter.out" 2>"$tmp/adapter.err"; then
+  echo "FAIL: reference adapter trapped the session on a missing DISPATCH.md" >&2
   exit 1
 fi
-grep -Fq "Verbs session adapter: missing" "$tmp/adapter.err"
+[ ! -s "$tmp/adapter.out" ]
+grep -Fq "[verbs session-adapter] unavailable: missing DISPATCH.md; continuing without dispatch injection." "$tmp/adapter.err"
 
-echo "OK: missing requested host cannot be masked by offline adapter checks"
+echo "OK: missing host stays red while the session adapter fails open visibly"
