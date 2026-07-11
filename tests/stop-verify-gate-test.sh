@@ -15,6 +15,8 @@ WANT_REASON='[verbs verify-gate] code changed this turn with no test or verify r
 u() { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
 ulist() { printf '{"type":"user","message":{"role":"user","content":[{"type":"text","text":"%s"}]}}\n' "$1"; }
 ulistimg() { printf '{"type":"user","message":{"role":"user","content":[{"type":"image","source":{"type":"base64","media_type":"image/png","data":"AA=="}},{"type":"text","text":"%s"}]}}\n' "$1"; }
+umeta() { printf '{"type":"user","isMeta":true,"message":{"role":"user","content":[{"type":"text","text":"%s"}]}}\n' "$1"; }
+umixed() { printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"%s","content":"result","is_error":false},{"type":"text","text":"%s"}]}}\n' "$1" "$2"; }
 cedit() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"%s","input":{"file_path":"%s","old_string":"a","new_string":"b"}}]}}\n' "$1" "$2" "$3"; }
 cnbedit() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"NotebookEdit","input":{"notebook_path":"%s","new_source":"x"}}]}}\n' "$1" "$2"; }
 cbash() { printf '{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"%s","name":"Bash","input":{"command":"%s"}}]}}\n' "$1" "$2"; }
@@ -124,6 +126,14 @@ run_gate "$T"; expect_allow "Claude list-form text prompt resets the window"
 # An image+text block-form prompt also resets the window.
 { u "old"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; ulistimg "look at this"; } > "$T"
 run_gate "$T"; expect_allow "Claude image+text prompt resets the window"
+
+# Skill/slash-command metadata is injected by the host, not a user turn.
+{ u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; umeta "skill injection"; } > "$T"
+run_gate "$T"; expect_block "Claude list-form metadata does not reset the window"
+
+# Ignore tool results when the same entry also contains a genuine user prompt.
+{ u "old"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; umixed e1 "new question"; } > "$T"
+run_gate "$T"; expect_allow "Claude mixed result+text prompt resets the window"
 
 # A backgrounded verify returns only a launch ack, so it never counts as green.
 { u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; cbashbg v1 "pytest -q"; cresult v1 false; } > "$T"

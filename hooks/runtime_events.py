@@ -146,6 +146,8 @@ def normalize_pretool(payload: Dict[str, Any]) -> Dict[str, Any]:
 def _is_real_claude_prompt(entry: Dict[str, Any]) -> bool:
     if entry.get("type") != "user":
         return False
+    if entry.get("isMeta") is True:
+        return False
     content = entry.get("message", {}).get("content")
     if isinstance(content, str):
         return not content.lstrip().startswith(LOCAL_COMMAND_PREFIXES)
@@ -159,13 +161,13 @@ def _is_real_claude_prompt(entry: Dict[str, Any]) -> bool:
                 continue
             block_type = block.get("type")
             if block_type == "tool_result":
-                return False
-            if block_type == "image":
-                found = True
-            elif block_type == "text":
+                continue
+            if block_type == "text":
                 text = block.get("text", "")
-                if not text.lstrip().startswith(LOCAL_COMMAND_PREFIXES):
+                if isinstance(text, str) and not text.lstrip().startswith(LOCAL_COMMAND_PREFIXES):
                     found = True
+            else:
+                found = True
         return found
     return False
 
