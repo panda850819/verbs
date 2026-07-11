@@ -1,4 +1,4 @@
-# Panda Verbs (plugin internal)
+# Verbs (plugin internal)
 
 An opinionated skill pack for taking software work from ambiguity to verified delivery. Skills are tiered core / ext in `manifest.toml` and grouped under engineering, productivity, writing, and meta. The pack does not own identity, memory, project truth, runtimes, scheduling, connectors, or global model routing.
 

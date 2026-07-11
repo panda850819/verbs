@@ -29,7 +29,7 @@ user-invocable: false
 
 ## Routing Boundary
 
-Use this skill only for an explicit Panda Verbs `/handover`: unfinished mechanical build units from an existing plan are delegated to Codex, while the orchestrator keeps planning, review, and git ownership.
+Use this skill only for an explicit Verbs `/handover`: unfinished mechanical build units from an existing plan are delegated to Codex, while the orchestrator keeps planning, review, and git ownership.
 
 Do not use it for:
 - Direct `codex exec` outside the handover protocol — raw CLI use skips the payload contract, the preflight gate, and the result classification this skill adds.
@@ -37,7 +37,7 @@ Do not use it for:
 - Exploratory or judgment-heavy work where a model should reason, not execute — pull a cross-model take with `advisor`; do not hand the thinking to Codex.
 - Multi-step sequential plan-and-build in one runtime — use `sprint`.
 
-This is an explicit cross-runtime invocation contract. Panda Verbs defines the payload, safety gate, and result classification; the host owns runtime availability, authentication, model choice outside the pinned invocation, and cost policy.
+This is an explicit cross-runtime invocation contract. Verbs defines the payload, safety gate, and result classification; the host owns runtime availability, authentication, model choice outside the pinned invocation, and cost policy.
 
 ## When to use
 

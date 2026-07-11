@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stop-hook verify gate for Panda Verbs.
+"""Stop-hook verify gate for Verbs.
 
 Blocks the session's first stop when the current turn edited code files but
 never ran a test or verify command; the model gets one chance to run the
@@ -9,10 +9,10 @@ with exit 0 and no output — the gate must never break a session.
 
 stdin: Claude Code or Codex Stop-hook JSON (transcript_path, stop_hook_active).
 stdout: exactly one {"decision":"block","reason":...} object, or nothing.
-Kill switch: PANDA_VERBS_VERIFY_GATE=off. The v4 RC also reads the legacy
-PANDASTACK_VERIFY_GATE name when the new variable is unset. Python 3.9+, stdlib
-only, no network, no file writes. Design ported from fable-harness verify_gate.py
-(MIT).
+Kill switch: VERBS_VERIFY_GATE=off. During v0.5.x, the adapter also reads the
+legacy PANDA_VERBS_VERIFY_GATE and PANDASTACK_VERIFY_GATE names when the
+canonical variable is unset. Python 3.9+, stdlib only, no network, no file
+writes. Design ported from fable-harness verify_gate.py (MIT).
 """
 import json
 import os
@@ -48,7 +48,9 @@ def analyze(entries, hook_payload=None):
 
 def main():
     try:
-        gate_setting = os.environ.get("PANDA_VERBS_VERIFY_GATE")
+        gate_setting = os.environ.get("VERBS_VERIFY_GATE")
+        if gate_setting is None:
+            gate_setting = os.environ.get("PANDA_VERBS_VERIFY_GATE")
         if gate_setting is None:
             gate_setting = os.environ.get("PANDASTACK_VERIFY_GATE", "")
         if gate_setting.strip().lower() == "off":

@@ -4,7 +4,7 @@ Reference procedure for skill-creator Phases 6 and 6.5. Run both before declarin
 
 ## Phase 6 — Verify
 
-Run the checks that exist in this repo. Panda Verbs has an executable resolver route test, not Bun test files.
+Run the checks that exist in this repo. Verbs has an executable resolver route test, not Bun test files.
 
 ```bash
 repo_root="$(git rev-parse --show-toplevel)"
@@ -40,7 +40,7 @@ Do not use `bun test tests/` unless actual `.test` / `.spec` files have been add
 
 Whenever you add or edit a skill's trigger / description, manually confirm it did
 not start stealing a **near-neighbor's** traffic (route confusion). This is a
-~5-minute manual pass, not a runner + fixture + CI gate — at Panda Verbs' size the
+~5-minute manual pass, not a runner + fixture + CI gate — at Verbs' size the
 infra would cost more than it saves and would rot in a solo repo.
 
 1. Pick ~6 **confusable pairs** whose trigger surfaces sit closest to the one you

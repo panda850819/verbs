@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/verbs-sync.sh -- deterministic Panda Verbs loader-generation tests.
+# tests/verbs-sync.sh -- deterministic Verbs loader-generation tests.
 # No network and no host invocation. All drift mutations stay in a temp repo.
 set -uo pipefail
 
@@ -74,9 +74,9 @@ printf '%s\n' '{"sentinel":"codex-plugin"}' >"$root/.codex-plugin/plugin.json"
 printf '%s\n' '{"sentinel":"agents-marketplace"}' >"$root/.agents/plugins/marketplace.json"
 
 run_sync() {
-  PANDA_VERBS_REPO_ROOT="$root" \
-  PANDA_VERBS_MANIFEST="$man" \
-  PANDA_VERBS_SYNC_ROOT="$root" \
+  VERBS_REPO_ROOT="$root" \
+  VERBS_MANIFEST="$man" \
+  VERBS_SYNC_ROOT="$root" \
     "$PY3" "$CLI" sync "$@"
 }
 
@@ -266,8 +266,8 @@ tier = "core"
 tier = "ext"
 EOF
 
-if PANDA_VERBS_REPO_ROOT="$root" PANDA_VERBS_MANIFEST="$no_version" \
-   PANDA_VERBS_SYNC_ROOT="$root" "$PY3" "$CLI" sync \
+if VERBS_REPO_ROOT="$root" VERBS_MANIFEST="$no_version" \
+   VERBS_SYNC_ROOT="$root" "$PY3" "$CLI" sync \
    >/dev/null 2>"$tmp/no-version.err"; then
   fail_t "manifest without a version should exit nonzero"
 elif grep -q "Traceback" "$tmp/no-version.err"; then
@@ -288,8 +288,8 @@ tier = "core"
 tier = "ext"
 EOF
 
-if PANDA_VERBS_REPO_ROOT="$root" PANDA_VERBS_MANIFEST="$no_product" \
-   PANDA_VERBS_SYNC_ROOT="$root" "$PY3" "$CLI" sync \
+if VERBS_REPO_ROOT="$root" VERBS_MANIFEST="$no_product" \
+   VERBS_SYNC_ROOT="$root" "$PY3" "$CLI" sync \
    >/dev/null 2>"$tmp/no-product.err"; then
   fail_t "manifest without [product] should exit nonzero"
 elif grep -qF "missing [product]" "$tmp/no-product.err"; then

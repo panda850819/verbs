@@ -1,6 +1,6 @@
 # First session — a 15-minute software-work walkthrough
 
-New to Panda Verbs? This 15-minute pass proves discovery, routing, and artifact
+New to Verbs? This 15-minute pass proves discovery, routing, and artifact
 creation. Finishing the resulting build may take a full sprint.
 
 ## 0. Where you are (2 min)
@@ -8,7 +8,7 @@ creation. Finishing the resulting build may take a full sprint.
 Start in a writable software repository. Confirm the host sees the plugin:
 
 ```bash
-python3 /absolute/path/to/panda-verbs/scripts/verbs doctor --host claude --strict
+python3 /absolute/path/to/verbs/scripts/verbs doctor --host claude --strict
 # Or replace claude with codex.
 ```
 

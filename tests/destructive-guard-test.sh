@@ -11,7 +11,7 @@ set -uo pipefail
 GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-destructive-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
 pass=0 fail=0
-WANT_NOTICE='BLOCKED by Panda Verbs destructive-guard:'
+WANT_NOTICE='BLOCKED by Verbs destructive-guard:'
 
 # check <expect 0|2> <description> <command-string> [ENV=val]
 check() {
@@ -27,7 +27,7 @@ check() {
     pass=$((pass+1))
   else
     fail=$((fail+1))
-    printf 'FAIL  %-34s expected exit %s with Panda Verbs notice, got %s out=%s\n' "$desc" "$expect" "$got" "$notice"
+    printf 'FAIL  %-34s expected exit %s with Verbs notice, got %s out=%s\n' "$desc" "$expect" "$got" "$notice"
   fi
 }
 
@@ -82,7 +82,7 @@ check 0 "rm -r dir has -f substr"    'rm -r ./build-final-output'
 
 # --- bypass still works ---
 check 0 "FORCE_OK trailing override" 'git push --force  # FORCE_OK'
-check 0 "PANDA_VERBS_FORCE override" 'git push --force' 'PANDA_VERBS_FORCE=1'
+check 0 "VERBS_FORCE override" 'git push --force' 'VERBS_FORCE=1'
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

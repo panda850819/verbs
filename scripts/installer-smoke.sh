@@ -39,13 +39,13 @@ fi
 real_home="$HOME"
 real_claude_config="${CLAUDE_CONFIG_DIR:-}"
 real_codex_home="${CODEX_HOME:-$real_home/.codex}"
-profile="$(mktemp -d "${TMPDIR:-/tmp}/panda-verbs-$host-install.XXXXXX")"
+profile="$(mktemp -d "${TMPDIR:-/tmp}/verbs-$host-install.XXXXXX")"
 
 cleanup() {
   status=$?
   trap - EXIT HUP INT TERM
   rm -f "$profile/.codex/auth.json" || true
-  if [ "${PANDA_VERBS_KEEP_SMOKE_HOME:-0}" = 1 ]; then
+  if [ "${VERBS_KEEP_SMOKE_HOME:-0}" = 1 ]; then
     echo "INFO: kept disposable profile at $profile"
   else
     rm -rf "$profile"
@@ -71,9 +71,9 @@ if [ "$host" = claude ]; then
   HOME="$profile" CLAUDE_CONFIG_DIR="$profile/.claude" \
     claude plugin install verbs@verbs --scope user
   HOME="$profile" CLAUDE_CONFIG_DIR="$profile/.claude" \
-    PANDA_VERBS_REPO_ROOT="$source_root" \
-    PANDA_VERBS_SMOKE_EXPECT_HOME="$profile" \
-    PANDA_VERBS_SMOKE_INVENTORY_ONLY=1 \
+    VERBS_REPO_ROOT="$source_root" \
+    VERBS_SMOKE_EXPECT_HOME="$profile" \
+    VERBS_SMOKE_INVENTORY_ONLY=1 \
     bash "$source_root/scripts/conformance-smoke.sh" claude
   install_path="$(
     HOME="$profile" CLAUDE_CONFIG_DIR="$profile/.claude" \
@@ -174,8 +174,8 @@ else
   HOME="$profile" CODEX_HOME="$profile/.codex" \
     codex plugin add verbs@verbs --json
   HOME="$profile" CODEX_HOME="$profile/.codex" \
-    PANDA_VERBS_REPO_ROOT="$source_root" \
-    PANDA_VERBS_SMOKE_EXPECT_HOME="$profile" \
+    VERBS_REPO_ROOT="$source_root" \
+    VERBS_SMOKE_EXPECT_HOME="$profile" \
     bash "$source_root/scripts/conformance-smoke.sh" codex
 fi
 

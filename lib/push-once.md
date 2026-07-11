@@ -3,7 +3,7 @@
 > Shared module. Loaded by `grill` and `grill --brief`. Gives the model a fixed menu of 5 named pushback prompts to use when a first reply is rehearsed / vague / unsupported. Replaces ad-hoc improvised pushes with named, audit-able patterns.
 >
 > Origin: a gstack structured-brief precursor ships five pushback patterns.
-> Panda Verbs keeps the reusable pattern catalog here.
+> Verbs keeps the reusable pattern catalog here.
 
 ## When to load
 
@@ -86,4 +86,4 @@ This is the gstack residue lift: copy the discipline, not the body.
 ## Origin
 
 - gstack structured-brief precursor (943 lines) — 5 pushback patterns embedded inside skill body, repeated 11x
-- Panda Verbs — shared by `grill` and `grill --brief`
+- Verbs — shared by `grill` and `grill --brief`

@@ -23,7 +23,7 @@ Grounding sample: L99 — "use the exact per-finding gate from"
 | Pruning | pass | L51 — the default and panel branches are cleanly separated with a completion criterion for each, and the hot description now correctly states the exact two-role seat-filtered composition. |
 | Native parity | pass | L61 — same-model self-review is named as the nearest default behavior, and the skill's delta is a pinned different-family transport that refuses silent fallback. |
 | Granularity | pass | L86 — the panel stays inside the consult skill because it shares transport and caller-owned decisions, while the expensive-if-wrong threshold prevents a routine second workflow. |
-| Panda Verbs conformance | pass | L100 — the current gate reference resolves to lib/gate-contract.md with its exact `approve / edit / reject / skip` options; all seat-filtered role keys also exist in the current anchor table. |
+| Verbs conformance | pass | L100 — the current gate reference resolves to lib/gate-contract.md with its exact `approve / edit / reject / skip` options; all seat-filtered role keys also exist in the current anchor table. |
 
 ## Why it's good
 

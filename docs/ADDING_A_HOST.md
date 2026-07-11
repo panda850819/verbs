@@ -1,8 +1,8 @@
-# Adding a Host to Panda Verbs
+# Adding a Host to Verbs
 
 A host adapter makes the existing skill pack discoverable in one runtime. It
 does not add orchestration, memory, scheduling, identity, or project state to
-Panda Verbs.
+Verbs.
 
 ## Sources of truth
 

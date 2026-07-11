@@ -2,8 +2,8 @@
 # Offline synthetic fixtures for scripts/release-preflight.sh.
 set -euo pipefail
 
-if [ "${PANDA_VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
-  echo "SKIP: release-preflight-test.sh is exercised only by the outer suite; packaged preflight set PANDA_VERBS_RELEASE_PREFLIGHT_INNER=1"
+if [ "${VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
+  echo "SKIP: release-preflight-test.sh is exercised only by the outer suite; packaged preflight set VERBS_RELEASE_PREFLIGHT_INNER=1"
   exit 0
 fi
 
@@ -13,7 +13,7 @@ export GIT_CONFIG_NOSYSTEM=1
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 script_under_test="$repo_root/scripts/release-preflight.sh"
 real_mv="$(command -v mv)"
-tmp="$(mktemp -d "${TMPDIR:-/tmp}/panda-verbs-release-test.XXXXXX")"
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/verbs-release-test.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
 fail=0
@@ -49,7 +49,7 @@ new_fixture() {
 #!/usr/bin/env bash
 set -u
 
-root="${PANDA_VERBS_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
+root="${VERBS_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
 command_name="${1:-}"
 shift || true
 
@@ -118,7 +118,7 @@ EOF
 #!/usr/bin/env bash
 set -u
 cd "$(dirname "$0")/.."
-[ "${PANDA_VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ] || exit 31
+[ "${VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ] || exit 31
 bash tests/release-preflight-test.sh || exit 32
 if [ -f .fixture-fail-tests ]; then
   echo "fixture canonical suite forced failure" >&2
@@ -129,7 +129,7 @@ EOF
 
   cat > "$repo/tests/release-preflight-test.sh" <<'EOF'
 #!/usr/bin/env bash
-if [ "${PANDA_VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
+if [ "${VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
   echo "SKIP: fixture release-preflight self-test skipped under the packaged suite"
   exit 0
 fi
@@ -141,7 +141,7 @@ EOF
 [product]
 id = "verbs"
 marketplace_id = "verbs"
-archive_prefix = "panda-verbs"
+archive_prefix = "verbs"
 
 [manifest]
 version = "7.8.9"
@@ -201,11 +201,11 @@ run_preflight() {
 }
 
 archive_path() {
-  echo "$repo/dist/panda-verbs-v7.8.9.tar.gz"
+  echo "$repo/dist/verbs-v7.8.9.tar.gz"
 }
 
 checksum_path() {
-  echo "$repo/dist/panda-verbs-v7.8.9.tar.gz.sha256"
+  echo "$repo/dist/verbs-v7.8.9.tar.gz.sha256"
 }
 
 seed_stale_outputs() {
@@ -290,7 +290,7 @@ EOF
     fail_t "candidate did not publish archive and checksum"
   fi
 
-  expected_checksum="$(file_sha256 "$archive")  panda-verbs-v7.8.9.tar.gz"
+  expected_checksum="$(file_sha256 "$archive")  verbs-v7.8.9.tar.gz"
   if [ "$(cat "$checksum")" = "$expected_checksum" ]; then
     pass "candidate checksum matches archive bytes"
   else
@@ -301,7 +301,7 @@ EOF
 import sys
 import tarfile
 
-prefix = "panda-verbs-v7.8.9/"
+prefix = "verbs-v7.8.9/"
 with tarfile.open(sys.argv[1], "r:gz") as handle:
     names = [member.name for member in handle.getmembers() if not member.isdir()]
 if not names or not all(name.startswith(prefix) for name in names):
@@ -350,7 +350,7 @@ import sys
 
 path = sys.argv[1]
 text = open(path, encoding="utf-8").read()
-text = text.replace('archive_prefix = "panda-verbs"', 'archive_prefix = "fixture-verbs"', 1)
+text = text.replace('archive_prefix = "verbs"', 'archive_prefix = "fixture-verbs"', 1)
 open(path, "w", encoding="utf-8", newline="\n").write(text)
 PY
   commit_and_push "change manifest archive prefix"
@@ -836,7 +836,7 @@ case_staged_dirty_worktree
 case_untracked_dirty_worktree
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: Panda Verbs release-preflight synthetic cache-layout fixtures all green (not installer proof)"
+  echo "OK: Verbs release-preflight synthetic cache-layout fixtures all green (not installer proof)"
 else
   echo "FAILURES present"
 fi

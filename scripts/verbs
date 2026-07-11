@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Panda Verbs CLI: doctor, install hints, and manifest sync. Stdlib only."""
+"""Verbs CLI: doctor, install hints, and manifest sync. Stdlib only."""
 import argparse
 import hashlib
 import json
@@ -9,11 +9,25 @@ import shlex
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(os.environ.get(
-    "PANDA_VERBS_REPO_ROOT", str(Path(__file__).resolve().parent.parent)
+
+def _env_value(canonical, legacy, default=None):
+    """Read the Verbs variable first, then one bounded legacy alias."""
+    if canonical in os.environ:
+        return os.environ[canonical]
+    if legacy in os.environ:
+        return os.environ[legacy]
+    return default
+
+
+REPO_ROOT = Path(_env_value(
+    "VERBS_REPO_ROOT",
+    "PANDA_VERBS_REPO_ROOT",
+    str(Path(__file__).resolve().parent.parent),
 )).resolve()
 _DEFAULT_MANIFEST = REPO_ROOT / "manifest.toml"
-MANIFEST_PATH = Path(os.environ.get("PANDA_VERBS_MANIFEST", str(_DEFAULT_MANIFEST)))
+MANIFEST_PATH = Path(_env_value(
+    "VERBS_MANIFEST", "PANDA_VERBS_MANIFEST", str(_DEFAULT_MANIFEST)
+))
 DISPATCH_PATH = REPO_ROOT / "DISPATCH.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 
@@ -771,7 +785,7 @@ def run_init(args):
 
 def _sync_root():
     """Repo root the JSON targets are resolved under. Overridable for tests."""
-    override = os.environ.get("PANDA_VERBS_SYNC_ROOT")
+    override = _env_value("VERBS_SYNC_ROOT", "PANDA_VERBS_SYNC_ROOT")
     return Path(override) if override else REPO_ROOT
 
 
@@ -958,7 +972,7 @@ def run_sync(args):
 def main():
     parser = argparse.ArgumentParser(
         prog="verbs",
-        description="Panda Verbs CLI: doctor, install hints, and manifest sync",
+        description="Verbs CLI: doctor, install hints, and manifest sync",
     )
     sub = parser.add_subparsers(dest="command")
 

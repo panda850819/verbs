@@ -2,7 +2,7 @@
 type: skill-eval
 skill: review
 bucket: engineering
-evaluated_skill_hash: d020a3416909e72c4771b2961ee3266212b4ccf7
+evaluated_skill_hash: 546fb61add742113be42bdb80af20ca62f8923c4
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -11,7 +11,7 @@ rubric: writing-great-skills@1.1.0
 
 **Verdict: SOLID.** A fixed audit, scoped parallel lenses, cold-context review, and an internal opposite-seat transport make the review process unusually resistant to confirmation bias; the main construction costs are its long hot body and an implicit native-parity claim.
 
-Grounding sample: L104 — "Panda Verbs defines the three review lenses and their output contract"
+Grounding sample: L104 — "Verbs defines the three review lenses and their output contract"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
@@ -23,7 +23,7 @@ Grounding sample: L104 — "Panda Verbs defines the three review lenses and thei
 | Pruning | weak | L121 — the attacker-control rule is load-bearing but occupies one very dense paragraph; the overall hot body remains far beyond the usual size budget. |
 | Native parity | weak | L146 — cold review clearly adds decorrelation, but the skill never names the nearest native single-pass review feature and states the earned delta only implicitly. |
 | Granularity | pass | L172 — cross-model review stays an internal parallel transport, preserving `review` as the one code-diff verb instead of leaking into `advisor`. |
-| Panda Verbs conformance | weak | L256 — references resolve and heavy reads use isolated agents, but the 227-line body substantially exceeds the normal guideline without an explicit size justification. |
+| Verbs conformance | weak | L256 — references resolve and heavy reads use isolated agents, but the 227-line body substantially exceeds the normal guideline without an explicit size justification. |
 
 ## Why it's good
 

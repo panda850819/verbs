@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 workflow=".github/workflows/release.yml"
-tmp="$(mktemp -d "${TMPDIR:-/tmp}/panda-verbs-release-workflow.XXXXXX")"
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/verbs-release-workflow.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 validator="$tmp/validate.py"
 

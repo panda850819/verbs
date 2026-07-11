@@ -284,7 +284,7 @@ tags: [sprint, {state-lowercase}]
 {any axes not addressed}
 ```
 
-Emit this block to stdout. The host/project may persist it; Panda Verbs does not
+Emit this block to stdout. The host/project may persist it; Verbs does not
 select or write a project-state path.
 
 ## Common Rationalizations

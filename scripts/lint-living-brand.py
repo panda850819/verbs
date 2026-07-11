@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject retired Panda Verbs identity and routes on living documentation."""
+"""Reject retired Verbs identity and routes on living documentation."""
 from __future__ import annotations
 
 import os
@@ -9,15 +9,17 @@ from pathlib import Path
 
 
 ROOT = Path(os.environ.get(
-    "PANDA_VERBS_LIVING_ROOT",
+    "VERBS_LIVING_ROOT",
     Path(__file__).resolve().parent.parent,
 )).resolve()
 ALLOWLIST = Path(os.environ.get(
-    "PANDA_VERBS_BRAND_ALLOWLIST",
+    "VERBS_BRAND_ALLOWLIST",
     ROOT / "scripts" / "living-brand-allowlist.tsv",
 ))
 
 PATTERNS = {
+    "retired display name": re.compile(r"\bPanda\s+Verbs\b", re.I),
+    "retired repository name": re.compile(r"\bpanda-\s*verbs\b", re.I),
     "old product claim": re.compile(
         r"personal(?: context-aware)? AI operator OS|\boperator OS\b|"
         r"\bpersonal-os\b|\bone substrate\b|\bthree runtimes\b|"
@@ -41,7 +43,8 @@ PATTERNS = {
 
 ROOT_FILES = (
     "README.md", "INSTALL_FOR_AGENTS.md", ".codex/INSTALL.md", "CLAUDE.md",
-    "PHILOSOPHY.md", "RESOLVER.md", "DISPATCH.md", "SKILL-FRONTMATTER.md",
+    "PHILOSOPHY.md", "RESOLVER.md", "ROADMAP.md", "DISPATCH.md",
+    "SKILL-FRONTMATTER.md",
     "THIRD_PARTY_NOTICES.md", "docs/first-session.md",
     "docs/ADDING_A_HOST.md", "docs/HERMES.md", "docs/OPENCLAW.md",
 )
@@ -83,16 +86,19 @@ def main():
     failures = []
     for path in living_files():
         relative = path.relative_to(ROOT).as_posix()
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            for label, pattern in PATTERNS.items():
-                if pattern.search(line) and not allowed(relative, line, rules):
-                    failures.append(f"{relative}:{number}: {label}: {line.strip()}")
+        content = path.read_text(encoding="utf-8")
+        for label, pattern in PATTERNS.items():
+            for match in pattern.finditer(content):
+                number = content.count("\n", 0, match.start()) + 1
+                snippet = " ".join(match.group(0).split())
+                if not allowed(relative, snippet, rules):
+                    failures.append(f"{relative}:{number}: {label}: {snippet}")
     if failures:
         print("FAIL: retired identity or routes found on living surfaces:")
         for failure in failures:
             print(f"  {failure}")
         return 1
-    print("OK: living surfaces use the Panda Verbs v4 identity and current routes.")
+    print("OK: living surfaces use the Verbs v0.5 identity and current routes.")
     return 0
 
 

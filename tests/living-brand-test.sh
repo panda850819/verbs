@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Seeded regression cases for the Panda Verbs living-brand linter.
+# Seeded regression cases for the Verbs living-brand linter.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -13,7 +13,7 @@ fail=0
 
 check_pass() {
   local label="$1"
-  if PANDA_VERBS_LIVING_ROOT="$root" PANDA_VERBS_BRAND_ALLOWLIST="$allow" \
+  if VERBS_LIVING_ROOT="$root" VERBS_BRAND_ALLOWLIST="$allow" \
       python3 scripts/lint-living-brand.py >/dev/null; then
     echo "PASS: $label"
   else
@@ -24,7 +24,7 @@ check_pass() {
 
 check_fail() {
   local label="$1"
-  if PANDA_VERBS_LIVING_ROOT="$root" PANDA_VERBS_BRAND_ALLOWLIST="$allow" \
+  if VERBS_LIVING_ROOT="$root" VERBS_BRAND_ALLOWLIST="$allow" \
       python3 scripts/lint-living-brand.py >/dev/null; then
     echo "FAIL: $label"
     fail=1
@@ -33,8 +33,17 @@ check_fail() {
   fi
 }
 
-printf '# Panda Verbs\n\nHard-won ways of working.\n' > "$root/README.md"
+printf '# Verbs\n\nHard-won ways of working.\n' > "$root/README.md"
 check_pass "current identity passes"
+
+printf '# Panda Verbs\n' > "$root/README.md"
+check_fail "retired display name fails"
+
+printf '# Panda\nVerbs\n' > "$root/README.md"
+check_fail "split retired display name fails"
+
+printf 'Clone panda-verbs.\n' > "$root/README.md"
+check_fail "retired repository name fails"
 
 printf '# Personal AI operator OS\n' > "$root/README.md"
 check_fail "old hero fails"
@@ -48,7 +57,7 @@ check_fail "old namespace fails"
 printf 'The pack has 3 documented compositions.\n' > "$root/README.md"
 check_fail "retired lifecycle claim fails"
 
-printf '# Panda Verbs\n' > "$root/README.md"
+printf '# Verbs\n' > "$root/README.md"
 mkdir -p "$root/skills/engineering/ship"
 printf '%s\n' '- trigger `/ship knowledge note.md`' > "$root/skills/engineering/ship/eval.md"
 check_fail "retired eval route fails"

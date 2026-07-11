@@ -2,7 +2,7 @@
 type: skill-eval
 skill: ship
 bucket: engineering
-evaluated_skill_hash: 53c63374c54af9207b8ccb3c68b0176670187db2
+evaluated_skill_hash: 3a664680bbd4a102b793dacc2e14a71002eede0c
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -23,7 +23,7 @@ Grounding sample: L95 — "Do not stage or commit until this branch gate passes.
 | Pruning | weak | L147 — the propose-only flaw-routing paragraph repeats ownership and timing constraints at length after an earlier guard-escalation sentence. |
 | Native parity | weak | L41 — “one command” states convenience but does not explicitly name the delta over native `git` plus `gh pr create`: test, scope, review, branch, and evidence gates. |
 | Granularity | pass | L36 — the skill owns one coherent git-to-PR lifecycle and explicitly leaves knowledge and external publication to the host. |
-| Panda Verbs conformance | weak | L151 — frontmatter and pointers resolve, but the 118-line body exceeds the normal guideline without an explicit reason for retaining all ten steps inline. |
+| Verbs conformance | weak | L151 — frontmatter and pointers resolve, but the 118-line body exceeds the normal guideline without an explicit reason for retaining all ten steps inline. |
 
 ## Why it's good
 

@@ -16,7 +16,7 @@ carry enough context to completion.
 
 When a real question is necessary, include the missing fact and why it changes
 the outcome. Do not write to a memory, telemetry, or audit store. The host may
-record repeated asks under its own policy; Panda Verbs only governs this turn.
+record repeated asks under its own policy; Verbs only governs this turn.
 
 ## Anti-patterns
 

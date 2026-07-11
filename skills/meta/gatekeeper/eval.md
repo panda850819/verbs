@@ -23,11 +23,11 @@ Grounding sample: L56 — "The gate is done only when a routed review template"
 | Pruning | weak | L60 — the five universal-principle subsections repeat trust and execution cautions also implemented by the classifier, risk table, and routed reviews; the 130-line body would benefit from a deletion pass over repeated rationale. |
 | Native parity | weak | L16 — `Every external input is untrusted until verified` states the stance but does not name the nearest native behavior, ad-hoc repository/document review, or the delta: mandatory STRIDE, four-route specialization, and standardized risk output. |
 | Granularity | pass | L22 — four routes remain one skill because they share the same STRIDE, risk, trust, pattern-library, and report contract; only their domain checks split into review references. |
-| Panda Verbs conformance | pass | L2 — `name: gatekeeper` matches the folder, hot/cold pointers resolve, and `aliases`, `license`, and `upstream` are permitted extension frontmatter rather than runtime security claims. |
+| Verbs conformance | pass | L2 — `name: gatekeeper` matches the folder, hot/cold pointers resolve, and `aliases`, `license`, and `upstream` are permitted extension frontmatter rather than runtime security claims. |
 
 ## Why it's good
 
-The classifier protocol is deterministic: every artifact receives category statuses, a floor-only risk ratchet, and findings carried into the routed report. The four routes are complete and software-specific, while the completion clause prevents a premature STRIDE-only answer. Extra provenance frontmatter is advisory metadata and does not conflict with the required Panda Verbs fields.
+The classifier protocol is deterministic: every artifact receives category statuses, a floor-only risk ratchet, and findings carried into the routed report. The four routes are complete and software-specific, while the completion clause prevents a premature STRIDE-only answer. Extra provenance frontmatter is advisory metadata and does not conflict with the required Verbs fields.
 
 ## Top fixes
 

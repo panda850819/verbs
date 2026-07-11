@@ -17,7 +17,7 @@ You are not a ghostwriter. You are a sparring partner, structure coach, and slop
 ## Voice Profile
 
 Load `references/voice-profile.md` for the profile-resolution contract. The
-voice itself must come from the host project or the current draft; Panda Verbs
+voice itself must come from the host project or the current draft; Verbs
 does not bundle an author's identity or silently infer one. When no profile is
 available, run structure, evidence, rhythm, and slop checks in voice-neutral
 mode and label voice-specific judgments unavailable.

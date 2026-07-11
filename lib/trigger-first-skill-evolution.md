@@ -1,6 +1,6 @@
 # Trigger-first Skill Evolution
 
-> Shared skill-evolution rule. Load when creating, improving, splitting, merging, or reviewing Panda Verbs skills. The goal is to let repeated usage create structure instead of forcing a taxonomy too early.
+> Shared skill-evolution rule. Load when creating, improving, splitting, merging, or reviewing Verbs skills. The goal is to let repeated usage create structure instead of forcing a taxonomy too early.
 
 ## Core shape
 

@@ -42,4 +42,4 @@ this module only reads the configured repo path and injects the strongest match.
 - ❌ Listing recalled learnings without using them — recall MUST change the plan or be explicitly dismissed. Listing-and-ignoring is why the prior Step 2 was dead.
 - ❌ Querying the whole knowledge dump — scope to `learnings/`, top 3-5, confidence-decayed.
 - ❌ Treating "no relevant learning" as an error or a reason to skip the step — a clean miss is a result.
-- ❌ Searching a personal or external knowledge store implicitly — Panda Verbs reads only the repo path configured by the host project.
+- ❌ Searching a personal or external knowledge store implicitly — Verbs reads only the repo path configured by the host project.

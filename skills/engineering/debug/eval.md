@@ -22,7 +22,7 @@ Grounding sample: L22 — "Diagnosis ends only on a red-capable command."
 | Pruning | pass | L14 — the introduction now avoids a brittle numeric count, the body remains compact, and the learning tail contains only behavior that changes recall or candidate output. |
 | Native parity | pass | L14 — “You already know how to debug” names the native method and limits the skill’s delta to momentum failures plus non-derivable project lore. |
 | Granularity | pass | L8 — explicit anti-triggers keep review, UI judgment, and feature building outside this diagnosis unit, so no additional invocation cut earns its load. |
-| Panda Verbs conformance | pass | L40 — all current references resolve, the candidate schema now admits `debug`, and both the skill and its diagnosis reference explicitly leave store mutation to the host or project. |
+| Verbs conformance | pass | L40 — all current references resolve, the candidate schema now admits `debug`, and both the skill and its diagnosis reference explicitly leave store mutation to the host or project. |
 
 ## Why it's good
 

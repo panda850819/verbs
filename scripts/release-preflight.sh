@@ -309,12 +309,12 @@ package_root="$extract_dir/$package_dir_name"
 [ -f "$package_root/THIRD_PARTY_NOTICES.md" ] || \
   die "extracted package is missing root THIRD_PARTY_NOTICES.md"
 
-PANDA_VERBS_REPO_ROOT="$package_root" \
+VERBS_REPO_ROOT="$package_root" \
   "$package_root/scripts/verbs" sync --check
 
 (
   cd "$package_root"
-  PANDA_VERBS_RELEASE_PREFLIGHT_INNER=1 bash tests/run-all.sh
+  VERBS_RELEASE_PREFLIGHT_INNER=1 bash tests/run-all.sh
 )
 
 # Synthetic cache-layout proof only. This checks the packaged manifests and
@@ -365,9 +365,9 @@ with open(codex_path, "w", encoding="utf-8", newline="\n") as handle:
     handle.write("enabled = true\n")
 PY
 
-HOME="$test_home" PANDA_VERBS_REPO_ROOT="$package_root" \
+HOME="$test_home" VERBS_REPO_ROOT="$package_root" \
   "$package_root/scripts/verbs" doctor --host claude --strict
-HOME="$test_home" PANDA_VERBS_REPO_ROOT="$package_root" \
+HOME="$test_home" VERBS_REPO_ROOT="$package_root" \
   "$package_root/scripts/verbs" doctor --host codex --strict
 
 archive_hash="$(python3 - "$stage_archive" <<'PY'

@@ -1,13 +1,13 @@
 {
   "name": "verbs",
-  "version": "4.0.0-rc.1",
+  "version": "0.5.0",
   "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills.",
   "author": {
     "name": "Panda Zeng",
     "url": "https://github.com/panda850819"
   },
-  "homepage": "https://github.com/panda850819/panda-verbs",
-  "repository": "https://github.com/panda850819/panda-verbs",
+  "homepage": "https://github.com/panda850819/verbs",
+  "repository": "https://github.com/panda850819/verbs",
   "license": "MIT",
   "keywords": [
     "agent-skills",
@@ -19,7 +19,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Panda Verbs",
+    "displayName": "Verbs",
     "shortDescription": "Hard-won ways of working, encoded as composable skills for coding agents.",
     "longDescription": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills. Verified on Claude Code and Codex. Hermes supports selective manual import. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
     "developerName": "Panda Zeng",

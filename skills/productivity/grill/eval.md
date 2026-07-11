@@ -23,7 +23,7 @@ Grounding sample: L123 — "default grill does not choose or write a project-sta
 | Pruning | weak | L131 — the hot body embeds all three structured-close stages and the wayfinder exit after the atomic grill flow; moving the `--brief` close behind one cold reference would shorten the 155-line skill without changing its branch contract. |
 | Native parity | pass | L27 — it names the native failure, filling a structured questionnaire, and the delta: interrogate one revealed angle at a time until the answer exposes an unknown unknown. |
 | Granularity | pass | L127 — default and `--brief` share the drilling, stopping, and log process; the structured close adds gated alternatives and artifacts without duplicating that core in another skill. |
-| Panda Verbs conformance | pass | L17 — required frontmatter is valid, advisory `reads` and `writes` now claim the actual consulted surfaces and stdout, direct refs resolve, and the longer body is earned by two modes plus hard-stop behavior. |
+| Verbs conformance | pass | L17 — required frontmatter is valid, advisory `reads` and `writes` now claim the actual consulted surfaces and stdout, direct refs resolve, and the longer body is earned by two modes plus hard-stop behavior. |
 
 ## Why it's good
 

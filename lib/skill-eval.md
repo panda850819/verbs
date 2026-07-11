@@ -51,7 +51,7 @@ Grounding sample: L<n> — "<one exact quote of at least 12 characters from that
 | Pruning | … | L<n> — … |
 | Native parity | … | L<n> — … |
 | Granularity | … | L<n> — … |
-| Panda Verbs conformance | … | L<n> — … |
+| Verbs conformance | … | L<n> — … |
 
 ## Why it's good
 <2–3 sentences: the load-bearing strengths>

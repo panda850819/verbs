@@ -1,5 +1,38 @@
 # Changelog
 
+## v0.5.0 — Verbs
+
+Released: 2026-07-11
+
+### Changed
+
+- The product name is **Verbs**. The repository, display name, archive prefix,
+  and canonical environment prefix are now `panda850819/verbs`, `Verbs`,
+  `verbs`, and `VERBS_`.
+- The active roadmap now tracks a small 0.x evidence line and explicit v1.0
+  gates. The retired persona, vault, personal-OS, and lifecycle milestones no
+  longer appear as current work.
+- `v0.5.0` begins a new Verbs version epoch. Existing `v1.*` and
+  `v4.0.0-rc.1` tags/releases remain immutable legacy history.
+
+### Compatibility
+
+- Moving from `4.0.0-rc.1` to `0.5.0` is an explicit uninstall/reinstall;
+  SemVer sorts `0.5.0` below the RC, so an ordinary upgrade is unsafe.
+- `VERBS_*` is canonical. Documented `PANDA_VERBS_*` path and verify-gate
+  variables remain read-only fallbacks through v0.5.x. The retired
+  `scripts/pandastack` shim also forwards its two legacy path variables.
+- The plugin selector and namespace stay `verbs@verbs` and `/verbs:*`.
+
+### Verified
+
+- Manifest-driven Claude, Codex, and Agents metadata agree on version `0.5.0`,
+  repository identity, and the exact 14-skill surface.
+- Release preflight proves the deterministic `verbs-v0.5.0.tar.gz` archive and
+  checksum before the annotated tag is pushed.
+- Disposable Claude and Codex profiles install and invoke the exact tagged
+  artifact; real profiles use the same explicit reinstall path.
+
 ## v4.0.0-rc.1 — Verbs
 
 Released: 2026-07-11

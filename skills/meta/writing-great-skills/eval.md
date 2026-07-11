@@ -2,7 +2,7 @@
 type: skill-eval
 skill: writing-great-skills
 bucket: meta
-evaluated_skill_hash: 07ab37227bdedd8d1126ea190ca6ee0f152b24a0
+evaluated_skill_hash: 5202b60d05eed0002fb3412c1ab0f162f41e442b
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -21,13 +21,13 @@ Grounding sample: L12 — "A skill exists to wrangle determinism out of a stocha
 | Information hierarchy | pass | L35 — the three-tier ladder distinguishes in-skill steps, in-skill references, and external references by immediacy, then ties each step to a checkable completion criterion. |
 | Leading words | pass | L58 — the section defines pretrained anchors, explains their invocation and execution roles, and demonstrates how one can collapse diffuse instructions. |
 | Pruning | pass | L78 — the scorecard is an index back to the defining sections rather than a second copy of every criterion, and it names only `skill-creator --eval` as evaluator. |
-| Native parity | pass | L75 — the section applies its own test directly: generic model guidance can draft a skill, while Panda Verbs adds a checkable nine-axis scorecard plus local hot/cold and conformance rules. |
+| Native parity | pass | L75 — the section applies its own test directly: generic model guidance can draft a skill, while Verbs adds a checkable nine-axis scorecard plus local hot/cold and conformance rules. |
 | Granularity | pass | L14 — definitions stay cold in the co-located glossary while criteria and the scorecard remain together in one reference skill, preserving a single construction SSOT. |
-| Panda Verbs conformance | pass | L90 — required frontmatter is valid, direct glossary and repo-lib pointers resolve, hot/cold is explicit, and the longer body is earned by the complete nine-axis SSOT. |
+| Verbs conformance | pass | L90 — required frontmatter is valid, direct glossary and repo-lib pointers resolve, hot/cold is explicit, and the longer body is earned by the complete nine-axis SSOT. |
 
 ## Why it's good
 
-The skill turns subjective construction advice into reusable concepts: context load, cognitive load, information hierarchy, completion criteria, leading words, and named failure modes. Each scorecard axis points back to its defining section. The native-parity section names both the baseline (generic model guidance) and the delta (checkable scorecard + Panda Verbs conformance), modeling the very test it teaches.
+The skill turns subjective construction advice into reusable concepts: context load, cognitive load, information hierarchy, completion criteria, leading words, and named failure modes. Each scorecard axis points back to its defining section. The native-parity section names both the baseline (generic model guidance) and the delta (checkable scorecard + Verbs conformance), modeling the very test it teaches.
 
 ## Top fixes
 

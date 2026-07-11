@@ -144,7 +144,7 @@ storage belongs to the host/project.
 
 For recurring or mechanically checkable bug classes, apply review Step 7's guard-escalation wording: propose the exact guard file only, never create it here.
 
-**Route the flaw back (propose-only).** If a flaw surfaced during ship maps to an existing Panda Verbs skill — matched against that skill's anti-pattern / checklist table, not just its trigger keywords — emit one `skill-edit candidate: <skill> — <missing check>` line into the session-end learning-candidate audit when the host provides one. See `lib/trigger-first-skill-evolution.md`. Propose-only: never edit the target skill here, and never during an autonomous build. This routes the catch back to strengthen the skill that let it through, instead of leaving only a passive pitfall.
+**Route the flaw back (propose-only).** If a flaw surfaced during ship maps to an existing Verbs skill — matched against that skill's anti-pattern / checklist table, not just its trigger keywords — emit one `skill-edit candidate: <skill> — <missing check>` line into the session-end learning-candidate audit when the host provides one. See `lib/trigger-first-skill-evolution.md`. Propose-only: never edit the target skill here, and never during an autonomous build. This routes the catch back to strengthen the skill that let it through, instead of leaving only a passive pitfall.
 
 ## Common Rationalizations
 

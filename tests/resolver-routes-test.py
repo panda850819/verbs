@@ -51,7 +51,7 @@ def main():
             print(f"  {failure}")
         return 1
     print(
-        f"OK: RESOLVER exposes exactly {len(EXPECTED)} Panda Verbs skills; "
+        f"OK: RESOLVER exposes exactly {len(EXPECTED)} Verbs skills; "
         "retired routes fail loud."
     )
     return 0

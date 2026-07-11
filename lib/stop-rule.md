@@ -2,7 +2,7 @@
 
 > Shared module. Loaded by skills that present multiple decisions and must NOT proceed by writing the recommendation in chat prose and silently continuing. Enforces explicit gates so the user's approval is load-bearing.
 >
-> Origin: a gstack structured-brief precursor repeats "STOP. Wait for user response." 11x because long skills make the model forget halfway. Panda Verbs keeps the rule in one shared lib so every multi-decision skill enforces it without per-skill duplication.
+> Origin: a gstack structured-brief precursor repeats "STOP. Wait for user response." 11x because long skills make the model forget halfway. Verbs keeps the rule in one shared lib so every multi-decision skill enforces it without per-skill duplication.
 
 ## When to load
 
