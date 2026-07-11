@@ -1,4 +1,4 @@
-# Panda Verbs Philosophy
+# Verbs Philosophy
 
 ## Core Belief
 
@@ -10,7 +10,7 @@ Each unit of engineering work should make subsequent units easier — not harder
 
 The intelligence lives in the model plus the skill's own lore, not in swappable
 persona agents. A skill is a short sequence of steps that frames the task, loads the
-relevant lore, and manages the learnings loop. Panda Verbs ships skills and thin host
+relevant lore, and manages the learnings loop. Verbs ships skills and thin host
 adapters. The host owns agents, identity, memory, and scheduling.
 
 ### 2. Close the Loop
@@ -66,7 +66,7 @@ Without explicit contracts, quality degrades silently through the chain —
 later stages lose nuance from earlier ones (telephone effect) and budget
 gets misallocated across passes (model overbuild).
 
-## What Panda Verbs Is Not
+## What Verbs Is Not
 
 - Not a replacement for thinking. It's a tool for structured thinking.
 - Not an agent runtime, personal context store, scheduler, or project source of truth.

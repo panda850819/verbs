@@ -1,6 +1,6 @@
 # Host capability probe
 
-> Shared availability check for a Panda Verbs skill. It checks only the current
+> Shared availability check for a Verbs skill. It checks only the current
 > working directory, packaged references, and tools declared by that skill.
 > Identity, voice, memory, and project policy belong to the host.
 

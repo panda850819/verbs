@@ -3,7 +3,7 @@
 > Nisi principle (media/videos/nisi-deleted-95-percent-skills-personalized):
 > "Load this skill 77% correct / no skill 97% correct — I was actively making
 > it worse, and I only knew because I measured it." This protocol produces that
-> number for a Panda Verbs skill instead of guessing.
+> number for a Verbs skill instead of guessing.
 
 ## Design
 

@@ -1,6 +1,6 @@
 # Voice profile resolution contract
 
-Panda Verbs does not bundle an author's identity. Resolve an optional voice
+Verbs does not bundle an author's identity. Resolve an optional voice
 profile from the host project before making voice-specific judgments.
 
 ## Resolution order

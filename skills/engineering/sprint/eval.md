@@ -2,7 +2,7 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: 82b2d19b89a2b0de3eea6308c0b1c42274ecd587
+evaluated_skill_hash: 39f2c5db8d995c6ec0f83c98f407792a0ff1409c
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -23,7 +23,7 @@ Grounding sample: L202 — "READY_TO_SHIP → SHIPPED or PAUSED"
 | Pruning | weak | L65 — the `--plan` mode bullet repeats read-only and progress-derivation mechanics owned by Stage 3, making the invocation index carry execution detail. |
 | Native parity | pass | L117 — architect re-verification of acceptance is the earned delta over native subagent delegation and blocks self-reported false green. |
 | Granularity | pass | L58 — pure planning routes to `grill --brief`, keeping sprint focused on execution through delivery or an explicit stop state. |
-| Panda Verbs conformance | weak | L292 — references resolve and optional heavy mechanics are externalized, but the 254-line body is far above the normal hot-skill budget. |
+| Verbs conformance | weak | L292 — references resolve and optional heavy mechanics are externalized, but the 254-line body is far above the normal hot-skill budget. |
 
 ## Why it's good
 

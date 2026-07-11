@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: |
-  Create or improve Panda Verbs skills, MECE-checked against the repo-root RESOLVER.md. `--eval <name>` scores an existing skill against the writing-great-skills scorecard and writes a co-located eval.md. Triggers: "create a skill", "improve this skill", "eval/score this skill".
+  Create or improve Verbs skills, MECE-checked against the repo-root RESOLVER.md. `--eval <name>` scores an existing skill against the writing-great-skills scorecard and writes a co-located eval.md. Triggers: "create a skill", "improve this skill", "eval/score this skill".
 version: 1.0.0
 user-invocable: false
 type: skill
@@ -9,7 +9,7 @@ type: skill
 
 # Skill Creator
 
-Create a new Panda Verbs skill that follows the SKILL-FRONTMATTER.md contract and the hot/cold dispatch rule. Sized to fit between `grill --brief` (idea → brief) and `sprint` (brief → execution).
+Create a new Verbs skill that follows the SKILL-FRONTMATTER.md contract and the hot/cold dispatch rule. Sized to fit between `grill --brief` (idea → brief) and `sprint` (brief → execution).
 
 Native drafting can produce a SKILL.md. This workflow earns its slot by
 refusing non-skills, preventing trigger overlap, enforcing hot/cold placement,
@@ -156,7 +156,7 @@ Verification checks pass (`lint-manifest-sync.sh`, `lint-eval-fresh.sh`, and `re
   frontmatter contract. Stack extensions and advisory audit metadata remain
   valid when `SKILL-FRONTMATTER.md` defines them.
 - **Adding a new RESOLVER category without justification** — categories are an MECE budget, not a free namespace.
-- **Shipping a one-off skill** — if it won't fire >3 times in the next month, don't ship. Panda Verbs has repeatedly cut low-leverage skills for this reason.
+- **Shipping a one-off skill** — if it won't fire >3 times in the next month, don't ship. Verbs has repeatedly cut low-leverage skills for this reason.
 
 ## Related
 

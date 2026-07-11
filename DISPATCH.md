@@ -15,9 +15,9 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Focused build-to-ship session | `sprint` |
 | About to commit | `review`, then `ship` |
 | External artifact before install / adopt | `gatekeeper` |
-| Non-trivial but no row matches | classify the load-bearing unknown: fact→inspect first (code/docs/knowledge base) · intent→`grill` · taste→`ui` · architecture→`grill --brief` · risk→`careful` · verification→`debug` · mechanical→`handover`; still unclear → Panda Verbs `RESOLVER.md`, pick closest |
+| Non-trivial but no row matches | classify the load-bearing unknown: fact→inspect first (code/docs/knowledge base) · intent→`grill` · taste→`ui` · architecture→`grill --brief` · risk→`careful` · verification→`debug` · mechanical→`handover`; still unclear → Verbs `RESOLVER.md`, pick closest |
 
 <!-- Maintenance: this file is the SINGLE SOURCE for the process-axis routing table.
      Hosts may point to it directly or explicitly wire hooks/session-start as a
-     reference adapter. Panda Verbs does not register the adapter automatically.
+     reference adapter. Verbs does not register the adapter automatically.
      Do not fork the table. -->

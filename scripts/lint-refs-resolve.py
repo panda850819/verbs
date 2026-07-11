@@ -11,7 +11,7 @@ Usage: python3 scripts/lint-refs-resolve.py [repo-root]
 Accepted non-repo tokens (skipped): output convention dirs skills create at
 runtime (docs/sessions, docs/checkpoints, docs/retros, docs/plans, docs/briefs,
 docs/handoffs — not tracked when empty), absolute-path substrings
-(skills/panda-verbs/...), external URLs (skills/tree/main/...), and template
+(skills/verbs/...), external URLs (skills/tree/main/...), and template
 placeholders containing { or < (verified by shape, not existence).
 
 Pack token limits: verbs:<name> resolves to this pack's skill dirs; and
@@ -41,7 +41,7 @@ SLASH_COMMAND = re.compile(r"`(/(?:verbs:)?[a-z0-9][a-z0-9-]*)`")
 def accepted(t):
     return (
         t.startswith(("docs/sessions", "docs/checkpoints", "docs/retros", "docs/plans", "docs/briefs", "docs/handoffs"))
-        or t.startswith("skills/panda-verbs/scripts")  # repo URL/path substring
+        or t.startswith("skills/verbs/scripts")  # repo URL/path substring
         or t.startswith("skills/tree/main")           # github URL substring
         or t == "skills/SKILL.md"                       # substring of writing-great-skills/SKILL.md
         or "{" in t or "<" in t                         # template placeholder
@@ -85,7 +85,7 @@ for f in glob.glob("skills/**/SKILL.md", recursive=True):
             name = name.split(":", 1)[1]
         if name in skill_bucket or command in command_allowlist:
             continue
-        broken.setdefault(f, []).append((command, "slash command does not match a Panda Verbs skill or allowlist entry"))
+        broken.setdefault(f, []).append((command, "slash command does not match a Verbs skill or allowlist entry"))
 
 if broken:
     print("FAIL: unresolved internal refs in SKILL.md files:")

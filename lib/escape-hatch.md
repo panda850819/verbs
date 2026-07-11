@@ -3,7 +3,7 @@
 > Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `grill --brief`, `gatekeeper`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
 >
 > Origin: a gstack structured-brief precursor shipped an embedded escape hatch
-> (943 lines total). Panda Verbs keeps the rule in one shared lib.
+> (943 lines total). Verbs keeps the rule in one shared lib.
 
 ## When to load
 

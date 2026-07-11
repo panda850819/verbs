@@ -24,6 +24,6 @@ if bash "$tmp/adapter-root/hooks/session-start" >"$tmp/adapter.out" 2>"$tmp/adap
   echo "FAIL: reference adapter accepted a missing DISPATCH.md" >&2
   exit 1
 fi
-grep -Fq "Panda Verbs session adapter: missing" "$tmp/adapter.err"
+grep -Fq "Verbs session adapter: missing" "$tmp/adapter.err"
 
 echo "OK: missing requested host cannot be masked by offline adapter checks"

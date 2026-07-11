@@ -23,7 +23,7 @@ Grounding sample: L46 — "Direct main-agent browser checking is the native base
 | Pruning | pass | L98 — Step 4 now executes the report's `Action` field through the referenced contract and explicitly refuses a second classification rule, making the SSOT explicit. |
 | Native parity | pass | L46 — direct main-agent browser checking is named as the explicit native baseline; isolated workers plus structured markers are the optional delta for larger suites. |
 | Granularity | pass | L58 — small changes run directly and large grouped suites may fan out to isolated workers, while both branches share one plan, assertion protocol, summary, fix, and candidate sequence. |
-| Panda Verbs conformance | pass | L104 — both repo-root references resolve, the current candidate format admits `skill: qa`, the capability extension is allowed, and persistence remains explicitly host-owned. |
+| Verbs conformance | pass | L104 — both repo-root references resolve, the current candidate format admits `skill: qa`, the capability extension is allowed, and persistence remains explicitly host-owned. |
 
 ## Why it's good
 

@@ -2,7 +2,7 @@
 type: skill-eval
 skill: handover
 bucket: engineering
-evaluated_skill_hash: 33a953f1e0f912801d4c80a1cd53fa66f0beef62
+evaluated_skill_hash: 886f04edde7e0d9c491c6906d614efaba7386df3
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -23,7 +23,7 @@ Grounding sample: L91 — "Stop when that one-shot table returns its"
 | Pruning | pass | L34 — the skill now keeps one consistent Routing Boundary; the unfinished-versus-finished distinction does not repeat after the preceding exclusion list already routes closing work to `ship`. |
 | Native parity | pass | L35 — raw `codex exec` is named as the nearest native path, and the payload contract, preflight, pinned model, sandbox gate, and terminal classification are the concrete delta. |
 | Granularity | pass | L57 — sync and async share plan resolution, model selection, and payload construction; one skill is justified because their only mode axis is whether this turn remains occupied. |
-| Panda Verbs conformance | pass | L77 — required and advisory frontmatter match current behavior, both references resolve, the long body is earned by two modes plus seven safety gates, and the result classification is one-shot with no batch counter. |
+| Verbs conformance | pass | L77 — required and advisory frontmatter match current behavior, both references resolve, the long body is earned by two modes plus seven safety gates, and the result classification is one-shot with no batch counter. |
 
 ## Why it's good
 

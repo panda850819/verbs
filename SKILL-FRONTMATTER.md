@@ -1,10 +1,10 @@
-# Panda Verbs skill frontmatter spec
+# Verbs skill frontmatter spec
 
-> Contract for `skills/<name>/SKILL.md` frontmatter in Panda Verbs and compatible skill packs.
+> Contract for `skills/<name>/SKILL.md` frontmatter in Verbs and compatible skill packs.
 
 ## Why this exists
 
-The frontmatter is the contract between a skill and the hosts that consume it: Panda Verbs declares what each skill is, and downstream hosts read it to surface, validate, and route.
+The frontmatter is the contract between a skill and the hosts that consume it: Verbs declares what each skill is, and downstream hosts read it to surface, validate, and route.
 
 Without a contract, the `name` field drifts (`verbs:X` / `ps-X` / `X` coexist) and optional fields multiply ad-hoc. Drift makes the resolver brittle and migration costly.
 

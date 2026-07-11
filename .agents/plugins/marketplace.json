@@ -1,7 +1,7 @@
 {
   "name": "verbs",
   "interface": {
-    "displayName": "Panda Verbs"
+    "displayName": "Verbs"
   },
   "plugins": [
     {

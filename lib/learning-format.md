@@ -1,6 +1,6 @@
 # Learning Candidate Format
 
-Panda Verbs emits this shape to stdout. It does not select a storage path or
+Verbs emits this shape to stdout. It does not select a storage path or
 write a learning file. A host/project may persist the candidate in its own
 configured store.
 

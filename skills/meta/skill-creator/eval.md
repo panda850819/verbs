@@ -2,7 +2,7 @@
 type: skill-eval
 skill: skill-creator
 bucket: meta
-evaluated_skill_hash: de47c75e4574d7b0c4a978e7b8b78dc29f3d5be5
+evaluated_skill_hash: 7c59e867d347ac31141a8c4f59bef18d306e2296
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -23,7 +23,7 @@ Grounding sample: L15 — "refusing non-skills, preventing trigger overlap, enfo
 | Pruning | weak | L56 — the hot/cold phase expands a binary placement rule into a 22-line diagram and example block; a compact rule plus a cold evidence pointer would preserve behavior and reduce the 164-line body. |
 | Native parity | pass | L14 — states directly that native drafting can produce a SKILL.md, while this workflow earns its slot through Q0 refusal, overlap control, hot/cold placement, manifest-driven sync, and route verification. |
 | Granularity | pass | L18 — evaluation remains a mode of the creator because generation and judgment share the same scorecard, hash contract, and completion checks; a separate evaluator surface would duplicate that core. |
-| Panda Verbs conformance | pass | L156 — foreign routing/runtime claims must map to the current contract, while stack extensions and advisory audit metadata are explicitly preserved as valid. |
+| Verbs conformance | pass | L156 — foreign routing/runtime claims must map to the current contract, while stack extensions and advisory audit metadata are explicitly preserved as valid. |
 
 ## Why it's good
 

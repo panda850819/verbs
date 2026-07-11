@@ -15,10 +15,10 @@ VERSION = "1.2.3"
 EXPECTED = {"advisor", "alpha"}
 PRODUCT = {
     "id": "verbs",
-    "display_name": "Panda Verbs",
+    "display_name": "Verbs",
     "marketplace_id": "verbs",
-    "repository": "panda850819/panda-verbs",
-    "homepage": "https://github.com/panda850819/panda-verbs",
+    "repository": "panda850819/verbs",
+    "homepage": "https://github.com/panda850819/verbs",
     "description": (
         "An opinionated skill pack for taking software work from ambiguity "
         "to verified delivery."
@@ -30,8 +30,8 @@ PRODUCT = {
         "Verified on Claude Code and Codex. Hermes supports selective manual import."
     ),
     "category": "Developer Tools",
-    "archive_prefix": "panda-verbs",
-    "environment_prefix": "PANDA_VERBS",
+    "archive_prefix": "verbs",
+    "environment_prefix": "VERBS",
     "keywords": ["agent-skills", "coding-agents"],
 }
 
@@ -190,8 +190,8 @@ def doctor(root, home, *args):
     env.update(
         {
             "HOME": str(home),
-            "PANDA_VERBS_REPO_ROOT": str(root),
-            "PANDA_VERBS_MANIFEST": str(root / "manifest.toml"),
+            "VERBS_REPO_ROOT": str(root),
+            "VERBS_MANIFEST": str(root / "manifest.toml"),
         }
     )
     proc = subprocess.run(

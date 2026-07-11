@@ -23,7 +23,7 @@ Grounding sample: L21 — "Verify the render, not the source."
 | Pruning | pass | L14 — the skill explicitly assumes native design ability and carries only missing craft numbers plus override discipline; generic design-process prose is absent. |
 | Native parity | pass | L18 — it names the native competitor concretely, Inter plus gradient hero, two CTAs, and identical cards, then requires a named direction and default-trap scan as the delta. |
 | Granularity | pass | L26 — typography, color, layout, motion, content, and completeness remain one cold craft reference because they all support the same UI invocation rather than distinct trigger surfaces. |
-| Panda Verbs conformance | pass | L2 — required frontmatter is valid, the craft pointer resolves, no data-heavy material is loaded hot, and the 27-line body stays well under the soft cap. |
+| Verbs conformance | pass | L2 — required frontmatter is valid, the craft pointer resolves, no data-heavy material is loaded hot, and the 27-line body stays well under the soft cap. |
 
 ## Why it's good
 

@@ -2,7 +2,7 @@
 type: skill-eval
 skill: write
 bucket: writing
-evaluated_skill_hash: 7cc5c21c8dd6e43f4429f5a77a85bbb88ed704bc
+evaluated_skill_hash: 225b78af596eb1860ce6447a8d657da936949aa9
 evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
@@ -23,7 +23,7 @@ Grounding sample: L13 — "AI touches HOW you say it, never WHAT you say or WHY"
 | Pruning | weak | L52 and L103 — the same ~8K article-pattern sub-agent scan and return contract is specified in both Spar and Edit; a shared pointer would reduce drift in an already-dense body. |
 | Native parity | pass | L39 — names the default model ghostwriting reflex, replaces it with specific Spar redirect, preserves author's thesis before any prose generation — delta from native that merits the skill. |
 | Granularity | pass | L48–212 — eight modes share voice resolution and anti-slop contracts but split by execution path; each branch occupies distinct input state and completion criteria, justifying the split. |
-| Panda Verbs conformance | pass | L4 (alias frontmatter), L134 (read-only library semantics), L141 (hot/cold dispatch enforced), L298 (output validation reference) — all conformance checks verified and explicit. |
+| Verbs conformance | pass | L4 (alias frontmatter), L134 (read-only library semantics), L141 (hot/cold dispatch enforced), L298 (output validation reference) — all conformance checks verified and explicit. |
 
 ## Why it's good
 

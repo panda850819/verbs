@@ -1,12 +1,12 @@
 # RESOLVER.md
 
-> Map of every active skill in Panda Verbs. Use this as the index when something looks like overlap or you cannot tell which skill to invoke.
+> Map of every active skill in Verbs. Use this as the index when something looks like overlap or you cannot tell which skill to invoke.
 >
 > Companion to PHILOSOPHY.md (the why) and the per-skill SKILL.md files (the how). The active tier list lives in `manifest.toml`.
 
 ## Why this file exists
 
-Panda Verbs ships the skills cataloged in `manifest.toml` (core + ext tiers). Each skill owns its own contract; users and hosts compose them as needed.
+Verbs ships the skills cataloged in `manifest.toml` (core + ext tiers). Each skill owns its own contract; users and hosts compose them as needed.
 
 This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md beats multi-repo split, because the categorization lives next to the content.
 
@@ -51,7 +51,7 @@ Scope greenfield design (DB schema, service topology, ADRs) with `grill --brief`
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `verbs:skill-creator` | Create new Panda Verbs skills. MECE-checks RESOLVER, enforces hot/cold dispatch, applies trigger-first skill evolution, and `--eval` scores existing skills. | create a skill, new Panda Verbs skill, improve this skill, eval this skill, score this skill |
+| `verbs:skill-creator` | Create new Verbs skills. MECE-checks RESOLVER, enforces hot/cold dispatch, applies trigger-first skill evolution, and `--eval` scores existing skills. | create a skill, new Verbs skill, improve this skill, eval this skill, score this skill |
 | `verbs:writing-great-skills` | Reference + scorecard for well-constructed skills. The construction-quality SSOT (scores the SKILL.md, not its artifact). `skill-creator --eval` binds it. | how do I write a skill, what makes a skill good |
 
 ## Disambiguation
@@ -74,7 +74,7 @@ If you are reviewing your own PR -> `verbs:review`. If you are deciding whether 
 
 ## Version
 
-This RESOLVER.md is for Panda Verbs v4.0.0-rc.1. Update it when adding, removing, or renaming skills.
+This RESOLVER.md is for Verbs v0.5.0. Update it when adding, removing, or renaming skills.
 
 ---
 

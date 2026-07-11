@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook for Panda Verbs.
+# SessionStart hook for Verbs.
 # Inspired by superpowers v5.0.7 hook structure (obra/superpowers).
 # Injects only the dispatch table. Identity, memory, and project policy belong
 # to the host, not this skill pack.
@@ -21,7 +21,7 @@ escape_for_json() {
 plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dispatch_file="${plugin_root}/DISPATCH.md"
 [ -f "$dispatch_file" ] || {
-  echo "Panda Verbs session adapter: missing $dispatch_file" >&2
+  echo "Verbs session adapter: missing $dispatch_file" >&2
   exit 1
 }
 dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"

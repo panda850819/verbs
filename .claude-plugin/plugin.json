@@ -1,12 +1,12 @@
 {
   "name": "verbs",
   "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills.",
-  "version": "4.0.0-rc.1",
+  "version": "0.5.0",
   "author": {
     "name": "Panda Zeng"
   },
-  "homepage": "https://github.com/panda850819/panda-verbs",
-  "repository": "https://github.com/panda850819/panda-verbs",
+  "homepage": "https://github.com/panda850819/verbs",
+  "repository": "https://github.com/panda850819/verbs",
   "keywords": [
     "agent-skills",
     "coding-agents",

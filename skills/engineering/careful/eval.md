@@ -23,7 +23,7 @@ Grounding sample: L21 — "Ordinary model caution can still proceed without an a
 | Pruning | weak | L44 — the filesystem exemption packs the artifact catalog, two predicates, multi-path behavior, examples, and rationale into one hot paragraph; extract the catalog and edge-case proof once the rule has another consumer. |
 | Native parity | pass | L21 — it explicitly names the nearest native baseline (model's ordinary caution, which can proceed without an answer) and the delta (careful blocks the listed action until explicit confirmation), making the contribution clear. |
 | Granularity | pass | L70 — the "only automatic pauses" boundary keeps Git, filesystem, external, database, and verification cases inside one coherent safety mode rather than spawning adjacent skills. |
-| Panda Verbs conformance | pass | L78 — required frontmatter is valid, advisory `forbids` entries align with the scoped filesystem exemption, and the current anti-bypass reference resolves with the same path-by-path rule. |
+| Verbs conformance | pass | L78 — required frontmatter is valid, advisory `forbids` entries align with the scoped filesystem exemption, and the current anti-bypass reference resolves with the same path-by-path rule. |
 
 ## Why it's good
 

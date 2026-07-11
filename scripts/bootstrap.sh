@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# panda-verbs/scripts/bootstrap.sh
+# verbs/scripts/bootstrap.sh
 #
 # Report-only: surfaces what's ready to run, what needs a public CLI, and
 # what install command to run. Reads manifest.toml as the single source of
@@ -24,7 +24,7 @@ fi
 ok()   { printf "  \033[32m✓\033[0m %s\n" "$1"; }
 
 echo
-echo "Panda Verbs bootstrap"
+echo "Verbs bootstrap"
 echo "===================="
 echo "Repo:     $REPO_ROOT"
 echo "Manifest: $MANIFEST"

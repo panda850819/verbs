@@ -60,7 +60,7 @@ EOF
 expect_pass() {
   local label="$1" root="$2" name="$3" log
   log="$tmp/$label.log"
-  if env PANDA_VERBS_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
+  if env VERBS_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
     printf 'ok    %s passing verdict passed\n' "$label"
   else
     printf 'FAIL  %s passing verdict failed\n' "$label"
@@ -72,7 +72,7 @@ expect_pass() {
 expect_fail() {
   local label="$1" root="$2" name="$3" log
   log="$tmp/$label.log"
-  if env PANDA_VERBS_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
+  if env VERBS_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
     printf 'FAIL  %s failing verdict unexpectedly passed\n' "$label"
     cat "$log"
     fail=1

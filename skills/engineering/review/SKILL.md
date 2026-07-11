@@ -101,7 +101,7 @@ Log detected scopes: "Scope signals: {list}" (or "none" if only base code change
 
 Launch review passes in parallel using `context: fork` (isolated subagents — results flow back, intermediate work stays out of main context). Each reviews the same diff with a different lens.
 
-Use the host's available isolated-agent mechanism. Panda Verbs defines the three review lenses and their output contract; agent implementation, model selection, and global dispatch policy remain host concerns.
+Use the host's available isolated-agent mechanism. Verbs defines the three review lenses and their output contract; agent implementation, model selection, and global dispatch policy remain host concerns.
 
 **Always-on passes (run every time):**
 

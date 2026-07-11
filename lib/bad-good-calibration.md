@@ -2,7 +2,7 @@
 
 > Shared module. Loaded by skills that produce user-facing text where voice / posture matters. Replaces banned-phrase enumeration with concrete BAD → GOOD pairs that show the target posture in context.
 >
-> Origin: gstack ships anti-sycophancy and framing examples across long skills. Panda Verbs consolidates the recurring posture failures into four pairs for skill-level loading.
+> Origin: gstack ships anti-sycophancy and framing examples across long skills. Verbs consolidates the recurring posture failures into four pairs for skill-level loading.
 
 ## When to load
 

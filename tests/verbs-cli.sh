@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/verbs-cli.sh -- Panda Verbs CLI front-door regression tests.
+# tests/verbs-cli.sh -- Verbs CLI front-door regression tests.
 # No network and no real Claude/Codex invocation. Every HOME is isolated.
 set -uo pipefail
 
@@ -40,9 +40,9 @@ for invocation in direct python3; do
      && [ "$(wc -l < "$legacy_stderr" | tr -d ' ')" = 1 ] \
      && grep -qF "DEPRECATED: scripts/pandastack moved to scripts/verbs" \
           "$legacy_stderr"; then
-    pass "RC shim preserves $invocation invocation output and exit status"
+    pass "shim preserves $invocation invocation output and exit status"
   else
-    fail_t "RC shim broke $invocation invocation compatibility"
+    fail_t "shim broke $invocation invocation compatibility"
   fi
 done
 
@@ -53,7 +53,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# T02 -- doctor schema is the narrow v4 product/install report
+# T02 -- doctor schema is the narrow Verbs product/install report
 # ---------------------------------------------------------------------------
 json_out="$(HOME="$clean_home" "$PY3" "$CLI" doctor --json 2>&1)"
 if echo "$json_out" | "$PY3" -m json.tool >/dev/null 2>&1; then
@@ -69,15 +69,15 @@ assert set(r) == {"schema_version", "product", "repo", "host", "checks"}, set(r)
 assert r["schema_version"] == 2
 assert set(r["checks"]) == {"manifest", "runtime_surface"}
 assert r["product"]["id"] == "verbs"
-assert r["product"]["display_name"] == "Panda Verbs"
+assert r["product"]["display_name"] == "Verbs"
 assert r["product"]["marketplace_id"] == "verbs"
-assert r["product"]["repository"] == "panda850819/panda-verbs"
-assert r["product"]["environment_prefix"] == "PANDA_VERBS"
+assert r["product"]["repository"] == "panda850819/verbs"
+assert r["product"]["environment_prefix"] == "VERBS"
 for retired in ("roles", "recommendation", "next_actions", "capabilities_paths"):
     assert retired not in r, retired
 assert "substrate" not in r["checks"]
 ' 2>/dev/null \
-  && pass "doctor JSON has only the v4 product/repo/host/check surface" \
+  && pass "doctor JSON has only the Verbs product/repo/host/check surface" \
   || fail_t "doctor JSON contains missing or retired fields"
 
 core_count="$(echo "$json_out" | "$PY3" -c \
@@ -101,11 +101,11 @@ manifest_ok="$(echo "$json_out" | "$PY3" -c \
 
 # The old internal env name must not be needed by the canonical CLI.
 bad_manifest="$tmp/nonexistent-manifest.toml"
-if HOME="$clean_home" PANDA_VERBS_MANIFEST="$bad_manifest" \
+if HOME="$clean_home" VERBS_MANIFEST="$bad_manifest" \
     "$PY3" "$CLI" doctor --json >/dev/null 2>"$tmp/manifest.err"; then
   fail_t "missing manifest should exit nonzero"
 else
-  pass "PANDA_VERBS_MANIFEST controls the canonical manifest path"
+  pass "VERBS_MANIFEST controls the canonical manifest path"
 fi
 if grep -q "Traceback" "$tmp/manifest.err" 2>/dev/null; then
   fail_t "missing manifest should not print a traceback"
@@ -115,8 +115,23 @@ else
   fail_t "missing manifest should show a clear error"
 fi
 
+if HOME="$clean_home" PANDA_VERBS_MANIFEST="$bad_manifest" \
+    "$PY3" "$CLI" doctor --json >/dev/null 2>"$tmp/legacy-manifest.err"; then
+  fail_t "PANDA_VERBS_MANIFEST fallback should still control the manifest path"
+else
+  pass "PANDA_VERBS_MANIFEST remains a bounded 0.x fallback"
+fi
+
+if HOME="$clean_home" VERBS_MANIFEST="$repo_root/manifest.toml" \
+    PANDA_VERBS_MANIFEST="$bad_manifest" "$PY3" "$CLI" doctor --json \
+    >/dev/null 2>"$tmp/manifest-precedence.err"; then
+  pass "VERBS_MANIFEST wins over the legacy fallback"
+else
+  fail_t "canonical manifest variable should win over the legacy fallback"
+fi
+
 text_out="$(HOME="$clean_home" "$PY3" "$CLI" doctor 2>&1)"
-for required in "Panda Verbs doctor" "manifest:" "source registrations:" \
+for required in "Verbs doctor" "manifest:" "source registrations:" \
                 "claude install:" "codex install:"; do
   if echo "$text_out" | grep -qF "$required"; then
     pass "doctor text contains '$required'"
@@ -179,9 +194,9 @@ mkdir -p "$space_root/scripts"
 cp "$repo_root/manifest.toml" "$space_root/manifest.toml"
 cp "$repo_root/scripts/bootstrap.sh" "$space_root/scripts/bootstrap.sh"
 
-PANDA_VERBS_REPO_ROOT="$space_root" "$PY3" "$CLI" \
+VERBS_REPO_ROOT="$space_root" "$PY3" "$CLI" \
   init --host claude --dry-run >"$tmp/spaced-claude.out"
-PANDA_VERBS_REPO_ROOT="$space_root" "$PY3" "$CLI" \
+VERBS_REPO_ROOT="$space_root" "$PY3" "$CLI" \
   init --host codex --dry-run >"$tmp/spaced-codex.out"
 PANDASTACK_REPO_ROOT="$space_root" "$PY3" "$LEGACY_CLI" \
   init --host claude --dry-run >"$tmp/legacy-spaced.out" 2>"$tmp/legacy-spaced.err"
@@ -247,9 +262,19 @@ fi
 
 if grep -qF "DEPRECATED: scripts/pandastack moved to scripts/verbs" \
         "$tmp/legacy-spaced.err"; then
-  pass "RC shim maps legacy PANDASTACK_REPO_ROOT to PANDA_VERBS_REPO_ROOT"
+  pass "shim maps legacy PANDASTACK_REPO_ROOT to VERBS_REPO_ROOT"
 else
-  fail_t "RC shim lost the legacy repo-root environment override"
+  fail_t "shim lost the legacy repo-root environment override"
+fi
+
+if PANDA_VERBS_REPO_ROOT="$space_root" \
+    PANDASTACK_REPO_ROOT="$tmp/older-stack-root" \
+    "$PY3" "$LEGACY_CLI" init --host claude --dry-run \
+    >"$tmp/legacy-precedence.out" 2>"$tmp/legacy-precedence.err" \
+    && grep -qF "$space_root" "$tmp/legacy-precedence.out"; then
+  pass "PANDA_VERBS_REPO_ROOT wins over the older PANDASTACK fallback"
+else
+  fail_t "shim legacy precedence selected the older PANDASTACK path"
 fi
 
 init_hermes="$(HOME="$clean_home" "$PY3" "$CLI" init --host hermes --dry-run 2>&1)"

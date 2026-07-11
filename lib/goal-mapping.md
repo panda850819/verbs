@@ -4,7 +4,7 @@ Pre-step before requirement clarification. Identify which stated project goals
 the task serves, weight them, and use the dominant layer to shape downstream
 questions and alternatives.
 
-Panda Verbs does not discover personal goals from identity or memory stores.
+Verbs does not discover personal goals from identity or memory stores.
 Use goals already in the conversation or explicitly present in the current
 project. Missing context stays missing.
 

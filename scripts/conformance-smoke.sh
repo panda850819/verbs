@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Verify enabled plugin inventory, exact packaged parity, and one namespaced
-# Panda Verbs invocation. Host install is a prerequisite; this script never
+# Verbs invocation. Host install is a prerequisite; this script never
 # creates registry/cache fixtures.
 set -uo pipefail
 
@@ -9,9 +9,9 @@ cli="$repo_root/scripts/verbs"
 fail=0
 host_ran=0
 
-if [ -n "${PANDA_VERBS_SMOKE_EXPECT_HOME:-}" ]; then
+if [ -n "${VERBS_SMOKE_EXPECT_HOME:-}" ]; then
   actual_home="$(cd "$HOME" 2>/dev/null && pwd -P)" || actual_home=""
-  expected_home="$(cd "$PANDA_VERBS_SMOKE_EXPECT_HOME" 2>/dev/null && pwd -P)" \
+  expected_home="$(cd "$VERBS_SMOKE_EXPECT_HOME" 2>/dev/null && pwd -P)" \
     || expected_home=""
   if [ -z "$actual_home" ] || [ "$actual_home" != "$expected_home" ]; then
     echo "FAIL: HOME is not the expected disposable smoke profile" >&2
@@ -139,7 +139,7 @@ run_claude() {
     return
   fi
   check_doctor claude || return
-  if [ "${PANDA_VERBS_SMOKE_INVENTORY_ONLY:-0}" = 1 ]; then
+  if [ "${VERBS_SMOKE_INVENTORY_ONLY:-0}" = 1 ]; then
     echo "PASS [claude]: inventory-only smoke completed"
     return
   fi
@@ -173,7 +173,7 @@ run_codex() {
     return
   fi
   check_doctor codex || return
-  if [ "${PANDA_VERBS_SMOKE_INVENTORY_ONLY:-0}" = 1 ]; then
+  if [ "${VERBS_SMOKE_INVENTORY_ONLY:-0}" = 1 ]; then
     echo "PASS [codex]: inventory-only smoke completed"
     return
   fi

@@ -15,7 +15,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-skills_dir="${PANDA_VERBS_LINT_SKILLS_DIR:-$repo_root/skills}"
+skills_dir="${VERBS_LINT_SKILLS_DIR:-${PANDA_VERBS_LINT_SKILLS_DIR:-$repo_root/skills}}"
 only="${1:-}"
 scorecard="$repo_root/skills/meta/writing-great-skills/SKILL.md"
 scorecard_version="$(sed -n 's/^version:[[:space:]]*//p' "$scorecard" | head -1 | tr -d '"[:space:]')"
@@ -141,7 +141,7 @@ if [ -n "$only" ] && [ "$checked" -eq 0 ]; then
   exit 1
 fi
 
-# A skills dir that resolves to zero skills (typo'd PANDA_VERBS_LINT_SKILLS_DIR,
+# A skills dir that resolves to zero skills (typo'd VERBS_LINT_SKILLS_DIR,
 # deleted fixture) must never produce a green gate.
 if [ "$checked" -eq 0 ]; then
   echo "FAIL: no skills found under $skills_dir — refusing to pass an empty gate"

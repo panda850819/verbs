@@ -1,7 +1,7 @@
 ---
 name: writing-great-skills
 description: |
-  Reference for writing and editing Panda Verbs skills well — the vocabulary and principles that make a skill predictable, plus the checkable scorecard `skill-creator --eval` scores against. Consult when authoring, splitting, pruning, or reviewing a SKILL.md. The construction-quality SSOT (counterpart to lib/quality-rubric.md, which scores artifacts, not skills).
+  Reference for writing and editing Verbs skills well — the vocabulary and principles that make a skill predictable, plus the checkable scorecard `skill-creator --eval` scores against. Consult when authoring, splitting, pruning, or reviewing a SKILL.md. The construction-quality SSOT (counterpart to lib/quality-rubric.md, which scores artifacts, not skills).
 version: 1.1.0
 user-invocable: false
 type: skill
@@ -40,7 +40,7 @@ A skill mixes two content types — **steps** and **reference** — placed on th
 
 **Progressive disclosure** is the move down the ladder so the top stays legible. A **branch** is a distinct way the skill is used; inline what every branch needs, push behind a pointer what only some reach. **Co-location**: keep a concept's definition, rules, and caveats under one heading.
 
-Panda Verbs note: the **hot/cold dispatch rule** is progressive disclosure with teeth — a skill that must read >5K tokens of reference dispatches a sub-agent rather than loading it hot.
+Verbs note: the **hot/cold dispatch rule** is progressive disclosure with teeth — a skill that must read >5K tokens of reference dispatches a sub-agent rather than loading it hot.
 
 ## When to split
 
@@ -51,7 +51,7 @@ Panda Verbs note: the **hot/cold dispatch rule** is progressive disclosure with 
 
 ## Pruning
 
-Keep each meaning in a **single source of truth**. Check every line for **relevance**. Then hunt **no-ops** sentence by sentence: does it change behaviour versus the default? Be aggressive — most prose that fails the no-op test should be deleted, not reworded. Panda Verbs discipline: a skill body runs ~under 80 lines unless the extra length clearly earns itself.
+Keep each meaning in a **single source of truth**. Check every line for **relevance**. Then hunt **no-ops** sentence by sentence: does it change behaviour versus the default? Be aggressive — most prose that fails the no-op test should be deleted, not reworded. Verbs discipline: a skill body runs ~under 80 lines unless the extra length clearly earns itself.
 
 ## Leading words
 
@@ -72,7 +72,7 @@ Diagnose a struggling skill against these:
 **Native parity** treats every skill as competing with the harness's own defaults, which ship faster than this pack. Name the nearest native feature — built-in command, tool, or default behavior — and the delta that still earns the skill its slot: the lore plus reflex-override the model gets wrong despite understanding. A skill that cannot name its delta is a cut candidate at the next harness release; re-check this axis whenever the harness ships an overlapping feature.
 
 This reference applies the same test to itself: generic model guidance can draft
-a skill, while Panda Verbs adds a checkable nine-axis scorecard plus its local
+a skill, while Verbs adds a checkable nine-axis scorecard plus its local
 hot/cold, routing, and conformance rules.
 
 ## The scorecard
@@ -87,10 +87,10 @@ hot/cold, routing, and conformance rules.
 6. **Pruning** — see [Pruning](#pruning) + [Failure modes](#failure-modes).
 7. **Native parity** — see [Native parity](#native-parity).
 8. **Granularity** — see [When to split](#when-to-split).
-9. **Panda Verbs conformance** — SKILL-FRONTMATTER.md valid; hot/cold dispatch honoured; ~<80 lines unless earned; `lib/` refs resolve.
+9. **Verbs conformance** — SKILL-FRONTMATTER.md valid; hot/cold dispatch honoured; ~<80 lines unless earned; `lib/` refs resolve.
 
 Verdict shape: the skill's leading virtue (why it is good) + the top 1–3 line-cited fixes.
 
 ## Attribution
 
-Principles, glossary, and failure-mode vocabulary adapted from [mattpocock/skills `writing-great-skills`](https://github.com/mattpocock/skills/tree/main/skills/productivity/writing-great-skills). The scorecard and Panda Verbs bindings are local additions.
+Principles, glossary, and failure-mode vocabulary adapted from [mattpocock/skills `writing-great-skills`](https://github.com/mattpocock/skills/tree/main/skills/productivity/writing-great-skills). The scorecard and Verbs bindings are local additions.
