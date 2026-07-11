@@ -1,17 +1,17 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "pandastack",
-  "description": "Panda's personal AI operator OS for Claude Code: dev / knowledge / writing / work / research / retro / decision lifecycles with a learning loop.",
+  "name": "verbs",
+  "description": "Hard-won ways of working, encoded as composable skills for coding agents.",
   "owner": {
     "name": "Panda Zeng"
   },
   "plugins": [
     {
-      "name": "pandastack",
-      "description": "Personal AI operator OS for Claude Code. 14 skills in engineering / productivity / writing / meta buckets, dev / writing / knowledge lifecycles with a review-and-ship learning loop, plus a skill-construction quality loop.",
+      "name": "verbs",
+      "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 14 composable skills.",
       "source": ".",
-      "category": "personal-os",
-      "homepage": "https://github.com/panda850819/pandastack"
+      "category": "development",
+      "homepage": "https://github.com/panda850819/panda-verbs"
     }
   ]
 }

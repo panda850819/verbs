@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
-# SessionStart hook for pandastack plugin.
+# SessionStart hook for Panda Verbs.
 # Inspired by superpowers v5.0.7 hook structure (obra/superpowers).
-# Injects only the small brain-first startup rule. Full skill bodies should be
-# loaded on demand by the runtime skill mechanism, not injected into every
-# session context.
+# Injects only the dispatch table. Identity, memory, and project policy belong
+# to the host, not this skill pack.
 
 set -euo pipefail
-
-brain_first_rule="Use brain first: before any factual, knowledge, or decision answer, query the brain. If the brain is empty, say so plainly. Do not preload full skill bodies at session start; load skills on demand when the task clearly matches them. Pick the single best recommendation and execute it; no A/B/C option menus. Once a plan is approved, run it to ship without stopping at step boundaries."
 
 escape_for_json() {
   local s="$1"
@@ -19,19 +16,17 @@ escape_for_json() {
   printf '%s' "$s"
 }
 
-rule_escaped=$(escape_for_json "$brain_first_rule")
-
-session_context="<IMPORTANT>\n${rule_escaped}\n</IMPORTANT>"
-
 # Append the dispatch table (single source: DISPATCH.md).
 # Strip the HTML maintenance comment to keep the injected payload compact.
 plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dispatch_file="${plugin_root}/DISPATCH.md"
-if [ -f "$dispatch_file" ]; then
-  dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"
-  dispatch_escaped=$(escape_for_json "$dispatch_content")
-  session_context="${session_context}\n<IMPORTANT>\n${dispatch_escaped}\n</IMPORTANT>"
-fi
+[ -f "$dispatch_file" ] || {
+  echo "Panda Verbs session adapter: missing $dispatch_file" >&2
+  exit 1
+}
+dispatch_content="$(sed '/<!--/,/-->/d' "$dispatch_file")"
+dispatch_escaped=$(escape_for_json "$dispatch_content")
+session_context="<IMPORTANT>\n${dispatch_escaped}\n</IMPORTANT>"
 
 # Platform-specific JSON output. Same content, different envelope per CLI.
 # - Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT)

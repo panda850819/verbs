@@ -49,7 +49,7 @@ validate_license() {
 validate_notices() {
   local file="$1" license="$2" needle count notice_terms license_terms
   local required=(
-    "Panda-authored portions of pandastack"
+    "Panda-authored portions of Panda Verbs"
     'root [`LICENSE`](LICENSE)'
     "Adapted or included material"
     "tw93/Waza"

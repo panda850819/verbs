@@ -1,15 +1,17 @@
-# Learning File Format
+# Learning Candidate Format
 
-All learnings are stored as markdown files with YAML frontmatter.
+Panda Verbs emits this shape to stdout. It does not select a storage path or
+write a learning file. A host/project may persist the candidate in its own
+configured store.
 
-## File Location
+## Optional host store
 
-Configured in CLAUDE.md under `## pstack`:
+Configured in CLAUDE.md or AGENTS.md under `## verbs`:
 ```yaml
 learnings: docs/learnings    # default, can be any path
 ```
 
-## Directory Structure
+If the host persists candidates, it may use a structure such as:
 
 ```
 {learnings_dir}/
@@ -19,7 +21,7 @@ learnings: docs/learnings    # default, can be any path
 └── preferences/     # User-stated preferences
 ```
 
-## File Format
+## Candidate Format
 
 ```markdown
 ---
@@ -27,12 +29,12 @@ type: pattern | pitfall | architecture | preference
 key: short-kebab-case-name
 confidence: 1-10
 source: observed | inferred | user-stated
-skill: review | compound | ship
+skill: review | debug | qa | ship | sprint
 files:
   - path/to/relevant/file.ts
 first_seen: YYYY-MM-DD   # first time this learning was hit (= created on day one)
 recurrence: N            # times this same key recurred; starts at 1, +1 on each match
-status: active           # active | stale — retro proposes stale; human sets it
+status: active           # active | stale — host policy proposes; human sets it
 stale_reason: ...        # why it went stale (only when status: stale)
 stale_date: YYYY-MM-DD   # when it was marked stale
 created: YYYY-MM-DD
@@ -70,12 +72,13 @@ How to catch this earlier next time.
 | `inferred` | Yes, -1 per 30 days | AI deduction, not directly verified |
 | `user-stated` | Never | User explicitly told us this |
 
-## Writing Rules
+## Candidate Rules
 
-- Only log genuine discoveries that would save time in a future session.
-- Check for existing learnings with the same key before creating a new file.
-- If a match exists, update the existing file: bump `last_seen`, **increment `recurrence`**, add context. Never open a second file for the same key — that is how the corpus turns into write-only sediment instead of a ratchet.
-- Don't log obvious things or routine fixes.
+- Emit only genuine discoveries that would save time in a future session.
+- Search the host-configured store for the same key when one is available.
+- A match emits `seen_again: <key>` plus the new context. The host decides
+  whether to update `last_seen` or `recurrence`; the skill never mutates it.
+- Do not emit obvious things or routine fixes.
 
 ## Reading Rules
 
@@ -83,5 +86,6 @@ How to catch this earlier next time.
 - `user-stated` sources never decay.
 - Skip learnings with effective confidence < 3.
 - Skip `status: stale` learnings entirely (kept for provenance; flagged during retro, human sets them). Passive decay only *suppresses*; an explicit stale mark is the corpus correcting itself.
-- A high `recurrence` (>= 2) marks a repeat offender — surface it even at lower effective confidence; a learning that keeps recurring has earned its place.
+- A high host-provided `recurrence` (>= 2) marks a repeat offender — surface it
+  even at lower effective confidence.
 - When a learning matches the current work, display: "Prior learning: [key] (confidence N/10, recurrence M, from [date])"

@@ -1,7 +1,7 @@
 ---
 name: review
 description: |
-  Use when asked to "review", "check my code", or before creating a PR. NOT UI/browser (qa), plan critique (boardroom), or lightweight single-pass diff checks.
+  Use when asked to "review", "check my code", or before creating a PR. NOT UI/browser (qa), prepared-plan critique (advisor --panel), or lightweight single-pass diff checks.
 reads:
   - repo: "**"
   - repo: CLAUDE.md
@@ -11,7 +11,9 @@ reads:
   - repo: lib/gate-contract.md
   - repo: lib/learning-format.md
   - repo: lib/learning-recall.md
+  - repo: lib/model-anchors.md
   - repo: lib/trigger-first-skill-evolution.md
+  - repo: skills/engineering/review/lib/cross-model-transport.md
   - repo: skills/engineering/review/lib/rationalizations.md
   - cli: git
   - cli: grep
@@ -52,14 +54,14 @@ If output for any command is > 30 lines, summarize. Don't dump raw output into t
 
 ## Step 1: Scope
 
-1. Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Bind the path variables used below from it: `{main}` = configured main branch (default `main`), `{learnings_dir}` = configured learnings dir (default `docs/learnings`). Use these resolved values everywhere they appear.
+1. Read verbs config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Bind the path variables used below from it: `{main}` = configured main branch (default `main`), `{learnings_dir}` = configured learnings dir (default `docs/learnings`). Use these resolved values everywhere they appear.
 2. Run `git branch --show-current`. If on the main branch, stop: "Nothing to review — you're on main."
 3. Run `git diff origin/{main} --stat`. If no diff, stop.
 4. Get the full diff: `git diff origin/{main}`
 
 ## Step 2: Load Learnings (recall)
 
-Run the learnings recall per [`lib/learning-recall.md`](../../../lib/learning-recall.md): derive the review topic from the changed files + diff keywords, pull the top 3-5 relevant learnings from the store, and INJECT them. Store resolution is store-agnostic — `gbrain query "<topic>"` filtered to `learnings/` when gbrain is present, else ranked grep over `{learnings_dir}`:
+Run the learnings recall per [`lib/learning-recall.md`](../../../lib/learning-recall.md): derive the review topic from the changed files + diff keywords, pull the top 3-5 relevant learnings from `{learnings_dir}`, and INJECT them:
 
 ```bash
 grep -rl "relevant-file-path" {learnings_dir}/ 2>/dev/null   # by changed path
@@ -99,7 +101,7 @@ Log detected scopes: "Scope signals: {list}" (or "none" if only base code change
 
 Launch review passes in parallel using `context: fork` (isolated subagents — results flow back, intermediate work stays out of main context). Each reviews the same diff with a different lens.
 
-**Model routing** — when spawning each Agent, the orchestrator judges which model fits that lens by its demands: a mechanical pattern-match pass and a deep architectural-reasoning pass have different needs. Pass `model:` per pass based on that judgment; decide by task nature at dispatch time rather than from a fixed model-name table.
+Use the host's available isolated-agent mechanism. Panda Verbs defines the three review lenses and their output contract; agent implementation, model selection, and global dispatch policy remain host concerns.
 
 **Always-on passes (run every time):**
 
@@ -165,63 +167,48 @@ Merge cold review findings with Step 5 findings:
 - If cold reviewer flags something that Step 5 explicitly cleared →
   present both opinions to user, don't auto-resolve
 
-## Step 6.5: Codex Adversarial Review (Cross-Model)
+## Step 6.5: Cross-Model Adversarial Review
 
-Run Codex as an independent adversarial reviewer. This adds a second model's
-perspective (GPT) to Claude's review, catching blind spots from model-specific
-reasoning patterns.
+**Launch in parallel with Step 6.** This is an internal review transport, not an
+`advisor` invocation. `advisor` rejects code-diff review by design. Materialize
+the raw diff and use the file/stdin, size, isolation, and opposite-seat contract
+in `skills/engineering/review/lib/cross-model-transport.md`, which resolves the
+verified role from `lib/model-anchors.md`. Never embed a raw diff in a command
+argument and never truncate it silently.
 
-**Launch in parallel with Step 6.** Drive the installed `codex` CLI
-(codex-cli) directly — there is no Node companion script. Probe first;
-if `codex` is not on PATH, skip and note "Codex: unavailable (codex CLI
-not on PATH)" in the completion box (honest degrade, never silent):
+Prompt contract:
 
-```bash
-if command -v codex >/dev/null 2>&1; then
-  git diff origin/{main} -- ':!docs' > /tmp/pstack-review.diff
-  codex exec --skip-git-repo-check -c 'sandbox_mode="read-only"' \
-    "You are an adversarial cross-model reviewer (GPT) on this PR diff (stdin).
-Report ONLY real defects as: [P0|P1|P2|P3] file:line — issue — fix.
-Terse, no preamble, no praise, max 8 findings. Prioritise concurrency /
-data races, object lifetime & leaks, auth & permission gating, and
-error-path correctness. Say 'clean: <file>' for files with no defect." \
-    < /tmp/pstack-review.diff 2>&1 | tail -60
-else
-  echo "Codex: unavailable (codex CLI not on PATH)"
-fi
+```
+Review this PR diff as an independent adversarial reviewer.
+Report only real defects as [P0|P1|P2|P3] file:line — issue — fix.
+Terse, no praise, max 8 findings. Prioritize concurrency, object lifetime,
+auth/permission gates, migration safety, and error-path correctness.
 ```
 
-`codex exec` is non-interactive and self-terminating; cap it with a
-`timeout 360` if the harness needs a hard bound. Do NOT fall back to an
-interactive `codex` invocation (it would hang the review).
+**Outside Voice Integration Rule:** findings are informational only. Each must
+be explicitly approved by the user before it lands in the final report or a
+follow-up commit. Cross-model consensus is a strong signal; do not auto-elevate
+priority or confidence based on consensus alone.
 
-**Outside Voice Integration Rule:** Codex findings are **informational only**. Each must be explicitly approved by the user before it lands in the final report or any follow-up commit. Cross-model consensus is a strong signal — surface it as such — but **do not auto-elevate** priority or confidence based on consensus alone.
+Merge with Steps 5-6 findings:
+- matching finding → tag `CROSS-MODEL CONFIRMED`, retaining the original confidence;
+- novel finding → tag `OUTSIDE-CATCH, suggested P{N}` and request approval;
+- contradiction of a clean assessment → present both opinions.
 
-**Merge Codex findings with Steps 5-6 findings:**
-- Codex finding matches a Claude finding → tag as "CROSS-MODEL CONFIRMED". Display original Claude confidence + Codex confirmation. **Do not auto-boost** to maximum.
-- Codex finding is novel (not caught by Claude) → tag as "CODEX-CATCH, suggested P{N}". The suggested priority is informational. **User approval required** before it enters the final report at that priority.
-- Codex finding contradicts a Claude "clean" assessment → present both opinions to user, don't auto-resolve.
+`N` responses go to the Completion Summary's `OPEN_QUESTIONS` count.
 
-**Output format for Codex findings:**
-```
-[suggested P0-P3] (CODEX-CATCH, confidence: N%) file:line — description
-  Fix: recommendation
-  Apply to final report? [Y / N / edit]
-```
-
-`N` responses go to the Completion Summary's `OPEN_QUESTIONS` count, not discarded silently.
-
-## Step 7: Write Learnings
+## Step 7: Surface Learning Candidates
 
 After review completes (including cold review), evaluate whether any non-obvious pattern was discovered.
 
 Test: "Would this save time in a future session on this codebase?"
 
-If yes, check `{learnings_dir}` for existing learnings with similar key.
-- If match exists: update `last_seen` and add new context.
-- If no match: write new file to `{learnings_dir}/{category}/{slug}.md`
+If yes, check `{learnings_dir}` for an existing learning with a similar key.
+- If a match exists: cite it and emit a one-line `seen again` candidate.
+- If no match exists: emit a full candidate using `lib/learning-format.md`.
 
-Use the format from `lib/learning-format.md`.
+Do not write or update the learning store. Persistence belongs to the
+host/project.
 
 Guard escalation (propose-only): if the flaw is a bug class seen before (grep `{learnings_dir}` for the signature) or is mechanically checkable, propose one structural guard and name the exact file it would add: `scripts/lint-<class>.sh`, `tests/<class>-test.sh`, or a hook under `hooks/`. Never auto-create the guard during review.
 
@@ -229,7 +216,7 @@ If nothing worth recording: skip silently. Not every review produces learnings.
 
 ## Step 7.5: Route caught flaws back to the skill (propose-only)
 
-After Step 7, for each confirmed flaw, apply the propose-only flaw-routing rule in `lib/trigger-first-skill-evolution.md` (map to the skill whose anti-pattern/checklist table should have caught it; propose only, never edit the target skill, never during an autonomous build). For each mapping, emit ONE line into the session-end brain-candidate audit (skip silently if your setup has no such surface):
+After Step 7, for each confirmed flaw, apply the propose-only flaw-routing rule in `lib/trigger-first-skill-evolution.md` (map to the skill whose anti-pattern/checklist table should have caught it; propose only, never edit the target skill, never during an autonomous build). For each mapping, emit ONE line in the review result:
 
 ```
 skill-edit candidate: <skill> — <missing check its anti-pattern/checklist table should have had>
@@ -251,9 +238,9 @@ Before exiting, print a single ASCII box so the user can see scope at a glance.
 | Step 3 brief | ON TRACK / DRIFT:{N} / GAP:{N} / no brief   |
 | Step 5 passes| P0:_ P1:_ P2:_ P3:_  ({N} AUTO-FIX applied) |
 | Step 6 cold  | ran / skipped — {N} COLD-CATCH              |
-| Step 6.5 cdx | ran / unavailable — {N} CODEX-CATCH         |
-| Codex apply  | {N} approved, {N} deferred to OPEN_QUESTIONS|
-| Step 7 learn | {N} learnings written / skipped             |
+| Step 6.5 xmdl| ran / unavailable — {N} OUTSIDE-CATCH       |
+| Outside apply| {N} approved, {N} deferred to OPEN_QUESTIONS|
+| Step 7 cand  | {N} learning candidates / skipped           |
 | Step 7.5 map | {N} skill-edit candidates / none            |
 +------------------------------------------------------------+
 | OPEN_QUESTIONS  | {N}                                       |

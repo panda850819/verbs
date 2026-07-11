@@ -32,4 +32,4 @@ Zero tolerance — every match gets flagged.
 
 ## Voice test (Layer 3 reminder)
 
-After vocab scan, ask: would Panda say this out loud to a friend at a coffee shop? If "sort of but more formal" → simplify. If no → rewrite or delete.
+After the vocabulary scan, compare against the resolved voice profile. With no profile, ask only whether the sentence is plainer and more specific than the original; do not invent an author voice.

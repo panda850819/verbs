@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 workflow=".github/workflows/release.yml"
-tmp="$(mktemp -d "${TMPDIR:-/tmp}/pandastack-release-workflow.XXXXXX")"
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/panda-verbs-release-workflow.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 validator="$tmp/validate.py"
 
@@ -110,8 +110,8 @@ check(
     == [
         "dist/release-title.txt",
         "dist/release-notes.md",
-        "dist/pandastack-${{ github.ref_name }}.tar.gz",
-        "dist/pandastack-${{ github.ref_name }}.tar.gz.sha256",
+        "dist/*-${{ github.ref_name }}.tar.gz",
+        "dist/*-${{ github.ref_name }}.tar.gz.sha256",
     ],
     "artifact upload must contain exactly the four dist outputs",
 )
@@ -169,6 +169,16 @@ check(
     re.search(r"(?m)^\s*(?:bash|sh|python3?|ruby|node|source|\.)\s", script) is None,
     "publish must not execute downloaded or repository code",
 )
+check(
+    'archives=(dist/*-"$GITHUB_REF_NAME".tar.gz)' in script
+    and 'if [ "${#archives[@]}" -ne 1 ]; then' in script,
+    "publish must resolve exactly one manifest-named release archive",
+)
+check(
+    'checksum_path="$archive_path.sha256"' in script
+    and '[ ! -f "$checksum_path" ]' in script,
+    "publish must require the checksum paired with the resolved archive",
+)
 
 check(
     'gh release view "$GITHUB_REF_NAME"' in script
@@ -190,25 +200,29 @@ esac'''
 check(cleanup in script, "cleanup must delete only a draft and reject published releases")
 check(script.count('gh release delete "$GITHUB_REF_NAME" --yes') == 1, "draft cleanup must be singular")
 
-create = 'gh release create "$GITHUB_REF_NAME" --verify-tag --draft'
+release_flags = 'release_flags=(--verify-tag --draft)'
+prerelease_case = '''case "$GITHUB_REF_NAME" in
+  *-*)
+    release_flags+=(--prerelease --latest=false)
+    ;;
+esac'''
+create = 'gh release create "$GITHUB_REF_NAME" "${release_flags[@]}"'
 edit = 'gh release edit "$GITHUB_REF_NAME" --draft=false'
-check(create in script, "release creation must verify the existing tag and stay draft")
+check(release_flags in script, "release creation must verify the existing tag and stay draft")
+check(prerelease_case in script, "prerelease tags must set prerelease and latest=false together")
+check(script.count("--prerelease") == 1, "prerelease flag policy must be singular")
+check(script.count("--latest=false") == 1, "latest=false flag policy must be singular")
+check(create in script, "release creation must use only the policy-derived flags")
 check('--title "$(cat dist/release-title.txt)"' in script, "title must come from the exact title file")
 check("--notes-file dist/release-notes.md" in script, "notes must come from the exact notes file")
-check(
-    '"dist/pandastack-$GITHUB_REF_NAME.tar.gz"' in script,
-    "archive must be uploaded",
-)
-check(
-    '"dist/pandastack-$GITHUB_REF_NAME.tar.gz.sha256"' in script,
-    "archive checksum must be uploaded",
-)
+check('"$archive_path"' in script, "resolved archive must be uploaded")
+check('"$checksum_path"' in script, "resolved archive checksum must be uploaded")
 check(edit in script, "draft must be published only after asset upload")
 
 view_at = script.find('gh release view "$GITHUB_REF_NAME"')
 delete_at = script.find('gh release delete "$GITHUB_REF_NAME" --yes')
 create_at = script.find(create)
-checksum_at = script.find('"dist/pandastack-$GITHUB_REF_NAME.tar.gz.sha256"')
+checksum_at = script.find('"$checksum_path"', create_at)
 edit_at = script.find(edit)
 check(
     -1 not in (view_at, delete_at, create_at, checksum_at, edit_at)
@@ -228,7 +242,7 @@ if errors:
         print("FAIL: {}".format(error), file=sys.stderr)
     sys.exit(1)
 
-print("OK: release workflow is tag-only, least-privilege, pinned, and draft-first")
+print("OK: release workflow is tag-only, least-privilege, pinned, draft-first, and prerelease-aware")
 PY
 
 python3 "$validator" "$workflow"
@@ -263,4 +277,157 @@ if python3 "$validator" "$tmp/non-draft.yml" >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "OK: seeded permission and draft mutations failed as expected."
+publish_script="$tmp/publish.sh"
+python3 - "$workflow" "$publish_script" <<'PY'
+import sys
+from pathlib import Path
+
+source, output = map(Path, sys.argv[1:])
+lines = source.read_text(encoding="utf-8").splitlines()
+marker = "      - name: Publish GitHub release"
+try:
+    start = lines.index(marker)
+except ValueError as exc:
+    raise SystemExit("missing publish step") from exc
+
+run_start = None
+for index in range(start + 1, len(lines)):
+    if lines[index] == "        run: |":
+        run_start = index + 1
+        break
+if run_start is None:
+    raise SystemExit("missing publish run block")
+
+script_lines = []
+for line in lines[run_start:]:
+    if line and not line.startswith("          "):
+        break
+    script_lines.append(line[10:] if line.startswith("          ") else line)
+output.write_text("\n".join(script_lines) + "\n", encoding="utf-8")
+PY
+
+fake_bin="$tmp/fake-bin"
+publish_fixture="$tmp/publish-fixture"
+mkdir -p "$fake_bin" "$publish_fixture/dist"
+printf '%s\n' 'Release title' > "$publish_fixture/dist/release-title.txt"
+printf '%s\n' 'Release notes' > "$publish_fixture/dist/release-notes.md"
+
+cat > "$fake_bin/gh" <<'EOF'
+#!/usr/bin/env bash
+set -eu
+
+{
+  echo CALL
+  for arg in "$@"; do
+    printf 'ARG=%s\n' "$arg"
+  done
+} >> "$GH_CALL_LOG"
+
+if [ "${1:-}" = "release" ] && [ "${2:-}" = "view" ]; then
+  exit 1
+fi
+EOF
+chmod +x "$fake_bin/gh"
+
+run_publish_policy() {
+  ref="$1"
+  log="$2"
+  (
+    cd "$publish_fixture"
+    PATH="$fake_bin:$PATH" GITHUB_REF_NAME="$ref" GH_CALL_LOG="$log" \
+      bash -e "$publish_script"
+  )
+}
+
+seed_publish_artifacts() {
+  ref="$1"
+  prefix="$2"
+  rm -f "$publish_fixture"/dist/*.tar.gz "$publish_fixture"/dist/*.tar.gz.sha256
+  : > "$publish_fixture/dist/$prefix-$ref.tar.gz"
+  : > "$publish_fixture/dist/$prefix-$ref.tar.gz.sha256"
+}
+
+assert_rejected_before_gh() {
+  label="$1"
+  ref="$2"
+  log="$3"
+  : > "$log"
+  if run_publish_policy "$ref" "$log" >/dev/null 2>&1; then
+    echo "FAIL: $label unexpectedly passed" >&2
+    exit 1
+  fi
+  if [ -s "$log" ]; then
+    echo "FAIL: $label reached gh before artifact validation" >&2
+    exit 1
+  fi
+}
+
+zero_log="$tmp/zero-artifact-calls.log"
+rm -f "$publish_fixture"/dist/*.tar.gz "$publish_fixture"/dist/*.tar.gz.sha256
+assert_rejected_before_gh "zero release archives" v4.0.0-rc.1 "$zero_log"
+
+missing_checksum_log="$tmp/missing-checksum-calls.log"
+: > "$publish_fixture/dist/fixture-verbs-v4.0.0-rc.1.tar.gz"
+assert_rejected_before_gh "missing paired checksum" v4.0.0-rc.1 "$missing_checksum_log"
+
+multiple_log="$tmp/multiple-artifact-calls.log"
+seed_publish_artifacts v4.0.0-rc.1 fixture-verbs
+: > "$publish_fixture/dist/second-verbs-v4.0.0-rc.1.tar.gz"
+: > "$publish_fixture/dist/second-verbs-v4.0.0-rc.1.tar.gz.sha256"
+assert_rejected_before_gh "multiple release archives" v4.0.0-rc.1 "$multiple_log"
+
+rc_log="$tmp/rc-calls.log"
+stable_log="$tmp/stable-calls.log"
+seed_publish_artifacts v4.0.0-rc.1 fixture-verbs
+run_publish_policy v4.0.0-rc.1 "$rc_log"
+seed_publish_artifacts v4.0.0 stable-verbs
+run_publish_policy v4.0.0 "$stable_log"
+
+python3 - "$rc_log" "$stable_log" <<'PY'
+import sys
+from pathlib import Path
+
+
+def parse_calls(path):
+    calls = []
+    current = None
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if line == "CALL":
+            current = []
+            calls.append(current)
+        elif line.startswith("ARG=") and current is not None:
+            current.append(line[4:])
+    return calls
+
+
+def create_call(path):
+    matches = [call for call in parse_calls(path) if call[:2] == ["release", "create"]]
+    if len(matches) != 1:
+        raise SystemExit("expected one gh release create call in {}".format(path))
+    return matches[0]
+
+
+rc = create_call(sys.argv[1])
+stable = create_call(sys.argv[2])
+for required in ("--verify-tag", "--draft", "--prerelease", "--latest=false"):
+    if required not in rc:
+        raise SystemExit("RC release create is missing {}".format(required))
+for forbidden in ("--prerelease", "--latest=false"):
+    if forbidden in stable:
+        raise SystemExit("stable release create unexpectedly contains {}".format(forbidden))
+for required in ("--verify-tag", "--draft"):
+    if required not in stable:
+        raise SystemExit("stable release create is missing {}".format(required))
+for call, basename in (
+    (rc, "fixture-verbs-v4.0.0-rc.1.tar.gz"),
+    (stable, "stable-verbs-v4.0.0.tar.gz"),
+):
+    if not any(arg.endswith(basename) for arg in call):
+        raise SystemExit("release create is missing {}".format(basename))
+    if not any(arg.endswith(basename + ".sha256") for arg in call):
+        raise SystemExit("release create is missing {}.sha256".format(basename))
+
+print("OK: RC publish call has --prerelease --latest=false; stable publish call has neither")
+PY
+
+echo "OK: artifact fail-safes, permission/draft mutations, and RC/stable publish policy passed."

@@ -14,7 +14,7 @@ expected_rubric="writing-great-skills@$scorecard_version"
 fail=0
 
 write_fixture() {
-  local root="$1" name="$2" top_verdict="$3" fail_axis="${4:-}"
+  local root="$1" name="$2" top_verdict="$3" fail_axis="${4:-}" weak_axis="${5:-}"
   local skdir="$root/skills/meta/$name" skill_md hash
   mkdir -p "$skdir"
   skill_md="$skdir/SKILL.md"
@@ -49,6 +49,7 @@ EOF
   while IFS= read -r axis; do
     local axis_verdict="pass"
     [ "$axis" = "$fail_axis" ] && axis_verdict="fail"
+    [ "$axis" = "$weak_axis" ] && axis_verdict="weak"
     printf '| %s | %s | L7 - fixture evidence. |\n' "$axis" "$axis_verdict" >>"$skdir/eval.md"
   done < <(
     sed -n '/^## The scorecard$/,/^## /p' "$scorecard" |
@@ -59,7 +60,7 @@ EOF
 expect_pass() {
   local label="$1" root="$2" name="$3" log
   log="$tmp/$label.log"
-  if env PANDASTACK_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
+  if env PANDA_VERBS_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
     printf 'ok    %s passing verdict passed\n' "$label"
   else
     printf 'FAIL  %s passing verdict failed\n' "$label"
@@ -71,7 +72,7 @@ expect_pass() {
 expect_fail() {
   local label="$1" root="$2" name="$3" log
   log="$tmp/$label.log"
-  if env PANDASTACK_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
+  if env PANDA_VERBS_LINT_SKILLS_DIR="$root/skills" bash scripts/lint-eval-fresh.sh "$name" >"$log" 2>&1; then
     printf 'FAIL  %s failing verdict unexpectedly passed\n' "$label"
     cat "$log"
     fail=1
@@ -85,8 +86,12 @@ expect_fail() {
 }
 
 pass_root="$tmp/pass"
-write_fixture "$pass_root" verdict-pass SOLID
+write_fixture "$pass_root" verdict-pass SOLID "" "Pruning"
 expect_pass top-solid "$pass_root" verdict-pass
+
+all_pass_root="$tmp/all-pass"
+write_fixture "$all_pass_root" verdict-all-pass STRONG
+expect_fail all-pass "$all_pass_root" verdict-all-pass
 
 weak_root="$tmp/weak"
 write_fixture "$weak_root" verdict-weak WEAK

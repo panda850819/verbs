@@ -2,43 +2,41 @@
 type: skill-eval
 skill: sprint
 bucket: engineering
-evaluated_skill_hash: ff6eddebfe623ac7af9dc1fd6067f50e47ac0da6
-evaluated_at: 2026-07-10
+evaluated_skill_hash: 82b2d19b89a2b0de3eea6308c0b1c42274ecd587
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — sprint
 
-> 2026-07-09 re-validation (#170): SKILL.md swapped its plan-artifact source and planning/multi-day routing from the retired structured-brief skill to `grill --brief` (no structural change); anti-trigger route re-anchored, all L-citations re-verified against the current file, verdict unchanged.
->
-> 2026-07-10 re-validation (#172): Codex delegation now declares and loads `lib/model-anchors.md`; the cold batch-loop reference owns per-batch mechanical/risky selection and the shared minimum-version gate. The lifecycle shape and verdict are unchanged.
+**Verdict: SOLID.** The lifecycle has an explicit intermediate `READY_TO_SHIP`, an unconditional review gate, evidence-gated delivery, and host-owned checkpoint candidates; the very large hot body remains its main construction cost.
 
-**Verdict: SOLID.** The new closure-evidence gate (Stage 6 SHIPPED step 4) turns "claim SHIPPED without proof" into a checkable failure, but it doesn't say what terminal state a sprint lands in when that evidence is missing — and the previous eval's "conformance: weak" call turns out to be a stale citation, not a real gap.
-
-_2026-07-02 re-eval: T03 (#145) inserted a closure-evidence step ahead of the SHIPPED summary output, matching `ship/SKILL.md`'s identical step 4. Every axis re-read fresh against the current file (not a hash refresh) — see Top fixes #3 for what that caught._
+Grounding sample: L202 — "READY_TO_SHIP → SHIPPED or PAUSED"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L179 — terminal state is still computed from booleans (`if review_clean AND deploy_proven AND user_approves_ship: state = SHIPPED`) before Stage 6 ever runs; the new evidence check doesn't touch this core computation. |
-| Description / invocation | pass | L5 — front-loads "Focused execution session", lists `/sprint` + phrase triggers, carries anti-trigger reach clauses (UI → `ui`, bugs → `debug`). |
-| Completion criteria | weak | L215 — "Closure evidence before claiming SHIPPED: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done" is checkable but not exhaustive: it names the failure (evidence missing) without naming the resulting terminal state, so a sprint that hits this branch can dead-end outside the four states the contract at L43 promises. |
-| Information hierarchy | pass | L121 — the hot Stage 3 body points to `lib/model-anchors.md` and the cold `references/codex-delegation.md`; per-batch model selection stays out of the 301-line lifecycle body. The SHIPPED summary remains directly after its closure-evidence gate. |
-| Leading words | pass | L118 — "'Faster if I just write it myself' is the failure mode this default exists to prevent" anchors the architect/subagent split in one pretraining concept. |
-| Pruning | weak | L243 — "Only SHIPPED runs ship/extract/backflow" restates L43 near-verbatim; the new step doesn't add duplication but doesn't remove this pre-existing one either. |
-| Native parity | pass | L118 — names the native default the skill overrides ("just write it myself") and the delta that earns the architect/subagent split its slot; the previous eval's table omitted this axis entirely. |
-| Granularity | pass | L84 — the learnings recall stays a `lib/` pointer rather than an inlined glob or a new skill; unaffected by this edit, still the right cut. |
-| pandastack conformance | pass | L12 — `reads:` declares `lib/model-anchors.md`; every referenced `lib/`, `skills/`, and `references/` path resolves, and the batch-loop reference consumes the same invocation SSOT as handover. |
+| Predictability | pass | L142 — Stage 4 is an unconditional review gate, matching every mode's execute → review → ship sequence. |
+| Description / invocation | pass | L5 — the description front-loads focused execution, names the four outcomes, lists triggers, and routes UI and bug work to their specialist skills. |
+| Completion criteria | pass | L204 — SHIPPED requires successful ship output containing PR and pushed commit/branch evidence; missing evidence deterministically becomes PAUSED. |
+| Information hierarchy | pass | L126 — optional Codex batching and circuit-breaker mechanics stay behind a branch-specific reference instead of bloating the base execution steps. |
+| Leading words | pass | L41 — “a whistle and a finish line” anchors bounded execution and makes terminal-state discipline memorable. |
+| Pruning | weak | L65 — the `--plan` mode bullet repeats read-only and progress-derivation mechanics owned by Stage 3, making the invocation index carry execution detail. |
+| Native parity | pass | L117 — architect re-verification of acceptance is the earned delta over native subagent delegation and blocks self-reported false green. |
+| Granularity | pass | L58 — pure planning routes to `grill --brief`, keeping sprint focused on execution through delivery or an explicit stop state. |
+| Panda Verbs conformance | weak | L292 — references resolve and optional heavy mechanics are externalized, but the 254-line body is far above the normal hot-skill budget. |
 
 ## Why it's good
-The closure-evidence step (L215) is a small, well-placed fix: it turns "did you actually open the ticket/PR" from an implicit expectation into a printed, checkable gate, using the exact same wording as `ship/SKILL.md`'s own step 4 (`skills/engineering/ship/SKILL.md:143`) so the two skills fail the same way at their respective closure points. It sits one line above the thing it gates (the SHIPPED summary, L216) instead of a separate stage, so the information hierarchy stays flat and legible.
+
+`READY_TO_SHIP` cleanly separates “all gates passed” from “delivery actually happened,” and every mode now crosses the same review gate first. Stage 6 promotes it to SHIPPED only with PR and pushed commit/branch evidence; every non-shipping outcome emits a checkpoint candidate to stdout and leaves persistence or project tracking to the host.
 
 ## Top fixes
-1. L215 — define the fallback when evidence is missing: does the sprint stay SHIPPED with a flagged gap, drop to PAUSED, or need a fifth state? "do not claim done" has no destination right now, which is inconsistent with the four-state contract at L43/L241-245 and with the `scripts/pandastack-state append --event {shipped|paused|failed|aborted}` call (L200-202), which only knows how to log one of the four known events.
-2. L243 — fold "Terminal state contract" into the Stage 6 header or delete it; it restates L43 verbatim, the same pre-existing duplication the last eval flagged and still unresolved.
-3. Process note, not a SKILL.md fix — the prior eval's "2026-07-02 re-stamp" bumped `evaluated_skill_hash` and wrote "verdict unchanged" without re-verifying every citation; its "reads: not declared" claim was already false at that hash (line 11 has carried `lib/learning-recall.md` since #116). A hash bump should trigger a fresh read, not just a fresh signature.
+
+1. L65 — keep the `--plan` mode bullet to syntax plus its Stage 3 pointer; let Stage 3 own read-only progress derivation and auto-detection mechanics.
+2. L70 — keep the `--delegate codex` mode bullet to explicit opt-in, plan requirement, and its reference pointer; the linked reference already owns batching and invocation details.
 
 ## Behavioral cases
-- trigger `let's ship the auth rate-limit fix today` → expected process: Stage 0 probe → Stage 1 prep + store-agnostic learning recall (top 3-5, used in the plan) → grill-lite (3-question cap) → architect/subagent execute → review gate (≤3 iterations) → Stage 5 deploy-proof + ship-gate computes terminal state → Stage 6 SHIPPED prints closure evidence (ticket/PR URL + state transition) before the summary line.
-- trigger `/sprint --continue payments-webhook` → expected process: skip prep+grill, load the PAUSED checkpoint + `docs/plans/payments-webhook.md`, re-derive done U-IDs from git+acceptance, resume at the first non-done task (L65).
-- anti-trigger `should I even build a rate limiter? let me think out loud` → should NOT fire; no concrete topic, pure ideation routes to `grill --brief` (When to skip, L57).
-- anti-trigger `review this diff before I open the PR` → should NOT fire; code-diff review routes to `review`, not the full sprint flow (description routing clause, L5).
+
+- trigger `/sprint --plan payments-webhook` → expected process: read the plan without mutating it, derive progress from git plus acceptance, execute and re-verify units, review, compute `READY_TO_SHIP`, then invoke ship and promote to SHIPPED only after PR and pushed commit/branch evidence.
+- trigger `/sprint --continue payments-webhook` with a host-supplied checkpoint → expected process: use the checkpoint only as context, re-derive done work from the plan and git, and resume without selecting or writing a project-state path.
+- trigger a paused or failed sprint → expected process: emit a checkpoint candidate to stdout; do not persist it or mutate a project tracker.
+- anti-trigger `help me scope whether this project is worth doing` → should NOT fire; route to `grill --brief`.

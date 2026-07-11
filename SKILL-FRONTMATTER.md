@@ -1,12 +1,12 @@
-# pandastack skill frontmatter spec
+# Panda Verbs skill frontmatter spec
 
-> Contract for `skills/<name>/SKILL.md` frontmatter in pandastack and any pandastack-compatible stack.
+> Contract for `skills/<name>/SKILL.md` frontmatter in Panda Verbs and compatible skill packs.
 
 ## Why this exists
 
-The frontmatter is the contract between a skill and the runtimes that consume it: pandastack declares what each skill is, and downstream runtimes (Claude Code, Codex CLI, future tools) read it to surface, validate, and route.
+The frontmatter is the contract between a skill and the hosts that consume it: Panda Verbs declares what each skill is, and downstream hosts read it to surface, validate, and route.
 
-Without a contract, the `name` field drifts (`pandastack:X` / `ps-X` / `X` all coexist in the current corpus) and optional fields multiply ad-hoc. Drift makes the resolver brittle and migration costly.
+Without a contract, the `name` field drifts (`verbs:X` / `ps-X` / `X` coexist) and optional fields multiply ad-hoc. Drift makes the resolver brittle and migration costly.
 
 ## Scope
 
@@ -42,7 +42,7 @@ type: skill | flow | lib
 
 | Field | Rule |
 |---|---|
-| `name` | Must equal the skill's folder name. Plain. No `pandastack:` or `ps-` prefix. The prefix belongs to the consumer side (Claude Code plugin namespace, etc.), not the content. |
+| `name` | Must equal the skill's folder name. Plain. No `verbs:` or `ps-` prefix. The prefix belongs to the consumer side (Claude Code plugin namespace, etc.), not the content. |
 | `description` | Trigger paragraph. Should be short and concrete enough for an AI runtime to decide whether the skill applies. See "On length". |
 | `user-invocable` | Boolean. `true` marks a user-invoked-only skill that the human must call by name; `false` marks a model-dispatched skill that the runtime may choose from its description. |
 
@@ -72,13 +72,9 @@ Other top-level keys are not warned and not blocked. Stacks may extend.
 ## Advisory firewall fields (audit metadata)
 
 `reads`, `writes`, `forbids`, `domain`, and `classification` are optional
-per-skill fields originally specified for the Layer 5 firewall (see
-[docs/firewall-l5.md](docs/firewall-l5.md)). They are **advisory audit metadata
-only** — nothing reads or enforces them at runtime. The firewall that consumed
-them was implemented in the now-retired `pdctx` overlay; no enforcement remains.
-Authors may still declare them to document intent, but must not treat them as a
-security boundary. The only active guard is the separate global
-`pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands.
+advisory audit metadata. Current hosts do not enforce them as a per-skill
+security boundary. Reference adapters under `hooks/` are separate and activate
+only when a host enables them explicitly.
 
 ## HOT / COLD classification
 
@@ -108,10 +104,10 @@ Validators may emit informational signals on long descriptions but should not wa
 Status levels:
 
 - **pass** — required fields present, `name` matches folder
-- **warn** — known drift (`name` carries `ps-` or `pandastack:` prefix, `name` mismatches folder)
+- **warn** — known drift (`name` carries `ps-` or `verbs:` prefix, `name` mismatches folder)
 - **fail** — no frontmatter, or required field missing
 
-A `fail` should block publication; `warn` is reported but does not block. (The `pdctx publish-check` gate that enforced this was retired with the overlay.)
+A `fail` should block publication; `warn` is reported but does not block.
 
 ## Migration
 

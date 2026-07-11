@@ -2,36 +2,41 @@
 type: skill-eval
 skill: careful
 bucket: engineering
-evaluated_skill_hash: 33c39ee6ae9587ad216bf5390619e6ae3cb4a697
-evaluated_at: 2026-07-03
+evaluated_skill_hash: 63fb96886e91ff0b89749cae59bf5039f4dc25c4
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — careful
 
-**Verdict: SOLID.** A deterministic gate-and-confirm mode whose three heavy catalogs (test-loop, stopping-discipline, rationalizations) now correctly lazy-load from lib/; the residual cost is the destructive-command strings still echoed verbatim across `forbids:` frontmatter and the prose gates.
+**Verdict: STRONG.** A compact persistent safety mode now has one coherent path-by-path filesystem exemption, an exact confirmation gate, explicit block delta against the native baseline, and current cold references for proof, stopping, and anti-bypass behavior.
+
+Grounding sample: L21 — "Ordinary model caution can still proceed without an answer."
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L30 — "Before executing any of the following, pause and ask…"; On-Invoke → gate categories → Confirmation Format → Deactivate runs identically every activation, and each gate is an objective command predicate, not a model-chosen branch. |
-| Description / invocation | pass | L4 — front-loads "Use when working on production code, shared infrastructure, or unfamiliar codebases"; model-invoked is correct (a safety gate the agent must self-reach), branches = the destructive-command classes, no body identity smuggled in. |
-| Completion criteria | pass | L72 — the Confirmation Format ends on a literal `Proceed? [y/n]`, a checkable done/not-done predicate; reinforced at L59 "Unproven ⇒ the bug is the pipeline" (hard predicate, not premature-completion bait). |
-| Information hierarchy | pass | L85 — the 8-row rationalizations catalog now sits behind a pointer to lib/rationalizations.md (the #106 slim); together with L77 (stopping-discipline) and L55 (verify-the-test-loop) the hot body keeps only the gate predicates, full progressive disclosure. |
-| Leading words | pass | L22 — "confirmation gate" is the consistent pretrained anchor carried through L30/L44/L77; L77 "Lopopolo 'continue' failure" is a strong named concept the agent thinks with, no weak "be careful" no-op. |
-| Pruning | weak | L33 — `git push --force`, `git reset --hard`, `git clean -f` are echoed verbatim from `forbids:` (L10-12), and L48 repeats `npm publish` / `cargo publish` from L14-15; the literal command strings live in two sources of truth. |
-| Native parity | weak | L30 — nearest native feature is the model's default caution before destructive commands; the delta is a mandatory confirmation gate, but the skill does not name that native baseline directly. |
-| Granularity | pass | L44 — Git/FS/External/DB/Verification split each earns its load (distinct command class), and the dense rm-rf exemption is one block of load-bearing judgment rather than over-fragmented; the three lib/ splits are by-reference cuts that earn it. |
-| pandastack conformance | pass | L2 — `name: careful` matches the folder; frontmatter (writes/forbids/domain/classification) valid; 85-line body is just over the ~80 norm but the rm-rf exemption + verification summary earn it; all three lib/ refs (L55, L77, L85) resolve. |
+| Predictability | pass | L43 — the reinstallable-artifact exemption is fully specified by basename, explicit path, and an all-targets multi-path rule, and the current rationalizations reference now preserves the same decision. |
+| Description / invocation | pass | L4 — production code, shared infrastructure, and unfamiliar codebases are concrete model-dispatch conditions, with representative destructive actions supplied immediately. |
+| Completion criteria | pass | L65 — every gated action ends at a literal `Proceed? [y/n]`, making approval observable before execution. |
+| Information hierarchy | pass | L56 — the full deploy-proof and stopping contract stays in the shared verification module while the body retains only its trigger and blocking consequence. |
+| Leading words | pass | L21 — "confirmation gate" anchors the mode more precisely than a generic instruction to be careful. |
+| Pruning | weak | L44 — the filesystem exemption packs the artifact catalog, two predicates, multi-path behavior, examples, and rationale into one hot paragraph; extract the catalog and edge-case proof once the rule has another consumer. |
+| Native parity | pass | L21 — it explicitly names the nearest native baseline (model's ordinary caution, which can proceed without an answer) and the delta (careful blocks the listed action until explicit confirmation), making the contribution clear. |
+| Granularity | pass | L70 — the "only automatic pauses" boundary keeps Git, filesystem, external, database, and verification cases inside one coherent safety mode rather than spawning adjacent skills. |
+| Panda Verbs conformance | pass | L78 — required frontmatter is valid, advisory `forbids` entries align with the scoped filesystem exemption, and the current anti-bypass reference resolves with the same path-by-path rule. |
 
 ## Why it's good
-The body is pure gate-and-confirm: every pause is a concrete destructive predicate that terminates in a fixed `[y/n]` block, so the process is byte-identical on every activation. The #106 slim pushed the rationalizations table out to lib/, joining the stopping-discipline and test-loop modules already behind pointers, so all three heavy catalogs are now lazy-loaded and the hot path is gates-only. The deferred catalogs convert the hardest override-temptations and stop-failures into checkable reality, not a vague "be careful".
+
+The process is observable and repeatable: announce the mode, match a concrete risk class, show target and reversibility, then wait for `y` or `n`. The formerly conflicting `rm -rf` surfaces now agree: an explicit regenerable artifact basename is exempt regardless of location, but any extra unsafe target or glob/variable re-arms the whole command.
 
 ## Top fixes
-1. L33 / L48 — collapse the verbatim command echo: let the prose gates name categories and carry only the judgment the frontmatter cannot (exemptions, multi-path rule), leaving `forbids:` (L10-15) the single source of the literal command strings.
-2. L55 / L77 / L85 — unify the pointer conventions: repo-root `lib/verify-the-test-loop.md` and skill-local stopping/rationalizations use three different reference styles, which obscures which are auto-loaded vs read-on-demand.
-3. L56-64 — the inline verification-integrity summary restates Rule 1 / the instrumentation tell / Rule 4 that live in full at lib/verify-the-test-loop.md; trim to the gate trigger + pointer so the rule text has one home.
+
+1. L21 — explicit block delta: ordinary model caution can still proceed without an answer, while careful blocks the listed action until explicit confirmation.
+2. L43 — scoped rm exemption: removal is exempt only when the target's basename is a named regenerable artifact, the path is explicit with no glob/variable, and (for multi-path) every path independently satisfies both conditions.
 
 ## Behavioral cases
-- trigger `git push --force origin main` → expected process: announce "CAREFUL mode ON" (L26), hit the Git gate (L33), emit the Confirmation Format block with Reversible: no (L68-73), wait for explicit `y`.
-- trigger `rm -rf /anywhere/node_modules` → expected process: NO gate fires — basename is a regenerable artifact and the path is explicit, so the L44 exemption applies; proceed without confirmation.
-- anti-trigger `critique this plan before I build it` → should NOT fire (routes to `grill --brief` / `advisor --panel`); careful gates execution of destructive commands, not plan critique.
+
+- trigger `git push --force origin feature` while careful is active → show the action, target, reversibility, and wait for explicit `y` or `n`; advisory frontmatter is not itself an enforcement hook.
+- trigger `rm -rf /tmp/node_modules` with one explicit path → proceed without the gate because the target basename is a named regenerable artifact.
+- trigger `rm -rf node_modules ../../prod-data` → re-arm the gate for the entire command because `../../prod-data` is not a regenerable artifact and the multi-path rule requires all paths to independently qualify.
+- anti-trigger `review this code diff` → should NOT replace code review; route review work to `review`, while careful remains active only for later high-risk actions.

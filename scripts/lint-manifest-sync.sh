@@ -12,9 +12,9 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
 
-# scripts/pandastack owns skill discovery for every loader. Consume its source
+# scripts/verbs owns skill discovery for every loader. Consume its source
 # result here so doctor and CI cannot disagree about the exact active set.
-surface_json="$(python3 "$repo_root/scripts/pandastack" doctor --json)" || {
+surface_json="$(python3 "$repo_root/scripts/verbs" doctor --json)" || {
   echo "FAIL: doctor could not build the runtime surface"
   exit 1
 }
@@ -45,8 +45,8 @@ print(len(json.load(sys.stdin)["checks"]["runtime_surface"]["expected"]))
 # #100/#101) and the driver split (PR #92) are gone, retro-week/retro-month moved
 # to the personal overlay (2026-06-30), and the live skill count is whatever
 # manifest+disk agree on — a hard-coded 24-29 count, a persona ref, or a
-# pre-flatten plugins/pandastack/ path in a living doc is drift. Current-count
-# claims also drift; manifest.toml owns the tier list and scripts/pandastack sync
+# pre-flatten plugin paths in a living doc are drift. Current-count claims also
+# drift; manifest.toml owns the tier list and scripts/verbs sync
 # owns derived loader JSON descriptions. Historical sections in RESOLVER/CHANGELOG
 # are exempt by not being scanned.
 scan_docs=(
@@ -57,9 +57,8 @@ scan_docs=(
   "$repo_root/.claude-plugin/plugin.json"
   "$repo_root/.codex-plugin/plugin.json"
   "$repo_root/PHILOSOPHY.md"
-  "$repo_root/skills/meta/using-pandastack/SKILL.md"
 )
-stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|plugins/pandastack/(agents|skills)/" \
+stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|3 documented compositions" \
   "${scan_docs[@]}" 2>/dev/null || true)
 current_counts=$(grep -niE "[0-9]+ skills? \(|\([0-9]+ core|[0-9]+ (core|ext)\b" \
   "${scan_docs[@]}" 2>/dev/null || true)
@@ -75,9 +74,9 @@ if [ -n "$stale" ]; then
 fi
 
 # Derived loader manifests restate the version + skill count from manifest.toml.
-# scripts/pandastack sync is the generator; --check is the drift gate so the
+# scripts/verbs sync is the generator; --check is the drift gate so the
 # Codex/Claude/marketplace JSON can never silently fall behind a manifest bump.
-if ! sync_out="$(python3 "$repo_root/scripts/pandastack" sync --check 2>&1)"; then
+if ! sync_out="$(python3 "$repo_root/scripts/verbs" sync --check 2>&1)"; then
   echo "FAIL: derived loader manifests drift from manifest.toml:"
   echo "$sync_out" | sed 's/^/  /'
   fail=1
@@ -90,11 +89,6 @@ if [ ! -f "$repo_root/DISPATCH.md" ]; then
 fi
 
 # State store + its schema doc travel together.
-if [ -f "$repo_root/scripts/pandastack-state" ] && [ ! -f "$repo_root/docs/state-schema.md" ]; then
-  echo "FAIL: scripts/pandastack-state exists but docs/state-schema.md missing"
-  fail=1
-fi
-
 if [ "$fail" -eq 0 ]; then
   echo "OK: manifest and skills/ in sync ($count skills), no stale claims."
 fi

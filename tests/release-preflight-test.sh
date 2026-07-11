@@ -2,8 +2,8 @@
 # Offline synthetic fixtures for scripts/release-preflight.sh.
 set -euo pipefail
 
-if [ "${PANDASTACK_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
-  echo "SKIP: release-preflight-test.sh is exercised only by the outer suite; packaged preflight set PANDASTACK_RELEASE_PREFLIGHT_INNER=1"
+if [ "${PANDA_VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
+  echo "SKIP: release-preflight-test.sh is exercised only by the outer suite; packaged preflight set PANDA_VERBS_RELEASE_PREFLIGHT_INNER=1"
   exit 0
 fi
 
@@ -13,7 +13,7 @@ export GIT_CONFIG_NOSYSTEM=1
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 script_under_test="$repo_root/scripts/release-preflight.sh"
 real_mv="$(command -v mv)"
-tmp="$(mktemp -d "${TMPDIR:-/tmp}/pandastack-release-test.XXXXXX")"
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/panda-verbs-release-test.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
 fail=0
@@ -45,11 +45,11 @@ new_fixture() {
   mkdir -p "$repo/scripts" "$repo/tests"
 
   cp "$script_under_test" "$repo/scripts/release-preflight.sh"
-  cat > "$repo/scripts/pandastack" <<'EOF'
+  cat > "$repo/scripts/verbs" <<'EOF'
 #!/usr/bin/env bash
 set -u
 
-root="${PANDASTACK_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
+root="${PANDA_VERBS_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
 command_name="${1:-}"
 shift || true
 
@@ -80,7 +80,7 @@ case "$command_name" in
           echo "fixture Claude strict forced failure" >&2
           exit 25
         fi
-        cache="$HOME/.claude/plugins/cache/pandastack/pandastack/7.8.9"
+        cache="$HOME/.claude/plugins/cache/verbs/verbs/7.8.9"
         registry="$HOME/.claude/plugins/installed_plugins.json"
         [ -f "$cache/LICENSE" ] || exit 26
         python3 - "$registry" "$cache" <<'PY'
@@ -89,7 +89,7 @@ import sys
 
 with open(sys.argv[1], encoding="utf-8") as handle:
     data = json.load(handle)
-records = data["plugins"]["pandastack@pandastack"]
+records = data["plugins"]["verbs@verbs"]
 if not isinstance(records, list) or len(records) != 1:
     sys.exit(1)
 if records[0].get("installPath") != sys.argv[2]:
@@ -103,7 +103,7 @@ PY
           echo "fixture Codex strict forced failure" >&2
           exit 27
         fi
-        cache="$HOME/.codex/plugins/cache/pandastack/pandastack/7.8.9"
+        cache="$HOME/.codex/plugins/cache/verbs/verbs/7.8.9"
         [ -f "$cache/LICENSE" ] || exit 28
         ;;
       *) exit 29 ;;
@@ -118,7 +118,7 @@ EOF
 #!/usr/bin/env bash
 set -u
 cd "$(dirname "$0")/.."
-[ "${PANDASTACK_RELEASE_PREFLIGHT_INNER:-}" = "1" ] || exit 31
+[ "${PANDA_VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ] || exit 31
 bash tests/release-preflight-test.sh || exit 32
 if [ -f .fixture-fail-tests ]; then
   echo "fixture canonical suite forced failure" >&2
@@ -129,7 +129,7 @@ EOF
 
   cat > "$repo/tests/release-preflight-test.sh" <<'EOF'
 #!/usr/bin/env bash
-if [ "${PANDASTACK_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
+if [ "${PANDA_VERBS_RELEASE_PREFLIGHT_INNER:-}" = "1" ]; then
   echo "SKIP: fixture release-preflight self-test skipped under the packaged suite"
   exit 0
 fi
@@ -138,6 +138,11 @@ exit 1
 EOF
 
   cat > "$repo/manifest.toml" <<'EOF'
+[product]
+id = "verbs"
+marketplace_id = "verbs"
+archive_prefix = "panda-verbs"
+
 [manifest]
 version = "7.8.9"
 EOF
@@ -166,7 +171,7 @@ EOF
 /dist/
 EOF
 
-  chmod +x "$repo/scripts/release-preflight.sh" "$repo/scripts/pandastack" \
+  chmod +x "$repo/scripts/release-preflight.sh" "$repo/scripts/verbs" \
     "$repo/tests/run-all.sh" "$repo/tests/release-preflight-test.sh"
 
   git init -q --bare "$remote"
@@ -196,11 +201,11 @@ run_preflight() {
 }
 
 archive_path() {
-  echo "$repo/dist/pandastack-v7.8.9.tar.gz"
+  echo "$repo/dist/panda-verbs-v7.8.9.tar.gz"
 }
 
 checksum_path() {
-  echo "$repo/dist/pandastack-v7.8.9.tar.gz.sha256"
+  echo "$repo/dist/panda-verbs-v7.8.9.tar.gz.sha256"
 }
 
 seed_stale_outputs() {
@@ -252,6 +257,12 @@ case_happy_candidate() {
     return
   fi
 
+  if grep -Fq "INFO: synthetic cache-layout check only (not real installer proof)" "$run_log"; then
+    pass "candidate labels synthetic cache-layout proof honestly"
+  else
+    fail_t "candidate did not label synthetic cache-layout proof"
+  fi
+
   if [ "$(cat "$repo/dist/release-title.txt")" = "v7.8.9 — Test Codename" ]; then
     pass "candidate derives the release title"
   else
@@ -279,7 +290,7 @@ EOF
     fail_t "candidate did not publish archive and checksum"
   fi
 
-  expected_checksum="$(file_sha256 "$archive")  pandastack-v7.8.9.tar.gz"
+  expected_checksum="$(file_sha256 "$archive")  panda-verbs-v7.8.9.tar.gz"
   if [ "$(cat "$checksum")" = "$expected_checksum" ]; then
     pass "candidate checksum matches archive bytes"
   else
@@ -290,7 +301,7 @@ EOF
 import sys
 import tarfile
 
-prefix = "pandastack-v7.8.9/"
+prefix = "panda-verbs-v7.8.9/"
 with tarfile.open(sys.argv[1], "r:gz") as handle:
     names = [member.name for member in handle.getmembers() if not member.isdir()]
 if not names or not all(name.startswith(prefix) for name in names):
@@ -329,6 +340,50 @@ case_deterministic_candidate() {
     pass "candidate archive and checksum are deterministic across two runs"
   else
     fail_t "candidate output changed across identical runs"
+  fi
+}
+
+case_manifest_archive_prefix() {
+  new_fixture
+  python3 - "$repo/manifest.toml" <<'PY'
+import sys
+
+path = sys.argv[1]
+text = open(path, encoding="utf-8").read()
+text = text.replace('archive_prefix = "panda-verbs"', 'archive_prefix = "fixture-verbs"', 1)
+open(path, "w", encoding="utf-8", newline="\n").write(text)
+PY
+  commit_and_push "change manifest archive prefix"
+  if run_preflight --candidate v7.8.9; then
+    pass "candidate derives archive name from manifest product identity"
+  else
+    fail_t "manifest-derived archive candidate failed: $(tail -20 "$run_log")"
+    return
+  fi
+
+  derived_archive="$repo/dist/fixture-verbs-v7.8.9.tar.gz"
+  derived_checksum="$derived_archive.sha256"
+  if [ -f "$derived_archive" ] && [ -f "$derived_checksum" ] && \
+     [ ! -e "$(archive_path)" ] && [ ! -e "$(checksum_path)" ]; then
+    pass "manifest archive prefix controls both release outputs"
+  else
+    fail_t "release outputs did not follow the manifest archive prefix"
+  fi
+
+  if python3 - "$derived_archive" <<'PY'
+import sys
+import tarfile
+
+prefix = "fixture-verbs-v7.8.9/"
+with tarfile.open(sys.argv[1], "r:gz") as handle:
+    names = [member.name for member in handle.getmembers() if not member.isdir()]
+if not names or not all(name.startswith(prefix) for name in names):
+    sys.exit(1)
+PY
+  then
+    pass "manifest archive prefix controls the package root"
+  else
+    fail_t "package root did not follow the manifest archive prefix"
   fi
 }
 
@@ -755,6 +810,7 @@ case_untracked_dirty_worktree() {
 
 case_happy_candidate
 case_deterministic_candidate
+case_manifest_archive_prefix
 case_candidate_feature_branch
 case_version_mismatch
 case_missing_changelog_section
@@ -780,7 +836,7 @@ case_staged_dirty_worktree
 case_untracked_dirty_worktree
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: release-preflight synthetic fixtures all green"
+  echo "OK: Panda Verbs release-preflight synthetic cache-layout fixtures all green (not installer proof)"
 else
   echo "FAILURES present"
 fi

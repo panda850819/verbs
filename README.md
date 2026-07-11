@@ -1,476 +1,135 @@
-# pandastack
+# Panda Verbs
 
-Personal context-aware AI operator OS — one substrate, three runtimes, no vendor lock-in.
+An opinionated skill pack for taking software work from ambiguity to verified delivery. Hard-won ways of working, encoded as composable skills for coding agents.
 
-Agent install runbook: see [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md).
+Verified on Claude Code and Codex. Hermes supports selective manual import.
 
-I built pandastack to run my own work across multiple AI CLIs without dotdir sprawl. Skills are version-controlled markdown. Same content runs across Claude Code, Codex CLI, and Hermes; per-CLI shims handle syntax differences. No data-layer vendor lock-in.
+## Product boundary
 
-The stack is a compact skill set focused on dev, writing, and knowledge workflows, tiered **core** (markdown-only, fresh-clone runnable) and **ext** (publicly installable CLI) in `manifest.toml`. Anchored on a personal Obsidian vault as SSOT.
-
-**Philosophy**: pandastack ships verbs. The brain (gbrain or your own knowledge store) keeps state. Lifecycle discipline is your job, not the package's. v2.2 dropped the `flows/` directory (7 spec files); the public package is self-contained: clone + install gives you everything in the manifest.
-
-**Stability scope (read this first):**
-
-v3 is **personal-substrate stable**: API, schema, and skill content are stable for the author's daily use. The current surface is the tier list in `manifest.toml`, after successive scope-tightening (v2.2.0 dropped the `flows` layer; later releases split out the autonomous driver, removed the persona layer, and cut model-judgment scaffolding). Fresh-clone Core install runs without author hand-holding; verified-user-install count is still 0 because the current surface has not been validated by external A-class users yet.
-
-What this means for you:
-
-- If you are the author or a fork-and-learn power user, the current cut is stable for daily use.
-- If you are a fresh A-class user (Obsidian + Coding Agent power user willing to bring your own vault and CLIs), `bash scripts/bootstrap.sh` reports what runs now and what install steps remain. Core should run on a clean clone.
-- If you use Logseq / Roam / Notion instead of Obsidian, skills will reference Panda's vault conventions (`knowledge/`, `Inbox/`, `docs/learnings/`, etc.) — these are prompt defaults, not hard-coded interfaces. You'd adapt them per session or by editing skill text. There's no built-in adapter layer; whether that matters depends on your tolerance for hand-tuning conventions.
-
-**Who this is for:**
-- **Multi-CLI users** who want the same skills across Claude Code, Codex CLI, and Hermes
-- **Vault-centric operators** building on Obsidian
-- **Personal-OS builders** who want substrate-first architecture instead of dotdir sprawl
-- **v1 dogfood reality**: 1 user (the author). Verification window for v1.3.0+ structural fix opens now.
-
-## Quick start
-
-```bash
-git clone https://github.com/panda850819/pandastack.git
-cd pandastack
-scripts/pandastack doctor          # detect runtimes and print next actions
-bash scripts/bootstrap.sh --claude    # or --codex
-```
-
-`bootstrap.sh` reports:
-- substrate state (`~/.agents/AGENTS.md` only)
-- core skills runnable on this clone with no external CLI
-- extension skills with the exact `brew install` / `npm install -g` to enable each
-
-After install:
-
-1. Add a project `AGENTS.md` / `CLAUDE.md` contract when your repo needs one.
-2. `/grill --brief` — bring a fuzzy idea, walk out with a written brief
-3. `/sprint` — 1-2h focused execution, ends in SHIPPED / PAUSED / FAILED
-4. `/ship knowledge <path>` on a finished note in your vault
-5. Stop there. You'll know if pandastack fits how you work.
-
-> **New to pandastack?** [`docs/first-session.md`](docs/first-session.md) is a 15-minute guided first run. Project setup is manual now: add a local contract file when a repo needs one. To try pandastack vault-only with no project, see **Fresh start** under [Install § Substrate config](#substrate-config).
-
-> **Tier model**: Skills are tiered in `manifest.toml`. Core = markdown-only, runs on a fresh clone. Ext = needs a public CLI install. `capability-probe` only ABORTs when substrate is missing, not when ext CLIs are absent.
-
-## Lifecycle map
-
-> Which skill do I run when? This is the 30-second answer. pandastack has 3 documented compositions; everything else is ad-hoc skill chaining you decide on.
-
-```
-                  pandastack lifecycles
-                  ─────────────────────
-
-  dev        DEFINE ──▶ PLAN ──▶ GATE ──▶ BUILD ──▶ VERIFY ──▶ REVIEW ──▶ SHIP
-             grill      grill   careful  build     qa         review     ship
-             --brief                                           (codex
-                                                              cross-check)
-
-             Express path: /sprint chains DEFINE → SHIP internally (1-2h cap).
-
-  writing    CAPTURE ──▶ STRUCTURE ──▶ DRAFT ──▶ SHIP
-             direct      write          write     manual publish
-                         (slop check)             (ship write retired 2026-06-12)
-
-  knowledge  CAPTURE ──▶ DEDUP ──▶ DISTILL ──▶ VERIFY ──▶ SHIP
-             direct      rg/grep   write       human       ship knowledge
-             (or brain   knowledge/            readback    (decisions/ path
-              ingest)                                       triggers decision-
-                                                            note variant,
-                                                            replaces v2.1
-                                                            /work-ship)
-```
-
-Cross-flow router (start here when you're not sure which composition applies):
-
-| If you're about to… | Open with | Composition |
-|---|---|---|
-| Build / fix / refactor code | `/grill --brief` then `/sprint` | dev |
-| Turn a draft into a published post | `/write` then manual publish | writing |
-| Make a raw note durable | `/ship knowledge <path>` | knowledge |
-| Close out a work topic / decision | `/ship knowledge <decisions/path>` | knowledge (decision-note variant) |
-**Express path for dev work**: `/sprint` chains DEFINE → SHIP internally for 1-2h focused tasks. Use sprint when one skill should drive the whole arc; use the manual phase-by-phase progression when stages need user gates between them (e.g. `/careful` for prod) or when the work spans multiple sessions.
-
-**What's NOT a flow** (cut in v2.2.0): `research` is a knowledge-flow variant (`/grill` then `/scout`-like recon then `/ship knowledge`); `work` is a dev-flow variant + decision-note variant of `/ship knowledge`; `decision` is the cron-autonomy contract ("cron proposes, Panda decides, Panda executes") which lives as a rule in `~/.agents/AGENTS.md`, not as a flow; `retro` (weekly/monthly reflection) is brain-centric PKM and moved to the personal overlay on 2026-06-30. None of these earn a separate spec.
-
-## How skills connect
-
-`/grill --brief` writes a brief. `/sprint` reads the brief and executes. `/sprint` ends in SHIPPED, then `/ship knowledge <path>` reads the session note and runs Close + Extract + Backflow. Each step writes an artifact the next step picks up. You decide when to fire each step; the brief, session note, and decision log are the contracts between phases.
-
-## See it work
-
-```
-You:    我想做一個 RSS curation 工具，每天整理 AI 圈新聞，但範圍我沒想清楚
-You:    /grill --brief
-
-Claude: [load context] rg "RSS\|digest\|curation" knowledge/ — 3 條相關 vault note 帶上來
-        [grill] 6 forcing questions: 痛是「資訊過載」還是「漏掉重要的」?
-                                     現在怎麼讀? 「重要」誰定義?
-
-You:    痛是漏掉，「重要」標準是會引用到工作上
-Claude: [premise challenge] 你說「整理 digest」，但描述的是「curation 系統」.
-                            Digest 是 push; curation 是反向過濾.
-        [alternatives]
-                A. RSS → AI 摘要 → 每日 push
-                B. RSS → 看過的舊文 fingerprint → 過濾不相關
-                C. RSS → AI ranking → top-N 推送
-        [recommendation] 先做 B 的 MVP. A 你已經被 newsletter 餵爆.
-        [write brief] docs/briefs/2026-05-05-feed-curator.md
-
-You:    /sprint docs/briefs/2026-05-05-feed-curator.md
-Claude: [dojo] 讀 brief, scan 過往 RSS / curation note (rg / find)
-        [grill-lite] 一題: MVP 先做哪 3 個 source?
-You:    HN + Lenny + 自己 X 收藏
-Claude: [execute] ~400 lines across 4 files. bun test 12/12 passed.
-        [review] /review → 1 ASK (fingerprint hash 衝突) → 你 approve fix.
-        [terminal] State: SHIPPED. Session note: docs/sessions/2026-05-05-sprint-feed-curator.md
-
-You:    /ship knowledge docs/sessions/2026-05-05-sprint-feed-curator.md
-Claude: [Close]    frontmatter / used_in / wiki-link 補齊
-        [Extract]  3 questions:
-                   - 最大發現? 「fingerprint 比 keyword 過濾乾淨」
-                   - 假設錯在? 「以為 30 條都該讀，其實 5 條夠了」
-                   - 下次重來怎麼做? 「先寫 fingerprint test 再寫 source connector」
-        [Backflow]
-                   principle → docs/learnings/patterns/fingerprint-over-keyword.md
-                   SOP → curate-feeds skill 已合併
-                   signal → 成為 learning 候選
-```
-
-You said "RSS digest tool". The agent reframed it as "curation system" — listening to the pain, not the feature request. Three slash commands, end to end. Brief is the contract between phases.
-
-## Architecture
-
-pandastack is a runtime-agnostic substrate consumed by interchangeable runtimes. The autonomous driver / scheduler that drove these runtimes as black-box workers has split out into a separate product; this repo ships the substrate and the skills, not the scheduler.
-
-The **Tier 1 substrate** is runtime-agnostic: identity, voice, skill content, knowledge vault, and worktrees live on disk. All runtimes read the same `AGENTS.md` before acting. No vendor lock-in at the data layer.
-
-The **Tier 2 runtimes** (Claude Code, Codex CLI) are thin, interchangeable consumers of Tier 1. Each gets a slim shim in its dotdir (`~/.claude/`, `~/.codex/`); skills are identical across runtimes, with a per-CLI tool-name mapping for syntax. Every layer shares the same Tier 1 substrate — no duplication, no drift.
-
-```mermaid
-flowchart TB
-    User((User))
-
-    subgraph T2 [Tier 2 — Runtimes]
-        direction LR
-        cc[Claude Code]
-        cx[Codex CLI]
-    end
-
-    subgraph T1 [Tier 1 — Substrate]
-        direction TB
-        agents[AGENTS.md · identity / voice / routing]
-        skills[pandastack · skills]
-        knowledge[knowledge vault · SSOT]
-        job[worktrees]
-        cli[personal CLI tools · gog · bird · ...]
-    end
-
-    User --> T2
-    T2 --> T1
-```
-
-## Multi-runtime arbitrage
-
-Claude Code (Opus) handles foreground reasoning. Codex CLI takes multi-file edits and batch tasks, spending OpenAI subscription quota instead of Claude tokens. `/handover` dispatches a mechanical batch to Codex against the same Tier 1 substrate.
-
-## Runtime support
-
-pandastack is not a monolithic runtime. It is a stack package: shared skills and conventions that different hosts can consume.
-
-Host design notes live in [`docs/ADDING_A_HOST.md`](docs/ADDING_A_HOST.md).
-
-| Host | Status | Install model |
-|---|---|---|
-| Claude Code | First-class | Claude plugin marketplace, local repo or GitHub repo |
-| Codex CLI | Supported | Native skill discovery via clone + symlink |
-| Hermes | Supported as conductor / host, not as first-class packaged runtime yet | Import/symlink selected skills into `~/.hermes/skills/` |
-| OpenClaw | Planned / experimental | Intended shape is a skill package, not shipped as a first-class installer in this repo yet |
-
-## Install
-
-`scripts/bootstrap.sh` is the entrypoint. It probes substrate, lists what's ready, prints exact commands for what's missing, then prints the host-specific install line.
-
-```bash
-git clone https://github.com/panda850819/pandastack.git
-cd pandastack
-bash scripts/bootstrap.sh             # report only
-bash scripts/bootstrap.sh --claude    # also print Claude Code install steps
-bash scripts/bootstrap.sh --codex     # also print Codex CLI install steps
-```
-
-### Per-host one-liners (after clone)
-
-| Host | Install |
-|---|---|
-| Claude Code | `/plugin marketplace add /absolute/path/to/pandastack` then `/plugin install pandastack@pandastack` then `/reload-plugins` |
-| Codex CLI | `ln -sfn /absolute/path/to/pandastack/skills ~/.codex/skills/pandastack` then restart Codex |
-| Hermes | Import/symlink selected skills into `~/.hermes/skills/` (see `docs/HERMES.md`) |
-| OpenClaw | Skill package experimental, see `docs/OPENCLAW.md` |
-
-After install, run `/pandastack:init` once inside your project.
-
-### Substrate config
-
-**Identity contract** (one is enough): `~/.agents/AGENTS.md` (the author's personal substrate), **or** a project `./CLAUDE.md`, **or** `./AGENTS.md`. A fresh Claude Code user with a `CLAUDE.md` is covered — `/pandastack:init` creates one. Flow skills abort only when *none* of the three exists. No env vars needed as of v2.0.1.
-
-- **Work dir**: skills write into the cwd — any writable repo or vault, not only an Obsidian vault. Missing work dirs (`Inbox/`, `docs/briefs/` …) are auto-created on first write by `capability-probe`; you don't have to pre-make them.
-- **Plugin path**: resolved via the host plugin-resolver (`$CLAUDE_PLUGIN_ROOT` under Claude Code) or a relative path from the calling skill.
-- **Work-vault decision-note close**: `cd <work-vault> && /ship knowledge decisions/<file>.md` — runs the decision-note variant which also writes `Inbox/ship-proposals/` for manual external push (replaces v2.1 `/work-ship`).
-
-**Vault structure** (created on demand — here's the full tree if you'd rather pre-make it):
-
-```
-Inbox/                 # session captures, ship proposals
-knowledge/             # long-form notes
-docs/
-  briefs/              # /grill --brief output
-  plans/               # executable plans (/sprint --plan)
-  sessions/            # session logs
-  learnings/           # learnings sedimented by /review
-  checkpoints/         # sprint pause/resume snapshots
-```
-```bash
-mkdir -p Inbox knowledge docs/{briefs,plans,sessions,learnings,checkpoints}
-```
-
-**Fresh start (no project yet)**: project setup is manual now. To try pandastack without a project contract, `cd` into any writable dir and run `/grill --brief "<a real problem you have>"` — it produces a brief without the retired setup skill. Full guided run: [`docs/first-session.md`](docs/first-session.md).
-
-Re-run `bash scripts/bootstrap.sh` any time to verify substrate.
-
-## Local development loop, author workflow
-
-If you are developing pandastack itself, the clean loop is:
-
-1. Clone the repo locally.
-2. Point Claude Code marketplace at that local repo.
-3. Install `pandastack@pandastack` from the local source.
-4. Edit files in the repo.
-5. Run `/reload-plugins` in Claude Code to pick up changes.
-6. Re-run the target skill / flow.
-
-Example:
-
-```
-/plugin marketplace add /absolute/path/to/pandastack
-/plugin install pandastack@pandastack
-/reload-plugins
-```
-
-For Codex, the equivalent loop is `git pull` or local edits on the cloned repo plus a Codex restart. For Hermes direct-import setups, re-copy or re-symlink the changed skill files.
+Panda Verbs ships **skills, shared procedural primitives, dispatch, narrow host adapters, install manifests, evals, and tests**. It does not own: identity, context, brain or memory, project truth, runtimes or models, scheduling, autonomous drivers, connectors, or global routing.
 
 ## Skills
 
-Skills grouped by lifecycle (core / ext tiers — see `manifest.toml`). Each skill is "your specialist" for that step.
+**Core** = markdown-first with only baseline `git` where declared. **Ext** =
+needs an additional public CLI. Full spec in `manifest.toml`.
 
-### Think / intake
-
-| Skill | Your specialist | What they do |
+| Skill | Tier | Purpose |
 |---|---|---|
-| `/grill` | The Adversary | Atomic 5-10 min adversarial discovery. One question at a time, hunting for hidden requirements and unknown unknowns. Use `--brief` for a written brief + executable plan. |
+| `/verbs:grill` | core | Atomic adversarial discovery, 5-10 min. Use `--brief` for a written brief + executable plan. |
+| `/verbs:careful` | core | Confirmation gate before destructive commands (prod, rm -rf, force-push). |
+| `/verbs:debug` | core | Root-cause debugging: hypothesis → instrument → bisect → scope-blast. NOT diff review. |
+| `/verbs:ui` | core | Build/fix UI with a point of view. NOT browser-test (qa) or render-bug (debug). |
+| `/verbs:review` | core | 3-pass review + cross-model adversarial check. |
+| `/verbs:sprint` | core | 1-2h focused execution: scope → grill-lite → execute → review → ship. |
+| `/verbs:write` | core | Voice-aware drafting + slop detection. |
+| `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
+| `/verbs:skill-creator` | core | Create new Panda Verbs skills. `--eval` scores existing skills. |
+| `/verbs:writing-great-skills` | core | Reference + scorecard for well-constructed skills. |
+| `/verbs:qa` | core | Browser-based UI QA when the host provides browser automation. |
+| `/verbs:ship` | ext | Test + commit + push + PR for completed code work. Needs cli:gh. |
+| `/verbs:handover` | ext | Hand unfinished work to Codex (sync or async). Needs cli:codex. |
+| `/verbs:advisor` | ext | Cross-model second opinion. Needs cli:codex and cli:claude for opposite-seat routing. |
 
-### Build
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/sprint` | Sprint Coach | 1-2h single-track focused execution. Internal flow: prep → grill (lite) → execute → review → ship. For multi-step work, run multiple sprints in sequence. |
-| `/debug` | Root-cause debugging | Name the root cause before editing, verify before claiming fixed, scope-blast siblings. Bug-class lore + bisect in lib. |
-| `/ui` | UI craft | Lock a direction and fight your defaults. Reflex-font blocklist, CJK type, OKLCH, CSS bans-with-rewrites in references. |
-| `/careful` | Safety Gate | Confirmation gates before destructive commands (force push, rm -rf, DROP). |
-
-### Plan critique
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/advisor --panel` | Cross-model critics | Blind cross-model critique of a prepared plan. Deduped + ranked findings, per-finding apply gate. |
-
-### Review / QA
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/review` | Code Reviewer | Parallel 3-pass review (correctness, security, architecture) + Codex adversarial cross-check. |
-| `/qa` | QA Lead | Browser-based QA. Opens real pages, runs flows, finds bugs. |
-
-### Ship (multi-mode)
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/ship` | Release Engineer | Multi-mode close. `/ship` (no args) = test + commit + push + PR. `/ship knowledge <path>` = Close + Extract + Backflow on a knowledge note (decision-note variant when path matches `decisions/`, replaces v2.1 `/work-ship`). |
-| `/handover` | Codex Handover | Hand UNFINISHED work to Codex to DO (ship closes, handover delegates). `/handover [slug]` = sync, Claude spawns `codex exec` now + collects the result. `/handover --async [slug]` = write a payload to `docs/handoffs/` for Hermes / offline. Codex runs on ChatGPT-subscription quota, conserving the Claude session. |
-
-### Trust
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/gatekeeper` | The Gatekeeper | Pre-adoption trust check (skills, MCPs, repos, on-chain addresses). |
-
-### Reflect / cadence
-
-Retro (weekly / monthly reflection) moved to the personal overlay on 2026-06-30 — brain-centric PKM, not a coding-agent skill. Compounding now runs continuously in the dev flow via `lib/learning-recall.md`, not a calendar retro.
-
-Vault hygiene (orphans / stale / superseded) is a direct `rg` / `find` scan or — when `gbrain` is connected — a brain query (`mcp__gbrain__find_orphans`). v2.2.0 cut `/inbox-triage`.
-
-### Session
-
-Project setup is manual now: add the repo-local `AGENTS.md` / `CLAUDE.md` contract directly. `/checkpoint` and `/done` were cut from the active surface. Sprint pause/resume state now lives in sprint artifacts and external session notes.
-
-### Writing
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/write` | The Editor | Voice-aware drafting + slop detection. Used inside the writing composition. |
-
-### Tool wrappers (public CLI)
-
-`/agent-browser` was archived 2026-06-08 — the npm `agent-browser` CLI carries its own docs; `/qa` still uses the CLI directly. Repo-doc diagram grounding now lives in `lib/mermaid-grounding.md`.
-
-`summarize`, `notion`, `slack`, `scout`, `inbox-triage`, `work-ship`, `think-like-*` were cut in v2.2.0 — see `RESOLVER.md` § "v2.2.0 cut summary".
-
-### Meta / skill authoring
-
-| Skill | Your specialist | What they do |
-|---|---|---|
-| `/skill-creator` | Skill Smith | Create a new pandastack skill, MECE-checked against `RESOLVER.md`, trigger-first. Use `--eval` to score an existing skill and write a co-located `eval.md`. |
-| `/writing-great-skills` | The Scorecard | Reference + scorecard for well-constructed skills; the construction-quality SSOT. |
-
-## Lifecycle compositions
-
-v2.2.0 cut the `flows/` directory. There are no longer separate flow spec files — what used to live in `flows/*.md` is now either:
-
-1. **Inline in the relevant skill**: `/sprint` for dev, `/ship knowledge` (incl. decision-note variant) for knowledge close.
-2. **Documented in the "Lifecycle map" section above**: the 3 first-class compositions (dev / writing / knowledge).
-3. **Demoted because it wasn't really a flow**:
-   - `research` → knowledge variant (Phase 1-3 vary, Phase 4-6 = knowledge ship)
-   - `work` → dev variant + decision-note variant of `/ship knowledge`
-   - `decision` → autonomy contract ("cron proposes, Panda decides, Panda executes") in `~/.agents/AGENTS.md`
-   - `retro` → moved to the personal overlay (brain-centric PKM)
-
-This shrinks the documentation surface and makes "which skill do I run" answerable in 30 seconds from the Lifecycle map alone.
-
-## Cron jobs
-
-The public package ships no cron-driven skills. If you want scheduled cadence, wire your own skills with whichever scheduler you prefer (launchd plist, system crontab, or Hermes).
-
-## Updating
-
-### For users
-
-#### Claude Code, installed from GitHub marketplace source
+## Install
 
 ```bash
-/plugin marketplace update pandastack
-/plugin update pandastack@pandastack
-/reload-plugins
+git clone https://github.com/panda850819/panda-verbs.git
+cd panda-verbs
+bash scripts/bootstrap.sh             # report only
+bash scripts/bootstrap.sh --claude    # print Claude Code install steps
+bash scripts/bootstrap.sh --codex     # print Codex CLI install steps
 ```
 
-#### Claude Code, installed from local repo
+### Per-host
 
-Pull the repo or edit it locally, then reload:
+| Host | Install after clone |
+|---|---|
+| Claude Code | `claude plugin marketplace add /absolute/path/to/panda-verbs --scope user` then `claude plugin install verbs@verbs --scope user` |
+| Codex CLI | `codex plugin marketplace add /absolute/path/to/panda-verbs --json` then `codex plugin add verbs@verbs --json` |
+| Hermes | Import/symlink selected skills into `~/.hermes/skills/` (see `docs/HERMES.md`) |
+
+**Work dirs** (`Inbox/`, `docs/briefs/`, etc.) are auto-created on first write; you don't pre-make them.
+
+Full install, verification, and v3 migration commands are in
+[`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md).
+
+## Manual chaining examples
+
+Dev work: grill then sprint.
+```
+/verbs:grill --brief "<problem>"
+/verbs:sprint
+```
+
+Code review: review then ship.
+```
+/verbs:review
+/verbs:ship
+```
+
+Artifacts flow between skills; you decide when to invoke each step.
+
+## Host support
+
+| Host | Status |
+|---|---|
+| Claude Code | Verified plugin marketplace install |
+| Codex CLI | Verified plugin marketplace install |
+| Hermes | Selective manual skill import |
+
+## v3 to v4 migration
+
+v4 keeps the 14-skill catalog and makes the product boundary explicit. The
+plugin id, namespace, CLI, and repository name change. Before migrating, pin
+v3.4.2 commit `8d9a382b74d5b3e0ef0b6e91375fab3a172a916f` in a detached rollback
+worktree as documented in the install guide. Never enable both plugins at once.
 
 ```bash
-cd /absolute/path/to/pandastack
-git pull
+claude plugin validate "/absolute/path/to/panda-verbs"
+claude plugin marketplace add "/absolute/path/to/panda-verbs" --scope user
+claude plugin uninstall pandastack@pandastack --scope user --keep-data
+claude plugin install verbs@verbs --scope user
+# After /reload-plugins and strict verification pass:
+claude plugin marketplace remove pandastack --scope user
 ```
 
-Then run `/reload-plugins` in Claude Code.
+If v4 fails before verification, repoint the old marketplace to that immutable
+rollback checkout and reinstall `pandastack@pandastack`. Then migrate Codex
+with the commands in the install guide.
+`/pandastack:*` has no alias. Use `/verbs:*` or an unqualified skill name when
+the host displays one.
 
-#### Codex CLI
+## Development and verification
 
+Check a checkout:
 ```bash
-cd ~/.codex/pandastack
-git pull
+bash scripts/bootstrap.sh
+python3 scripts/verbs sync --check
+claude plugin validate .
+bash tests/run-all.sh
 ```
 
-Restart Codex. The symlinked skills update with the repo.
-
-#### Hermes
-
-Re-copy or re-symlink the changed skill folders into `~/.hermes/skills/`.
-
-### For the author / maintainer
-
-Recommended release loop:
-
-1. Update skill content in the repo.
-2. Update user-facing docs, especially `README.md` and install notes.
-3. Edit the version only in `manifest.toml`, then regenerate the derived loader
-   metadata:
-
-   ```bash
-   scripts/pandastack sync
-   ```
-
-4. Name the release in `CHANGELOG.md` with a heading such as
-   `## vX.Y.Z — Release name` and add its `Released: YYYY-MM-DD` line.
-5. Verify in the real hosts you claim to support:
-   - Claude Code local marketplace install
-   - Codex clone + symlink install
-   - Hermes import/symlink path, if relevant to the change
-6. Candidate mode can be run from any clean, committed worktree:
-
-   ```bash
-   git status --short  # must print nothing
-   bash scripts/release-preflight.sh --candidate vX.Y.Z
-   ```
-
-7. Push the feature branch, open a PR, let CI pass, and merge it. Feature-branch
-   `/ship` stops at this PR boundary: it does not tag or publish a release. That
-   is why the repo config remains `tag: none` and `release: false`.
-8. For the actual tag flow, start from a clean, updated `main`. Create the
-   annotated tag, validate it, then push only that tag:
-
-   ```bash
-   git switch main
-   git pull --ff-only
-   git status --short  # must print nothing
-   git tag -a vX.Y.Z -m "vX.Y.Z — Release name"
-   bash scripts/release-preflight.sh --tag vX.Y.Z
-   git push origin vX.Y.Z
-   ```
-
-9. The tag-only release workflow reruns the preflight and publishes the exact
-   title, notes, archive, and checksum it produces. The release remains a draft
-   until all four artifacts upload successfully.
-
-## Contributing
-
-### Before opening a PR
-
-- Keep skill content in `skills/<bucket>/<name>/SKILL.md` (bucket = engineering | productivity | writing | meta); add the path to the `skills` array in `.claude-plugin/plugin.json`
-- Keep each skill concise; the current discipline is roughly under 80 lines unless the extra length clearly earns itself
-- Construction quality is scored against the scorecard in `writing-great-skills` (the SSOT). `skill-creator --eval` scores a skill and writes a co-located hash-stamped `eval.md`; every skill carries one. `scripts/lint-eval-fresh.sh` fails if a skill is edited without re-evaling, and `scripts/lint-refs-resolve.py` checks that every internal ref in a SKILL.md resolves.
-- Run validation:
-
+Score a skill against the construction quality SSOT:
 ```bash
-bash scripts/lint-manifest-sync.sh
+/verbs:skill-creator --eval <skill-name>
 ```
 
-Frontmatter fields `reads`, `writes`, `domain`, and `classification` are optional advisory audit metadata — nothing reads or enforces them. The L1–L5 firewall they were specified for was implemented in the now-retired `pdctx` overlay; on the public surface the only active guard is `hooks/pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands. See [SKILL-FRONTMATTER.md](SKILL-FRONTMATTER.md) for the schema.
+## Release
 
-### How to open a PR
+Maintainer workflow:
 
-1. Fork the repo or create a branch from `main`.
-2. Make the smallest coherent change.
-3. Update docs if install surface, runtime behavior, or invocation changes.
-4. Add or update CHANGELOG entries when the change is user-visible.
-5. Open a PR describing:
-   - what changed
-   - which host it affects, Claude Code / Codex / Hermes / OpenClaw
-   - how you tested it
-   - any migration or reload step users need
+1. Update `manifest.toml`, `CHANGELOG.md`, and skill content on an issue branch.
+2. Run `scripts/verbs sync`, `bash tests/run-all.sh`, and
+   `bash scripts/release-preflight.sh --candidate vX.Y.Z` from a clean commit.
+3. Merge the green PR to `main`.
+4. Create an annotated tag whose subject equals the changelog heading.
+5. Run `bash scripts/release-preflight.sh --tag vX.Y.Z`, then run
+   `bash scripts/installer-smoke.sh claude "$PWD" vX.Y.Z` and the same command
+   for `codex`.
+6. Push only the tag after both real installer smokes pass.
 
-Repository PRs: [github.com/panda850819/pandastack/pulls](https://github.com/panda850819/pandastack/pulls)
+Tag-only release workflow publishes archives and checksums; release stays draft until all artifacts upload.
 
-### How to file an issue
-
-Please include:
-- host/runtime, Claude Code / Codex / Hermes / OpenClaw
-- install model, GitHub marketplace / local marketplace / clone + symlink / manual import
-- expected behavior
-- actual behavior
-- reproduction steps
-- relevant logs or screenshots
-
-Repository issues: [github.com/panda850819/pandastack/issues](https://github.com/panda850819/pandastack/issues)
 
 ## License
 
@@ -479,4 +138,7 @@ attributions and included or adapted license terms.
 
 ## Acknowledgements
 
-README structure (Quick start, Who this is for, See it work, Skill / specialist / what they do tables) inspired by [gstack](https://github.com/garrytan/gstack). The JSONL session timeline pattern is also borrowed from gstack and iterated for per-context isolation.
+Release and skill-writing conventions are adapted from
+[mattpocock/skills](https://github.com/mattpocock/skills); Chinese writing
+references include [tw93/Waza](https://github.com/tw93/Waza). See the notices
+for exact attribution.

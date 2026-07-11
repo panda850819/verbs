@@ -1,6 +1,6 @@
 # Gate Contract
 
-Standard schema for user-facing decision points in pstack skills.
+Standard schema for user-facing decision points in Panda Verbs skills.
 
 When a skill needs the user to review / decide / approve before proceeding, use this four-option contract. Consistency across skills lowers decision cost — the user learns one pattern, not N.
 

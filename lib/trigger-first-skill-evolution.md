@@ -1,11 +1,11 @@
 # Trigger-first Skill Evolution
 
-> Shared harness-evolution rule. Load when creating, improving, splitting, merging, or reviewing pandastack skills. The goal is to let repeated usage create structure instead of forcing a taxonomy too early.
+> Shared skill-evolution rule. Load when creating, improving, splitting, merging, or reviewing Panda Verbs skills. The goal is to let repeated usage create structure instead of forcing a taxonomy too early.
 
 ## Core shape
 
 ```text
-PangPang Core / host assistant
+Host assistant
   → trigger matching
   → task skill
   → inline checklist / rubric
@@ -62,5 +62,5 @@ Use review windows to clean the system instead of redesigning during every task:
 
 ## Source
 
-- Brain: `~/site/knowledge/brain/learnings/architecture/trigger-first-skill-evolution.md`
-- Origin: Panda + PangPang Telegram discussion, 2026-06-01.
+Distilled from repeated skill-surface cleanup in this repository. Historical
+discussion and prior names remain in git history.

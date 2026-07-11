@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stop-hook verify gate for the pandastack plugin.
+"""Stop-hook verify gate for Panda Verbs.
 
 Blocks the session's first stop when the current turn edited code files but
 never ran a test or verify command; the model gets one chance to run the
@@ -9,8 +9,9 @@ with exit 0 and no output — the gate must never break a session.
 
 stdin: Claude Code or Codex Stop-hook JSON (transcript_path, stop_hook_active).
 stdout: exactly one {"decision":"block","reason":...} object, or nothing.
-Kill switch: PANDASTACK_VERIFY_GATE=off. Python 3.9+, stdlib only, no
-network, no file writes. Design ported from fable-harness verify_gate.py
+Kill switch: PANDA_VERBS_VERIFY_GATE=off. The v4 RC also reads the legacy
+PANDASTACK_VERIFY_GATE name when the new variable is unset. Python 3.9+, stdlib
+only, no network, no file writes. Design ported from fable-harness verify_gate.py
 (MIT).
 """
 import json
@@ -20,7 +21,7 @@ import sys
 from runtime_events import current_turn_events, is_code_path
 
 BLOCK_REASON = (
-    "[pandastack verify-gate] code changed this turn with no test or verify "
+    "[verbs verify-gate] code changed this turn with no test or verify "
     "run — run the relevant check, or state the change is not yet verified."
 )
 
@@ -47,7 +48,10 @@ def analyze(entries, hook_payload=None):
 
 def main():
     try:
-        if os.environ.get("PANDASTACK_VERIFY_GATE", "").strip().lower() == "off":
+        gate_setting = os.environ.get("PANDA_VERBS_VERIFY_GATE")
+        if gate_setting is None:
+            gate_setting = os.environ.get("PANDASTACK_VERIFY_GATE", "")
+        if gate_setting.strip().lower() == "off":
             return 0
         data = json.loads(sys.stdin.read() or "{}")
         if data.get("stop_hook_active"):

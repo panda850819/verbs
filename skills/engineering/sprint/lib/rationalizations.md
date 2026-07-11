@@ -17,4 +17,4 @@ Anti-bypass table. Each shortcut is tied to the concrete failure it causes.
 | "Re-asking the user to re-test is just one more round" | Each contaminated human round-trip is the expensive unit. If the loop needs repeated round-trips, harden the loop first (R3), then iterate. |
 | "Let's sprint on stuff" (no single topic) | Sprint requires one concrete topic. No-topic ideation routes to `grill --brief`, not sprint. |
 | "Substrate's fine, skip Stage 0 capability probe" | Probe each run — state changes between sessions. The probe block is the opening, not optional. |
-| "Sprint didn't ship, so it failed (PAUSED = failure)" | PAUSED is a legitimate terminal outcome, not a break. No extract/backflow; write the checkpoint and stop cleanly. |
+| "Sprint didn't ship, so it failed (PAUSED = failure)" | PAUSED is a legitimate terminal outcome, not a break. Write the checkpoint and stop cleanly. |

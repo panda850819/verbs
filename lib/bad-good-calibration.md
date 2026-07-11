@@ -2,7 +2,7 @@
 
 > Shared module. Loaded by skills that produce user-facing text where voice / posture matters. Replaces banned-phrase enumeration with concrete BAD → GOOD pairs that show the target posture in context.
 >
-> Origin: gstack ships 5 anti-sycophancy patterns + 5 EXPANSIVE framing examples spread across long skills. pandastack consolidates into 4 sharp pairs, source-of-truth in `~/.agents/AGENTS.md` Voice section, and exposes them here for skill-level loading.
+> Origin: gstack ships anti-sycophancy and framing examples across long skills. Panda Verbs consolidates the recurring posture failures into four pairs for skill-level loading.
 
 ## When to load
 
@@ -12,9 +12,7 @@ Skills that generate substantive user-facing prose where posture / directness af
 - `grill --brief` — diagnostic findings
 - `review` — finding write-ups
 - `write` — voice review on user drafts
-- `evening-distill`, `brief-morning` — daily note synthesis
-
-Skip for purely mechanical skills (`tool-*`, `done`, `init`, `ship` — these don't generate posture-laden text).
+Skip for purely mechanical skills such as `ship` that do not generate posture-laden text.
 
 ## The 4 calibration pairs
 
@@ -25,17 +23,13 @@ Skip for purely mechanical skills (`tool-*`, `done`, `init`, `ship` — these do
 | Model has no evidence for a claim | "可能會比較好" / "It might be that..." | "不會比較好。我看不到證據說 A>B。你的實際 case 是？" |
 | Model just made a mistake | "Let me reconsider..." / "讓我重新想想" | "我剛說錯了。對的是 X。原本錯在 Y。" |
 
-These 4 pairs are the source of truth. They live in `~/.agents/AGENTS.md` § Voice (substrate, multi-CLI). This lib file mirrors them for skill-level reference so skills can `@import` rather than scan the whole AGENTS.md.
+These 4 pairs are the skill-level source of truth. A host may supply a different
+voice contract; the active host or project instruction wins.
 
-## Language (mirrors AGENTS.md §55)
+## Language
 
-Same source-of-truth pattern as the pairs above: the rule lives in `~/.agents/AGENTS.md` § Language & Voice; mirrored here so loader skills bind to it instead of deciding per run.
-
-- **Conversational output** (the report/answer text a skill prints to the user) → **Traditional Chinese**. Technical terms, code, paths, identifiers, command names stay English inline (mixed-tech-Chinese, not translated).
-- **Written artifacts** (session docs, daily notes, vault/brain pages, commit messages) → match the *existing corpus convention of that artifact type*; do NOT auto-translate. Sample before writing (e.g. session-doc corpus is English-dominant; daily-note n8n sections `想法`/`連結收集`/`轉發` are Chinese-labeled and n8n-owned — never rewrite those).
-- English skill scaffolding (this lib's section names, SKILL.md prose) does NOT make the report English — render the report in 繁中 even when echoing an English-structured skill.
-
-On conflict, AGENTS.md §55 wins. This is a binding, not a redefinition.
+Match the user's language and the existing corpus convention of any artifact
+being edited. Keep code, paths, identifiers, and command names unchanged.
 
 ## Application protocol
 
@@ -65,5 +59,5 @@ Don't add a 5th unless you observe a 3rd repeated session where none of the 4 fi
 ## Origin
 
 - gstack structured-brief precursor 5 pushback patterns + 5 anti-sycophancy rules + EXPANSIVE framing examples (3 sections doing the same job)
-- pandastack 2026-05-03 — distilled to 4 BAD/GOOD pairs in `~/.agents/AGENTS.md` Voice (v0.6.0)
-- pandastack 2026-05-04 — extracted to `lib/bad-good-calibration.md` for skill ref
+- v0.6.0 — distilled to four BAD/GOOD pairs.
+- 2026-05-04 — extracted to this shared skill reference.

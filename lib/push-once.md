@@ -2,20 +2,23 @@
 
 > Shared module. Loaded by `grill` and `grill --brief`. Gives the model a fixed menu of 5 named pushback prompts to use when a first reply is rehearsed / vague / unsupported. Replaces ad-hoc improvised pushes with named, audit-able patterns.
 >
-> Origin: a gstack structured-brief precursor ships 5 pushback patterns inside the skill body (943 lines total). pandastack lifts the residue (the 5 patterns themselves) into a shared lib so multiple skills can ref it without duplicating the body.
+> Origin: a gstack structured-brief precursor ships five pushback patterns.
+> Panda Verbs keeps the reusable pattern catalog here.
 
 ## When to load
 
 Skills that take user input on a fuzzy / unverified claim and need to drill before accepting it. Specifically:
 
-- `grill` Protocol step — first reply on any axis
-- `grill --brief` premise challenge — first claim
+- `grill` Protocol step — a reply is rehearsed, vague, or unsupported
+- `grill --brief` premise challenge — a claim needs one concrete challenge
 
 Do NOT load for skills where input is already concrete (bug fix, typo, executing a confirmed plan).
 
 ## The 5 patterns
 
-Print these to the user as a numbered menu when the first reply is shallow. Model picks one (or asks user to pick) and uses that exact prompt as the next message.
+When a reply is shallow, the model selects one pattern using the priority below,
+prints its label, and asks that exact prompt. Do not spend another turn asking
+the user to choose a pattern.
 
 ```
 [1] 具體一點    — "給我名字、數字、case 編號。沒有具體例子等於沒講。"
@@ -43,42 +46,32 @@ If 2+ symptoms present, pick the highest-leverage one (usually [3] reverse-premi
 
 When loading this lib in a skill:
 
-1. After user's first reply on any axis, model prints:
+1. When a reply matches a symptom in the table, select the highest-leverage
+   matching pattern and print:
 
    ```
-   First reply detected. Pick a push pattern:
-
-   [1] 具體一點    — give me names / numbers / cases
-   [2] 證據檢查    — have you seen it? which case?
-   [3] 反命題      — what if we remove that assumption?
-   [4] 邊界條件    — where does this NOT apply?
-   [5] 自由發問    — model writes a sharper one
-   [self] I'll push myself
-
-   Pattern: __ (or "skip" to accept reply as-is)
+   Push [N] {pattern-name}: {the exact pattern prompt}
    ```
 
-2. User picks. Model uses that pattern as the literal next prompt.
+2. Wait for the answer. If the user says `skip`, accept the original reply and
+   record `axis-N: accepted without push` in the emitted grill log.
 
-3. If user picks `[5]`, model writes a context-specific variant in the same shape (specific → demand reality, evidence → demand source, reverse → strip assumption, boundary → find counter-case).
-
-4. If user picks `skip`, model proceeds without pushing — but logs `axis-N: accepted on first reply` to the grill log so the absence of push is auditable.
+3. For `[5]`, write a context-specific variant in the same shape.
 
 ## Anti-patterns
 
-- ❌ Skipping the menu and improvising a push from scratch (defeats the audit trail)
+- ❌ Improvising outside the five-pattern catalog without using `[5]`
 - ❌ Running 2 patterns in one message ("具體一點，而且你看過嗎？")
 - ❌ Falling back to chat prose without picking from the menu
-- ❌ Asking the user "want me to push?" — that's escape hatch territory, not push-once
+- ❌ Asking the user to choose a pattern before the model makes its own selection
 
 ## Relationship to escape hatch
 
-Push-once is **before** the escape hatch. Push-once enforces minimum-1 push per axis. Escape hatch handles user signaling enough after multiple pushes have happened.
+Push-once is **before** the escape hatch. It challenges only a rehearsed, vague,
+or unsupported reply. Escape hatch handles user signaling enough.
 
-- Push-once: "1st reply rehearsed, must push once"
+- Push-once: "unsupported reply, use one named challenge"
 - Escape hatch: "user says 夠了, stop pushing, log unprocessed"
-
-If user triggers escape hatch BEFORE the model has done 1 push on any axis, that's a signal the menu was too noisy or the timing was wrong. Log to `Inbox/feedback-log.md` for retro review.
 
 ## Why a menu and not a rule
 
@@ -93,4 +86,4 @@ This is the gstack residue lift: copy the discipline, not the body.
 ## Origin
 
 - gstack structured-brief precursor (943 lines) — 5 pushback patterns embedded inside skill body, repeated 11x
-- pandastack 2026-05-04 — extracted to `lib/push-once.md`, refed by `grill` and `grill --brief`
+- Panda Verbs — shared by `grill` and `grill --brief`

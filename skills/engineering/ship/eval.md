@@ -2,37 +2,42 @@
 type: skill-eval
 skill: ship
 bucket: engineering
-evaluated_skill_hash: b96b164261817d54bdcf6475cebbb76c1bf2fef7
-evaluated_at: 2026-07-03
+evaluated_skill_hash: 53c63374c54af9207b8ccb3c68b0176670187db2
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — ship
 
-**Verdict: SOLID.** Strong leading-word anchors, a clean hot/cold split, Step 8 closure evidence, and a Step 10 pointer to review's guard-escalation SSOT; held back by existing line-level duplication, an un-named native-parity delta, and a git-mode body still past the ~80-line guide.
+**Verdict: SOLID.** The git-only delivery path is ordered around a mandatory pre-commit branch gate and closes on PR plus pushed commit/branch evidence; its native-parity delta and body-length justification remain implicit.
+
+Grounding sample: L95 — "Do not stage or commit until this branch gate passes."
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L41 — mode-dispatch table then numbered Steps 0–11 (L63–169) run the same ordered process every git-mode invocation; the new Step 8.4 (L143) is a deterministic presence/absence check, not a model-discretion fork. |
-| Description / invocation | pass | L4 — front-loads "Multi-mode ship verb. Closes work", branch-per-trigger table, explicit `/handover` disambiguation (L8); unaffected by this edit. |
-| Completion criteria | pass | L143 — new: "Closure evidence before claiming done: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done" is checkable (evidence present or named-absent) and closes the exact premature-completion gap ("I shipped" with no PR link) the audit flagged; strictly stronger than the step it sits in. |
-| Information hierarchy | pass | L181 — git mode still inline as the hot path, knowledge mode and reference detail (rationalizations, project-state, quote-gate) behind pointers; the guard-escalation change is a one-line pointer to review Step 7 (L159), not a copied rule block. |
-| Leading words | pass | L107 — step headers ("Pre-flight", "Load Learnings", "Scope Check", "Review Gate", "Commit", "Branch", "Push + PR") remain pretrained anchors; "closure evidence" (L143) is itself a compact leading phrase the model can act on without further unpacking. |
-| Pruning | weak | L142-143 — the closure gate restates "Return the PR URL" one line after it: item 3 already says "Return the PR URL", item 4 says "print ticket/PR URL" again before adding its real new content (the state-transition + missing-evidence branch). Separately, L161's propose-only flaw-routing prose is still triplicated against `lib/trigger-first-skill-evolution.md` and the review skill's matching rule — the prior eval's fix was never applied. |
-| Native parity | weak | L143 — the delta is real (raw `gh pr create` + a human eyeballing the terminal vs. a gate that refuses to claim done without printed evidence) but the skill never names it: no line in the body says "vs. running git/gh by hand, ship adds X" the way the axis asks. Same gap as the sibling meta evals — the axis is new to this skill's scoring, not yet answered in the text. |
-| Granularity | pass | L159 — guard escalation folds into existing Step 10 as a pointer to review Step 7 rather than spawning a new ship stage or duplicating the full clause. |
-| pandastack conformance | weak | L181 — frontmatter valid, all pointers resolve (`@./modes/knowledge.md`, three `skills/engineering/ship/lib/*.md`, repo-root `lib/trigger-first-skill-evolution.md`); but the git-mode body still runs ~120 lines (Steps 0-11 + dispatch), past the ~<80 guideline the prior eval already flagged. |
+| Predictability | pass | L85 — the mandatory branch step occurs before commit, preventing local main from advancing before the feature branch exists. |
+| Description / invocation | pass | L4 — the description front-loads completed-code delivery and separates unfinished work into `handover`. |
+| Completion criteria | pass | L124 — completion requires both the PR URL and pushed commit/branch evidence, with a named gap when either is absent. |
+| Information hierarchy | pass | L142 — quote verification is kept behind a focused pointer and loaded only when a learning candidate contains a quote. |
+| Leading words | pass | L85 — “Branch (mandatory, before commit)” is a compact execution anchor for the highest-risk ordering rule. |
+| Pruning | weak | L147 — the propose-only flaw-routing paragraph repeats ownership and timing constraints at length after an earlier guard-escalation sentence. |
+| Native parity | weak | L41 — “one command” states convenience but does not explicitly name the delta over native `git` plus `gh pr create`: test, scope, review, branch, and evidence gates. |
+| Granularity | pass | L36 — the skill owns one coherent git-to-PR lifecycle and explicitly leaves knowledge and external publication to the host. |
+| Panda Verbs conformance | weak | L151 — frontmatter and pointers resolve, but the 118-line body exceeds the normal guideline without an explicit reason for retaining all ten steps inline. |
 
 ## Why it's good
-The hot/cold dispatch is still done right: the knowledge mode and three reference chunks (rationalizations, project-state mechanics, quote-gate) all sit behind resolvable pointers, so SKILL.md carries only the git-mode hot path. Step 8.4 converts "return the PR URL" from a soft instruction into a real completion criterion (evidence printed, or the gap named). Step 10's guard-escalation pointer strengthens close-out without copying review's full rule.
+
+The workflow makes the dangerous ordering invariant unambiguous: create or confirm a feature branch before staging and committing. It also separates delivery from project administration, requiring only evidence the skill actually owns: a PR URL and the pushed commit/branch.
 
 ## Top fixes
-1. L142-143 — collapse the duplication the new gate introduced: fold "Return the PR URL" into item 4 (e.g. "Print the PR URL, then closure evidence: ... print the state transition performed; if either is missing, say what's missing and do not claim done") instead of stating "print the PR URL" twice in adjacent lines.
-2. L143 — name the native-parity delta explicitly since the axis now scores every skill on it: one clause noting that raw `gh pr create` leaves evidence-checking to whoever reads the terminal, and this gate is the earned override.
-3. L161 — still unresolved from the prior eval: collapse the inlined propose-only flaw-routing prose to a single cite of `lib/trigger-first-skill-evolution.md`; it remains triplicated (here + the lib SSOT + review's matching rule).
+
+1. L41 — name the native-parity delta over raw `git` and `gh`: ship adds test, scope, review, branch-order, and closure-evidence gates.
+2. L147 — reduce flaw routing to the one propose-only rule and its existing reference pointer.
+3. L43 — consider extracting optional release and learning-candidate branches so the main git-delivery spine stays under the hot-body budget.
 
 ## Behavioral cases
-- trigger `/ship` -> expected process: git mode — read config, pre-flight (pull/test/diff/log/branch), load learnings, scope check, review gate, commit, branch, tag, push + PR (print URL, then closure evidence or named gap), release, write learnings with review Step 7 guard-escalation pointer, project-state.
-- trigger `/ship knowledge knowledge/foo.md` -> expected process: dispatch to `@./modes/knowledge.md` (Close + Extract + Backflow), vault-only, never touches external systems.
-- trigger `gh pr create` succeeds but the linked Linear/GitHub issue was never transitioned -> expected process: Step 8.4 fires — report the missing state transition explicitly, do not claim the ship is done.
-- anti-trigger `hand this unfinished build unit to Codex` -> should NOT fire (routes to `/handover`; ship closes finished work, handover delegates unfinished — disambiguated at L8).
+
+- trigger `ship this completed branch` while on `main` → expected process: read config, sync and test, check scope and review status, create a feature branch before staging or committing, push, open the PR, and print PR plus pushed commit/branch evidence.
+- trigger `ship this completed branch` when `gh pr create` returns a URL but pushed commit evidence is missing → expected process: name the missing evidence and do not claim completion.
+- trigger `ship this knowledge note` → should NOT enter a knowledge mode; knowledge lifecycle is a host concern.
+- anti-trigger `hand this unfinished implementation to Codex` → should NOT fire; route to `handover`.

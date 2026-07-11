@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: |
-  Create new pandastack skills, MECE-checked against the pandastack RESOLVER.md at the repo root (the skill-overlap index, NOT the brain filing-tree RESOLVER.md). Also the evaluator: `--eval <name>` scores an existing skill's construction against the writing-great-skills scorecard and writes a co-located eval.md (the retired `skill-eval` folded here). Triggers: "create a skill", "new pandastack skill", "improve this skill", "eval/score this skill", "扩 skill".
+  Create or improve Panda Verbs skills, MECE-checked against the repo-root RESOLVER.md. `--eval <name>` scores an existing skill against the writing-great-skills scorecard and writes a co-located eval.md. Triggers: "create a skill", "improve this skill", "eval/score this skill".
 version: 1.0.0
 user-invocable: false
 type: skill
@@ -9,7 +9,11 @@ type: skill
 
 # Skill Creator
 
-Create a new pandastack skill that follows the SKILL-FRONTMATTER.md contract and the hot/cold dispatch rule. Sized to fit between `grill --brief` (idea → brief) and `sprint` (brief → execution).
+Create a new Panda Verbs skill that follows the SKILL-FRONTMATTER.md contract and the hot/cold dispatch rule. Sized to fit between `grill --brief` (idea → brief) and `sprint` (brief → execution).
+
+Native drafting can produce a SKILL.md. This workflow earns its slot by
+refusing non-skills, preventing trigger overlap, enforcing hot/cold placement,
+and syncing every loader from the manifest source of truth.
 
 ## `--eval <name>` mode (score an existing skill)
 
@@ -32,14 +36,18 @@ Default to the smallest durable change: tighten trigger text and inline checklis
 ### 2. MECE check
 
 **First, Q0 (refuse-to-build):** apply `lib/skill-decision-tree.md` § "Q0" before
-walking the index. If the capability is really knowledge (→ a brain page) or one
+walking the index. If the capability is really knowledge (→ a note in the owner's
+configured knowledge store) or one
 deterministic step (→ a one-line script / `lib/` helper), stop here — "not a skill"
 is a valid outcome, and it kills sprawl upstream of the overlap check below.
 
 Before proposing a new skill or abstraction, consult `docs/out-of-scope/`. If a
 precedent matches, surface that entry and stop instead of continuing.
 
-Open `RESOLVER.md`. Walk every current category (Knowledge / Writing / Dev workflow / Tool wrappers / Trust evaluation / Meta / skill authoring). For each existing skill in scope, ask: does its trigger surface already cover this intent? If yes, extend that skill instead of adding new.
+Open `RESOLVER.md`. Enumerate every current catalog heading before comparing
+the proposed trigger surface; do not restate a category list here because the
+resolver is the source of truth. For each existing skill in scope, ask: does its
+trigger surface already cover this intent? If yes, extend that skill.
 
 **subtract-first gate:** before creating a skill, name the existing skill it absorbs/replaces, or why extending an existing skill was rejected. If neither can be named, do not create the skill.
 
@@ -84,7 +92,7 @@ Frontmatter must match `SKILL-FRONTMATTER.md`:
 
 ```yaml
 ---
-name: <folder-name>             # plain. no pandastack: prefix.
+name: <folder-name>             # plain. no verbs: prefix.
 description: |
   <one-paragraph trigger sentence — short, concrete, decision-enabling>
 version: 1.0.0                  # optional
@@ -99,12 +107,16 @@ Body sections in order:
 2. **Output Format** — what good output looks like
 3. **Anti-Patterns** — 3-5 items; MUST include the hot/cold rule when relevant
 
-### 5. Add to RESOLVER.md
+### 5. Register in manifest and RESOLVER
 
-Place under the matching category:
+Add `[skill.<name>]` to `manifest.toml` with its tier, declared requirements,
+and one-line description. Then run `scripts/verbs sync`; the four host loader
+JSON files are generated outputs and must never be edited by hand.
+
+Add one resolver row under the matching current category:
 
 ```
-| `pandastack:<name>` | <one-line purpose> | <trigger phrase> |
+| `verbs:<name>` | <one-line purpose> | <trigger phrase> |
 ```
 
 If no existing category fits, add a new section AND justify in commit message. Categories are deliberate — fragmenting the index has cost.
@@ -112,7 +124,9 @@ If no existing category fits, add a new section AND justify in commit message. C
 ### 6. Verify + near-neighbor route check
 
 Run both procedures in [`skills/meta/skill-creator/lib/verify-and-route-check.md`](skills/meta/skill-creator/lib/verify-and-route-check.md):
-- **6. Verify** — `git diff --check` + the frontmatter linter (exits non-zero on a missing/unclosed frontmatter); manually run any affected `tests/resolver-golden.md` cases. Do not `bun test` unless `.test`/`.spec` files exist. Must pass before merge.
+- **6. Verify** — `git diff --check` + `scripts/verbs sync --check` + the
+  frontmatter linter + `python3 tests/resolver-routes-test.py`. Do not `bun test`
+  unless `.test`/`.spec` files exist. Must pass before merge.
 - **6.5. Near-neighbor route check** — whenever you add/edit a trigger, manually confirm ~6 confusable pairs still route correctly and your skill did not steal a neighbor's traffic. The check is the gate.
 
 ### 7. Construction self-check (generation-moment binding)
@@ -125,21 +139,24 @@ Before declaring the skill done, score it against the [`../writing-great-skills/
 skills/<bucket>/<name>/   (bucket = engineering | productivity | writing | meta)
 ├── SKILL.md            ← created
 └── eval.md             ← created by --eval
-.claude-plugin/plugin.json ← "./skills/<bucket>/<name>" added to skills array
 manifest.toml            ← [skill.<name>] entry added
 RESOLVER.md              ← row added
+loader JSON              ← regenerated only by scripts/verbs sync
 ```
 
-Verification checks pass (`lint-manifest-sync.sh`, `lint-eval-fresh.sh`), and any affected resolver-golden cases are noted.
+Verification checks pass (`lint-manifest-sync.sh`, `lint-eval-fresh.sh`, and `resolver-routes-test.py`).
 
 ## Anti-Patterns
 
 - **MECE violation** — overlapping an existing skill's trigger surface. Extend, don't add.
 - **Premature abstraction** — building lens / persona / rubric registries before `lib/trigger-first-skill-evolution.md` extraction threshold is met.
 - **Skipping Phase 3 (hot/cold check)** — data-heavy skill running inline degrades long sessions (evidence cited in Phase 3).
-- **gbrain-flavored frontmatter** — `triggers:` array, `tools:`, `mutating:`. Pandastack uses description-sentence + optional `allowed-tools`.
+- **foreign semantic fields** — importing routing/runtime claims such as
+  `triggers:`, `tools:`, or `mutating:` without mapping them to the current
+  frontmatter contract. Stack extensions and advisory audit metadata remain
+  valid when `SKILL-FRONTMATTER.md` defines them.
 - **Adding a new RESOLVER category without justification** — categories are an MECE budget, not a free namespace.
-- **Shipping a one-off skill** — if it won't fire >3 times in the next month, don't ship. Pandastack has repeatedly cut low-leverage skills for this reason.
+- **Shipping a one-off skill** — if it won't fire >3 times in the next month, don't ship. Panda Verbs has repeatedly cut low-leverage skills for this reason.
 
 ## Related
 

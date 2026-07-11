@@ -26,13 +26,14 @@ cd "$repo_root"
 
 [ -f manifest.toml ] || die "manifest.toml is missing"
 
-if ! manifest_version="$(python3 - manifest.toml <<'PY'
+if ! manifest_facts="$(python3 - manifest.toml <<'PY'
 import re
 import sys
 
 path = sys.argv[1]
 section = None
 versions = []
+product = {}
 with open(path, encoding="utf-8") as handle:
     for raw_line in handle:
         line = raw_line.strip()
@@ -44,18 +45,54 @@ with open(path, encoding="utf-8") as handle:
             version_match = re.match(r'^version\s*=\s*"([^"\r\n]+)"\s*(?:#.*)?$', line)
             if version_match:
                 versions.append(version_match.group(1))
+        elif section == "product":
+            value_match = re.match(
+                r'^(id|marketplace_id|archive_prefix)\s*=\s*"([^"\r\n]+)"\s*(?:#.*)?$',
+                line,
+            )
+            if value_match:
+                key, value = value_match.groups()
+                product.setdefault(key, []).append(value)
 
 if len(versions) != 1:
     print("manifest.toml must contain exactly one [manifest] version", file=sys.stderr)
     sys.exit(1)
-print(versions[0])
+for key in ("id", "marketplace_id", "archive_prefix"):
+    values = product.get(key, [])
+    if len(values) != 1:
+        print(
+            "manifest.toml must contain exactly one [product] {}".format(key),
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if re.fullmatch(r"[a-z0-9][a-z0-9._-]*", values[0]) is None:
+        print("manifest.toml [product] {} is not release-safe".format(key), file=sys.stderr)
+        sys.exit(1)
+
+print(
+    "\t".join(
+        [
+            versions[0],
+            product["archive_prefix"][0],
+            product["id"][0],
+            product["marketplace_id"][0],
+        ]
+    )
+)
 PY
 )"; then
-  die "cannot derive the release version from manifest.toml"
+  die "cannot derive release identity from manifest.toml"
 fi
 
+IFS=$'\t' read -r manifest_version archive_prefix product_id marketplace_id \
+  <<< "$manifest_facts"
+[ -n "$manifest_version" ] && [ -n "$archive_prefix" ] && \
+  [ -n "$product_id" ] && [ -n "$marketplace_id" ] || \
+  die "manifest.toml release identity is incomplete"
+
 release_ref="v$manifest_version"
-archive_name="pandastack-$release_ref.tar.gz"
+archive_name="$archive_prefix-$release_ref.tar.gz"
+plugin_selector="$product_id@$marketplace_id"
 dist_title="dist/release-title.txt"
 dist_notes="dist/release-notes.md"
 dist_archive="dist/$archive_name"
@@ -116,7 +153,7 @@ if [ "$mode" = "--tag" ]; then
     die "tag $release_ref is not contained in origin/main"
 fi
 
-tmp_root="$(mktemp -d "${TMPDIR:-/tmp}/pandastack-release.XXXXXX")"
+tmp_root="$(mktemp -d "${TMPDIR:-/tmp}/$archive_prefix-release.XXXXXX")"
 stage_dir="$tmp_root/stage"
 extract_dir="$tmp_root/extract"
 test_home="$tmp_root/home"
@@ -126,7 +163,7 @@ stage_title="$stage_dir/release-title.txt"
 stage_notes="$stage_dir/release-notes.md"
 stage_archive="$stage_dir/$archive_name"
 stage_checksum="$stage_archive.sha256"
-package_dir_name="pandastack-$release_ref"
+package_dir_name="$archive_prefix-$release_ref"
 package_prefix="$package_dir_name/"
 
 python3 - CHANGELOG.md "$manifest_version" "$stage_title" "$stage_notes" <<'PY'
@@ -272,34 +309,40 @@ package_root="$extract_dir/$package_dir_name"
 [ -f "$package_root/THIRD_PARTY_NOTICES.md" ] || \
   die "extracted package is missing root THIRD_PARTY_NOTICES.md"
 
-PANDASTACK_REPO_ROOT="$package_root" \
-  "$package_root/scripts/pandastack" sync --check
+PANDA_VERBS_REPO_ROOT="$package_root" \
+  "$package_root/scripts/verbs" sync --check
 
 (
   cd "$package_root"
-  PANDASTACK_RELEASE_PREFLIGHT_INNER=1 bash tests/run-all.sh
+  PANDA_VERBS_RELEASE_PREFLIGHT_INNER=1 bash tests/run-all.sh
 )
 
-claude_cache="$test_home/.claude/plugins/cache/pandastack/pandastack/$manifest_version"
-codex_cache="$test_home/.codex/plugins/cache/pandastack/pandastack/$manifest_version"
+# Synthetic cache-layout proof only. This checks the packaged manifests and
+# doctor scanner against host-shaped cache paths; it is not real installer proof.
+echo "INFO: synthetic cache-layout check only (not real installer proof)"
+claude_cache="$test_home/.claude/plugins/cache/$marketplace_id/$product_id/$manifest_version"
+codex_cache="$test_home/.codex/plugins/cache/$marketplace_id/$product_id/$manifest_version"
 mkdir -p "$(dirname "$claude_cache")" "$(dirname "$codex_cache")"
 cp -R "$package_root" "$claude_cache"
 cp -R "$package_root" "$codex_cache"
 
 registry="$test_home/.claude/plugins/installed_plugins.json"
-python3 - "$registry" "$claude_cache" "$manifest_version" <<'PY'
+claude_settings="$test_home/.claude/settings.json"
+codex_config="$test_home/.codex/config.toml"
+python3 - "$registry" "$claude_cache" "$manifest_version" "$plugin_selector" \
+  "$claude_settings" "$codex_config" <<'PY'
 import json
 import os
 import sys
 
-path, install_path, version = sys.argv[1:]
+path, install_path, version, plugin_selector, settings_path, codex_path = sys.argv[1:]
 parent = os.path.dirname(path)
 if not os.path.isdir(parent):
     os.makedirs(parent)
 data = {
     "version": 2,
     "plugins": {
-        "pandastack@pandastack": [{
+        plugin_selector: [{
             "installPath": install_path,
             "version": version,
             "lastUpdated": "1970-01-01T00:00:00Z",
@@ -309,12 +352,23 @@ data = {
 with open(path, "w", encoding="utf-8", newline="\n") as handle:
     json.dump(data, handle, indent=2, sort_keys=True)
     handle.write("\n")
+
+with open(settings_path, "w", encoding="utf-8", newline="\n") as handle:
+    json.dump({"enabledPlugins": {plugin_selector: True}}, handle, indent=2)
+    handle.write("\n")
+
+codex_parent = os.path.dirname(codex_path)
+if not os.path.isdir(codex_parent):
+    os.makedirs(codex_parent)
+with open(codex_path, "w", encoding="utf-8", newline="\n") as handle:
+    handle.write('[plugins."{}"]\n'.format(plugin_selector))
+    handle.write("enabled = true\n")
 PY
 
-HOME="$test_home" PANDASTACK_REPO_ROOT="$package_root" \
-  "$package_root/scripts/pandastack" doctor --host claude --strict
-HOME="$test_home" PANDASTACK_REPO_ROOT="$package_root" \
-  "$package_root/scripts/pandastack" doctor --host codex --strict
+HOME="$test_home" PANDA_VERBS_REPO_ROOT="$package_root" \
+  "$package_root/scripts/verbs" doctor --host claude --strict
+HOME="$test_home" PANDA_VERBS_REPO_ROOT="$package_root" \
+  "$package_root/scripts/verbs" doctor --host codex --strict
 
 archive_hash="$(python3 - "$stage_archive" <<'PY'
 import hashlib
@@ -329,7 +383,8 @@ PY
 )"
 printf '%s  %s\n' "$archive_hash" "$archive_name" > "$stage_checksum"
 
-# Publish only after the extracted package and both staged host caches pass.
+# Publish only after the extracted package and both synthetic cache-layout
+# checks pass. Real installer proof is a separate release gate.
 mkdir -p dist
 mv "$stage_title" "$dist_title"
 mv "$stage_notes" "$dist_notes"

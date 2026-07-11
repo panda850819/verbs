@@ -2,7 +2,7 @@
 
 > Shared module. Loaded by skills that present multiple decisions and must NOT proceed by writing the recommendation in chat prose and silently continuing. Enforces explicit gates so the user's approval is load-bearing.
 >
-> Origin: a gstack structured-brief precursor repeats "STOP. Wait for user response." 11x because long skills make the model forget halfway. pandastack lifts the rule into a shared lib so every multi-decision skill enforces it without per-skill duplication.
+> Origin: a gstack structured-brief precursor repeats "STOP. Wait for user response." 11x because long skills make the model forget halfway. Panda Verbs keeps the rule in one shared lib so every multi-decision skill enforces it without per-skill duplication.
 
 ## When to load
 
@@ -10,7 +10,7 @@ Skills that present:
 
 - ≥2 alternatives that need user choice (e.g. `grill --brief` alternatives)
 - Per-finding apply gates (`review` Step 6.5, `gatekeeper` STRIDE findings)
-- Per-stage gates inside a flow command (`sprint`, `grill --brief`, `prep` / `dojo`)
+- Per-stage gates inside a flow command (`sprint`, `grill --brief`)
 
 Skip for skills with single linear output (no decision branches).
 
@@ -51,7 +51,7 @@ When integrating multiple findings (review, codex critiques):
 **Verdict**: {informational}
 **Patch**: {concrete change}
 
-Apply? [Y / N / edit]
+Apply? [approve / edit / reject / skip]
 ```
 
 One finding per gate. Do NOT batch ("apply findings 1-5? [Y/N]"). Batching loses the per-finding visibility and the user can't tell which finding's patch they actually accepted.
@@ -62,19 +62,20 @@ One finding per gate. Do NOT batch ("apply findings 1-5? [Y/N]"). Batching loses
 - ❌ "Findings 1-5 applied automatically since they look correct" — batched, no gate
 - ❌ "A is clearly better, no need to ask" — yes there is, the user might disagree
 - ❌ "Asking inline within prose" — gate must be explicit `[STOP — waiting]`, not buried in a sentence
-- ❌ "Re-asking same gate on the same decision" (after Y/N answered) — that's escape-hatch territory
+- ❌ "Re-asking same gate on the same decision" after an option was chosen — that's escape-hatch territory
 - ❌ Skipping the gate format and using free-form ("what do you want to do?") — defeats the audit trail
 
 ## Logging
 
-Each gate outcome goes into the skill's output file under a `## Gate Log` section:
+Each gate outcome goes into a `## Gate Log` section in the active artifact. If
+the mode is chat-only, emit the log in terminal output:
 
 ```markdown
 ## Gate Log
 
 - [Step 4 Alternatives] approved A (recommendation accepted)
 - [Step 6.5 Finding 3] edit: changed patch X to X' before applying
-- [Step 6.5 Finding 7] N → routed to OPEN_QUESTIONS
+- [Step 6.5 Finding 7] reject → routed to OPEN_QUESTIONS
 - [escape-hatch fired after Q5] — remaining axes logged as OPEN_QUESTIONS
 ```
 

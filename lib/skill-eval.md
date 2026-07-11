@@ -39,6 +39,8 @@ rubric: writing-great-skills@1.1.0
 
 **Verdict: STRONG | SOLID | WEAK.** <one line: the skill's leading virtue — why it is good>
 
+Grounding sample: L<n> — "<one exact quote of at least 12 characters from that SKILL.md line>"
+
 | Axis | Verdict | Evidence |
 |---|---|---|
 | Predictability | pass/weak/fail | L<n> — <why> |
@@ -49,7 +51,7 @@ rubric: writing-great-skills@1.1.0
 | Pruning | … | L<n> — … |
 | Native parity | … | L<n> — … |
 | Granularity | … | L<n> — … |
-| pandastack conformance | … | L<n> — … |
+| Panda Verbs conformance | … | L<n> — … |
 
 ## Why it's good
 <2–3 sentences: the load-bearing strengths>
@@ -68,4 +70,6 @@ rubric: writing-great-skills@1.1.0
 - **Rubber-stamping** — all-pass with vague evidence. If nothing is weak, you did not read hard enough.
 - **Scoring the artifact, not the skill** — judging the prose a skill writes instead of how the SKILL.md is built. Wrong rubric.
 - **Uncited verdicts** — an axis verdict with no `L<n>` is unfalsifiable; redo it.
+- **Ungrounded sample** — every eval carries one exact quoted SKILL.md line so
+  the quote linter always exercises a real assertion instead of passing vacuously.
 - **Stale eval** — editing a SKILL.md without re-running; the hash header + `lint-eval-fresh.sh` exist to catch exactly this.

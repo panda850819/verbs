@@ -3,7 +3,7 @@ name: advisor
 description: |
   Pull a decorrelated second opinion from a DIFFERENT model into the current session — the executor-calls-advisor pattern. Zero-config: self-locates the runtime seat and routes the call, never hardcodes a direction.
   - default: one cross-model consult on a load-bearing judgment (a design fork, a decision, "am I sure about this").
-  - --panel: 2-3 mutually-blind cross-model critics on a PREPARED plan (this replaced boardroom).
+  - --panel: two mutually-blind cross-model critics on a PREPARED plan.
   Fires only on a LOAD-BEARING judgment (expensive-if-wrong: a design fork, a plan before you commit, an irreversible or outward-facing decision, keep-vs-rewrite) — reversible small calls just decide, no consult. Reach for the MOST INDEPENDENT model, not the nominally highest tier: from an Opus seat a different provider (Codex/GPT) usually gives more new signal than a same-family model. "get a second opinion", "red-team this", "多角度審". NOT code-diff review (use review), NOT sending mechanical build work out to Codex (use handover), NOT self-interview to sharpen a fuzzy idea (use grill).
 reads:
   - repo: lib/gate-contract.md
@@ -29,7 +29,7 @@ user-invocable: false
 advisor pulls JUDGMENT in from a different model. It is the inbound half of the cross-runtime pair; `handover` is the outbound half (it sends mechanical build work OUT to Codex). Keep them distinct:
 
 - Second opinion on a judgment / design fork / decision → advisor (default).
-- Adversarial critique of a PREPARED plan → advisor `--panel` (this absorbed `boardroom`).
+- Adversarial critique of a PREPARED plan → advisor `--panel`.
 - Review a code diff → `review`.
 - Hand unfinished mechanical build work to Codex to DO → `handover`.
 - Sharpen a fuzzy idea by self-interview → `grill`.
@@ -38,16 +38,21 @@ advisor never writes code, never commits, never touches git. It asks another mod
 
 ## Step 0: Locate the seat (zero-config)
 
-The economics flip by which runtime you are on, so detect it first — the direction is derived, never hardcoded:
+Detect the current runtime only to guarantee that the outside opinion comes from a different model family:
 
-- `CLAUDECODE=1` in env → **Claude seat** (metered). Your tokens are expensive; reach OUT to a flat-rate model for the opinion.
-- otherwise → **Codex seat** (flat-rate). Your tokens are cheap; keep the bulk local, reach OUT only for the judgment.
+- `CLAUDECODE=1` in env → **Claude seat**; reach out through the verified Codex transport.
+- otherwise → **Codex seat**; reach out through the verified Claude transport.
+
+This seat check chooses direction only. Authentication, budgets, and general
+model-routing policy remain host concerns.
 
 ## Step 1: Select roles, then probe (fail loud, never silently self-review)
 
 Select the complete role set before probing: default uses the one seat-derived
-role from Step 2; `--panel` uses `advisor.panel.fast`, `advisor.openai`, and the
-optional `advisor.panel.deep`. For every unique transport in that set, assert
+role from Step 2. A Claude-seat panel uses `advisor.panel.openai.fast` plus
+`advisor.openai`; a Codex-seat panel uses `advisor.panel.fast` plus
+`advisor.panel.deep`. Every panel critic therefore differs from the current
+seat family. For every unique transport in that set, assert
 the target binary is on PATH. Then read each row's minimum CLI version from
 `lib/model-anchors.md`, parse `<name> --version`, and stop with
 `ADVISOR: <name> <have> is below verified minimum <need> — upgrade required`
@@ -69,25 +74,30 @@ in, structured out.
 
 - Claude seat → direct `codex exec` with the `advisor.openai` anchor and its
   read-only sandbox guard.
-- Codex seat → direct `claude -p` with the `advisor.anthropic` anchor. The
-  Claude side is metered and runs with tools disabled plus session persistence
-  off. Keep the call tight: one question, smallest sufficient context, a
-  structured answer back.
+- Codex seat → direct `claude -p` with the `advisor.anthropic` anchor, tools
+  disabled, and session persistence off. Keep the call tight: one question,
+  smallest sufficient context, a structured answer back.
 
 Done when the outside view is returned as outside-voice, unincorporated. The
 caller owns the decision.
 
-## Step 3: --panel — blind cross-model critique (absorbs boardroom)
+## Step 3: --panel — blind cross-model critique
 
 Only for a plan that is **expensive if wrong** (irreversible, outward-facing, multi-day). A daily plan uses the review pass built into `sprint`, not a panel. The panel is a forcing function, not a ritual.
 
-Spawn 2-3 mutually-blind critics, each a **different model** and a **distinct lens** (correctness / does-it-reproduce · the user outcome · simplicity, is it over-built · what's-missing · failure-modes + reversal). Cross-model is the point: same-model critics decorrelate only the prompt, not the model's own priors. Pick the lenses the plan is most likely to fail on, one per critic.
+Spawn two mutually-blind critics, each a **different model** and a **distinct
+lens** (correctness / user outcome / simplicity / missing constraints / failure
+modes + reversal). Cross-model is the point: same-model critics decorrelate only
+the prompt, not the model's priors. Pick one likely-failure lens per critic.
 
-- Default composition: `advisor.panel.fast` + `advisor.openai` + at most one
-  `advisor.panel.deep`. Use every row's model, effort, minimum version, and guard
-  exactly. Synthesis and the per-finding gate stay in the main loop.
+- Select the seat-filtered two-role composition from Step 1. Use every row's
+  model, effort, minimum version, and guard exactly. Synthesis and the
+  per-finding gate stay in the main loop.
 - Each critic gets the plan + its one lens + "find the strongest objection; default to finding a real problem", never the others' output. Inline any hard rule a critic needs — the subagent does not read your global config.
 - **Keep every lone-critic finding.** A problem only one lens caught is the whole reason for the panel; never drop it as an outlier.
-- Dedup across critics, rank by severity, present each as finding / evidence / suggested change, then per-finding gate (`lib/gate-contract.md`): `Apply? [Y / N / edit]`. Outside-voice findings are informational; the caller decides each.
+- Dedup across critics, rank by severity, present each as finding / evidence /
+  suggested change, then use the exact per-finding gate from
+  `lib/gate-contract.md`: `Apply? [approve / edit / reject / skip]`.
+  Outside-voice findings are informational; the caller decides each.
 
 Stop after the gated list. advisor returns judgment; it does not execute (that is `sprint`).

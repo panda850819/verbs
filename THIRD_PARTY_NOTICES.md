@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Panda-authored portions of pandastack are Copyright (c) 2026 Panda Zeng and
+Panda-authored portions of Panda Verbs are Copyright (c) 2026 Panda Zeng and
 are licensed under the root [`LICENSE`](LICENSE). Adapted or included material
 retains the upstream copyright notices and MIT license references below.
 

@@ -1,5 +1,59 @@
 # Changelog
 
+## v4.0.0-rc.1 — Verbs
+
+Released: 2026-07-11
+
+> **Release candidate.** Panda Verbs is the public skill pack. Personal context,
+> memory, runtimes, schedulers, connectors, and project truth stay with the host.
+
+### Breaking
+
+- Product, repository, plugin, and namespace rename to **Panda Verbs**,
+  `panda-verbs`, `verbs@verbs`, and `/verbs:*`.
+- `/pandastack:*` has no alias. Claude Code and Codex must remove the old plugin
+  before installing `verbs@verbs`; otherwise stale v3 policies remain active.
+- `/ship knowledge` and the `knowledge-ship` alias moved out of the public pack.
+  Knowledge lifecycle and persistence belong to the host's knowledge system.
+- `scripts/verbs-state`, `scripts/pandastack-state`, and the project lifecycle
+  store are removed. State belongs to the host/project.
+
+### Changed
+
+- The product definition is now one sentence: "An opinionated skill pack for
+  taking software work from ambiguity to verified delivery."
+- `manifest.toml` owns the complete product dictionary. `scripts/verbs sync`
+  deterministically generates all Claude, Codex, and Agents loader metadata.
+- Automatic plugin hooks are removed. `DISPATCH.md` and the reference guard
+  scripts remain available for hosts that opt in explicitly.
+- `verbs doctor` checks the 14-skill source surface and installed plugin parity.
+  The retired capability map, ticket/worktree policy hook, lifecycle state
+  helper, and `/loop` driver kickoff are gone.
+- Claude Code and Codex both use their real local marketplace installers.
+  Hermes remains selective manual import; OpenClaw is experimental.
+
+### Compatibility
+
+- `scripts/pandastack` remains a one-line RC forwarding shim with a deprecation
+  notice on stderr. The old state CLI has no v4 replacement.
+- `PANDASTACK_VERIFY_GATE` remains an RC fallback when the new variable is
+  unset for hosts that wire the optional verify adapter.
+- GitHub's old repository URL redirects after the rename. Recreating the old
+  repository name is intentionally unsupported because it breaks that redirect.
+- Migration pins v3.4.2 commit
+  `8d9a382b74d5b3e0ef0b6e91375fab3a172a916f` as an immutable rollback
+  checkout through the RC dogfood window.
+
+### Verified
+
+- Generated metadata fails red on product id, repository, hero, category,
+  version, or skill-surface drift.
+- Automated preflight proves the packaged tree and synthetic cache scanner.
+  The RC operator gate separately installs the exact tagged checkout in
+  disposable Claude and Codex profiles before the tag is pushed.
+- Prerelease tags publish with `--prerelease --latest=false`; archives and their
+  SHA-256 checksums use the `panda-verbs-v<version>` prefix.
+
 ## v3.4.2 — Parity
 
 Released: 2026-07-10

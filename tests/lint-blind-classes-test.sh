@@ -89,7 +89,7 @@ write_skill "$refs_clean" meta demo "---
 name: demo
 ---
 # Demo
-Use \`pandastack:real\` and \`/real\`."
+Use \`verbs:real\` and \`/real\`."
 pass_case refs-clean python3 scripts/lint-refs-resolve.py "$refs_clean"
 
 refs_drift="$tmp/refs-drift"
@@ -97,40 +97,8 @@ write_skill "$refs_drift" meta demo "---
 name: demo
 ---
 # Demo
-Use \`pandastack:ghost\` and \`/ghost-command\`."
+Use \`verbs:ghost\` and \`/ghost-command\`."
 fail_case refs-drift python3 scripts/lint-refs-resolve.py "$refs_drift"
-
-# gbrain refs must be gated even with the pack absent (the CI condition):
-# resolution runs against the checked-in scripts/gbrain-skills.list snapshot.
-gbrain_clean="$tmp/gbrain-clean"
-mkdir -p "$gbrain_clean/scripts"
-printf 'query\n' >"$gbrain_clean/scripts/gbrain-skills.list"
-write_skill "$gbrain_clean" meta demo "---
-name: demo
----
-# Demo
-Use \`gbrain:query\`."
-pass_case gbrain-clean env PANDASTACK_GBRAIN_SKILLS="$tmp/absent-pack" python3 scripts/lint-refs-resolve.py "$gbrain_clean"
-
-gbrain_drift="$tmp/gbrain-drift"
-mkdir -p "$gbrain_drift/scripts"
-printf 'query\n' >"$gbrain_drift/scripts/gbrain-skills.list"
-write_skill "$gbrain_drift" meta demo "---
-name: demo
----
-# Demo
-Use \`gbrain:ghost\`."
-fail_case gbrain-drift env PANDASTACK_GBRAIN_SKILLS="$tmp/absent-pack" python3 scripts/lint-refs-resolve.py "$gbrain_drift"
-
-# and when the pack IS present, a stale snapshot entry must fail (freshness).
-gbrain_stale="$tmp/gbrain-stale"
-mkdir -p "$gbrain_stale/scripts" "$tmp/mini-pack/query"
-printf 'query\nghost-skill\n' >"$gbrain_stale/scripts/gbrain-skills.list"
-write_skill "$gbrain_stale" meta demo "---
-name: demo
----
-# Demo"
-fail_case gbrain-stale env PANDASTACK_GBRAIN_SKILLS="$tmp/mini-pack" python3 scripts/lint-refs-resolve.py "$gbrain_stale"
 
 quotes_clean="$tmp/quotes-clean"
 write_skill "$quotes_clean" meta demo "---
@@ -143,7 +111,7 @@ cat >"$quotes_clean/skills/meta/demo/eval.md" <<'EOF'
 type: skill-eval
 skill: demo
 ---
-Evidence quote L5: "This exact current sentence is present."
+Grounding sample: L5 — "This exact current sentence is present."
 EOF
 pass_case quotes-clean python3 scripts/lint-eval-quotes.py "$quotes_clean"
 
@@ -158,9 +126,24 @@ cat >"$quotes_drift/skills/meta/demo/eval.md" <<'EOF'
 type: skill-eval
 skill: demo
 ---
-Evidence quote L5: "This stale quoted sentence is absent."
+Grounding sample: L5 — "This stale quoted sentence is absent."
 EOF
 fail_case quotes-drift python3 scripts/lint-eval-quotes.py "$quotes_drift"
+
+quotes_missing="$tmp/quotes-missing"
+write_skill "$quotes_missing" meta demo "---
+name: demo
+---
+# Demo
+This exact current sentence is present."
+cat >"$quotes_missing/skills/meta/demo/eval.md" <<'EOF'
+---
+type: skill-eval
+skill: demo
+---
+No grounding sample is present.
+EOF
+fail_case quotes-missing python3 scripts/lint-eval-quotes.py "$quotes_missing"
 
 if [ "$fail" -ne 0 ]; then
   echo "lint-blind-classes-test: one or more seeded checks failed"

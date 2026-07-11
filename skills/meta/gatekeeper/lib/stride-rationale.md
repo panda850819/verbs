@@ -19,4 +19,7 @@ Output: `stride_categories: [spoofing, tampering, eop, info-disclosure-suspect]`
 
 ## Why STRIDE before routing
 
-The 6 review templates (skill-mcp / repository / url-document / onchain / product-service / message-share) ask similar questions in domain-specific language. STRIDE is the lingua franca that lets findings from different review types be aggregated, ranked, and queried after the fact. Without it, each review is an island.
+The four review templates (skill-mcp / repository / url-document /
+product-service) ask similar questions in domain-specific language. STRIDE is
+the common vocabulary that lets findings be aggregated and ranked. Without it,
+each review is an island.

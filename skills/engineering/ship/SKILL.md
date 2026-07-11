@@ -1,20 +1,17 @@
 ---
 name: ship
-aliases: [knowledge-ship]
 description: |
-  Multi-mode ship verb. Closes work to its proper destination.
-  - /ship                    → git mode: test, commit, push, PR
-  - /ship knowledge <path>   → vault: Close + Extract + Backflow on a knowledge/ note
-  Vault modes never write to external systems. To hand unfinished work to Codex, use /handover (that is a handover, not a ship).
-  Use when asked to "ship", "create PR", "ship this note".
+  Close completed code work through test, commit, push, and PR. Use when asked
+  to "ship", "create PR", or publish the current branch. To hand unfinished
+  work to Codex, use handover.
 reads:
   - repo: "**"
   - repo: CLAUDE.md
   - repo: AGENTS.md
   - repo: docs/briefs/**
   - repo: docs/learnings/**
+  - repo: lib/learning-format.md
   - repo: lib/trigger-first-skill-evolution.md
-  - repo: skills/engineering/ship/lib/project-state.md
   - repo: skills/engineering/ship/lib/quote-gate.md
   - repo: skills/engineering/ship/lib/rationalizations.md
   - cli: git
@@ -36,33 +33,16 @@ user-invocable: false
 ---
 # Ship
 
-`/ship` closes a unit of work. The mode determines what "closing" means: pushing code or filing a knowledge note.
+`/ship` closes completed code work through a pull request. Knowledge-note
+lifecycle and external publication remain host concerns.
 
-## Mode dispatch
-
-Pick mode from first arg:
-
-| First arg | Mode | Branch |
-|---|---|---|
-| `knowledge` | knowledge mode | @./modes/knowledge.md |
-| (none, or a path/flag for git) | git mode | continue below |
-
-If first arg is a path (no explicit mode word), sniff:
-
-- Path matches `knowledge/**` → knowledge mode
-- Otherwise → git mode (treat as filename for staged commit)
-
-Alias `/knowledge-ship` routes here automatically.
-
----
-
-## Git mode (default)
+## Git delivery
 
 Test, commit, create PR. One command from "code done" to "PR open".
 
 ### Step 0: Read Config
 
-Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses) for: test command, tag format, release preference.
+Read verbs config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses) for: test command, tag format, release preference.
 
 ### Step 1: Pre-flight
 
@@ -76,8 +56,6 @@ Read pstack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses) 
 
 Search `{learnings_dir}` for `type: pitfall` related to the changed files.
 If any matched pitfall touches a changed file, list it and require ack before proceeding; else skip.
-
-Also best-effort search `{brain}/learnings/{pitfalls,patterns,architecture}/` — the auto-sedimented learnings from past sessions (transcript-ingest). Skip silently if `{brain}` is unset or absent (Zero-Dependencies: a brain-less clone just uses `{learnings_dir}`). This is the READ side that closes the compound loop — a learning that sedimented from a past session surfaces here before you ship related work.
 
 ### Step 3: Scope Check
 
@@ -104,16 +82,7 @@ If `/review` has NOT been run on the current diff in this session:
 1. Warn: "Review not run. Run /review first?"
 2. If user says skip, proceed. Otherwise run review.
 
-### Step 5: Commit
-
-If there are uncommitted changes:
-1. Analyze the diff
-2. Generate a conventional commit message (`type(scope): description`)
-3. Stage relevant files (never `git add -A`)
-4. Stop if `git diff --cached` is empty after staging (nothing to commit) — report and skip the commit.
-5. Commit (don't amend, don't skip hooks)
-
-### Step 6: Branch (mandatory)
+### Step 5: Branch (mandatory, before commit)
 
 **Never push directly to main/master.** Always ship via PR.
 
@@ -123,9 +92,21 @@ If there are uncommitted changes:
    - `refactor/*` for refactoring
 2. If already on a feature branch, stay on it.
 
+Do not stage or commit until this branch gate passes. Creating the branch after
+the commit would still advance the local default branch.
+
+### Step 6: Commit
+
+If there are uncommitted changes:
+1. Analyze the diff
+2. Generate a conventional commit message (`type(scope): description`)
+3. Stage relevant files (never `git add -A`)
+4. Stop if `git diff --cached` is empty after staging (nothing to commit) — report and skip the commit.
+5. Commit (don't amend, don't skip hooks)
+
 ### Step 7: Tag (if configured)
 
-If pstack config has `tag: semver`:
+If verbs config has `tag: semver`:
 1. Read current version from package.json, VERSION, or latest git tag
 2. Determine bump type from commits (feat = minor, fix = patch)
 3. Create tag: `git tag v{version}`
@@ -138,44 +119,33 @@ If `tag: none`: skip.
 2. Create PR with `gh pr create`:
    - Title: short, under 70 chars
    - Body: what changed, why, how to test
-   - If learnings were written this session, mention in PR body
+   - If the host/project persisted a learning from this session, mention it
 3. Return the PR URL.
-4. Closure evidence before claiming done: print ticket/PR URL and the state transition performed; if either is missing, say what evidence is missing and do not claim done.
+4. Closure evidence before claiming done: print the PR URL and pushed
+   commit/branch. Ticket or project-state transitions belong to the host; if
+   required delivery evidence is missing, name the gap and do not claim done.
 
 ### Step 9: Release (if configured)
 
-If pstack config has `release: true`:
+If verbs config has `release: true`:
 - Create GitHub Release from the tag
 - Auto-generate release notes from commits
 
 If `release: false`: skip.
 
-### Step 10: Write Learnings (if applicable)
+### Step 10: Surface Learning Candidates (if applicable)
 
-Write a learning ONLY if a concrete artifact surfaced during this ship: a test that caught a subtle bug, a deploy pattern worth remembering, or a CI gotcha. If none surfaced, skip.
-
-Write the learning to `{learnings_dir}/pitfalls/` or `{learnings_dir}/patterns/`. Apply the quote gate before writing: `@skills/engineering/ship/lib/quote-gate.md`.
+Emit a learning candidate ONLY if a concrete artifact surfaced during this ship:
+a test that caught a subtle bug, a deploy pattern worth remembering, or a CI
+gotcha. If none surfaced, skip. Use the `lib/learning-format.md` fields in the
+response and apply the quote gate before quoting:
+`@skills/engineering/ship/lib/quote-gate.md`. Do not persist the candidate;
+storage belongs to the host/project.
 
 For recurring or mechanically checkable bug classes, apply review Step 7's guard-escalation wording: propose the exact guard file only, never create it here.
 
-**Route the flaw back (propose-only).** If a flaw surfaced during ship maps to an existing pandastack skill — matched against that skill's anti-pattern / checklist table, not just its trigger keywords — emit one `skill-edit candidate: <skill> — <missing check>` line into the session-end brain-candidate audit (skip silently if absent). See `lib/trigger-first-skill-evolution.md`. Propose-only: never edit the target skill here, and never during an autonomous build — the human picks from the audit. This routes the catch back to strengthen the skill that let it through, instead of leaving only a passive pitfall.
-
-### Step 11: Project state (if project work)
-
-If this work maps to a brain project page (`{brain}/projects/{slug}.md` exists), record the EVL datapoint — do NOT hand-edit the page's table:
-
-```bash
-project-state append {slug} --done {N} --open {N} --blocked {N} --next "{one-line next}"
-```
-
-Mechanics (how it does the surgery, repo-backed handling, deriving the counts): `@skills/engineering/ship/lib/project-state.md`. Best-effort: if `project-state` or the page is absent, skip silently — never fail the ship over it.
+**Route the flaw back (propose-only).** If a flaw surfaced during ship maps to an existing Panda Verbs skill — matched against that skill's anti-pattern / checklist table, not just its trigger keywords — emit one `skill-edit candidate: <skill> — <missing check>` line into the session-end learning-candidate audit when the host provides one. See `lib/trigger-first-skill-evolution.md`. Propose-only: never edit the target skill here, and never during an autonomous build. This routes the catch back to strengthen the skill that let it through, instead of leaving only a passive pitfall.
 
 ## Common Rationalizations
 
 Anti-bypass table tying each ship shortcut to the failure it causes: `@skills/engineering/ship/lib/rationalizations.md`.
-
----
-
-## Knowledge mode
-
-@./modes/knowledge.md

@@ -1,0 +1,5 @@
+# path-regex<TAB>content-regex<TAB>reason
+README\.md	pandastack@pandastack|/pandastack:\*|panda850819/pandastack	v3 to v4 migration contract
+INSTALL_FOR_AGENTS\.md	pandastack@pandastack|/pandastack:\*|panda850819/pandastack	v3 to v4 migration contract
+\.codex/INSTALL\.md	pandastack@pandastack|panda850819/pandastack	v3 to v4 migration contract
+lib/mermaid-grounding\.md	deepwiki	historical source attribution

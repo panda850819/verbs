@@ -13,11 +13,10 @@ reads:
   - repo: lib/stop-rule.md
   - repo: lib/output-templates.md
   - repo: lib/skill-decision-tree.md
-  - vault: knowledge/**
+  - repo: knowledge/**
 writes:
-  - vault: Inbox/grill-*.md
-  - vault: docs/briefs/*.md
-  - vault: docs/plans/*.md
+  - repo: docs/briefs/*.md
+  - repo: docs/plans/*.md
   - cli: stdout
 domain: shared
 classification: tool
@@ -25,9 +24,10 @@ user-invocable: false
 ---
 # Grill
 
-Adversarial requirement discovery. Inspired by Matt Pocock's "grill me" prompt — see [[matt-pocock-agent-coding-workflow]].
-
-The point is NOT to fill a structured questionnaire. The point is to surface **unknown unknowns** by interrogating one angle at a time until the answer surprises you. Default grill is atomic (mid-flight, no artifact); `--brief` mode (below) adds a structured close that leaves a written brief.
+The point is NOT to fill a structured questionnaire. The point is to surface
+**unknown unknowns** by interrogating one angle at a time until the answer
+surprises you. Default grill emits a confirmed/open log to chat; `--brief` adds
+a structured close that writes a brief and executable plan.
 
 ## Pre-step: Goal Mapping (recommended)
 
@@ -51,9 +51,13 @@ If goal mapping has not been done yet (e.g. you are running grill standalone, no
 
 **ONE question at a time.** Wait for the answer. Then pick the next question based on what the answer revealed, not from a pre-baked list.
 
-**Expect rehearsed first answers.** First reply on any axis is usually the polished version. Real answer surfaces after the second or third push. Push once minimum on every axis before switching.
+**Expect rehearsed first answers.** A polished first reply is not evidence. When
+an answer is rehearsed, vague, or unsupported, use the pushback contract below;
+a concrete supported answer needs no ritual second push.
 
-**Pushback uses the 5-pattern menu in `lib/push-once.md`.** When a first reply is rehearsed / vague / unsupported, print the menu from `lib/push-once.md` (Output protocol). User picks; model uses that exact prompt as the next message. Never improvise the push without showing the menu first — that defeats the audit trail. See `lib/push-once.md` for the menu, selection rules, and anti-patterns.
+**Pushback uses the 5-pattern catalog in `lib/push-once.md`.** When a reply is
+rehearsed, vague, or unsupported, select the highest-leverage matching pattern,
+print its label, and ask its exact prompt. Do not add a pattern-selection turn.
 
 **Delete-first — drill whether before how.** Before drilling scope or edges, try to delete the whole requirement: can it be removed entirely? Who owns it, and can that person waive it? Requirements from smart or senior people are the most dangerous, because you question them least; optimizing something that should not exist is the most expensive mistake. Only what survives deletion is worth the axes below.
 
@@ -115,13 +119,14 @@ After grilling ends, produce:
 - Park as memo (if not ready to act)
 ```
 
-Save to:
-- `Inbox/grill-<slug>-<date>.md` if topic is fresh
-- Append to existing brief / PRD if drilling on a known feature
+Emit the log to chat. Persist only when the host/user supplied an output path;
+default grill does not choose or write a project-state destination.
 
 ## `--brief` mode (structured close)
 
-Default grill is atomic and leaves only the log above. `--brief` runs the same drilling, then adds a structured close that ends with a written brief (+ executable plan) — the replacement for the retired `office-hours`. Use when you walked in with a fuzzy idea and want to walk out with a decision on paper. After the stopping rule fires, run three stages in order; do not skip, do not reorder.
+Default grill is atomic and leaves only the log above. `--brief` runs the same
+drilling, then adds a structured close with a written brief and executable plan.
+After the stopping rule fires, run three stages in order; do not skip or reorder.
 
 **Stage A — Alternatives (forced).** @../../../lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason mapped to the dominant goal layer}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Apply to brief? [Add / Defer / Reject]` — STOP and wait on each.
 
@@ -133,7 +138,7 @@ Default grill is atomic and leaves only the log above. `--brief` runs the same d
 
 ### Wayfinder exit (effort too big for one session)
 
-If the drilling reveals the effort is BOTH too big for one session AND still foggy — the way to the destination isn't visible, scope keeps expanding, decisions hang on decisions not yet made — do NOT force a single brief. Mint a shared **map** on Linear instead: a Project (or parent issue) as the map, one **typed investigation sub-issue** per open decision (`research` / `prototype` / `grilling` / `task` label), wired with native blocking — mirror the Linear epic structure (Initiative / Project / Issue / Sub-issue) already in use. Three disciplines: **don't chart what you can't yet see** (fog-of-war — leave it a "not yet specified" note, not a ticket); **one ticket per session**; **each ticket's deliverable is a DECISION** written to the brain `decisions/`, not code. The map replaces the brief only for this foggy-scoping case; once the way is clear, the effort re-enters at Stage A `--brief` or goes straight to `/sprint`.
+If the drilling reveals the effort is BOTH too big for one session AND still foggy — the way to the destination isn't visible, scope keeps expanding, decisions hang on decisions not yet made — do NOT force a single brief. Write a local **decision map** at `docs/briefs/{YYYY-MM-DD}-{slug}-map.md`: one typed investigation entry per visible open decision (`research` / `prototype` / `grilling` / `task`), with explicit blocking links. Three disciplines: **don't chart what you can't yet see** (fog-of-war — leave it as "not yet specified", not a fake task); **one investigation per session**; **each investigation's deliverable is a decision note, not code**. External tracker creation and knowledge-store filing remain host actions. Once the route is clear, re-enter at Stage A `--brief` or go straight to `/sprint`.
 
 ## Anti-patterns
 
@@ -145,5 +150,6 @@ If the drilling reveals the effort is BOTH too big for one session AND still fog
 
 ## Relationship to other skills
 
-- **For structured-brief output** — run `grill --brief` (below): writes a brief + executable plan to `docs/`; the retired `office-hours` folded here.
-- **Before `/ship knowledge <decisions/path>` Close stage** — if you're closing a work topic and realize scope was never grilled.
+- **For structured-brief output** — run `grill --brief`: writes a brief and
+  executable plan to `docs/`.
+- **Before a host closes a decision record** — if you're closing a work topic and realize scope was never grilled.

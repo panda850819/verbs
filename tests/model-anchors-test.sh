@@ -8,6 +8,7 @@ anchor="lib/model-anchors.md"
 expected_rows=(
   '| `advisor.openai` | direct `codex exec` | `gpt-5.6-sol` | `high` | `codex >= 0.144.1` | read-only sandbox | verified |'
   '| `advisor.anthropic` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |'
+  '| `advisor.panel.openai.fast` | direct `codex exec` | `gpt-5.6-terra` | `medium` | `codex >= 0.144.1` | read-only sandbox | verified |'
   '| `advisor.panel.fast` | direct `claude -p` | `sonnet` | `medium` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |'
   '| `advisor.panel.deep` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |'
   '| `handover.mechanical` | direct `codex exec` | `gpt-5.6-luna` | `medium` | `codex >= 0.144.1` | workspace-write sandbox | verified |'
@@ -21,7 +22,7 @@ for row in "${expected_rows[@]}"; do
   }
 done
 
-for skill in skills/engineering/advisor/SKILL.md skills/engineering/handover/SKILL.md skills/engineering/sprint/SKILL.md; do
+for skill in skills/engineering/advisor/SKILL.md skills/engineering/handover/SKILL.md skills/engineering/review/SKILL.md skills/engineering/sprint/SKILL.md; do
   grep -Fq -- '- repo: lib/model-anchors.md' "$skill" || {
     echo "FAIL: $skill does not declare the model anchor read"
     exit 1

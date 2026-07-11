@@ -11,16 +11,12 @@ Usage: python3 scripts/lint-refs-resolve.py [repo-root]
 Accepted non-repo tokens (skipped): output convention dirs skills create at
 runtime (docs/sessions, docs/checkpoints, docs/retros, docs/plans, docs/briefs,
 docs/handoffs — not tracked when empty), absolute-path substrings
-(skills/pandastack/...), external URLs (skills/tree/main/...), and template
+(skills/panda-verbs/...), external URLs (skills/tree/main/...), and template
 placeholders containing { or < (verified by shape, not existence).
 
-Cross-pack token limits: pandastack:<name> resolves to this pack's skill dirs;
-gbrain:<name> resolves against the checked-in snapshot scripts/gbrain-skills.list
-(so CI, which has no gbrain checkout, still gates the class deterministically);
-when the local pack IS present, every snapshot entry is also freshness-checked
-against the real dirs so the snapshot cannot silently rot; and
+Pack token limits: verbs:<name> resolves to this pack's skill dirs; and
 slash commands are checked only when shaped as backticked `/lower-kebab` (or
-`/pandastack:name`) so prose slashes, paths, and CLI flags do not false-positive.
+`/verbs:name`) so prose slashes, paths, and CLI flags do not false-positive.
 Bare skill names in prose are outside this deterministic token shape.
 """
 import os
@@ -37,14 +33,15 @@ for skill_dir in glob.glob("skills/*/*"):
         n = os.path.basename(skill_dir)
         skill_bucket[n] = os.path.dirname(skill_dir)
 TOKEN = re.compile(r"(?:skills|lib|docs|contexts)/[A-Za-z0-9_./{}<>-]+")
-PACK_TOKEN = re.compile(r"\b(pandastack|gbrain):([a-z0-9][a-z0-9-]*)\b")
-SLASH_COMMAND = re.compile(r"`(/(?:pandastack:)?[a-z0-9][a-z0-9-]*)`")
+PACK_TOKEN = re.compile(r"\bverbs:([a-z0-9][a-z0-9-]*)\b")
+RETIRED_PACK_TOKEN = re.compile(r"\bpandastack:([a-z0-9][a-z0-9-]*)\b")
+SLASH_COMMAND = re.compile(r"`(/(?:verbs:)?[a-z0-9][a-z0-9-]*)`")
 
 
 def accepted(t):
     return (
         t.startswith(("docs/sessions", "docs/checkpoints", "docs/retros", "docs/plans", "docs/briefs", "docs/handoffs"))
-        or t.startswith("skills/pandastack/scripts")  # abs-path substring of ~/site/skills/pandastack/...
+        or t.startswith("skills/panda-verbs/scripts")  # repo URL/path substring
         or t.startswith("skills/tree/main")           # github URL substring
         or t == "skills/SKILL.md"                       # substring of writing-great-skills/SKILL.md
         or "{" in t or "<" in t                         # template placeholder
@@ -52,7 +49,6 @@ def accepted(t):
 
 
 broken = {}
-notices = set()
 allowlist_path = os.path.join(ROOT, "scripts", "lint-command-allowlist.txt")
 command_allowlist = set()
 if os.path.exists(allowlist_path):
@@ -60,16 +56,6 @@ if os.path.exists(allowlist_path):
         line = line.strip()
         if line and not line.startswith("#"):
             command_allowlist.add(line)
-
-gbrain_dir = os.environ.get("PANDASTACK_GBRAIN_SKILLS") or os.path.join(os.path.expanduser("~"), "site", "knowledge", "brain", "skills")
-gbrain_present = os.path.isdir(gbrain_dir)
-gbrain_list_path = os.path.join(ROOT, "scripts", "gbrain-skills.list")
-gbrain_list = set()
-if os.path.exists(gbrain_list_path):
-    for line in open(gbrain_list_path, encoding="utf-8"):
-        line = line.strip()
-        if line and not line.startswith("#"):
-            gbrain_list.add(line)
 
 for f in glob.glob("skills/**/SKILL.md", recursive=True):
     if "/.archive/" in f or "/_deprecated/" in f:
@@ -86,35 +72,20 @@ for f in glob.glob("skills/**/SKILL.md", recursive=True):
             hint = f"flat ref — bucket it: skills/{skill_bucket[n]}/{n}"
         broken.setdefault(f, []).append((tok, hint))
 
-    for pack, name in set(PACK_TOKEN.findall(text)):
-        if pack == "pandastack":
-            if name not in skill_bucket:
-                broken.setdefault(f, []).append((f"pandastack:{name}", "no matching skills/*/<name>/ directory"))
-        else:
-            if name in gbrain_list:
-                continue
-            if gbrain_present and os.path.isdir(os.path.join(gbrain_dir, name)):
-                broken.setdefault(f, []).append((f"gbrain:{name}", "in the local pack but missing from scripts/gbrain-skills.list — add it so CI gates the ref"))
-            else:
-                broken.setdefault(f, []).append((f"gbrain:{name}", "not in scripts/gbrain-skills.list (the CI-gated snapshot)"))
+    for name in set(PACK_TOKEN.findall(text)):
+        if name not in skill_bucket:
+            broken.setdefault(f, []).append((f"verbs:{name}", "no matching skills/*/<name>/ directory"))
+
+    for name in set(RETIRED_PACK_TOKEN.findall(text)):
+        broken.setdefault(f, []).append((f"pandastack:{name}", "retired v3 namespace; use verbs:<name>"))
 
     for command in set(SLASH_COMMAND.findall(text)):
         name = command[1:]
-        if name.startswith("pandastack:"):
+        if name.startswith("verbs:"):
             name = name.split(":", 1)[1]
         if name in skill_bucket or command in command_allowlist:
             continue
-        broken.setdefault(f, []).append((command, "slash command does not match a pandastack skill or allowlist entry"))
-
-if gbrain_present:
-    for name in sorted(gbrain_list):
-        if not os.path.isdir(os.path.join(gbrain_dir, name)):
-            broken.setdefault("scripts/gbrain-skills.list", []).append((name, f"stale snapshot entry — no such dir in the local gbrain pack at {gbrain_dir}"))
-elif gbrain_list:
-    notices.add(f"NOTICE: gbrain pack absent at {gbrain_dir}; gbrain:* refs gated against scripts/gbrain-skills.list, freshness check skipped")
-
-for notice in sorted(notices):
-    print(notice)
+        broken.setdefault(f, []).append((command, "slash command does not match a Panda Verbs skill or allowlist entry"))
 
 if broken:
     print("FAIL: unresolved internal refs in SKILL.md files:")

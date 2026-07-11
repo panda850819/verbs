@@ -12,7 +12,7 @@
 # blocks. SQL DROP/TRUNCATE is command-scoped: the statement (seen raw) must also
 # reach an actually-invoked client (seen stripped), so a bare mention passes.
 # Bypass: a TRAILING `# FORCE_OK` comment (not a substring anywhere), or
-# PANDA_FORCE=1 in the environment.
+# PANDA_VERBS_FORCE=1 in the environment.
 #
 # Known residuals (fail-safe, rare — bias is over-block-not-under, except these):
 #   - A danger token inside a QUOTED payload handed to an executing interpreter
@@ -39,10 +39,10 @@ CMD=$(printf '%s' "$INPUT" | python3 -c 'import sys,json;print(json.load(sys.std
 
 # Bypass: marker must be a TRAILING comment, not a mention mid-command.
 printf '%s' "$CMD" | grep -qE '#[[:space:]]*FORCE_OK[[:space:]]*$' && exit 0
-[ "${PANDA_FORCE:-}" = "1" ] && exit 0
+[ "${PANDA_VERBS_FORCE:-}" = "1" ] && exit 0
 
 block() {
-  echo "BLOCKED by pandastack destructive-guard: $1" >&2
+  echo "BLOCKED by Panda Verbs destructive-guard: $1" >&2
   echo "High-blast-radius op (force-push / recursive-force-rm / hard-reset / clean -f / DROP). Confirm explicitly or narrow it; append '# FORCE_OK' as a trailing comment to override." >&2
   exit 2
 }

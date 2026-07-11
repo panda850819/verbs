@@ -1,22 +1,20 @@
 #!/usr/bin/env bash
-# pandastack/scripts/bootstrap.sh
+# panda-verbs/scripts/bootstrap.sh
 #
-# Fresh-install onboarding. Surfaces what runs out of the box, what needs a
-# public install step, and what needs a private overlay. Reads manifest.toml
-# as source of truth.
+# Report-only: surfaces what's ready to run, what needs a public CLI, and
+# what install command to run. Reads manifest.toml as the single source of
+# truth. Does NOT mutate ~/.claude or ~/.codex.
 #
 # Usage:
 #   bash scripts/bootstrap.sh              # report only
-#   bash scripts/bootstrap.sh --claude     # also print Claude Code install steps
-#   bash scripts/bootstrap.sh --codex      # also print Codex CLI install steps
-#
-# This script does NOT mutate ~/.claude or ~/.codex. It tells you the commands
-# to run; you run them. The install path itself is one line per host (see end).
+#   bash scripts/bootstrap.sh --claude     # + Claude Code install commands
+#   bash scripts/bootstrap.sh --codex      # + Codex CLI install commands
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="${REPO_ROOT}/manifest.toml"
+printf -v QUOTED_REPO_ROOT '%q' "$REPO_ROOT"
 
 if [ ! -f "$MANIFEST" ]; then
   echo "FATAL: manifest.toml not found at $MANIFEST" >&2
@@ -24,50 +22,35 @@ if [ ! -f "$MANIFEST" ]; then
 fi
 
 ok()   { printf "  \033[32m✓\033[0m %s\n" "$1"; }
-warn() { printf "  \033[33m⚠\033[0m %s\n" "$1"; }
-miss() { printf "  \033[31m✗\033[0m %s\n" "$1"; }
 
 echo
-echo "pandastack bootstrap"
+echo "Panda Verbs bootstrap"
 echo "===================="
 echo "Repo:     $REPO_ROOT"
 echo "Manifest: $MANIFEST"
 echo
 
-# ----------------------------------------------------------------------------
-# 1) Substrate probe
-# ----------------------------------------------------------------------------
-echo "[1/4] Substrate"
-
-if [ -f "$HOME/.agents/AGENTS.md" ]; then
-  ok "~/.agents/AGENTS.md present"
-else
-  miss "~/.agents/AGENTS.md missing — capability-probe will ABORT on skills that load it"
-  echo "      Fix: create ~/.agents/AGENTS.md (see README § Substrate)"
-fi
-
-echo
-
-# ----------------------------------------------------------------------------
-# 2) Core skills (always ready)
-# ----------------------------------------------------------------------------
-echo "[2/4] Core skills (markdown-only, ready now)"
-# Read core skill names directly from manifest (single source of truth).
-# grep -B1 catches the [skill.X] header above each `tier = "core"` line.
+# Read core and ext skill names directly from manifest
 core_skills=$(grep -B1 '^tier = "core"' "$MANIFEST" \
   | grep '^\[skill\.' \
   | sed -E 's|^\[skill\.||; s|\]$||' \
   | sort)
+
 core_count=$(echo "$core_skills" | wc -l | tr -d ' ')
-ok "$core_count skills runnable on this clone with zero external CLI"
-# Print in 3-column grid
-echo "$core_skills" | awk '{ printf "      /%-22s", $0; if (NR % 3 == 0) print "" } END { if (NR % 3 != 0) print "" }'
+
+# --------------------------------------------------
+# Core skills (markdown-only, ready now)
+# --------------------------------------------------
+echo "[1/3] Core skills (markdown-only)"
+ok "$core_count skills available without pack-managed optional CLIs"
+echo "      Host capabilities may still gate use (for example, QA needs browser automation)."
+echo "$core_skills" | awk '{ printf "      /%-20s", $0; if (NR % 3 == 0) print "" } END { if (NR % 3 != 0) print "" }'
 echo
 
-# ----------------------------------------------------------------------------
-# 3) Extension skills (public install)
-# ----------------------------------------------------------------------------
-echo "[3/4] Extension skills (public CLI install)"
+# --------------------------------------------------
+# Ext skills (public CLI dependencies)
+# --------------------------------------------------
+echo "[2/3] Extension skills (public CLI install)"
 printf "      %-18s %-9s %s\n" "Skill" "Status" "Install"
 printf "      %-18s %-9s %s\n" "-----" "------" "-------"
 
@@ -109,55 +92,32 @@ ext_check_version() {
   printf "      %-18s \033[32m%-9s\033[0m %s\n" "$skill" "ready" "(installed $have)"
 }
 
-ext_check "agent-browser"  "agent-browser" "npm install -g agent-browser"
-ext_check "deepwiki"       "curl"          "(curl + jq, usually preinstalled)"
-ext_check "qa"             "agent-browser" "npm install -g agent-browser"
-ext_check "ship"           "gh"            "brew install gh  (GitHub CLI, for the PR step)"
+ext_check "ship"           "gh"            "brew install gh"
 ext_check_version "handover"       "codex"  "0.144.1" "codex update"
 ext_check_version "advisor/codex"  "codex"  "0.144.1" "codex update"
 ext_check_version "advisor/claude" "claude" "2.1.206" "claude update"
 
 echo
 
-# ----------------------------------------------------------------------------
-# 4) Personal skills (private overlay)
-# ----------------------------------------------------------------------------
-echo "[4/4] Personal skills (private overlay)"
-if [ -d "$HOME/site/skills/pandastack-private" ] || [ -n "${PANDASTACK_PRIVATE:-}" ]; then
-  ok "private overlay detected at $HOME/site/skills/pandastack-private"
-  echo "      Unlocks: brief-morning, evening-distill, curate-feeds, bird,"
-  echo "               chain-scout, misalignment, yei-alert-triage"
-else
-  warn "no private overlay (personal-tier skills hidden)"
-  echo "      brief-morning, evening-distill, curate-feeds, bird (need gog / feed-server / bird CLIs)"
-  echo "      chain-scout, misalignment, yei-alert-triage (work-specific)"
-  echo "      pandastack-private is not currently published."
-  echo
-  echo "      For Notion / Slack ops: use Claude.ai Notion / Slack MCP via OAuth"
-  echo "      (the public /notion and /slack skills were deleted in v2.2.0)."
-fi
-
-echo
-
-# ----------------------------------------------------------------------------
-# 5) Host install hint
-# ----------------------------------------------------------------------------
-echo "[Host install]"
+# --------------------------------------------------
+# Host install commands
+# --------------------------------------------------
+echo "[3/3] Host install"
 case "${1:-}" in
   --claude)
     cat <<EOF
-  Run inside Claude Code:
-    /plugin marketplace add $REPO_ROOT
-    /plugin install pandastack@pandastack
-    /reload-plugins
-  Then run /pandastack:init once in your project.
+  Run in a shell:
+    claude plugin validate $QUOTED_REPO_ROOT
+    claude plugin marketplace add $QUOTED_REPO_ROOT --scope user
+    claude plugin install verbs@verbs --scope user
+  Then run /reload-plugins in Claude Code.
 EOF
     ;;
   --codex)
     cat <<EOF
-  Run in shell, then restart Codex CLI:
-    mkdir -p \$HOME/.codex/skills
-    ln -sfn $REPO_ROOT/skills \$HOME/.codex/skills/pandastack
+  Run in a shell, then restart Codex:
+    codex plugin marketplace add $QUOTED_REPO_ROOT --json
+    codex plugin add verbs@verbs --json
 EOF
     ;;
   *)
@@ -165,7 +125,7 @@ EOF
   Pick a host:
     Claude Code:  bash scripts/bootstrap.sh --claude
     Codex CLI:    bash scripts/bootstrap.sh --codex
-    Hermes:       see docs/HERMES.md (direct skill import into ~/.hermes/skills/)
+    Hermes:       see docs/HERMES.md (manual symlink into ~/.hermes/skills/)
 EOF
     ;;
 esac

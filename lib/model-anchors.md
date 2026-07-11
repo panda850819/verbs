@@ -10,6 +10,7 @@ Last verified: 2026-07-10 with Codex CLI 0.144.1 and Claude Code 2.1.206.
 |---|---|---|---|---|---|---|
 | `advisor.openai` | direct `codex exec` | `gpt-5.6-sol` | `high` | `codex >= 0.144.1` | read-only sandbox | verified |
 | `advisor.anthropic` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |
+| `advisor.panel.openai.fast` | direct `codex exec` | `gpt-5.6-terra` | `medium` | `codex >= 0.144.1` | read-only sandbox | verified |
 | `advisor.panel.fast` | direct `claude -p` | `sonnet` | `medium` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |
 | `advisor.panel.deep` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |
 | `handover.mechanical` | direct `codex exec` | `gpt-5.6-luna` | `medium` | `codex >= 0.144.1` | workspace-write sandbox | verified |
@@ -31,7 +32,7 @@ Last verified: 2026-07-10 with Codex CLI 0.144.1 and Claude Code 2.1.206.
 Command shapes:
 
 ```bash
-# advisor.openai
+# advisor.openai | advisor.panel.openai.fast
 codex exec --sandbox read-only -m "{Model}" \
   -c 'model_reasoning_effort="{Effort}"' ...
 

@@ -26,8 +26,8 @@ jobs:
           path: |
             dist/release-title.txt
             dist/release-notes.md
-            dist/pandastack-${{ github.ref_name }}.tar.gz
-            dist/pandastack-${{ github.ref_name }}.tar.gz.sha256
+            dist/*-${{ github.ref_name }}.tar.gz
+            dist/*-${{ github.ref_name }}.tar.gz.sha256
 
   publish:
     needs: preflight
@@ -45,6 +45,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          shopt -s nullglob
+          archives=(dist/*-"$GITHUB_REF_NAME".tar.gz)
+          if [ "${#archives[@]}" -ne 1 ]; then
+            echo "ERROR: expected exactly one release archive; found ${#archives[@]}" >&2
+            exit 1
+          fi
+          archive_path="${archives[0]}"
+          checksum_path="$archive_path.sha256"
+          if [ ! -f "$checksum_path" ]; then
+            echo "ERROR: release checksum is missing: $checksum_path" >&2
+            exit 1
+          fi
+
           existing_draft="$(
             gh release view "$GITHUB_REF_NAME" \
               --json isDraft \
@@ -62,9 +75,16 @@ jobs:
               ;;
           esac
 
-          gh release create "$GITHUB_REF_NAME" --verify-tag --draft \
+          release_flags=(--verify-tag --draft)
+          case "$GITHUB_REF_NAME" in
+            *-*)
+              release_flags+=(--prerelease --latest=false)
+              ;;
+          esac
+
+          gh release create "$GITHUB_REF_NAME" "${release_flags[@]}" \
             --title "$(cat dist/release-title.txt)" \
             --notes-file dist/release-notes.md \
-            "dist/pandastack-$GITHUB_REF_NAME.tar.gz" \
-            "dist/pandastack-$GITHUB_REF_NAME.tar.gz.sha256"
+            "$archive_path" \
+            "$checksum_path"
           gh release edit "$GITHUB_REF_NAME" --draft=false

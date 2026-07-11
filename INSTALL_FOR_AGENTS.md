@@ -1,100 +1,157 @@
-# Install for Agents
+# Install Panda Verbs
 
-Execute this from a fresh clone of pandastack. Do not invent a second install
-path: `scripts/bootstrap.sh`, `scripts/pandastack`, and `manifest.toml` are the
-current sources of truth.
+This is the install source of truth for Claude Code and Codex. Both hosts use
+the plugin id `verbs`, marketplace `verbs`, and selector `verbs@verbs`.
 
-## 1. Preconditions Probe
-
-Run these commands from anywhere inside the clone:
+## Clone and inspect
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"
-command -v git
-python3 scripts/pandastack doctor --host auto
+git clone https://github.com/panda850819/panda-verbs.git
+cd panda-verbs
+python3 scripts/verbs doctor --json
 bash scripts/bootstrap.sh
 ```
 
-Interpret the output:
+`doctor` checks the manifest, host registrations, enabled install receipts, and
+packaged source/cache parity. `bootstrap` reports the core and extension skills
+plus their optional CLI requirements. Neither command changes host configuration.
 
-- `git rev-parse` prints the repo root. If it fails, you are not in a git clone.
-- `command -v git` prints a path. If it fails, install Git first.
-- `python3 scripts/pandastack doctor --host auto` detects Claude Code, Codex CLI,
-  Hermes, the shell/manual operator, and manifest drift.
-- `bash scripts/bootstrap.sh` reads `manifest.toml`, lists core skills that run
-  from the clone, lists ext skills with public CLI dependencies, and prints the
-  host-specific next step.
+## Install in Claude Code
 
-The manifest tier model is:
+```bash
+cd /absolute/path/to/panda-verbs
+claude plugin validate .
+claude plugin marketplace add "$PWD" --scope user
+claude plugin install verbs@verbs --scope user
+```
 
-- `core`: markdown-only skills. A fresh clone plus host install should load them.
-- `ext`: public CLI-backed skills. `bootstrap.sh` prints the missing public
-  install command for each dependency.
+Run `/reload-plugins` in Claude Code, then verify:
 
-## 2. Install Path Per Runtime
+```bash
+claude plugin list --json
+python3 scripts/verbs doctor --host claude --strict
+bash scripts/conformance-smoke.sh claude
+```
 
-Run exactly one dry-run for the runtime you are installing. Then paste the
-printed runtime lines into that runtime or shell.
+## Install in Codex
+
+```bash
+cd /absolute/path/to/panda-verbs
+codex plugin marketplace add "$PWD" --json
+codex plugin add verbs@verbs --json
+```
+
+Restart Codex, then verify:
+
+```bash
+codex plugin list --json
+python3 scripts/verbs doctor --host codex --strict
+bash scripts/conformance-smoke.sh codex
+```
+
+Codex plugin install is the supported path. A bare skill-directory symlink does
+not install marketplace metadata or the complete packaged surface.
+
+## Migrate from v3
+
+Do one host at a time. First pin an immutable v3.4.2 rollback checkout; the old
+marketplace often points at the same moving checkout and stops being a v3 source
+after it advances to v4.
+
+```bash
+git worktree add --detach ../pandastack-v3-rollback \
+  8d9a382b74d5b3e0ef0b6e91375fab3a172a916f
+```
+
+Keep that worktree through the RC dogfood window. Add and validate the new
+marketplace, then remove the v3 plugin immediately before installing v4. Never
+enable both plugins at once.
 
 Claude Code:
 
 ```bash
-python3 scripts/pandastack init --host claude --dry-run
+claude plugin validate "/absolute/path/to/panda-verbs"
+claude plugin marketplace add "/absolute/path/to/panda-verbs" --scope user
+claude plugin uninstall pandastack@pandastack --scope user --keep-data
+claude plugin install verbs@verbs --scope user
 ```
 
-The dry-run prints the Claude plugin marketplace path, including
-`/plugin install pandastack@pandastack`, followed by `/reload-plugins`.
-
-Codex CLI:
+Run `/reload-plugins` and the Claude verification block. Only after it passes:
 
 ```bash
-python3 scripts/pandastack init --host codex --dry-run
+claude plugin marketplace remove pandastack --scope user
 ```
 
-The dry-run prints the Codex skill-dir install. Today this is clone plus symlink
-into `~/.codex/skills/pandastack`, then restart Codex CLI.
-
-Hermes or another host:
+If install or verification fails, repoint the old marketplace to the pinned
+checkout and reinstall v3:
 
 ```bash
-python3 scripts/pandastack init --host hermes --dry-run
+claude plugin marketplace remove pandastack --scope user
+claude plugin marketplace add ../pandastack-v3-rollback --scope user
+claude plugin install pandastack@pandastack --scope user
 ```
 
-Hermes is direct skill import. For an unsupported host, use
-`docs/ADDING_A_HOST.md` and keep the shared content canonical in this repo.
+Keep v4 disabled while you diagnose it. Then migrate Codex.
 
-## 3. Verification
-
-Run the deterministic offline gates:
+Codex:
 
 ```bash
-bash tests/lint-suite.sh && bash tests/run-all.sh
+codex plugin marketplace add "/absolute/path/to/panda-verbs" --json
+codex plugin remove pandastack@pandastack --json
+codex plugin add verbs@verbs --json
 ```
 
-Interpret the output:
-
-- Success means `lint-suite: all offline linters passed` and `run-all.sh` ends
-  with `0 failed`.
-- A linter failure is a real structural drift signal. Fix the named file or
-  stale eval, then rerun the same command.
-- A test failure writes per-test output under `/tmp/pstest-<name>.log`.
-
-For slower machines, rerun the full suite with a longer timeout:
+Restart Codex and run the Codex verification block. Only after it passes:
 
 ```bash
-PSTEST_TIMEOUT=300 bash tests/run-all.sh
+codex plugin marketplace remove pandastack
 ```
 
-## 4. Failure Table
+If install or verification fails, repoint the old marketplace and reinstall:
 
-| Symptom | Paste-ready fix command |
-|---|---|
-| You are inside the clone but not at the repo root | `cd "$(git rev-parse --show-toplevel)"` |
-| Unsure which host runtime is visible | `python3 scripts/pandastack doctor --host auto` |
-| Need Claude Code install lines again | `python3 scripts/pandastack init --host claude --dry-run` |
-| Need Codex CLI install lines again | `python3 scripts/pandastack init --host codex --dry-run` |
-| Need Hermes import lines again | `python3 scripts/pandastack init --host hermes --dry-run` |
-| Need to re-check core/ext dependency state | `bash scripts/bootstrap.sh` |
-| Offline structural lint failed | `bash tests/lint-suite.sh` |
-| Full deterministic suite failed | `bash tests/run-all.sh` |
-| Full deterministic suite timed out | `PSTEST_TIMEOUT=300 bash tests/run-all.sh` |
+```bash
+codex plugin marketplace remove pandastack
+codex plugin marketplace add ../pandastack-v3-rollback --json
+codex plugin add pandastack@pandastack --json
+```
+
+Keep v4 disabled while you diagnose it. Remove the rollback worktree only after
+the RC dogfood window succeeds.
+
+The v4 namespace is `/verbs:*`; `/pandastack:*` has no alias. The old GitHub
+repository URL redirects after the repository rename. RC compatibility is
+limited to the `scripts/pandastack` CLI shim and the documented verify-gate env
+fallback. Existing `~/.pandastack` lifecycle data is left untouched; v4 does
+not read, move, or delete it.
+
+## Verify a checkout
+
+```bash
+python3 scripts/verbs sync --check
+claude plugin validate .
+bash tests/run-all.sh
+```
+
+The full suite is deterministic and offline. Failed test output is written to
+`/tmp/panda-verbs-test-<name>.log`. On a slower machine:
+
+```bash
+PANDA_VERBS_TEST_TIMEOUT=300 bash tests/run-all.sh
+```
+
+Use `python3 scripts/verbs init --host <claude|codex|hermes> --dry-run` to print
+the local install commands without changing the host.
+
+Maintainers prove the real installer in a disposable profile with:
+
+```bash
+bash scripts/installer-smoke.sh claude "$PWD" vX.Y.Z
+bash scripts/installer-smoke.sh codex "$PWD" vX.Y.Z
+```
+
+The script uses official host installers, requires enabled inventory plus
+strict parity, and performs one namespaced skill invocation. It does not copy
+caches or synthesize registry/config receipts. Authentication is reused only
+for the invocation: Claude loads the exact disposable installed artifact in a
+fresh authenticated process; Codex copies only `auth.json` into the temporary
+profile with mode 0600 and removes it on exit.

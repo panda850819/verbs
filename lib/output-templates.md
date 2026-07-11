@@ -13,9 +13,9 @@ Write to `docs/briefs/{YYYY-MM-DD}-{slug}.md`:
 ---
 date: {YYYY-MM-DD}
 type: brief
-source: office-hours
+source: grill
 topic: {topic}
-tags: [brief, office-hours]
+tags: [brief, grill]
 ---
 
 # {Topic}
@@ -86,7 +86,7 @@ Write to `docs/plans/{slug}.md`:
 slug: {slug}
 date: {YYYY-MM-DD}
 type: plan
-source: office-hours
+source: grill
 brief: docs/briefs/{YYYY-MM-DD}-{slug}.md
 execution: {code | knowledge-work}
 status: todo

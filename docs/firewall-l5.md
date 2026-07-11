@@ -2,7 +2,7 @@
 
 > **Status: retired.** The L5 per-skill firewall — and the L3 (MCP deny list) and L4 (context recipe) layers it relied on — was implemented in the `pdctx` overlay, which has been removed. Nothing reads the `reads` / `writes` / `forbids` / `classification` skill-frontmatter fields at runtime. They remain only as **advisory audit metadata** documenting a skill's intended access.
 
-The only active guard on the public surface is the global `hooks/pretooluse-destructive-guard.sh`, which hard-blocks high-blast Bash commands. That is a separate mechanism, not L5.
+`hooks/pretooluse-destructive-guard.sh` is a reference adapter that can hard-block high-blast Bash commands when a host enables it explicitly. Panda Verbs does not register it globally.
 
 ## The fields
 

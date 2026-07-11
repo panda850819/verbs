@@ -20,7 +20,7 @@ Does the output feel like one decision, or a stitch of parts? Strong coherence =
 ### 2. Originality
 Is there evidence of judgment, or LLM-default surface? A human reader should recognize specific calls only this author would make.
 
-- Anti-pattern: "在當今快速發展的 X 領域" / "值得注意的是" / 報告腔 (per `pandastack:write` slop-zh-report-tone reference).
+- Anti-pattern: "在當今快速發展的 X 領域" / "值得注意的是" / 報告腔 (per `verbs:write` slop-zh-report-tone reference).
 - Anti-pattern: Symmetric bullet structures where every item is the same shape (LLM diversity collapse).
 - Anti-pattern: "purple gradients over white cards" (design domain) — visible AI-default aesthetic.
 - Positive signal: 一個 anti-thesis claim that competing AI defaults wouldn't make.
@@ -49,10 +49,10 @@ Per-skill overrides allowed:
 
 | Skill | Heaviest axes | Lightest |
 |---|---|---|
-| `pandastack:write` | Originality, Coherence | Craft (slop-check already covers) |
-| `pandastack:ui` | Originality, Craft | — |
-| `pandastack:review` (artifact review) | Functionality, Craft | — |
-| `gbrain:cross-modal-review` | All 4 equally, plus skill's own Contract | — |
+| `verbs:write` | Originality, Coherence | Craft (slop-check already covers) |
+| `verbs:ui` | Originality, Craft | — |
+| `verbs:review` (artifact review) | Functionality, Craft | — |
+| external cross-model artifact review | All 4 equally, plus the originating skill's contract | — |
 
 ## How skills load this
 
@@ -69,9 +69,9 @@ Evaluator side (reviewing the artifact):
 
 This rubric is NOT just exposed via pointer link — it binds to runtime moments:
 
-1. **Generation moment** — `pandastack:write edit` MUST load rubric and self-score before declaring output ready.
-2. **Review moment** — `pandastack:review` Step 5 spawns a per-rubric pass for any artifact in scope.
-3. **Cross-model moment** — `gbrain:cross-modal-review` Phase 2 loads rubric as part of evaluator context, not separate.
+1. **Generation moment** — `verbs:write edit` MUST load rubric and self-score before declaring output ready.
+2. **Review moment** — `verbs:review` Step 5 spawns a per-rubric pass for any artifact in scope.
+3. **Cross-model moment** — a host-provided outside reviewer receives the rubric as part of evaluator context, not as a separate pointer.
 
 Pointer-only references in SKILL.md without one of these binding moments = breaks the SSOT contract. Don't link without binding.
 
@@ -79,4 +79,4 @@ Pointer-only references in SKILL.md without one of these binding moments = break
 
 - [Anthropic — Harness Design for Long-Running Apps (Prithvi Rajasekaran, 2026-05)](https://www.anthropic.com/engineering/harness-design-long-running-apps) — origin of the 4-criteria-shared-prompt mechanism.
 - [Anthropic — Effective Harnesses for Long-Running Agents (Justin Young, 2026-04)](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — predecessor, established feature_list as evaluator artifact.
-- Brain context: `ideas/pandastack-harness-camp-lessons-2026-05.md` Scaffold 1 / `topics/tech/harness-engineering-discipline-2026.md`.
+- Historical adaptation notes remain in repository history.

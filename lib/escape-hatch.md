@@ -1,8 +1,9 @@
 # lib/escape-hatch.md — Hard-cap user-impatience protocol
 
-> Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `grill --brief`, `gatekeeper`, `prep` / `dojo`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
+> Shared module. Loaded by skills that ask the user multiple questions in sequence (`grill`, `grill --brief`, `gatekeeper`). Defines a 2-strike hard cap: when the user signals enough, the skill stops asking and logs unprocessed items.
 >
-> Origin: a gstack structured-brief precursor shipped an embedded escape hatch (943 lines total). pandastack lifts the rule into shared lib so every interrogation skill obeys the same hard cap, no per-skill drift.
+> Origin: a gstack structured-brief precursor shipped an embedded escape hatch
+> (943 lines total). Panda Verbs keeps the rule in one shared lib.
 
 ## When to load
 
@@ -10,10 +11,8 @@ Any skill where the model asks ≥2 questions in sequence and the user might rea
 
 - `grill` — adversarial drilling
 - `grill --brief` — structured brief flow, diagnostic pressure cooker
-- `gatekeeper` — `Apply? [Y/N/edit]` per-STRIDE-finding gate
-- `prep` / `dojo` (B3) — pre-action clarification
-
-Skip for skills that ask 0-1 questions (`ship`, `qa`, `done`).
+- `gatekeeper` — `Apply? [approve/edit/reject/skip]` per-finding gate
+Skip for skills that ask 0-1 questions (`ship`, `qa`).
 
 ## User triggers
 
@@ -47,7 +46,7 @@ Model output:
 
 ```
 停。Unprocessed: [list of axes / questions not asked]
-Logging to OPEN_QUESTIONS in {output-file}.
+Logging to OPEN_QUESTIONS in the terminal output or active artifact.
 Proceeding to {next stage / output}.
 ```
 
@@ -63,7 +62,8 @@ No follow-up question. No "are you sure?" No "one more thing". Skill proceeds to
 
 ## Output contract
 
-Skill must write OPEN_QUESTIONS section to its output file:
+Skill must emit an OPEN_QUESTIONS section. If the active mode already writes an
+artifact, include it there; otherwise keep it in terminal output:
 
 ```markdown
 ## OPEN_QUESTIONS (escape-hatch triggered)
@@ -87,7 +87,8 @@ Soft caps ("ask user nicely if they want one more") drift over sessions because 
 - Enforces output contract (unprocessed items always logged)
 - Compresses to a rule the user can hold in their head
 
-Companion to `lib/push-once.md` (which enforces minimum 1 push per axis). Push-once enforces depth on each axis; escape hatch enforces breadth ceiling. Together they bound interrogation: "push once minimum, escape hatch maximum".
+Companion to `lib/push-once.md`, which supplies a fixed pushback catalog when
+an answer is vague or unsupported. The escape hatch sets the breadth ceiling.
 
 ## Origin
 

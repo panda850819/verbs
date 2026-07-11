@@ -3,15 +3,17 @@ name: qa
 description: |
   Browser-based QA. Use when UI has changed, or when asked to
   "test this", "QA", or "check the page". Requires browser automation
-  tool. NOT for non-UI verification (use `verify`); NOT for code-diff
-  review (use `review`).
+  from the host. NOT for non-UI checks (use the project's normal test or
+  verification path); NOT for code-diff review (use `review`).
+capability_required:
+  - host browser automation
 user-invocable: false
 ---
 # QA
 
 ## Step 1: Load Context
 
-1. Read pandastack config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Resolve `{learnings_dir}` from it (default `docs/learnings`).
+1. Read verbs config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Resolve `{learnings_dir}` from it (default `docs/learnings`).
 2. Search `{learnings_dir}` for `type: pitfall` related to UI or the changed components. The `type: pitfall` shape is defined in `lib/learning-format.md`.
 3. Read the brief (if exists in `docs/briefs/`) to understand expected behavior.
 
@@ -41,15 +43,20 @@ If unclear what to test, ask the user: "What flows should I test?"
 
 ### Parallel Execution (for large changes)
 
-When the merged test list has 3+ groups, fan out to parallel sub-agents:
+Direct main-agent browser checking is the native baseline. This branch adds
+isolated workers plus structured markers only when a larger suite needs
+separable, mergeable evidence.
 
-1. Assign each test group to a separate Agent (sub-agent), passing `model:` to fit the group's load.
-2. Each sub-agent gets its own browser session via `--session <name>` for isolation.
+When the merged test list has 3+ groups and the host provides isolated browser
+workers, fan out to parallel sub-agents:
+
+1. Assign each test group to a separate isolated worker. The host owns model and worker selection.
+2. Give each worker a distinct browser session through the host's browser adapter. If session isolation cannot be proven, run the groups sequentially.
 3. Each sub-agent prompt must include:
    - The exact numbered test list to run (no exploration beyond assigned tests)
    - The assertion protocol below
    - A step budget (~25 for targeted checks, ~40 for a full page, ~75 for multiple pages)
-4. The main agent does NOT run browser commands itself. It coordinates, merges results, and produces the final summary.
+4. The main agent does not share one browser session across parallel workers. It coordinates, merges results, and produces the final summary.
 5. When a sub-agent hits its budget, accept partial results as-is. Include STEP_SKIP for uncovered tests.
 
 For small changes (1-2 groups), run tests directly without sub-agents.
@@ -88,14 +95,19 @@ Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
 
 ## Step 4: Fix
 
-AUTO-FIX bugs that are mechanical (CSS, missing null check, wrong URL).
-ASK about bugs that involve design or architecture decisions.
+Execute each bug report's `Action` field using the routing contract in
+`skills/engineering/qa/lib/test-output-format.md`. Do not reclassify it from a
+second rule here.
 
-After fixing, re-run the affected flow to verify the fix.
+After an AUTO-FIX, re-run the affected flow. ASK items remain explicit pending
+decisions and are never reported as fixed.
 
-## Step 5: Write Learnings
+## Step 5: Surface a Learning Candidate
 
-If a UI pattern or browser-specific pitfall was discovered, write a learning to `{learnings_dir}` with `type: pitfall` (format in `lib/learning-format.md`). Otherwise state explicitly "no learning warranted". Either way, Step 5 is done only once one of the two is recorded.
+If a UI pattern or browser-specific pitfall was discovered, emit one `type:
+pitfall` candidate using `lib/learning-format.md`. Do not write it to
+`{learnings_dir}`; persistence belongs to the host/project. Otherwise state
+explicitly "no learning warranted".
 Common examples:
 - "This component breaks on mobile viewport"
 - "Form validation fires before user finishes typing"

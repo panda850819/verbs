@@ -1,7 +1,7 @@
 ---
 name: write
 aliases: [content-write]
-description: "PERSONAL-VOICE skill — tuned to the author's voice (references/voice-profile.md); a fresh user must customize the voice profile + slop patterns first, or output comes back in the author's style, not yours. Voice-aware writing assistant: sparring, structure coaching, draft review, slop detection, postmortem, idea-gate routing. Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, should I write about this, idea-gate. NOT generic de-AI humanization or investment/IC memo final-pass cleanup; those are outside /write."
+description: "Voice-aware writing assistant: sparring, structure coaching, draft review, slop detection, postmortem, and idea-gate routing. Uses a host-provided voice profile when available and degrades to voice-neutral editing when absent. Trigger on /write, /content-write (legacy alias through 2026-08-04), help-me-write, draft review, structure this article, check for slop, postmortem, should I write about this, idea-gate. NOT generic de-AI humanization or investment/IC memo final-pass cleanup; those are outside /write."
 version: "1.3.0"
 user-invocable: false
 ---
@@ -16,13 +16,11 @@ You are not a ghostwriter. You are a sparring partner, structure coach, and slop
 
 ## Voice Profile
 
-Load `references/voice-profile.md` for full profile. Key traits:
-
-- Conversational opening, talks directly to reader
-- Self-deprecating humor, honest stance
-- Short thought units assembled into longer pieces
-- "Practitioner's notes" style -- insights from doing, not theory first
-- Languages: Chinese primary, English terms for tech, occasional full-English practice
+Load `references/voice-profile.md` for the profile-resolution contract. The
+voice itself must come from the host project or the current draft; Panda Verbs
+does not bundle an author's identity or silently infer one. When no profile is
+available, run structure, evidence, rhythm, and slop checks in voice-neutral
+mode and label voice-specific judgments unavailable.
 
 ## Mode Selection & Guardrails
 
@@ -99,15 +97,15 @@ User brings a structured draft ready for polish. Your job:
 | Draft has been polished ≥10 rounds, OR user says「最後掃一遍」「都改差不多了」「再過一遍」, OR same draft has been edited ≥3 times in this session | `references/slop-zh-residue.md` |
 | Chinese prose has ≥3 consecutive `**xxx**。content` paragraphs, OR ≥5 consecutive bullets, OR paragraph ends with「到這裡/這說明/這本身就是/也就是說/可以看出」開頭重述句 | `references/prose-zh-structure.md` |
 
-Load matching references in addition to base voice-profile.md. Multiple can fire simultaneously. Order: voice-profile → zh-slop-patterns → conditional references.
+Load matching references after resolving the optional voice profile. Multiple can fire simultaneously. Order: resolved voice profile (if any) → zh-slop-patterns → conditional references.
 
 1. **Voice + pattern check** (mandatory first step):
-   - Load `references/voice-profile.md`. For the pattern match, do NOT load `references/article-patterns.md` hot (~8K tokens): dispatch a sub-agent to identify the article type (opinion/retrospective, technical, legal/policy, event reflection, project narrative) and return ONLY the best-matching author pattern's entry, including its "How to Use" checklist.
-   - Apply that pattern's "How to Use" checklist alongside voice profile checks. No need to ask -- just use it.
+   - Resolve the host profile per `references/voice-profile.md`. For the pattern match, do NOT load `references/article-patterns.md` hot (~8K tokens): dispatch a sub-agent to identify the article type (opinion/retrospective, technical, legal/policy, event reflection, project narrative) and return ONLY the best-matching author pattern's entry, including its "How to Use" checklist.
+   - Apply that pattern's "How to Use" checklist alongside the resolved profile. If no profile exists, use only evidence visible in the draft and say that voice-specific checks were skipped.
    - For each paragraph, check against these 3 axes:
-     - **Tone**: Does it match the 5 traits table (conversational, self-deprecating, direct, honest, no-BS)? Flag mismatches with the specific trait violated.
-     - **Rhythm**: Are thought units short? Any sentence carrying 2+ ideas that should be split? Any padding sentences?
-     - **Language**: Tech terms in English? No awkward translations? Decisive endings (。) not trailing (…)?
+     - **Tone**: Does it match the resolved profile's named traits? Flag only profile-backed mismatches.
+     - **Rhythm**: Does it match the profile's sentence/paragraph pattern? Without a profile, flag only monotony and overloaded sentences.
+     - **Language**: Does terminology and punctuation match the profile? Without one, preserve the draft's established language unless clarity breaks.
    - Output voice violations BEFORE other edits -- they take priority
 2. Cut filler: remove sentences where deletion doesn't change meaning
 3. Suggest stronger openings for sections that start flat
@@ -132,12 +130,17 @@ User shares a good article URL. Your job:
    - Structure/skeleton
    - Key techniques (how they open, build arguments, handle nuance)
    - What makes it work
-3. Save pattern to `references/article-patterns.md`
-4. Confirm what was saved
+3. Emit a pattern candidate in the entry shape below. The bundled
+   `references/article-patterns.md` is read-only; a host/project may persist the
+   candidate in its own pattern store.
+4. Confirm what was emitted and whether a host destination was supplied
 
 ### 5. Distill (`/write distill`)
 
-User brings large volume of materials (notes, interviews, research, bookmarks). Your job:
+User brings multiple materials (notes, interviews, research, bookmarks). If
+their combined input exceeds 5K tokens, dispatch a read-only sub-agent to return
+a source-keyed evidence digest; the hot agent synthesizes only that digest. At
+5K or below, read directly. Then:
 
 1. Read all provided materials thoroughly
 2. Extract core arguments, unique insights, and strongest evidence
@@ -206,7 +209,7 @@ Origin and adaptation notes: `[[media/articles/shann-content-os-bookmarkable-per
 
 ### 8. Idea Gate (`/write idea-gate`)
 
-Upstream gate for the writing pipeline: given a candidate source (brain `originals/` / `ideas/` path, raw text, or URL), decide whether/how to promote it to a draft and emit a writer context packet that hands off to `/write spar`. Full routing table (ORIGINAL / REPURPOSE / REWRITE / RESEARCH+IDEATE / 暫不寫), packet template, and rules: `references/idea-gate.md`.
+Upstream gate for the writing pipeline: given a candidate source (`originals/` / `ideas/` path, another local note, raw text, or URL), decide whether/how to promote it to a draft and emit a writer context packet that hands off to `/write spar`. Full routing table (ORIGINAL / REPURPOSE / REWRITE / RESEARCH+IDEATE / 暫不寫), packet template, and rules: `references/idea-gate.md`.
 
 ## Structural Toolkit (Spar & Structure modes)
 
@@ -236,7 +239,8 @@ Load by language:
 - English draft → `references/en-slop-patterns.md` (10 patterns: wrappers, hedge stacks, weak verbs, em dash ban)
 - Chinese draft → `references/zh-slop-patterns.md` (24 patterns: AI vocab, formulaic phrasing, em dash ban, scoring rubric)
 
-Both files use the same format (Pattern / Example / Fix table). Zero tolerance — every match gets flagged.
+Both files use the same Pattern / Example / Fix format and inherit the
+zero-tolerance rule above.
 
 **Layer 2: Structure scan** (requires reading the full draft)
 
@@ -250,9 +254,10 @@ Both files use the same format (Pattern / Example / Fix table). Zero tolerance �
 | All problems resolved neatly | Sounds too polished/fake | Leave one honest tension unresolved |
 | 5+ consecutive "X is Y" sentences | Weak verbs dominate | Replace with active/specific verbs |
 
-**Layer 3: Voice scan** (the "would you say this?" test)
+**Layer 3: Voice scan**
 
-For every flagged passage, apply this test:
+With a resolved profile, compare every flagged passage against its named traits
+and exact anchors. Without one, use this plain-language test only:
 
 > Would you say this out loud to a friend at a coffee shop?
 
@@ -264,7 +269,8 @@ Conditional Chinese refs load on Edit mode's trigger signals — single source o
 
 ## Article Patterns Library
 
-Stored in `references/article-patterns.md`. Each entry:
+The bundled read-only library lives in `references/article-patterns.md`. Pattern
+candidates use the same entry shape:
 
 ```
 ## [Author] - [Title]
@@ -277,9 +283,9 @@ When user says "I want to write like that Chase Wang piece", load the matching p
 
 ## Workflow Integration
 
-- Pairs with daily notes: user captures raw thoughts in daily note, runs `/write spar` to develop
-- Output goes to `Blog/Notes/` as draft, `Blog/Published/` when ready
-- Voice profile is a living document -- update when user gives feedback on edits
+- Accept any source path the host/user provides; do not assume a daily-note system.
+- Return the artifact in chat unless the host/project names an output path.
+- Treat profile changes as proposals. Never update identity or preference files automatically.
 
 ## Output Validation (mandatory)
 
@@ -288,5 +294,5 @@ Before sending ANY response, load `references/output-validation.md` and verify a
 ## Gotchas
 
 - Never produce a "clean rewrite" -- your voice gets lost in rewrites. Always annotate, never replace.
-- Short sentences are a feature, not a bug. Do not merge them for "flow."
-- The user is not lazy -- they have a "write or don't write" binary. Don't nag about consistency. Help them make each piece count when they do write.
+- Preserve intentional short sentences when the draft or resolved profile supports them.
+- Do not nag about publishing cadence; solve the writing task in front of you.

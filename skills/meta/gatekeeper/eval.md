@@ -2,38 +2,42 @@
 type: skill-eval
 skill: gatekeeper
 bucket: meta
-evaluated_skill_hash: ab82faff78b26c88c60264197102706bf2594921
-evaluated_at: 2026-07-03
+evaluated_skill_hash: 9ef78dd73f27a7e4136acc94f1b8b81bfe95f434
+evaluated_at: 2026-07-11
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — gatekeeper
 
-**Verdict: SOLID.** Leading virtue is a hard, predictable router: a mandatory STRIDE Step 0 (L29) classifies every artifact identically before routing to one of seven cold branches, and the new "Gate completion" clause (L54) closes the premature-stop hole. Costs points on a description that clusters synonym triggers onto one branch (L6) and a residual optional-tool stub (L137).
+**Verdict: SOLID.** Its leading virtue is one mandatory STRIDE classifier feeding four explicit software-artifact review routes and standardized reports; the main construction gap is that native parity remains implicit.
+
+Grounding sample: L56 — "The gate is done only when a routed review template"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L29 — "Step 0: STRIDE Classification (mandatory)" forces classify-before-route on every artifact; the 7-step classifier protocol (L44-50) plus the floor-only ratchet (L49) run identically regardless of artifact type, so the process is the same every run. |
-| Description / invocation | weak | L6 — the natural-language triggers anchor only 3 of the 7 routes ("is this safe to install" → skill-mcp, "check this repo" → repository, "看這個協議的中央化風險" → defi-protocol), leaving url-document / onchain / product-service / message-share without an invocation anchor, and "trust check" restates the skill's own identity rather than naming a trigger. |
-| Completion criteria | pass | L54-56 — "Gate completion" defines a checkable end-state: a routed Step-1+ report carrying a risk rating, plus a human-decision line for 🔴/⛔, and explicitly rules out the STRIDE-table-alone stop the structure could otherwise invite. |
-| Information hierarchy | pass | L52 — the illustrative worked example and the why-before-routing essay are extracted to lib/stride-rationale.md behind a pointer; what stays hot (routing table L21-27, STRIDE taxonomy L33-40, risk/trust scoring tables) is consulted every run, so disclosure is progressive and co-located by need. |
-| Leading words | pass | L29 — "STRIDE" is a strong pretrained threat-model anchor doing real invocation+execution work; the L33-40 table reuses the canonical Spoofing/Tampering/Repudiation/… names rather than inventing labels, so each row anchors to pretrained meaning. |
-| Pruning | weak | L135-138 — "Available tools for on-chain checks" pairs a generic "Block explorers via WebFetch" line with "A protocol-specific alert-triage skill, if your private overlay supplies one (optional)"; the optional-overlay clause is hedge sediment naming no concrete contract and is the one passage not earning its load. |
-| Native parity | pass | L13 — names the native/default failure directly: trusting external input before verification; the delta is a pre-adoption routed trust check with explicit risk ratings. |
-| Granularity | pass | L52 — the single lib/ split (stride-rationale.md, 22 lines of example + rationale) earns its load: it is the one block that is pure illustration; every other section is a per-run dispatch or scoring table that must stay hot, so the split count is minimal and justified. |
-| pandastack conformance | pass | L2 — frontmatter name=gatekeeper matches folder skills/meta/gatekeeper; body is 137 lines but earns it (seven routing branches + STRIDE + risk + trust + template tables are all per-run reference, essay correctly cold in lib/); all 17 pointers verified to resolve on disk. |
+| Predictability | pass | L29 — the mandatory `Step 0: STRIDE Classification` gives every route the same classify-first spine before domain-specific review. |
+| Description / invocation | pass | L6 — the description names all four software branches: skill/MCP/package install, repository, URL/document, and product/service/API/SDK. |
+| Completion criteria | pass | L56 — completion requires a routed Step 1+ report with a risk rating and, for HIGH/REJECT, a human-decision line; a STRIDE table alone explicitly does not finish the gate. |
+| Information hierarchy | pass | L52 — the live classifier stays inline while the worked example and rationale are cold-loaded; route-specific checks, patterns, and report templates are likewise behind pointers. |
+| Leading words | pass | L31 — `STRIDE` supplies established threat-model vocabulary and a six-category decomposition instead of locally invented labels. |
+| Pruning | weak | L60 — the five universal-principle subsections repeat trust and execution cautions also implemented by the classifier, risk table, and routed reviews; the 130-line body would benefit from a deletion pass over repeated rationale. |
+| Native parity | weak | L16 — `Every external input is untrusted until verified` states the stance but does not name the nearest native behavior, ad-hoc repository/document review, or the delta: mandatory STRIDE, four-route specialization, and standardized risk output. |
+| Granularity | pass | L22 — four routes remain one skill because they share the same STRIDE, risk, trust, pattern-library, and report contract; only their domain checks split into review references. |
+| Panda Verbs conformance | pass | L2 — `name: gatekeeper` matches the folder, hot/cold pointers resolve, and `aliases`, `license`, and `upstream` are permitted extension frontmatter rather than runtime security claims. |
 
 ## Why it's good
 
-The router is genuinely predictable: STRIDE Step 0 is mandatory and runs the same 7-step protocol on every artifact before any branch-specific work, and the floor-only ratchet (L49) guarantees the classifier can raise scrutiny but never downgrade a higher independent rating. The repair since the prior eval landed where it mattered — the worked example and rationale essay moved to lib/ (L52), and "Gate completion" (L54-56) now names a checkable end-state so the agent cannot stop at a STRIDE table and call the gate done. Every hot section is a table the agent consults during a run, so the 137 lines read as reference density rather than sprawl.
+The classifier protocol is deterministic: every artifact receives category statuses, a floor-only risk ratchet, and findings carried into the routed report. The four routes are complete and software-specific, while the completion clause prevents a premature STRIDE-only answer. Extra provenance frontmatter is advisory metadata and does not conflict with the required Panda Verbs fields.
 
 ## Top fixes
 
-1. L6 — give each route a natural-language trigger: the description anchors only 3 of the 7 routes, so add leading anchors for the four unanchored routes (url-document / onchain / product-service / message-share); drop "trust check", which renames the skill rather than triggering a branch.
-2. L135-138 — cut or harden the optional-tool stub: "if your private overlay supplies one (optional)" is hedge sediment with no decidable action; either name the concrete tool contract or move the note to lib/, leaving only the sensitive-path floor (L128-133) hot.
-3. `_meta.json` — optional integration metadata is now generic/removed, but the external registry surface still needs a future policy for whether optional provider hints belong in `_meta.json` at all.
+1. L16 — name native parity directly: ordinary review can inspect one artifact, while Gatekeeper adds a mandatory cross-route STRIDE vocabulary, risk floor, and standardized human-decision boundary before adoption.
+2. L60 — compress universal principles that restate classifier or risk-table behavior; retain only rules that change a routed review step.
 
 ## Behavioral cases
 
-- trigger `看這個協議的中央化風險` -> expected process: STRIDE Step 0 classify (L29), then route to reviews/defi-protocol.md (multi-contract governance/admin scope, L25) not onchain.md, emit templates/report-defi-protocol.md with Privileged Surface + Timelock + Verdict, human-decision line if 🔴/⛔.
-- anti-trigger `review my code before I push this PR` -> should NOT fire (routes to pandastack:review / code-review — an internally authored diff, not an external untrusted artifact crossing the trust boundary).
+- trigger `is this MCP/package safe to install?` → run STRIDE Step 0, then `reviews/skill-mcp.md`, and emit the standardized skill report.
+- trigger `check this GitHub repository` → run STRIDE Step 0, then `reviews/repository.md`, and emit the repository report.
+- trigger `review this URL, Gist, or document` → run STRIDE Step 0, then `reviews/url-document.md`, including prompt-injection analysis.
+- trigger `evaluate this software service, API, or SDK` → run STRIDE Step 0, then `reviews/product-service.md`, including permissions and data-flow analysis.
+- anti-trigger `review my branch before commit` → should NOT fire; internally authored code-diff review routes to `review`.

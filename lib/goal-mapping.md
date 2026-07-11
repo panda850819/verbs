@@ -1,131 +1,75 @@
 # Goal Mapping
 
-Pre-step before requirement clarification. Identify which of the user's
-goals this task serves, weight them, and use the dominant goal layer to
-shape downstream questions and alternatives.
+Pre-step before requirement clarification. Identify which stated project goals
+the task serves, weight them, and use the dominant layer to shape downstream
+questions and alternatives.
 
-## Why this exists
+Panda Verbs does not discover personal goals from identity or memory stores.
+Use goals already in the conversation or explicitly present in the current
+project. Missing context stays missing.
 
-Without goal mapping, brief / grill default to generic forcing questions
-(demand reality / status quo / narrowest wedge) that don't adapt to the
-user's actual goal hierarchy. Result: solutions get scoped in a goal
-vacuum and often produce over-scaffolded answers that serve no specific
-layer. Goal mapping forces the agent to find what the user is actually
-trying to accomplish before solutioning.
+## Step 1: Read project goal evidence
 
-## Step 1: Read goal hierarchy
+Read in order and stop when enough signal exists:
 
-Read these sources in order. Stop early if enough signal:
+1. Goals and constraints stated in the current conversation.
+2. The matching brief, plan, issue, or decision record.
+3. Project-local `ROADMAP.md`, `TODOS.md`, or documented goals when present.
+4. Current branch, recent commits, and session notes for the immediate target.
 
-1. `<memory-dir>/MEMORY.md` — index of project / user / feedback memories
-2. `<memory-dir>/project_*.md` — active initiatives, output strategy,
-   season-level goals
-3. `<memory-dir>/user_*.md` — role, work modes, long-horizon identity goals
-4. Active session context — daily note, recent commits, branch name,
-   recent session docs
+Surface up to three layers:
 
-Surface up to three goal layers:
+- **L1 (long horizon)**: product or program commitments that this project states.
+- **L2 (current initiative)**: the active project, milestone, or in-flight bet.
+- **L3 (current delivery)**: this branch, sprint, or shipping target.
 
-- **L1 (long horizon, 6-18mo)** — output strategy, role/identity goals,
-  vision-level commitments. Often documented in a `project_output_*.md`
-  or similar memory entry.
-- **L2 (this season / quarter)** — active initiatives, named projects,
-  in-flight bets. Usually in `project_<name>.md` files.
-- **L3 (this week / today)** — current branch / sprint / shipping target.
-  Read from daily note + recent session docs + git status.
+If one or more layers are absent, record the gap. Never infer a role, identity,
+or life goal from unrelated files.
 
-If only one or two layers surface, that is fine. Note the gap rather
-than inventing.
+## Step 2: Map the task
 
-## Step 2: Map current task to each layer
+For each visible layer, classify the task as:
 
-For each layer, ask:
+- directly serves;
+- indirectly enables;
+- unrelated;
+- works against.
 
-- Does this task **directly serve** a goal at this layer?
-- Does it **indirectly serve** (enabler / scaffolding for the goal)?
-- Is it **unrelated** at this layer?
-- Does it **work against** any goal at this layer? (rare but worth checking)
+Pick the most directly served layer as dominant. If every visible layer is
+unrelated, flag the task framing before proposing a solution.
 
-Pick the **dominant layer** — the one the task most directly serves. If
-all three layers say "unrelated", the task framing is likely wrong.
-Flag and reframe before proceeding.
+## Step 3: Shape downstream questions
 
-## Step 3: Use dominant layer to shape downstream
+- **L1 dominant**: protect long-horizon constraints such as portability,
+  durability, and public compatibility.
+- **L2 dominant**: ask about integration with the named initiative and its
+  current dependencies.
+- **L3 dominant**: ask about time pressure, acceptance, edge cases, and failure
+  modes.
 
-Dominant layer changes which questions matter:
+An option that serves the dominant layer while violating a documented higher
+constraint must be flagged, not silently recommended.
 
-- **L1 dominant**: scope-completeness questions matter most. Task must
-  respect long-horizon constraints (publishability, portability,
-  durability). Skip "narrowest wedge" — wedge framing usually wrong for
-  L1 work.
-- **L2 dominant**: status-quo + integration questions matter most. Task
-  fits inside a named initiative; ask how it integrates with that
-  initiative's other moving parts. Wedge questions useful here.
-- **L3 dominant**: time-pressure + edge-case questions matter most.
-  Demand-reality usually answered (it's the user, today). Status-quo
-  usually obvious. Drill into edge cases / failure modes.
+## Step 4: Output
 
-If the dominant layer is L1 but Alternatives propose L3-style wedge
-options, that is a sign the framing collapsed back to short-term and
-should be rebuilt with L1 constraints in front.
-
-## Step 4: Output mapping to user
-
-State the mapping in one block:
-
-```
+```text
 GOAL MAPPING
-- L1 (long horizon): {goal or "no clear L1 goal found"}
-    → task serves this: directly | indirectly | not | works against
-- L2 (this season): {goal or gap note}
-    → task serves this: directly | indirectly | not | works against
-- L3 (this week): {goal or gap note}
-    → task serves this: directly | indirectly | not | works against
+- L1 (long horizon): {goal or "no project evidence"}
+    -> directly | indirectly | unrelated | works against
+- L2 (current initiative): {goal or "no project evidence"}
+    -> directly | indirectly | unrelated | works against
+- L3 (current delivery): {goal or "no project evidence"}
+    -> directly | indirectly | unrelated | works against
 
 DOMINANT LAYER: {L1 | L2 | L3 | UNCLEAR}
-RATIONALE: {one sentence — why this is dominant}
+RATIONALE: {one evidence-backed sentence}
 ```
 
-If `UNCLEAR` or no layer matches, also output:
+If `UNCLEAR`, ask one question that would change the mapping. Otherwise pass the
+mapping into the brief's Gate Log and continue under the caller's gate rules.
 
-```
-TASK FRAMING APPEARS WRONG. Reframing options:
-- Could this actually be {alternative framing}?
-- Is this a different lifecycle (e.g. maintenance, hygiene, retro)?
-- Should the question be {reframed question} instead?
-```
+## Skip
 
-Ask: "Confirming this mapping, or correct me?" — use the four-option
-gate (approve / edit / reject / skip — see `lib/gate-contract.md`).
-
-## Step 5: Pass result to downstream
-
-Record outcome in the brief's `## Gate Log`:
-
-```
-Goal Mapping (Step 1.5): L1={...} L2={...} L3={...} → dominant={...}
-  approve | edit: {what changed} | reject | skip
-```
-
-Downstream skills read this and adapt:
-
-- **Clarify (Step 2)**: skip forcing questions whose answers are
-  derivable from the goal mapping output.
-- **Alternatives (Step 4)**: filter to options that serve the dominant
-  layer; flag any option that violates a non-dominant layer's
-  constraints (e.g. dominant=L3 but option breaks L1 portability).
-- **Premise Challenge (Step 3)**: include "is the dominant goal layer
-  framing correct?" as one of the premises.
-
-## When to skip goal mapping
-
-- Task is a typo / one-line config / clear bug fix where any goal layer
-  would yield the same answer
-- User says "skip" or "just do it" — record in Gate Log as `skip`, do
-  not silently bypass
-- Goal mapping has already been done in a parent flow (e.g. sprint did
-  brief which already ran goal mapping — grill can sit on the result)
-
-The cost of running goal mapping is one extra round trip with the user.
-The cost of skipping when it would have helped is over-scaffolded work
-that serves no goal layer. Default to running it.
+Skip for a typo, one-line config edit, or clear bug where every layer yields the
+same action; when the user explicitly says skip; or when a parent flow already
+produced a current mapping.
