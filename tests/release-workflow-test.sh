@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Offline structural and mutation checks for the tag-only release workflow.
+# Offline structural and mutation checks for tag-triggered release and recovery.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -42,8 +42,25 @@ def top_block(name):
 
 on_block = [line for line in top_block("on") if line]
 check(
-    on_block == ["on:", "  push:", "    tags:", '      - "v*"'],
-    "trigger must be only tag pushes matching v*",
+    on_block
+    == [
+        "on:",
+        "  push:",
+        "    tags:",
+        '      - "v*"',
+        "  workflow_dispatch:",
+        "    inputs:",
+        "      release_tag:",
+        "        description: Existing annotated release tag",
+        "        required: true",
+        "        type: string",
+    ],
+    "trigger must support v* pushes plus one required recovery tag input",
+)
+env_block = [line for line in top_block("env") if line]
+check(
+    env_block == ["env:", "  RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}"],
+    "one RELEASE_TAG must resolve push and manual-dispatch events",
 )
 
 try:
@@ -87,13 +104,23 @@ check(
     "preflight actions must use the exact pinned checkout and upload SHAs",
 )
 check(
-    "        with:\n          fetch-depth: 0\n          persist-credentials: false" in preflight,
-    "checkout must fetch full history without persisted credentials",
+    "        with:\n          fetch-depth: 0\n          persist-credentials: false\n"
+    "          ref: ${{ env.RELEASE_TAG }}" in preflight,
+    "checkout must fetch the resolved tag with full history and no persisted credentials",
 )
 check(
     re.findall(r"(?m)^\s+run: (.+)$", preflight)
-    == ['bash scripts/release-preflight.sh --tag "$GITHUB_REF_NAME"'],
-    "preflight must run the locked --tag interface exactly once",
+    == [
+        'git fetch --force --no-tags origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"',
+        'bash scripts/release-preflight.sh --tag "$RELEASE_TAG"',
+    ],
+    "preflight must restore the annotated tag object before the locked --tag interface",
+)
+restore_at = preflight.find("Restore annotated tag object")
+preflight_at = preflight.find('bash scripts/release-preflight.sh --tag "$RELEASE_TAG"')
+check(
+    -1 not in (restore_at, preflight_at) and restore_at < preflight_at,
+    "annotated tag restoration must happen before release preflight",
 )
 check(
     "          name: release-artifacts\n          if-no-files-found: error\n          path: |"
@@ -110,8 +137,8 @@ check(
     == [
         "dist/release-title.txt",
         "dist/release-notes.md",
-        "dist/*-${{ github.ref_name }}.tar.gz",
-        "dist/*-${{ github.ref_name }}.tar.gz.sha256",
+        "dist/*-${{ env.RELEASE_TAG }}.tar.gz",
+        "dist/*-${{ env.RELEASE_TAG }}.tar.gz.sha256",
     ],
     "artifact upload must contain exactly the four dist outputs",
 )
@@ -170,7 +197,7 @@ check(
     "publish must not execute downloaded or repository code",
 )
 check(
-    'archives=(dist/*-"$GITHUB_REF_NAME".tar.gz)' in script
+    'archives=(dist/*-"$RELEASE_TAG".tar.gz)' in script
     and 'if [ "${#archives[@]}" -ne 1 ]; then' in script,
     "publish must resolve exactly one manifest-named release archive",
 )
@@ -181,7 +208,7 @@ check(
 )
 
 check(
-    'gh release view "$GITHUB_REF_NAME"' in script
+    'gh release view "$RELEASE_TAG"' in script
     and "--json isDraft" in script
     and "--jq '.isDraft'" in script,
     "rerun cleanup must inspect isDraft",
@@ -190,24 +217,24 @@ cleanup = '''case "$existing_draft" in
   "")
     ;;
   true)
-    gh release delete "$GITHUB_REF_NAME" --yes
+    gh release delete "$RELEASE_TAG" --yes
     ;;
   *)
-    echo "ERROR: release $GITHUB_REF_NAME already exists and is not a draft" >&2
+    echo "ERROR: release $RELEASE_TAG already exists and is not a draft" >&2
     exit 1
     ;;
 esac'''
 check(cleanup in script, "cleanup must delete only a draft and reject published releases")
-check(script.count('gh release delete "$GITHUB_REF_NAME" --yes') == 1, "draft cleanup must be singular")
+check(script.count('gh release delete "$RELEASE_TAG" --yes') == 1, "draft cleanup must be singular")
 
 release_flags = 'release_flags=(--verify-tag --draft)'
-prerelease_case = '''case "$GITHUB_REF_NAME" in
+prerelease_case = '''case "$RELEASE_TAG" in
   *-*)
     release_flags+=(--prerelease --latest=false)
     ;;
 esac'''
-create = 'gh release create "$GITHUB_REF_NAME" "${release_flags[@]}"'
-edit = 'gh release edit "$GITHUB_REF_NAME" --draft=false'
+create = 'gh release create "$RELEASE_TAG" "${release_flags[@]}"'
+edit = 'gh release edit "$RELEASE_TAG" --draft=false'
 check(release_flags in script, "release creation must verify the existing tag and stay draft")
 check(prerelease_case in script, "prerelease tags must set prerelease and latest=false together")
 check(script.count("--prerelease") == 1, "prerelease flag policy must be singular")
@@ -219,8 +246,8 @@ check('"$archive_path"' in script, "resolved archive must be uploaded")
 check('"$checksum_path"' in script, "resolved archive checksum must be uploaded")
 check(edit in script, "draft must be published only after asset upload")
 
-view_at = script.find('gh release view "$GITHUB_REF_NAME"')
-delete_at = script.find('gh release delete "$GITHUB_REF_NAME" --yes')
+view_at = script.find('gh release view "$RELEASE_TAG"')
+delete_at = script.find('gh release delete "$RELEASE_TAG" --yes')
 create_at = script.find(create)
 checksum_at = script.find('"$checksum_path"', create_at)
 edit_at = script.find(edit)
@@ -242,10 +269,42 @@ if errors:
         print("FAIL: {}".format(error), file=sys.stderr)
     sys.exit(1)
 
-print("OK: release workflow is tag-only, least-privilege, pinned, draft-first, and prerelease-aware")
+print("OK: release workflow is immutable-tag, least-privilege, pinned, draft-first, and prerelease-aware")
 PY
 
 python3 "$validator" "$workflow"
+
+# Reproduce actions/checkout replacing an annotated tag with github.sha, then
+# prove the workflow's restore command recovers the remote tag object.
+tag_origin="$tmp/tag-origin.git"
+tag_source="$tmp/tag-source"
+tag_runner="$tmp/tag-runner"
+git init --bare -q "$tag_origin"
+git init -q "$tag_source"
+git -C "$tag_source" config user.name "Release fixture"
+git -C "$tag_source" config user.email "release-fixture@example.invalid"
+git -C "$tag_source" commit --allow-empty -q -m init
+git -C "$tag_source" tag -a v4.0.0-rc.1 -m "v4.0.0-rc.1 — Verbs"
+git -C "$tag_source" remote add origin "$tag_origin"
+git -C "$tag_source" push -q origin HEAD:refs/heads/main refs/tags/v4.0.0-rc.1
+git init -q "$tag_runner"
+git -C "$tag_runner" remote add origin "$tag_origin"
+git -C "$tag_runner" fetch -q origin \
+  +refs/heads/main:refs/remotes/origin/main \
+  +refs/tags/v4.0.0-rc.1:refs/tags/v4.0.0-rc.1
+[ "$(git -C "$tag_runner" cat-file -t refs/tags/v4.0.0-rc.1)" = tag ]
+tag_commit="$(git -C "$tag_runner" rev-parse refs/tags/v4.0.0-rc.1^{commit})"
+git -C "$tag_runner" fetch -q --no-tags origin \
+  "+$tag_commit:refs/tags/v4.0.0-rc.1"
+[ "$(git -C "$tag_runner" cat-file -t refs/tags/v4.0.0-rc.1)" = commit ]
+(
+  cd "$tag_runner"
+  RELEASE_TAG=v4.0.0-rc.1
+  git fetch -q --force --no-tags origin \
+    "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+)
+[ "$(git -C "$tag_runner" cat-file -t refs/tags/v4.0.0-rc.1)" = tag ]
+echo "OK: annotated tag object restored after checkout-style downgrade"
 
 python3 - "$workflow" "$tmp/write-permission.yml" <<'PY'
 import sys
@@ -334,7 +393,7 @@ run_publish_policy() {
   log="$2"
   (
     cd "$publish_fixture"
-    PATH="$fake_bin:$PATH" GITHUB_REF_NAME="$ref" GH_CALL_LOG="$log" \
+    PATH="$fake_bin:$PATH" RELEASE_TAG="$ref" GH_CALL_LOG="$log" \
       bash -e "$publish_script"
   )
 }

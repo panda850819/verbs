@@ -4,6 +4,15 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing annotated release tag
+        required: true
+        type: string
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
 
 jobs:
   preflight:
@@ -16,8 +25,11 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ env.RELEASE_TAG }}
+      - name: Restore annotated tag object
+        run: git fetch --force --no-tags origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
       - name: Run release preflight
-        run: bash scripts/release-preflight.sh --tag "$GITHUB_REF_NAME"
+        run: bash scripts/release-preflight.sh --tag "$RELEASE_TAG"
       - name: Upload release artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -26,8 +38,8 @@ jobs:
           path: |
             dist/release-title.txt
             dist/release-notes.md
-            dist/*-${{ github.ref_name }}.tar.gz
-            dist/*-${{ github.ref_name }}.tar.gz.sha256
+            dist/*-${{ env.RELEASE_TAG }}.tar.gz
+            dist/*-${{ env.RELEASE_TAG }}.tar.gz.sha256
 
   publish:
     needs: preflight
@@ -46,7 +58,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           shopt -s nullglob
-          archives=(dist/*-"$GITHUB_REF_NAME".tar.gz)
+          archives=(dist/*-"$RELEASE_TAG".tar.gz)
           if [ "${#archives[@]}" -ne 1 ]; then
             echo "ERROR: expected exactly one release archive; found ${#archives[@]}" >&2
             exit 1
@@ -59,7 +71,7 @@ jobs:
           fi
 
           existing_draft="$(
-            gh release view "$GITHUB_REF_NAME" \
+            gh release view "$RELEASE_TAG" \
               --json isDraft \
               --jq '.isDraft' 2>/dev/null || true
           )"
@@ -67,24 +79,24 @@ jobs:
             "")
               ;;
             true)
-              gh release delete "$GITHUB_REF_NAME" --yes
+              gh release delete "$RELEASE_TAG" --yes
               ;;
             *)
-              echo "ERROR: release $GITHUB_REF_NAME already exists and is not a draft" >&2
+              echo "ERROR: release $RELEASE_TAG already exists and is not a draft" >&2
               exit 1
               ;;
           esac
 
           release_flags=(--verify-tag --draft)
-          case "$GITHUB_REF_NAME" in
+          case "$RELEASE_TAG" in
             *-*)
               release_flags+=(--prerelease --latest=false)
               ;;
           esac
 
-          gh release create "$GITHUB_REF_NAME" "${release_flags[@]}" \
+          gh release create "$RELEASE_TAG" "${release_flags[@]}" \
             --title "$(cat dist/release-title.txt)" \
             --notes-file dist/release-notes.md \
             "$archive_path" \
             "$checksum_path"
-          gh release edit "$GITHUB_REF_NAME" --draft=false
+          gh release edit "$RELEASE_TAG" --draft=false

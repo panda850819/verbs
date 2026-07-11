@@ -128,7 +128,9 @@ Maintainer workflow:
    for `codex`.
 6. Push only the tag after both real installer smokes pass.
 
-Tag-only release workflow publishes archives and checksums; release stays draft until all artifacts upload.
+The release workflow publishes archives and checksums; release stays draft until
+all artifacts upload. If automation fails after tag push, repair the workflow on
+`main` and manually dispatch that same immutable tag. Never rewrite the tag.
 
 
 ## License
