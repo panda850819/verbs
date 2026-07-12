@@ -14,7 +14,7 @@ Released: 2026-07-12
   `legal-files-test.sh`, and the per-skill `eval.md` hash-freshness ceremony
   (`lint-eval-fresh.sh`, `lint-eval-quotes.py`, `lint-eval-verdict-test.sh`,
   11 co-located `eval.md` files). Rationale recorded in
-  `docs/out-of-scope/fresh-user-certification.md`. (#220)
+  `.out-of-scope/fresh-user-certification.md`. (#220)
 - Dead weight: four orphaned `lib/` modules (`bad-good-calibration`,
   `capability-probe`, `escape-hatch`, `mermaid-grounding`) plus
   `lib/lint-mermaid-grounding.sh`, top-level `lib/skill-eval.md` and
