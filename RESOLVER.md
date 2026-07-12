@@ -59,7 +59,7 @@ If you are reviewing your own PR -> `verbs:review`. If you are deciding whether 
 
 ## Version
 
-This RESOLVER.md is for Verbs v0.7.2. Update it when adding, removing, or renaming skills.
+This RESOLVER.md is for Verbs v0.7.3. Update it when adding, removing, or renaming skills.
 
 ---
 

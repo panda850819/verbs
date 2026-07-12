@@ -124,7 +124,7 @@ claude plugin marketplace add "/absolute/path/to/verbs" --scope user
 claude plugin install verbs@verbs --scope user
 ```
 
-Run `/reload-plugins`, verify `0.7.2`, then repeat for Codex using the exact
+Run `/reload-plugins`, verify `0.7.3`, then repeat for Codex using the exact
 commands in the install guide. `/pandastack:*` has no alias.
 
 ## Development and verification

@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.7.3 — Guard Evidence and Native Workers
+
+Released: 2026-07-12
 
 ### Added
 
@@ -12,11 +14,20 @@
   command-vs-data confusion, hook drift, and event-log loss red-capable.
 - `tests/ticket-gate-guard-test.sh` expands its offline fixture-repo suite from
   29 to 52 cases.
+- Explicit Agent Worker requests use at most two depth-one, read-only native
+  subagents with a shared WorkOrder and WorkerResult contract; no new runner,
+  scheduler, queue, or state machine is introduced.
+- Blocking tests prove that both Claude and Codex SessionStart payloads inject
+  the Agent Worker protocol and reject missing contract fields.
 
 ### Changed
 
 - Stop verification fails closed when its input or runtime adapter is
   unavailable, while loop prevention and pure Q&A still pass.
+- Agent Worker metrics are coordinator-owned and accepted only when exposed by
+  the runtime; worker estimates cannot become telemetry evidence.
+- Anthropic advisor routes retain the previously verified `opus/high` seat, and
+  model-anchor tests reject the expired Fable selector.
 
 ## v0.7.2 — Four-Hook Smoke Truth
 

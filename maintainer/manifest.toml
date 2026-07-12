@@ -1,5 +1,5 @@
 [manifest]
-version = "0.7.2"
+version = "0.7.3"
 schema = "maintainer-skill-v1"
 
 [skill.skill-creator]
