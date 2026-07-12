@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.9.1 — Wayfinder charting bootstrap
+
+### Changed
+
+- `wayfinder` now supports both entry modes: it delegates a new large, fuzzy
+  effort to `grill --brief` to create a decision map and stop, or works one
+  frontier entry from an existing map per session. (#231)
+- DISPATCH and the skill catalog now route large multi-session efforts through
+  `wayfinder` while keeping atomic fuzzy-scope discovery on `grill`. (#231)
+
 ## v0.9.0 — Discipline Cores
 
 Released: 2026-07-13
