@@ -2,8 +2,8 @@
 type: skill-eval
 skill: handover
 bucket: engineering
-evaluated_skill_hash: 133525a3a129c16e81a04ea35f91774c4fbd86bc
-evaluated_at: 2026-07-11
+evaluated_skill_hash: 88f0a35b6a1d030862bd609bb93f3e4c4a8f7e03
+evaluated_at: 2026-07-12
 rubric: writing-great-skills@1.1.0
 ---
 
@@ -11,19 +11,19 @@ rubric: writing-great-skills@1.1.0
 
 **Verdict: STRONG.** The hot Claude-only platform gate, seven-part preflight, pinned payload, and one-shot terminal classification now give sync and async handovers explicit ownership without invented cross-run state. Batch counter belongs only in sprint, not in handover's single result.
 
-Grounding sample: L91 — "Stop when that one-shot table returns its"
+Grounding sample: L92 — "references/codex-invocation.md`. Stop when that one-shot table returns its"
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L91 — every collected sync result flows through one referenced status table whose current actions are terminal and contain no undefined counter or persistent state. |
+| Predictability | pass | L92 — every collected sync result flows through one referenced status table whose current actions are terminal and contain no undefined counter or persistent state. |
 | Description / invocation | weak | L6 — the hot description carries sync mechanics, async mechanics, seat restrictions, use cases, and four exclusions; keep the two mode triggers and seat guard, then move transport detail to the body. |
-| Completion criteria | pass | L92 — sync stops on an exhaustive one-shot `success`, `partial`, or `failed` result, while async separately ends after emitting its artifact and dispatch command. |
-| Information hierarchy | pass | L77 — command shape, payload schema, sandbox escalation, and classification remain in the branch-specific invocation reference instead of being duplicated in the main flow. |
+| Completion criteria | pass | L93 — sync stops on an exhaustive one-shot `success`, `partial`, or `failed` result, while async separately ends after emitting its artifact and dispatch command. |
+| Information hierarchy | pass | L76 — command shape, payload schema, sandbox escalation, and classification remain in the branch-specific invocation reference instead of being duplicated in the main flow. |
 | Leading words | pass | L57 — "session occupancy" cleanly anchors the sync-versus-async distinction without conflating it with cost, model, or git ownership. |
-| Pruning | pass | L34 — the skill now keeps one consistent Routing Boundary; the unfinished-versus-finished distinction does not repeat after the preceding exclusion list already routes closing work to `ship`. |
+| Pruning | pass | L36 — the Agent Worker exclusion adds one boundary sentence and sends the native path back to the shared dispatch contract instead of copying that protocol here. |
 | Native parity | pass | L35 — raw `codex exec` is named as the nearest native path, and the payload contract, preflight, pinned model, sandbox gate, and terminal classification are the concrete delta. |
 | Granularity | pass | L57 — sync and async share plan resolution, model selection, and payload construction; one skill is justified because their only mode axis is whether this turn remains occupied. |
-| Verbs conformance | pass | L77 — required and advisory frontmatter match current behavior, both references resolve, the long body is earned by two modes plus seven safety gates, and the result classification is one-shot with no batch counter. |
+| Verbs conformance | pass | L76 — required and advisory frontmatter match current behavior, both references resolve, the long body is earned by two modes plus seven safety gates, and the result classification is one-shot with no batch counter. |
 
 ## Why it's good
 
@@ -31,8 +31,8 @@ The workflow fails closed on platform, recursion, CLI, version, repo, plan, and 
 
 ## Top fixes
 
-1. L92 — the result classification is one-shot: success, partial, or failed. No batch counter or retry logic lives here; per-batch attempts belong in sprint's delegation loop, not in the single handover invocation.
-2. L34 — collapse the unfinished-versus-finished explanation into the Routing Boundary so it has one source of truth without duplication.
+1. L93 — keep the result classification one-shot. Per-batch attempts belong in sprint's delegation loop, not in the single handover invocation.
+2. L6 — shorten the hot description if a future edit can preserve both mode triggers and the Claude-only seat boundary with fewer transport words.
 
 ## Behavioral cases
 

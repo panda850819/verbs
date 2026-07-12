@@ -33,6 +33,7 @@ Use this skill only for an explicit Verbs `/handover`: unfinished mechanical bui
 
 Do not use it for:
 - Direct `codex exec` outside the handover protocol — raw CLI use skips the payload contract, the preflight gate, and the result classification this skill adds.
+- Native read-only Agent Worker fan-out — follow the shared `DISPATCH.md` protocol; handover remains the bounded path for mechanical write delegation from Claude Code to Codex.
 - Closing finished work, PR creation, publishing, or shipping — use `ship`.
 - Exploratory or judgment-heavy work where a model should reason, not execute — pull a cross-model take with `advisor`; do not hand the thinking to Codex.
 - Multi-step sequential plan-and-build in one runtime — use `sprint`.
