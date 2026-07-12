@@ -1,17 +1,18 @@
 ---
-name: writing-great-skills
-description: |
-  Reference for writing and editing Verbs skills well — the vocabulary and principles that make a skill predictable, plus the checkable scorecard `skill-creator --eval` scores against. Consult when authoring, splitting, pruning, or reviewing a SKILL.md. The construction-quality SSOT (counterpart to lib/quality-rubric.md, which scores artifacts, not skills).
+title: Writing Great Skills
 version: 1.1.0
-user-invocable: false
-type: skill
+type: lib
 ---
 
 # Writing Great Skills
 
 A skill exists to wrangle determinism out of a stochastic system. **Predictability** — the agent taking the same _process_ every run, not producing the same output — is the root virtue; every lever below serves it.
 
-**Bold terms** are defined in [`GLOSSARY.md`](GLOSSARY.md). This is the construction-quality SSOT: it scores the SKILL.md itself, not the artifact a skill produces (that is `lib/quality-rubric.md`). `skill-creator --eval` binds this file as its criteria; the creator self-checks against it before declaring a new skill done.
+**Bold terms** are defined in
+[`writing-great-skills-glossary.md`](writing-great-skills-glossary.md). This is
+the construction-quality SSOT: it scores the SKILL.md itself, not the artifact
+a skill produces (that is `lib/quality-rubric.md`). The maintainer-only
+`skill-creator --eval` workflow binds this file as its criteria.
 
 ## Invocation
 

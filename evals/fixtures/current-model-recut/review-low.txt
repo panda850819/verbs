@@ -1,0 +1,8 @@
+Review this before PR.
+
+Intent: internal rename only; behavior must remain unchanged.
+Base: main.
+Diff: app.py changes the local variable `result` to `response` inside one
+function. The returned value and tests are unchanged.
+
+Return the review conclusion. This is a hypothetical fixture; do not use tools.

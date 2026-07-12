@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.7.0 — Current-Model Surface Recut
+
+Released: 2026-07-12
+
+### Changed
+
+- The default runtime surface is 11 skills. `writing-great-skills` is now a
+  maintainer library, `skill-creator` is maintainer-only, and `write` moved to
+  Panda's personal overlay with default exposure disabled.
+- Construction/eval guidance no longer consumes a normal-session skill slot.
+- The installed plugin and portable manifests are generated from the reduced
+  active set; retired names must not appear in cold discovery.
+
+### Compatibility
+
+- Engineering, safety, review, delivery, browser QA, UI, and cross-model
+  capabilities retain their existing names and contracts.
+- Pack maintenance starts from `maintainer/skill-creator/SKILL.md`.
+
 ## v0.6.1 — Runtime Parity and Live Trust
 
 Released: 2026-07-11

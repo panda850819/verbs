@@ -52,18 +52,11 @@ validate_notices() {
     "Panda-authored portions of Verbs"
     'root [`LICENSE`](LICENSE)'
     "Adapted or included material"
-    "tw93/Waza"
-    "Copyright (c) 2026 Tw93"
-    "https://github.com/tw93/Waza/blob/main/LICENSE"
-    "skills/writing/write/references/slop-zh-residue.md"
-    "skills/writing/write/references/slop-zh-translation.md"
-    "skills/writing/write/references/prose-zh-structure.md"
-    "skills/writing/write/references/slop-zh-report-tone.md"
     "mattpocock/skills"
     "Copyright (c) 2026 Matt Pocock"
     "https://github.com/mattpocock/skills/blob/main/LICENSE"
-    "skills/meta/writing-great-skills/SKILL.md"
-    "skills/meta/writing-great-skills/GLOSSARY.md"
+    "maintainer/skill-creator/lib/writing-great-skills.md"
+    "maintainer/skill-creator/lib/writing-great-skills-glossary.md"
     "skills/productivity/grill/SKILL.md"
     "garrytan/gstack"
     "Copyright (c) 2026 Garry Tan"
@@ -72,10 +65,6 @@ validate_notices() {
     "lib/escape-hatch.md"
     "lib/stop-rule.md"
     "lib/bad-good-calibration.md"
-    "op7418/Humanizer-zh"
-    "Copyright (c) 2026 歸藏"
-    "https://github.com/op7418/Humanizer-zh/blob/main/LICENSE"
-    "skills/writing/write/references/zh-slop-patterns.md"
     "obra/superpowers"
     "Copyright (c) 2025 Jesse Vincent"
     "https://github.com/obra/superpowers/blob/main/LICENSE"
@@ -121,18 +110,13 @@ validate_notices() {
 validate_affected_paths() {
   local path actual
   local paths=(
-    "skills/writing/write/references/slop-zh-residue.md"
-    "skills/writing/write/references/slop-zh-translation.md"
-    "skills/writing/write/references/prose-zh-structure.md"
-    "skills/writing/write/references/slop-zh-report-tone.md"
-    "skills/meta/writing-great-skills/SKILL.md"
-    "skills/meta/writing-great-skills/GLOSSARY.md"
+    "maintainer/skill-creator/lib/writing-great-skills.md"
+    "maintainer/skill-creator/lib/writing-great-skills-glossary.md"
     "skills/productivity/grill/SKILL.md"
     "lib/push-once.md"
     "lib/escape-hatch.md"
     "lib/stop-rule.md"
     "lib/bad-good-calibration.md"
-    "skills/writing/write/references/zh-slop-patterns.md"
     "hooks/session-start"
     "skills/meta/gatekeeper"
     "skills/meta/gatekeeper/LICENSE"
@@ -165,7 +149,7 @@ cleanup() {
   rmdir "$tmp"
 }
 trap cleanup EXIT
-sed 's/Copyright (c) 2026 Tw93/Copyright (c) 2026 MUTATED/' "$NOTICES_FILE" >"$tmp/THIRD_PARTY_NOTICES.md"
+sed 's/Copyright (c) 2026 Matt Pocock/Copyright (c) 2026 MUTATED/' "$NOTICES_FILE" >"$tmp/THIRD_PARTY_NOTICES.md"
 if validate_notices "$tmp/THIRD_PARTY_NOTICES.md" "$LICENSE_FILE" >/dev/null 2>&1; then
   fail "seeded third-party notice mutation unexpectedly passed"
 fi

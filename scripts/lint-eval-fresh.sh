@@ -10,14 +10,14 @@
 #   bash scripts/lint-eval-fresh.sh <name>    # check one skill (exit 0/1)
 #
 # Skills live at skills/<bucket>/<skill>/. Fix a failure with
-# /verbs:skill-creator --eval <name>.
+# maintainer/skill-creator/SKILL.md --eval <name>.
 
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 skills_dir="${VERBS_LINT_SKILLS_DIR:-${PANDA_VERBS_LINT_SKILLS_DIR:-$repo_root/skills}}"
 only="${1:-}"
-scorecard="$repo_root/skills/meta/writing-great-skills/SKILL.md"
+scorecard="$repo_root/maintainer/skill-creator/lib/writing-great-skills.md"
 scorecard_version="$(sed -n 's/^version:[[:space:]]*//p' "$scorecard" | head -1 | tr -d '"[:space:]')"
 expected_rubric="writing-great-skills@$scorecard_version"
 scorecard_axes=()
@@ -64,7 +64,7 @@ while IFS= read -r skdir; do
   esac
 
   if [ ! -f "$eval_md" ]; then
-    echo "FAIL: $rel/ has no eval.md  (run: /verbs:skill-creator --eval $name)"
+    echo "FAIL: $rel/ has no eval.md  (use maintainer/skill-creator --eval $name)"
     fail=1
     continue
   fi
@@ -78,7 +78,7 @@ while IFS= read -r skdir; do
     echo "FAIL: $rel/eval.md missing evaluated_skill_hash"
     fail=1
   elif [ "$current" != "$recorded" ]; then
-    echo "FAIL: $rel/ eval is stale — SKILL.md changed since eval (run: /verbs:skill-creator --eval $name)"
+    echo "FAIL: $rel/ eval is stale — SKILL.md changed since eval (use maintainer/skill-creator --eval $name)"
     echo "       SKILL.md=$current  eval=$recorded"
     fail=1
   fi

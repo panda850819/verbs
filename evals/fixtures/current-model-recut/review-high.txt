@@ -1,0 +1,8 @@
+Review this auth diff before PR.
+
+Intent: accept signed webhooks only.
+Diff: auth.py changes `if not api_key: return 401` to
+`if not api_key: return next()`. Signature validation occurs only after that
+branch. Tests cover valid and invalid provided keys but no missing-key case.
+
+Return actionable findings. This is a hypothetical fixture; do not use tools.

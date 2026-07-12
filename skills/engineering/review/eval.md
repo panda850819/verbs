@@ -2,42 +2,40 @@
 type: skill-eval
 skill: review
 bucket: engineering
-evaluated_skill_hash: f50e1cbfb4a7b120a5813343d67965290538e1b7
-evaluated_at: 2026-07-11
+evaluated_skill_hash: f825d2559e2f4365f65921b73bc3d8f76cd83024
+evaluated_at: 2026-07-12
 rubric: writing-great-skills@1.1.0
 ---
 
 # Eval — review
 
-**Verdict: SOLID.** A fixed audit, scoped parallel lenses, cold-context review, and an internal opposite-seat transport make the review process unusually resistant to confirmation bias; the main construction costs are its long hot body and an implicit native-parity claim.
+**Verdict: STRONG.** The skill keeps review independent and evidence-bound while replacing fixed fan-out with a deterministic risk lane and an earned cold-context branch.
 
-Grounding sample: L105 — "Verbs defines the three review lenses and their output contract"
+Grounding sample: L48 — "Every lane gets one grounded correctness pass."
 
 | Axis | Verdict | Evidence |
 |---|---|---|
-| Predictability | pass | L102 — the skill fixes the parallel-review mechanism and gives every pass the same diff, so the process is stable even though findings vary. |
-| Description / invocation | pass | L4 — the description front-loads review triggers and excludes UI QA, prepared-plan critique, and lightweight checks. |
-| Completion criteria | pass | L229 — the mandatory completion box makes every stage, count, skipped gate, and open question observable before exit. |
-| Information hierarchy | pass | L130 — conditional lenses live behind a pointer and load only when a deterministic scope signal fires. |
-| Leading words | pass | L121 — “Grounding requirement” and `needs-trace` compress the security-review standard into memorable execution anchors. |
-| Pruning | weak | L121 — the attacker-control rule is load-bearing but occupies one very dense paragraph; the overall hot body remains far beyond the usual size budget. |
-| Native parity | weak | L146 — cold review clearly adds decorrelation, but the skill never names the nearest native single-pass review feature and states the earned delta only implicitly. |
-| Granularity | pass | L172 — cross-model review stays an internal parallel transport, preserving `review` as the one code-diff verb instead of leaking into `advisor`. |
-| Verbs conformance | weak | L256 — references resolve and heavy reads use isolated agents, but the 227-line body substantially exceeds the normal guideline without an explicit size justification. |
+| Predictability | pass | L27 — five ordered phases bind scope, risk, evidence, escalation, and conclusion. |
+| Description / invocation | pass | L4 — the description names review triggers, the native delta, and three exclusions. |
+| Completion criteria | pass | L94 — conclusion requires a self-refute plus one exhaustive terminal outcome. |
+| Information hierarchy | pass | L77 — cold review and model anchors load only for high risk, large diffs, or disputed conclusions. |
+| Leading words | pass | L39 — `risk lane` compresses the adaptive decision and controls downstream work. |
+| Pruning | weak | L102 — the output template is useful but repeats fields already specified in the finding contract. |
+| Native parity | pass | L23 — the opener explicitly names native single-pass review and the four deltas that earn this skill. |
+| Granularity | pass | L72 — the skill stays read-only and leaves mutation, browser QA, and artifact trust to neighboring verbs. |
+| Verbs conformance | pass | L77 — the >5K-token branch uses a cold reviewer; references resolve and the longer body is earned by the risk and evidence contracts. |
 
 ## Why it's good
 
-The skill attacks three distinct blind spots: in-context lens coverage, zero-intent cold review, and an opposite-seat model reached through a bounded internal transport. Its completion box prevents unavailable or skipped review paths from being silently reported as clean, while learning and skill-edit outputs remain candidates owned by the host.
+The fixed three-pass and always-on cross-model cost is gone. Low-risk diffs get one grounded pass; medium and high lanes add only evidence-triggered lenses, and every reported defect must survive an explicit disproof attempt.
 
 ## Top fixes
 
-1. L4 — state the native-parity delta directly: this workflow adds scoped parallel lenses, zero-context review, and opposite-seat adversarial review beyond a host's ordinary single-pass diff check.
-2. L121 — extract the full exploit-path decision tree behind a focused pointer while keeping the attacker-control and `needs-trace` gate inline.
-3. L172 — keep “internal transport, not advisor” as the single boundary statement and trim later merge prose that restates the same ownership split.
+1. L102 — if the output remains stable across releases, move the template to a cold reference and keep only required fields inline.
 
 ## Behavioral cases
 
-- trigger `review my branch before I open a PR` → expected process: audit branch state, bind the full diff, inject relevant learnings, check brief coverage, run scoped parallel passes, run cold review and the internal opposite-seat transport, then emit candidates and the completion box.
-- trigger `review this auth diff` from a Codex seat → expected process: code-review ownership stays here; Step 6.5 uses the verified Claude transport from the sibling reference and treats its findings as outside voice requiring approval.
-- anti-trigger `QA this page in the browser` → should NOT fire; route to `qa`.
-- anti-trigger `red-team this prepared plan` → should NOT fire; route to `advisor --panel`.
+- trigger `review this auth diff before PR` → bind the merge-base and intent, choose high risk, trace attacker-controlled paths, run an independent cold review, and report only grounded findings.
+- trigger `review this one-line local rename` → choose low risk and perform one pass without fixed fan-out.
+- anti-trigger `QA this page in Chrome` → should NOT fire; route to `qa`.
+- anti-trigger `is this MCP safe to install` → should NOT fire; route to `gatekeeper`.

@@ -44,9 +44,9 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.6.1"
+version = "0.7.0"
 schema  = "skill-tier-v1"
-updated = "2026-07-11"
+updated = "2026-07-12"
 
 # v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
 #   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
@@ -82,7 +82,7 @@ updated = "2026-07-11"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (11) — markdown-first, fresh-clone available
+# CORE (8) — markdown-first, fresh-clone available
 # Buckets on disk: engineering / productivity / writing / meta
 #
 # Git is the baseline software-work CLI, so review / debug stay core with a
@@ -112,9 +112,9 @@ description = "Atomic adversarial requirement discovery."
 [skill.review]
 tier = "core"
 requires = ["cli:git"]
-resources = ["lib/gate-contract.md", "lib/learning-format.md", "lib/learning-recall.md", "lib/model-anchors.md", "lib/trigger-first-skill-evolution.md", "lib/quality-rubric.md"]
+resources = ["lib/learning-recall.md", "lib/model-anchors.md"]
 composes = []
-description = "Parallel 3-pass review (correctness, security, architecture)."
+description = "Risk-adaptive diff review with scoped evidence and cold-context escalation."
 
 [skill.debug]
 tier = "core"
@@ -123,29 +123,11 @@ resources = ["lib/learning-format.md", "lib/learning-recall.md", "lib/verify-the
 composes = []
 description = "Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui)."
 
-[skill.skill-creator]
-tier = "core"
-resources = ["SKILL-FRONTMATTER.md", "lib/quality-rubric.md", "lib/skill-decision-tree.md", "lib/skill-eval.md", "lib/trigger-first-skill-evolution.md"]
-composes = ["writing-great-skills"]
-description = "Create new Verbs skills, MECE-checked against RESOLVER, trigger-first evolution; --eval scores existing skills."
-
 [skill.sprint]
 tier = "core"
-resources = ["lib/capability-probe.md", "lib/escape-hatch.md", "lib/gate-contract.md", "lib/learning-recall.md", "lib/model-anchors.md", "lib/push-once.md", "lib/verify-the-test-loop.md"]
+resources = ["lib/model-anchors.md", "lib/verify-the-test-loop.md"]
 composes = ["debug", "grill", "handover", "review", "ship", "ui"]
-description = "1-2h focused execution: scope, grill-lite, execute, review, ship."
-
-[skill.writing-great-skills]
-tier = "core"
-resources = ["SKILL-FRONTMATTER.md", "lib/quality-rubric.md"]
-composes = []
-description = "Reference + scorecard for well-constructed skills; the construction-quality SSOT skill-creator --eval binds."
-
-[skill.write]
-tier = "core"
-resources = ["lib/quality-rubric.md"]
-composes = []
-description = "Voice-aware drafting + slop detection."
+description = "Acceptance-driven execution with bounded review and delivery evidence."
 
 [skill.ui]
 tier = "core"
@@ -193,5 +175,5 @@ description = "Pull a decorrelated second opinion from a DIFFERENT model into th
 #   2. Add a [skill.<name>] entry here with tier + requires + config
 #   3. Run scripts/verbs sync to regenerate every loader manifest
 #   4. If tier=ext, add its dependency report to scripts/bootstrap.sh
-#   5. Run skill-creator --eval (writes co-located eval.md); lint-eval-fresh.sh enforces freshness
+#   5. Follow maintainer/skill-creator/SKILL.md to write and verify the co-located eval.md
 #   6. Update RESOLVER.md skill catalog

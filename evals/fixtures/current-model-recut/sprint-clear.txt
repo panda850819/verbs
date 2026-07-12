@@ -1,0 +1,9 @@
+Give a hypothetical execution response only; do not edit or use tools.
+
+The implementation contract is complete and approved; tracking issue #424
+exists. Rename CLI JSON field `status` to `state` in
+`src/serialize.ts`, update `test/serialize.test.ts`, and ship by PR. This is a
+deliberate breaking rename; no alias or dual write is wanted. Acceptance is the
+named unit test plus an inspected compatibility snapshot.
+
+State how you would execute.

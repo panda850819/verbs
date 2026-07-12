@@ -1,5 +1,4 @@
 # Slash commands that are legitimate outside Verbs.
-/content-write
 /work-ship
 /plan
 /brainstorm

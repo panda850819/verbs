@@ -382,6 +382,38 @@ else
 fi
 cp "$tmp/resource-index-clean.json" "$index"
 
+# A whole-skill retirement removes the manifest entry before sync prunes its
+# generated resource copies. The canonical-byte proof must still authorize the
+# generated deletion without touching handwritten files in that directory.
+cp "$man" "$tmp/manifest-before-whole-skill-retire.toml"
+mv "$root/skills/engineering/alpha/SKILL.md" \
+   "$tmp/alpha-retired-SKILL.md"
+"$PY3" - "$man" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+start = text.index("[skill.alpha]")
+end = text.index("[skill.beta]")
+path.write_text(text[:start] + text[end:])
+PY
+if run_sync >"$tmp/whole-skill-retire.out" 2>&1 \
+  && [ ! -e "$root/skills/engineering/alpha/lib/shared.md" ] \
+  && grep -qF '# handwritten local helper' \
+       "$root/skills/engineering/alpha/lib/handwritten.md"; then
+  pass "sync prunes generated resources after whole-skill retirement"
+else
+  cat "$tmp/whole-skill-retire.out" >&2
+  fail_t "whole-skill retirement did not prune only generated resources"
+fi
+mv "$tmp/manifest-before-whole-skill-retire.toml" "$man"
+mv "$tmp/alpha-retired-SKILL.md" \
+   "$root/skills/engineering/alpha/SKILL.md"
+if ! run_sync >/dev/null 2>&1; then
+  fail_t "sync should restore the fixture after whole-skill retirement"
+fi
+
 # ---------------------------------------------------------------------------
 # S05 -- restored fixture is clean and re-apply is idempotent
 # ---------------------------------------------------------------------------

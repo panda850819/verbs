@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-EXPECTED_COUNT = 14
+EXPECTED_COUNT = 11
 FRONTMATTER_NAME = re.compile(r"^name:\s*([^\s#]+)\s*$", re.MULTILINE)
 RELATIVE_RUNTIME_PATH = re.compile(
     r"(?<![A-Za-z0-9_])((?:\.\./)+(?:lib|references|patterns|reviews|"
@@ -192,8 +192,8 @@ def run_offline_contract():
     for name, spec in specs.items():
         assert isinstance(spec.get("resources"), list), name
         assert isinstance(spec.get("composes"), list), name
-    assert sum(len(spec["resources"]) for spec in specs.values()) == 36
-    assert sum(len(spec["composes"]) for spec in specs.values()) == 7
+    assert sum(len(spec["resources"]) for spec in specs.values()) == 19
+    assert sum(len(spec["composes"]) for spec in specs.values()) == 6
 
     verbs = load_verbs_module()
     invalid_specs = (
@@ -271,7 +271,7 @@ def run_offline_contract():
         ), errors
 
     print(
-        "OK: portable skill contract validates 14 flattened skills, resources, "
+        "OK: portable skill contract validates 11 flattened skills, resources, "
         "path containment, companion edges, and negative mutations"
     )
 
