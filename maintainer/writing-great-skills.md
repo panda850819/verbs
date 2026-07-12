@@ -53,6 +53,8 @@ Verbs note: the **hot/cold dispatch rule** is progressive disclosure with teeth 
 
 Keep each meaning in a **single source of truth**. Check every line for **relevance**. Then hunt **no-ops** sentence by sentence: does it change behaviour versus the default? Be aggressive — most prose that fails the no-op test should be deleted, not reworded. Verbs discipline: a skill body runs ~under 80 lines unless the extra length clearly earns itself.
 
+Hunt **negation** the same way: state target behaviour positively wherever a positive form exists; keep a prohibition only as a hard guardrail (safety, data-loss, permission boundaries), and pair it with the replacement behaviour.
+
 ## Leading words
 
 A **leading word** is a compact concept already in the model's pretraining (_fog of war_, _tracer bullets_, _tight_ loop) that the agent thinks with while running the skill. It anchors a region of behaviour in the fewest tokens. It serves predictability twice: in the body it anchors _execution_; in the description it anchors _invocation_. Hunt for restatements a leading word can **collapse** ("fast, deterministic, low-overhead" → _tight_).

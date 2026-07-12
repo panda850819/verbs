@@ -47,6 +47,11 @@ tags: [brief, grill]
 In: {what's included}
 Out: {what's explicitly excluded}
 
+## Seams
+
+{which existing test seams the work passes through; new seams named and placed
+as high as possible — omit this section for pure-decision briefs}
+
 ## Next skill (recommended)
 
 Apply `lib/skill-decision-tree.md` 2-question test against the chosen approach:

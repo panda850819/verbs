@@ -64,7 +64,12 @@ to write a commit; this skill is the gate sequence, not the coaching.
    staging → report and skip the commit; never amend, never skip hooks.
 8. **Tag / release (config-gated)** — `tag: semver` → derive the bump from
    commits (feat = minor, fix = patch) and tag; `release: true` → GitHub
-   Release from the tag with generated notes. Otherwise skip both.
+   Release from the tag with generated notes. **Truth gate before
+   publishing:** every PR / SHA the notes cite must be an ancestor of the tag
+   (`git merge-base --is-ancestor`), and added/removed claims must match
+   `git diff {prev-tag}..{tag} --stat` — the notes describe what the tag
+   contains, nothing more. On mismatch fix the notes, never re-tag.
+   Otherwise skip both.
 9. **Push + PR + closure evidence** — push with `-u` (plus tags if created);
    `gh pr create` with a title under 70 chars and a what/why/how-to-test
    body. Done means the PR URL and pushed commit/branch are printed. Missing

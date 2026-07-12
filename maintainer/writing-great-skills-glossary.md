@@ -22,6 +22,7 @@ Terms **bolded** in [`SKILL.md`](SKILL.md), defined once here (single source of 
 - **Single source of truth** — one authoritative place for each meaning, so changing behaviour is a one-place edit.
 - **Relevance** — whether a line still bears on what the skill does.
 - **No-op** — a sentence whose deletion changes no behaviour; test by deleting it and asking what process would differ.
+- **Negation** — a prohibition standing where a positive target behaviour could; allowed only as a hard guardrail (safety, data-loss, permission boundaries), paired with the replacement behaviour.
 - **Sediment** — stale instructions accumulating across edits, especially retired paths, features, or branches.
 - **Sprawl** — scope creep into another skill's territory.
 - **Legwork** — the digging the agent does within the work, driven by a demanding completion criterion.
