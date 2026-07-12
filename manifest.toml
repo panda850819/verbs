@@ -44,7 +44,7 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.7.0"
+version = "0.7.1"
 schema  = "skill-tier-v1"
 updated = "2026-07-12"
 
