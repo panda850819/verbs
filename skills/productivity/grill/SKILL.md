@@ -8,7 +8,6 @@ description: |
   this scope", "what am I missing", "draft a brief", "structured intake". Skip for
   tasks where scope is already concrete.
 reads:
-  - skill: lib/goal-mapping.md
   - skill: lib/push-once.md
   - skill: lib/stop-rule.md
   - skill: lib/output-templates.md
@@ -28,10 +27,6 @@ The point is NOT to fill a structured questionnaire. The point is to surface
 **unknown unknowns** by interrogating one angle at a time until the answer
 surprises you. Default grill emits a confirmed/open log to chat; `--brief` adds
 a structured close that writes a brief and executable plan.
-
-## Pre-step: Goal Mapping (recommended)
-
-If goal mapping has not been done yet (e.g. you are running grill standalone, not after brief), run only the L1/L2/L3 identification step in `lib/goal-mapping.md`. Do not import brief-only gates or output scaffolds. Adversarial drilling lands better when the agent knows what is actually being protected — questions about edge cases hit different when L1 portability is the dominant goal vs L3 ship-this-week. Skip if user already established goal context this session.
 
 ## When to use
 
@@ -128,7 +123,7 @@ Default grill is atomic and leaves only the log above. `--brief` runs the same
 drilling, then adds a structured close with a written brief and executable plan.
 After the stopping rule fires, run three stages in order; do not skip or reorder.
 
-**Stage A — Alternatives (forced).** @lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason mapped to the dominant goal layer}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Apply to brief? [Add / Defer / Reject]` — STOP and wait on each.
+**Stage A — Alternatives (forced).** @lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Apply to brief? [Add / Defer / Reject]` — STOP and wait on each.
 
 **Stage B — Premise refresh.** Original premise / surfaced premises (from the drilling) / revised premise / still-load-bearing [Y/N/partial]. If the revised premise differs significantly from the original, surface it — the user may want to redo Stage A with the new framing.
 

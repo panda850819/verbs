@@ -54,16 +54,6 @@ verification gate. High-signal guard decisions append to
 `VERBS_GUARD_EVENT_LOG`, disable it with `off`, or set
 `VERBS_GUARD_EVENT_LEVEL=all` to include routine allow decisions.
 
-### Portable: hook-free skills
-
-```bash
-npx skills@latest add panda850819/verbs -a claude-code codex -g -y
-```
-
-This installs the same self-contained 14-skill payload without plugin metadata
-or hooks. Choose one surface per host profile. Do not install both in the same
-profile.
-
 ### Inspect or develop locally
 
 ```bash
@@ -99,33 +89,16 @@ Artifacts flow between skills; you decide when to invoke each step.
 
 | Host | Status |
 |---|---|
-| Claude Code | Marketplace Plugin recommended; portable npx skills supported |
-| Codex CLI | Marketplace Plugin recommended; portable npx skills supported |
+| Claude Code | Marketplace Plugin |
+| Codex CLI | Marketplace Plugin |
 | Hermes | Selective manual skill import |
 
 ## Version reset
 
-`v0.5.0` started the Verbs version line; `v0.6.0` added the explicit native-plugin
-and portable-skill surfaces. `v0.6.1` carries the runtime-parity follow-up and
-adds an explicit Codex live-hook trust proof. Older `v1.*` tags belong to pandastack;
-`v4.0.0-rc.1` belongs to the short-lived product name used during the boundary
-cut. Those tags and releases stay immutable history.
-
-Because `0.6.0` sorts below `4.0.0-rc.1`, hosts cannot treat migration from that
-RC as an ordinary upgrade. Pin the RC checkout for rollback, then explicitly
-uninstall and reinstall `verbs@verbs` from the current Verbs checkout:
-
-```bash
-git worktree add --detach ../verbs-v4-rollback v4.0.0-rc.1
-claude plugin validate "/absolute/path/to/verbs"
-claude plugin uninstall verbs@verbs --scope user --keep-data
-claude plugin marketplace remove verbs --scope user
-claude plugin marketplace add "/absolute/path/to/verbs" --scope user
-claude plugin install verbs@verbs --scope user
-```
-
-Run `/reload-plugins`, verify `0.7.3`, then repeat for Codex using the exact
-commands in the install guide. `/pandastack:*` has no alias.
+`v0.5.0` started the Verbs version line. Older `v1.*` tags belong to
+pandastack; `v4.0.0-rc.1` belongs to the short-lived product name used during
+the boundary cut. Those tags and releases stay immutable history, and their
+migration paths live in git history. `/pandastack:*` has no alias.
 
 ## Development and verification
 
@@ -137,32 +110,22 @@ claude plugin validate .
 bash tests/run-all.sh
 ```
 
-Pack maintainers load `maintainer/skill-creator/SKILL.md` explicitly. Its
-construction scorecard is a library resource and is not exposed in normal
-runtime sessions.
+Skill-writing lore for maintainers lives in
+`maintainer/writing-great-skills.md`. It is not exposed in normal runtime
+sessions.
 
 ## Release
 
-Maintainer workflow:
+1. Update `manifest.toml` (version bump), `CHANGELOG.md`, and skill content on
+   an issue branch.
+2. Run `python3 scripts/verbs sync` and `bash tests/run-all.sh` from a clean
+   commit, then merge the green PR to `main`.
+3. Optionally tag `vX.Y.Z` and create a GitHub release with
+   `gh release create` from the changelog heading. GitHub supplies the
+   standard source archives; no custom release assets.
 
-1. Update `manifest.toml`, `CHANGELOG.md`, and skill content on an issue branch.
-2. Run `scripts/verbs sync`, `bash tests/run-all.sh`,
-   `bash tests/skills-sh-installer-external.sh`, and
-   `bash scripts/release-preflight.sh --candidate vX.Y.Z` from a clean commit.
-3. Merge the green PR to `main`.
-4. Create an annotated tag whose subject equals the changelog heading.
-5. Run `bash scripts/release-preflight.sh --tag vX.Y.Z`, then run the native
-   Marketplace Plugin proof with
-   `bash scripts/installer-smoke.sh claude "$PWD" vX.Y.Z` and the same command
-   for `codex`. For v0.6.0, also run both hosts through
-   `bash scripts/installer-smoke.sh <host> --upgrade ../verbs-v0.5.0 "$PWD"`.
-6. Push only the tag after both real installer smokes pass.
-
-The public release contains notes and install commands with zero custom release
-assets. Exact-tag package extraction remains an internal preflight; GitHub
-supplies the standard source archives. If automation fails after tag push,
-repair the workflow on `main` and manually dispatch that same immutable tag.
-Never rewrite the tag.
+The version bump is what refreshes installed plugin caches; reinstall or
+`/reload-plugins` after merging.
 
 
 ## License

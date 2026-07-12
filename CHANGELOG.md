@@ -1,5 +1,52 @@
 # Changelog
 
+## v0.8.0 — Personal-First Slim
+
+Released: 2026-07-12
+
+### Removed
+
+- The fresh-user certification layer: `release-preflight.sh` and its test,
+  `release.yml` and `release-workflow-test.sh`, `installer-smoke.sh` and its
+  structural test, the portable `npx skills` surface with
+  `portable-skills-test.py` and the pinned external installer proof,
+  `legal-files-test.sh`, and the per-skill `eval.md` hash-freshness ceremony
+  (`lint-eval-fresh.sh`, `lint-eval-quotes.py`, `lint-eval-verdict-test.sh`,
+  11 co-located `eval.md` files). Rationale recorded in
+  `docs/out-of-scope/fresh-user-certification.md`. (#220)
+- Dead weight: four orphaned `lib/` modules (`bad-good-calibration`,
+  `capability-probe`, `escape-hatch`, `mermaid-grounding`) plus
+  `lib/lint-mermaid-grounding.sh`, top-level `lib/skill-eval.md` and
+  `lib/quality-rubric.md` duplicates, `archive/retired-skills/`, two frozen
+  historical eval snapshots and the unwired browser-integration harness,
+  executed `docs/plans/`, shipped brief/session records, and the two
+  superseded audits.
+- The `maintainer/skill-creator` machinery. Skill-writing lore lives directly
+  at `maintainer/writing-great-skills.md` with its glossary and the artifact
+  `quality-rubric.md`.
+- The `grill` goal-mapping pre-step and `lib/goal-mapping.md`; review's
+  Pass 8 quality-rubric ritual (Pass 4-7 stay signal-gated).
+
+### Changed
+
+- `ship` and `qa` rewritten in invariant form. Every hard gate is kept —
+  branch-before-commit, review gate, scope check, closure evidence, the
+  STEP_PASS assertion protocol, the verification rigor order, and report
+  routing — while step-by-step coaching that current models carry natively is
+  removed.
+- README, INSTALL_FOR_AGENTS, ROADMAP, CLAUDE.md, and ADDING_A_HOST describe
+  the Marketplace-Plugin-only surface; completed v3/RC migration playbooks
+  compressed to a pointer at git history; the v1.0 gate is personal-first
+  (author-machine install proof and a model-upgrade audit instead of
+  three-non-author-user certification).
+
+### Kept deliberately
+
+- All four hooks with their truth-table tests, `doctor --strict` runtime
+  parity, `verbs sync` determinism, the structural lint suite, the offline
+  conformance adapter smoke, and `codex-hook-smoke.py`. Everything protecting
+  live enforcement on the author's machines stays.
+
 ## v0.7.3 — Guard Evidence and Native Workers
 
 Released: 2026-07-12

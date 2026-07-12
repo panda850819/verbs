@@ -4,7 +4,7 @@
 
 ## When to load
 
-At the START of a dev unit, right after `capability-probe`, BEFORE planning or executing:
+At the START of a dev unit, BEFORE planning or executing:
 
 - `sprint` Stage 0 · `review` Step 2 (its "Load Learnings" step) · `debug` opener.
 

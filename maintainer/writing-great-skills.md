@@ -11,8 +11,7 @@ A skill exists to wrangle determinism out of a stochastic system. **Predictabili
 **Bold terms** are defined in
 [`writing-great-skills-glossary.md`](writing-great-skills-glossary.md). This is
 the construction-quality SSOT: it scores the SKILL.md itself, not the artifact
-a skill produces (that is `lib/quality-rubric.md`). The maintainer-only
-`skill-creator --eval` workflow binds this file as its criteria.
+a skill produces (that is `quality-rubric.md` in this directory).
 
 ## Invocation
 
@@ -78,7 +77,7 @@ hot/cold, routing, and conformance rules.
 
 ## The scorecard
 
-`skill-creator --eval` scores a skill on these axes — each **pass / weak / fail** with one cited line. The criterion for each lives in the section it names above; this is the index, not a second copy.
+Score a skill on these axes — each **pass / weak / fail** with one cited line. The criterion for each lives in the section it names above; this is the index, not a second copy.
 
 1. **Predictability** — see [Writing Great Skills](#writing-great-skills) (the root virtue).
 2. **Description / invocation** — see [Invocation](#invocation) + [Writing the description](#writing-the-description).

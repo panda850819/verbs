@@ -17,8 +17,8 @@ For multi-step sequential work without parallelism, run multiple sprints in sequ
 
 ## Q0: Should this even be a skill? (refuse-to-build escape hatch)
 
-Before routing a workflow to an execution skill — and before `skill-creator` runs
-its MECE check — ask whether the thing should be a skill **at all**. Refusing to
+Before routing a workflow to an execution skill — and before proposing any new
+skill — ask whether the thing should be a skill **at all**. Refusing to
 build is a valid, non-failure outcome; it is the cheapest place to stop skill
 sprawl, upstream of the MECE check.
 

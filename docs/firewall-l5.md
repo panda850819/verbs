@@ -3,9 +3,9 @@
 > **Status: retired.** The L5 per-skill firewall — and the L3 (MCP deny list) and L4 (context recipe) layers it relied on — was implemented in the `pdctx` overlay, which has been removed. Nothing reads the `reads` / `writes` / `forbids` / `classification` skill-frontmatter fields at runtime. They remain only as **advisory audit metadata** documenting a skill's intended access.
 
 `hooks/pretooluse-destructive-guard.sh` can hard-block high-blast Bash commands.
-The Marketplace Plugin registers it for Bash PreToolUse; portable and manual
-skill installs remain hook-free. This narrow command guard does not restore the
-retired per-skill firewall.
+The Marketplace Plugin registers it for Bash PreToolUse; manual skill imports
+remain hook-free. This narrow command guard does not restore the retired
+per-skill firewall.
 
 ## The fields
 

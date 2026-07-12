@@ -1,6 +1,6 @@
-# Conditional Review Passes (Pass 4-8)
+# Conditional Review Passes (Pass 4-7)
 
-Run a pass ONLY when its scope signal fired in Step 4 (`SCOPE_*`), or — for Pass 8 — when the diff contains writing/design artifacts. Findings use the same `[P0-P3] (confidence: N/10) file:line` format as the always-on passes and merge into the same Step 5 pool.
+Run a pass ONLY when its scope signal fired in Step 4 (`SCOPE_*`). Findings use the same `[P0-P3] (confidence: N/10) file:line` format as the always-on passes and merge into the same Step 5 pool.
 
 **Pass 4 — Migration Safety** (only if SCOPE_MIGRATION):
 - Backwards-incompatible schema changes without migration path
@@ -25,9 +25,3 @@ Run a pass ONLY when its scope signal fired in Step 4 (`SCOPE_*`), or — for Pa
 - Missing environment variable validation
 - Docker image using latest tag instead of pinned version
 - CI steps that can silently fail
-
-**Pass 8 — Quality Rubric** (only when diff contains writing or design artifacts, e.g. `.md` in writing/ media/ briefs/ topics/ paths, or `.html`/`.tsx`/`.css` with visual surface changes):
-- Load `lib/quality-rubric.md`. Evaluator-side binding per governance moment #2.
-- Score each changed artifact 1-5 on the 4 axes (coherence / originality / craft / functionality).
-- Any axis < 3 = fail the gate. Include the specific anti-pattern hit (e.g. "Originality 2 — symmetric bullet structure, LLM diversity collapse").
-- Use per-skill weighting table from the rubric when artifact came from `verbs:write` / `verbs:ui` output.

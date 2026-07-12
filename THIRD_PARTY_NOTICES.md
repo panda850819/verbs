@@ -14,8 +14,8 @@ MIT license: https://github.com/mattpocock/skills/blob/main/LICENSE
 
 Affected files:
 
-- `maintainer/skill-creator/lib/writing-great-skills.md`
-- `maintainer/skill-creator/lib/writing-great-skills-glossary.md`
+- `maintainer/writing-great-skills.md`
+- `maintainer/writing-great-skills-glossary.md`
 - `skills/productivity/grill/SKILL.md`
 
 ### garrytan/gstack
@@ -27,9 +27,7 @@ MIT license: https://github.com/garrytan/gstack/blob/main/LICENSE
 Affected files:
 
 - `lib/push-once.md`
-- `lib/escape-hatch.md`
 - `lib/stop-rule.md`
-- `lib/bad-good-calibration.md`
 
 ### obra/superpowers
 

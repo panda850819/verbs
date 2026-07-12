@@ -13,7 +13,7 @@ persona agents. A skill is a short sequence of steps that frames the task, loads
 relevant lore, and manages the learnings loop. Verbs ships skills and thin host
 adapters. The recommended Marketplace Plugin registers only SessionStart
 dispatch, the Bash PreToolUse destructive guard, and the Stop verification
-gate. The portable skill surface is self-contained and hook-free. The host owns
+gate. Manual skill imports are hook-free. The host owns
 identity, brain or memory, scheduling, project truth, and global model routing.
 
 ### 2. Close the Loop
@@ -31,9 +31,9 @@ Small scripts are appropriate when parsing, validation, fetching, or formatting
 must be repeatable. Prefer standard-library implementations, keep helpers local
 to the capability they serve, and declare their runtime explicitly. A helper
 needed by one skill must not become an install prerequisite for every skill.
-The same source is verified as a Marketplace Plugin and as portable skills on
-Claude Code and Codex; Hermes supports selective manual import. One host profile
-uses one install surface.
+The same source is verified as a Marketplace Plugin on Claude Code and Codex;
+Hermes supports selective manual import. One host profile uses one install
+surface.
 
 ### 4. Less Is More
 

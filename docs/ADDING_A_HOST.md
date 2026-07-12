@@ -11,7 +11,7 @@ model routing to Verbs.
 - `DISPATCH.md` owns public routing.
 - `hooks/` contains SessionStart dispatch, the Bash PreToolUse destructive
   guard, and the Stop verification gate. The Marketplace Plugin registers them;
-  portable and manual skill installs are hook-free.
+  manual skill imports are hook-free.
 - Each `SKILL.md` owns its workflow and tool assumptions.
 
 Do not fork skill content merely to rename tools. Keep any translation in the
@@ -33,8 +33,7 @@ Before claiming support, define:
 The adapter may support a subset, but it must not imply parity for skills or
 adapters it does not enable.
 
-One host profile uses one install surface. Do not combine a native Marketplace
-Plugin with portable skills in the same profile.
+One host profile uses one install surface.
 
 ## Verification gate
 
@@ -53,8 +52,8 @@ test the scanner; they do not prove the real installer.
 
 | Host | Status | Install surface |
 |---|---|---|
-| Claude Code | Verified | Marketplace Plugin (recommended); portable npx skills |
-| Codex | Verified | Marketplace Plugin (recommended); portable npx skills |
+| Claude Code | Verified | Marketplace Plugin |
+| Codex | Verified | Marketplace Plugin |
 | Hermes | Selective manual import | Individual skill directories |
 | OpenClaw | Unsupported / experimental | None |
 

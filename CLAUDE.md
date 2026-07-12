@@ -1,6 +1,6 @@
 # Verbs (plugin internal)
 
-An opinionated skill pack for taking software work from ambiguity to verified delivery. Skills are tiered core / ext in `manifest.toml` and grouped under engineering, productivity, writing, and meta. The pack does not own identity, memory, project truth, runtimes, scheduling, connectors, or global model routing.
+An opinionated skill pack for taking software work from ambiguity to verified delivery. Skills are tiered core / ext in `manifest.toml` and grouped under engineering, productivity, and meta. The pack does not own identity, memory, project truth, runtimes, scheduling, connectors, or global model routing.
 
 This file is the plugin-internal contract read by skill content. The user-facing README lives at the repo root.
 
@@ -11,12 +11,12 @@ Full catalog in `RESOLVER.md` at the repo root. Dev-workflow primitives:
 - `/verbs:grill` — adversarial requirement discovery, atomic, no brief output
 - `/verbs:grill --brief` — structured close that produces a brief + executable plan
 - `/verbs:advisor --panel` — blind cross-model critique of a prepared plan
-- `/verbs:review` — parallel 3-pass review + cross-model adversarial check
+- `/verbs:review` — risk-adaptive diff review with earned cold-context escalation
 - `/verbs:qa` — browser-based QA with structured assertions
 - `/verbs:ship` — test + commit + push + PR for completed code work
 - `/verbs:careful` — confirm before destructive actions (safety)
 
-Writing (`/write`) is cataloged in `RESOLVER.md`. Skills are composed explicitly; there is no separate flow layer.
+Skills are composed explicitly; there is no separate flow layer.
 
 ## Scenario flows (single-skill, internally chained)
 
@@ -29,10 +29,6 @@ Writing (`/write`) is cataloged in `RESOLVER.md`. Skills are composed explicitly
 Skills may read the project path configured under `## verbs > learnings` and
 emit candidates in `lib/learning-format.md` shape. They do not persist knowledge;
 the host/project decides whether and where to store a candidate.
-
-## Goal mapping
-
-`grill --brief` can use the Goal Mapping helper in `lib/goal-mapping.md` when a brief needs to map the current task to L1 (long horizon) / L2 (this season) / L3 (this week) layers.
 
 ## verbs
 

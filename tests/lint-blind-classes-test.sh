@@ -188,51 +188,6 @@ reads:
 # Demo"
 fail_case refs-symlink python3 scripts/lint-refs-resolve.py "$refs_symlink"
 
-quotes_clean="$tmp/quotes-clean"
-write_skill "$quotes_clean" meta demo "---
-name: demo
----
-# Demo
-This exact current sentence is present."
-cat >"$quotes_clean/skills/meta/demo/eval.md" <<'EOF'
----
-type: skill-eval
-skill: demo
----
-Grounding sample: L5 — "This exact current sentence is present."
-EOF
-pass_case quotes-clean python3 scripts/lint-eval-quotes.py "$quotes_clean"
-
-quotes_drift="$tmp/quotes-drift"
-write_skill "$quotes_drift" meta demo "---
-name: demo
----
-# Demo
-This exact current sentence is present."
-cat >"$quotes_drift/skills/meta/demo/eval.md" <<'EOF'
----
-type: skill-eval
-skill: demo
----
-Grounding sample: L5 — "This stale quoted sentence is absent."
-EOF
-fail_case quotes-drift python3 scripts/lint-eval-quotes.py "$quotes_drift"
-
-quotes_missing="$tmp/quotes-missing"
-write_skill "$quotes_missing" meta demo "---
-name: demo
----
-# Demo
-This exact current sentence is present."
-cat >"$quotes_missing/skills/meta/demo/eval.md" <<'EOF'
----
-type: skill-eval
-skill: demo
----
-No grounding sample is present.
-EOF
-fail_case quotes-missing python3 scripts/lint-eval-quotes.py "$quotes_missing"
-
 if [ "$fail" -ne 0 ]; then
   echo "lint-blind-classes-test: one or more seeded checks failed"
   exit 1

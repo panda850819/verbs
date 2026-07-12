@@ -4,8 +4,8 @@ This directory records rejected directions as advisory precedent for future
 skill and abstraction proposals. It is a lookup surface for agents, not an
 enforcement surface.
 
-`skill-creator` consults these entries before proposing a new skill or
-abstraction. If a proposal matches an entry, surface that precedent first.
+Consult these entries before proposing a new skill or abstraction. If a
+proposal matches an entry, surface that precedent first.
 
 ## Entry Format
 

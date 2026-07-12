@@ -11,57 +11,35 @@ user-invocable: false
 ---
 # QA
 
-## Step 1: Load Context
+You already know what to test. This skill is the evidence protocol: structured
+assertions a merge decision can trust, not a test-writing tutorial.
 
-1. Read verbs config from `CLAUDE.md` or `AGENTS.md` (whichever the project uses). Resolve `{learnings_dir}` from it (default `docs/learnings`).
-2. Search `{learnings_dir}` for `type: pitfall` related to UI or the changed components. The `type: pitfall` shape is defined in `lib/learning-format.md`.
-3. Read the brief (if exists in `docs/briefs/`) to understand expected behavior.
+## Context
 
-## Step 2: Plan Tests
+Read the `## verbs` config from `CLAUDE.md` or `AGENTS.md`; resolve
+`{learnings_dir}` (default `docs/learnings`) and search it for `type: pitfall`
+entries related to the changed UI (shape per `lib/learning-format.md`). Read
+the brief in `docs/briefs/` when one exists.
 
-From the diff, brief, or user instructions, identify what to test.
+## Plan
 
-**Round 1 - Functional:** What are the core user flows? Write each test as: action -> expected result.
-- Which pages/URLs changed?
-- What should work after this change?
+From the diff, brief, or instructions, produce ONE numbered test list: core
+user flows first (each as action → expected result), then the paths a
+happy-path pass misses — error/empty/loading states, edge inputs, double
+submit, Escape mid-flow, keyboard-only nav, mobile viewport, console errors
+after interactions. Unclear what to test → ask: "What flows should I test?"
 
-**Round 2 - Adversarial:** Re-read Round 1. What did you miss?
-- Error paths, empty states, loading states
-- Edge inputs (empty, huge, special chars, rapid clicks)
-- Double-submit, Escape mid-flow, keyboard-only nav
+## Test
 
-**Round 3 - Coverage gaps** (skip for small changes): Re-read Rounds 1-2.
-- Accessibility (keyboard nav, focus management)
-- Mobile viewport breakpoints
-- Console errors after interactions
+Run directly for small changes. Fan out to host-provided isolated browser
+workers only when the list has 3+ groups AND session isolation is proven —
+otherwise run sequentially. Each worker gets its exact numbered tests, the
+assertion protocol below, and a step budget (~25 targeted / ~40 full page /
+~75 multi-page); at budget, accept partial results with `STEP_SKIP`. Never
+share one browser session across parallel workers; the main agent merges and
+summarizes.
 
-**Merge** into a single numbered test list. Remove overlaps.
-
-If unclear what to test, ask the user: "What flows should I test?"
-
-## Step 3: Test
-
-### Parallel Execution (for large changes)
-
-Direct main-agent browser checking is the native baseline. This branch adds
-isolated workers plus structured markers only when a larger suite needs
-separable, mergeable evidence.
-
-When the merged test list has 3+ groups and the host provides isolated browser
-workers, fan out to parallel sub-agents:
-
-1. Assign each test group to a separate isolated worker. The host owns model and worker selection.
-2. Give each worker a distinct browser session through the host's browser adapter. If session isolation cannot be proven, run the groups sequentially.
-3. Each sub-agent prompt must include:
-   - The exact numbered test list to run (no exploration beyond assigned tests)
-   - The assertion protocol below
-   - A step budget (~25 for targeted checks, ~40 for a full page, ~75 for multiple pages)
-4. The main agent does not share one browser session across parallel workers. It coordinates, merges results, and produces the final summary.
-5. When a sub-agent hits its budget, accept partial results as-is. Include STEP_SKIP for uncovered tests.
-
-For small changes (1-2 groups), run tests directly without sub-agents.
-
-### Assertion Protocol
+### Assertion protocol
 
 Every test step MUST produce a structured marker:
 
@@ -71,44 +49,29 @@ STEP_FAIL|<step-id>|<expected> -> <actual>
 STEP_SKIP|<step-id>|<reason>
 ```
 
-- `step-id`: short identifier like `homepage-cta`, `form-empty-submit`, `modal-escape`
-- `evidence`: what you observed that proves the step passed (element text, URL, eval result)
+Verification, in order of rigor — use the strongest available:
 
-### Verification (in order of rigor)
+1. **Deterministic check**: `eval` returns structured data (element count, field value, console errors)
+2. **Snapshot element match**: expected role/text exists in the accessibility tree
+3. **Before/after comparison**: snapshot, act, snapshot, verify the change
+4. **Screenshot + visual judgment** (weakest): only for properties the accessibility tree cannot capture
 
-1. **Deterministic check** (strongest): `eval` returns structured data (element count, field value, console errors)
-2. **Snapshot element match**: specific element with expected role/text exists in accessibility tree
-3. **Before/after comparison**: snapshot before action, act, snapshot after, verify expected change
-4. **Screenshot + visual judgment** (weakest): only for visual properties the accessibility tree cannot capture
-
-### Failure Output
-
-Every `STEP_FAIL` gets a screenshot and a bug report. See `lib/test-output-format.md` for the screenshot location and the `[BUG]` template (its `Action: AUTO-FIX | ASK` field feeds Step 4).
-
-### Summary
-
-After all tests, output a summary line:
+Every `STEP_FAIL` gets a screenshot and a `[BUG]` report per
+`lib/test-output-format.md`. After all tests:
 
 ```
 Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
 ```
 
-## Step 4: Fix
+## Fix
 
 Execute each bug report's `Action` field using the routing contract in
-`lib/test-output-format.md`. Do not reclassify it from a
-second rule here.
+`lib/test-output-format.md`; never reclassify it here. After an AUTO-FIX,
+re-run the affected flow. ASK items remain explicit pending decisions and are
+never reported as fixed.
 
-After an AUTO-FIX, re-run the affected flow. ASK items remain explicit pending
-decisions and are never reported as fixed.
+## Learning candidate
 
-## Step 5: Surface a Learning Candidate
-
-If a UI pattern or browser-specific pitfall was discovered, emit one `type:
-pitfall` candidate using `lib/learning-format.md`. Do not write it to
-`{learnings_dir}`; persistence belongs to the host/project. Otherwise state
-explicitly "no learning warranted".
-Common examples:
-- "This component breaks on mobile viewport"
-- "Form validation fires before user finishes typing"
-- "Loading state missing on slow network"
+If a genuinely new UI pattern or browser pitfall surfaced, emit one
+`type: pitfall` candidate per `lib/learning-format.md` — persistence belongs
+to the host/project. Otherwise state "no learning warranted".
