@@ -6,6 +6,7 @@
 #
 # Run: bash tests/ticket-gate-guard-test.sh
 set -uo pipefail
+export VERBS_GUARD_EVENT_LOG=off
 
 GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-ticket-gate-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
@@ -67,12 +68,26 @@ raw_check() {
 check 2 "commit on main"              "$REPO_MAIN"   'git commit -m msg'
 check 2 "commit --amend on master"    "$REPO_MASTER" 'git commit --amend --no-edit'
 check 2 "commit via -C from outside"  "$NONREPO"     "git -C $REPO_MAIN commit -m msg"
+check 2 "commit via quoted -C"        "$NONREPO"     "git -C \"$REPO_MAIN\" commit -m msg"
+check 2 "commit -C reuses message"    "$REPO_MAIN"   'git commit -C HEAD'
 check 2 "chained commit on main"      "$REPO_MAIN"   'echo ok && git commit -m msg'
 check 2 "push explicit main"          "$REPO_FEAT"   'git push origin main'
 check 2 "push refspec HEAD:main"      "$REPO_FEAT"   'git push origin HEAD:main'
 check 2 "push +main force refspec"    "$REPO_FEAT"   'git push origin +main'
 check 2 "push refs/heads/master"      "$REPO_FEAT"   'git push origin refs/heads/master'
 check 2 "bare push while on main"     "$REPO_MAIN"   'git push'
+check 2 "delete remote main"          "$REPO_FEAT"   'git push origin --delete main'
+check 2 "push all includes main"       "$REPO_FEAT"   'git push --all origin'
+check 2 "force lease explicit main"    "$REPO_FEAT"   'git push --force-with-lease origin main'
+check 2 "subshell commit main"         "$REPO_MAIN"   '(git commit -m x)'
+check 2 "command substitution commit"  "$REPO_MAIN"   'echo $(git commit -m x)'
+check 2 "env unset wrapper commit"      "$REPO_MAIN"   'env -u GIT_TRACE git commit -m x'
+check 2 "nice wrapper commit"           "$REPO_MAIN"   'nice git commit -m x'
+check 2 "nice priority commit"          "$REPO_MAIN"   'nice -n 10 git commit -m x'
+check 2 "nice compact priority"         "$REPO_MAIN"   'nice -n10 git commit -m x'
+check 2 "timeout wrapper commit"        "$REPO_MAIN"   'timeout 5 git commit -m x'
+check 2 "stdbuf wrapper commit"         "$REPO_MAIN"   'stdbuf -oL git commit -m x'
+check 2 "backtick command commit"       "$REPO_MAIN"   'echo `git commit -m x`'
 
 # --- must ALLOW (exit 0) ---
 check 0 "commit on issue branch"      "$REPO_FEAT"   'git commit -m msg'
@@ -81,7 +96,15 @@ check 0 "bare push on issue branch"   "$REPO_FEAT"   'git push'
 check 0 "status on main"              "$REPO_MAIN"   'git status'
 check 0 "pull on main"                "$REPO_MAIN"   'git pull origin main'
 check 0 "log main ref"                "$REPO_MAIN"   'git log main --oneline'
+check 0 "log grep commit word"        "$REPO_MAIN"   'git log --grep=commit'
+check 0 "rev-parse commit type"       "$REPO_MAIN"   'git rev-parse HEAD^{commit}'
+check 0 "config push word"            "$REPO_MAIN"   'git config push.default simple'
+check 0 "push tag from main"          "$REPO_MAIN"   'git push origin v1.0.0'
+check 0 "delete feature from main"    "$REPO_MAIN"   'git push origin --delete old-feature'
+check 0 "push tags from main"         "$REPO_MAIN"   'git push --tags'
+check 0 "quoted -C feature push"      "$NONREPO"     "git -C \"$REPO_MAIN\" push origin feature"
 check 0 "commit word as data"         "$REPO_MAIN"   'echo "git commit on main"'
+check 0 "unquoted words after echo"    "$REPO_MAIN"   'echo git commit on main'
 check 0 "commit msg mentions main"    "$REPO_FEAT"   'git commit -m "fix main path handling"'
 check 0 "non-git command"             "$REPO_MAIN"   'ls -la'
 check 0 "non-repo cwd"                "$NONREPO"     'git commit -m msg'
@@ -97,6 +120,8 @@ raw_check 0 "tool is not Bash"        '{"tool_name":"Read","tool_input":{"file_p
 raw_check 0 "malformed json fail-open" '{"tool_name":"Bash","tool_input":{"command":"git commit'
 raw_check 0 "no git substring"        '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}'
 raw_check 0 "missing command field"   '{"tool_name":"Bash","tool_input":{"note":"git commit"}}'
+workdir_payload=$(python3 -c 'import json,sys; print(json.dumps({"tool_name":"Bash","workdir":sys.argv[1],"tool_input":{"command":"git commit -m x"}}))' "$REPO_MAIN")
+raw_check 2 "Codex workdir resolves repo" "$workdir_payload"
 
 echo "ticket-gate-guard-test: pass=$pass fail=$fail"
 [ "$fail" -eq 0 ]

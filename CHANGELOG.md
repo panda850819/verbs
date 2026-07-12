@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- One fsynced, append-only `verbs.guard-event.v1` JSONL stream records
+  privacy-minimal deny, error, and override decisions from Claude Code and
+  Codex without storing shell command payloads. Set
+  `VERBS_GUARD_EVENT_LEVEL=all` for full allow tracing.
+- Regression coverage makes ticket-gate absence, verify-gate fail-open,
+  command-vs-data confusion, hook drift, and event-log loss red-capable.
+- `tests/ticket-gate-guard-test.sh` expands its offline fixture-repo suite from
+  29 to 52 cases.
+
+### Changed
+
+- Stop verification fails closed when its input or runtime adapter is
+  unavailable, while loop prevention and pure Q&A still pass.
+
 ## v0.7.2 — Four-Hook Smoke Truth
 
 Released: 2026-07-12

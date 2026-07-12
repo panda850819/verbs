@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Offline contract test for the native Plugin hook manifest and all hook envelopes.
 set -uo pipefail
+export VERBS_GUARD_EVENT_LOG=off
 cd "$(dirname "$0")/.."
 
 ROOT="${VERBS_HOOK_ROOT:-$(pwd)}"
@@ -206,8 +207,8 @@ printf 'NOT-JSON git' | VERBS_TICKET_GATE=off CLAUDE_PLUGIN_ROOT="$ROOT" bash -c
 [ $? = 0 ] && [ ! -s "$WORK/ticket-off.out" ] && [ ! -s "$WORK/ticket-off.err" ]
 record $? "ticket-gate kill switch must stay quiet on malformed input"
 
-# Stop: an edit without verify blocks once. The loop-prevention pass, kill
-# switch, and malformed infrastructure input all allow; only the latter warns.
+# Stop: an edit without verify blocks once. Loop prevention and the kill switch
+# allow; malformed verification infrastructure fails closed once.
 cat >"$WORK/transcript.jsonl" <<'JSONL'
 {"type":"user","message":{"role":"user","content":"fix"}}
 {"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"e1","name":"Edit","input":{"file_path":"/tmp/proj/app.py","old_string":"a","new_string":"b"}}]}}
@@ -251,18 +252,24 @@ record $? "VERBS_VERIFY_GATE=off must allow quietly"
 
 printf 'NOT-JSON' | CLAUDE_PLUGIN_ROOT="$ROOT" bash -c "$STOP_CMD" \
   >"$WORK/stop-malformed.out" 2>"$WORK/stop-malformed.err"
-[ $? = 0 ] && [ ! -s "$WORK/stop-malformed.out" ] && grep -Fq \
-  '[verbs verify-gate] unavailable: malformed or missing hook input; allowing stop.' \
-  "$WORK/stop-malformed.err"
-record $? "malformed Stop payload must fail open visibly"
+[ $? = 0 ] && [ ! -s "$WORK/stop-malformed.err" ] && python3 - "$WORK/stop-malformed.out" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+assert data["decision"] == "block"
+assert "blocking stop until verification evidence is readable" in data["reason"]
+PY
+record $? "malformed Stop payload must fail closed"
 
 printf '%s\n' 'NOT-JSON' >>"$WORK/transcript.jsonl"
 make_stop_payload false | CLAUDE_PLUGIN_ROOT="$ROOT" bash -c "$STOP_CMD" \
   >"$WORK/stop-mixed.out" 2>"$WORK/stop-mixed.err"
-[ $? = 0 ] && [ ! -s "$WORK/stop-mixed.out" ] && grep -Fq \
-  '[verbs verify-gate] unavailable: malformed or missing hook input; allowing stop.' \
-  "$WORK/stop-mixed.err"
-record $? "partially malformed transcript must fail open visibly"
+[ $? = 0 ] && [ ! -s "$WORK/stop-mixed.err" ] && python3 - "$WORK/stop-mixed.out" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+assert data["decision"] == "block"
+assert "blocking stop until verification evidence is readable" in data["reason"]
+PY
+record $? "partially malformed transcript must fail closed"
 sed -i.bak '$d' "$WORK/transcript.jsonl"
 rm -f "$WORK/transcript.jsonl.bak"
 
@@ -275,10 +282,13 @@ mkdir -p "$WORK/missing-runtime/hooks"
 cp "$STOP" "$WORK/missing-runtime/hooks/stop-verify-gate.py"
 make_stop_payload false | python3 "$WORK/missing-runtime/hooks/stop-verify-gate.py" \
   >"$WORK/stop-runtime.out" 2>"$WORK/stop-runtime.err"
-[ $? = 0 ] && [ ! -s "$WORK/stop-runtime.out" ] && grep -Fq \
-  '[verbs verify-gate] unavailable: runtime event adapter missing; allowing stop.' \
-  "$WORK/stop-runtime.err"
-record $? "missing Stop runtime adapter must fail open visibly"
+[ $? = 0 ] && grep -Fq '[verbs guard-events] unavailable: event helper missing; decision unchanged.' "$WORK/stop-runtime.err" && python3 - "$WORK/stop-runtime.out" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+assert data["decision"] == "block"
+assert "runtime event adapter missing" in data["reason"]
+PY
+record $? "missing Stop runtime adapter must fail closed"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

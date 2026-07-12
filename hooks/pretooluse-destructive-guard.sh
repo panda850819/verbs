@@ -32,12 +32,30 @@
 #   bash tests/destructive-guard-test.sh   # full positive/negative suite
 set -euo pipefail
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+log_event() {
+  local decision="$1" reason_code="$2"
+  case "$decision:$reason_code:${VERBS_GUARD_EVENT_LEVEL:-}" in
+    allow:no_policy_match:*|allow:not_bash:*)
+      case "${VERBS_GUARD_EVENT_LEVEL:-}" in
+        [aA][lL][lL]) ;;
+        *) return 0 ;;
+      esac
+      ;;
+  esac
+  printf '%s' "${INPUT-}" | python3 "$SCRIPT_DIR/guard_events.py" \
+    --hook PreToolUse --action destructive-bash \
+    --decision "$decision" --reason-code "$reason_code" || true
+}
+
 case "${VERBS_DESTRUCTIVE_GUARD:-}" in
   [oO][fF][fF]) exit 0 ;;
 esac
 
 fail_open() {
   trap - ERR
+  log_event error "guard_unavailable"
   printf '[verbs destructive-guard] unavailable: %s; allowing command.\n' "$1" >&2
   exit 0
 }
@@ -67,7 +85,7 @@ sys.stdout.write(tool_input["command"])
   fail_open "malformed PreToolUse input"
 fi
 case "$PARSED" in
-  SKIP) exit 0 ;;
+  SKIP) log_event allow "not_bash"; exit 0 ;;
   BADBASH) fail_open "malformed Bash tool input" ;;
   BASH) fail_open "empty Bash command" ;;
 esac
@@ -79,11 +97,19 @@ CMD=${PARSED#BASH$'\n'}
 trap - ERR
 
 # Bypass: marker must be a TRAILING comment, not a mention mid-command.
-printf '%s' "$CMD" | grep -qE '#[[:space:]]*FORCE_OK[[:space:]]*$' && exit 0
-[ "${VERBS_FORCE:-}" = "1" ] && exit 0
+if printf '%s' "$CMD" | grep -qE '#[[:space:]]*FORCE_OK[[:space:]]*$'; then
+  log_event allow "force_ok_override"
+  exit 0
+fi
+if [ "${VERBS_FORCE:-}" = "1" ]; then
+  log_event allow "verbs_force_override"
+  exit 0
+fi
 
 block() {
-  echo "BLOCKED by Verbs destructive-guard: $1" >&2
+  local reason_code="$1" detail="$2"
+  log_event deny "$reason_code"
+  echo "BLOCKED by Verbs destructive-guard: $detail" >&2
   echo "High-blast-radius op (force-push / recursive-force-rm / hard-reset / clean -f / DROP). Confirm explicitly or narrow it; append '# FORCE_OK' as a trailing comment to override." >&2
   exit 2
 }
@@ -141,7 +167,7 @@ SEGS=$(printf '%s' "$STRIPPED" | sed 's/&&/\n/g; s/||/\n/g; s/;/\n/g')
 # share a segment, while a bare textual mention with no client does not block.
 if printf '%s' "$CMD" | grep -qiE '(drop|truncate)[[:space:]]+(table|database|schema)' \
    && cmd_has_sql_client "$SEGS"; then
-  block "DROP/TRUNCATE handed to a database client"
+  block "database_drop_or_truncate" "DROP/TRUNCATE handed to a database client"
 fi
 
 # rm / git rules: scan each quote-stripped segment as a whole — once data is
@@ -157,7 +183,7 @@ while IFS= read -r seg; do
   if printf '%s' "$seg" | grep -qE '(^|[^a-zA-Z._-])rm([^a-zA-Z._]|$)' \
      && printf '%s' "$seg" | grep -qE '(^|[[:space:]])(-[a-zA-Z]*r|--recursive)' \
      && printf '%s' "$seg" | grep -qE '(^|[[:space:]])(-[a-zA-Z]*f|--force)'; then
-    block "$seg"
+    block "recursive_force_remove" "$seg"
   fi
 
   # git push force: --force(-with-lease), a bundled short flag containing f
@@ -167,20 +193,21 @@ while IFS= read -r seg; do
     if printf '%s' "$low" | grep -qE -- '--force' \
        || printf '%s' "$low" | grep -qE '[[:space:]]-[a-z]*f([[:space:]]|$)' \
        || printf '%s' "$low" | grep -qE 'push[[:space:]][^|]*[[:space:]]\+[^[:space:]]'; then
-      block "$seg"
+      block "force_push" "$seg"
     fi
   fi
 
   # git reset --hard
   if printf '%s' "$low" | grep -qE '(^|[^a-z])git([^a-z]|$)' && printf '%s' "$low" | grep -qE '(^|[^a-z])reset([^a-z]|$)' && printf '%s' "$low" | grep -qE -- '--hard'; then
-    block "$seg"
+    block "hard_reset" "$seg"
   fi
 
   # git clean -f / --force (flag anchored to a token boundary, as with rm)
   if printf '%s' "$low" | grep -qE '(^|[^a-z])git([^a-z]|$)' && printf '%s' "$low" | grep -qE '(^|[^a-z])clean([^a-z]|$)' && printf '%s' "$low" | grep -qE '(^|[[:space:]])(-[a-z]*f|--force)'; then
-    block "$seg"
+    block "force_clean" "$seg"
   fi
 done <<EOF
 $SEGS
 EOF
+log_event allow "no_policy_match"
 exit 0

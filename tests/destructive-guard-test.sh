@@ -7,6 +7,7 @@
 # (Danger tokens live INSIDE this file as data, never in an invoking argv, so a
 #  live PreToolUse guard does not false-trigger on the test runner itself.)
 set -uo pipefail
+export VERBS_GUARD_EVENT_LOG=off
 
 GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-destructive-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }

@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Offline Claude + Codex transcript truth table for the Stop verify gate.
 set -uo pipefail
+export VERBS_GUARD_EVENT_LOG=off
 
 GATE="$(cd "$(dirname "$0")/.." && pwd)/hooks/stop-verify-gate.py"
 [ -f "$GATE" ] || { echo "gate not found: $GATE" >&2; exit 1; }
 
 WORK=$(mktemp -d)
 trap '/bin/rm -rf "$WORK"' EXIT
+FAIL_MARKER="$WORK/failure.marker"
 pass=0 fail=0
 
 WANT_REASON='[verbs verify-gate] code changed this turn with no test or verify run — run the relevant check, or state the change is not yet verified.'
+WANT_UNAVAILABLE='[verbs verify-gate] unavailable: malformed or missing hook input; blocking stop until verification evidence is readable.'
 
 # Claude JSONL builders.
 u() { printf '{"type":"user","message":{"role":"user","content":"%s"}}\n' "$1"; }
@@ -58,7 +61,7 @@ DOC_PATCH=$'*** Begin Patch\n*** Update File: README.md\n@@\n-old\n+new\n*** End
 # run_gate <transcript> [active] [canonical env] [turn] [panda legacy] [stack legacy]
 run_gate() {
   local transcript="$1" active="${2:-false}" new_gate_env="${3:-}" turn_id="${4:-turn-current}" panda_gate_env="${5:-}" stack_gate_env="${6:-}" payload
-  local env_args=(-u VERBS_VERIFY_GATE -u PANDA_VERBS_VERIFY_GATE -u PANDASTACK_VERIFY_GATE)
+  local env_args=(-u VERBS_VERIFY_GATE -u PANDA_VERBS_VERIFY_GATE -u PANDASTACK_VERIFY_GATE "VERBS_VERIFY_GATE_FAILURE_MARKER=$FAIL_MARKER")
   payload=$(python3 -c 'import json,sys; print(json.dumps({"session_id":"t","turn_id":sys.argv[3],"hook_event_name":"Stop","stop_hook_active":sys.argv[2]=="true","transcript_path":sys.argv[1],"cwd":"/tmp/proj"}))' "$transcript" "$active" "$turn_id")
   [ -n "$new_gate_env" ] && env_args+=("VERBS_VERIFY_GATE=$new_gate_env")
   [ -n "$panda_gate_env" ] && env_args+=("PANDA_VERBS_VERIFY_GATE=$panda_gate_env")
@@ -78,8 +81,12 @@ expect_allow() {
 }
 
 expect_block() {
-  local desc="$1"
-  if [ "$RC" = 0 ] && printf '%s' "$OUT" | REASON="$WANT_REASON" python3 -c '
+  expect_block_reason "$1" "$WANT_REASON"
+}
+
+expect_block_reason() {
+  local desc="$1" reason="$2"
+  if [ "$RC" = 0 ] && printf '%s' "$OUT" | REASON="$reason" python3 -c '
 import json, os, sys
 d = json.loads(sys.stdin.read())
 sys.exit(0 if d.get("decision") == "block" and d.get("reason") == os.environ["REASON"] else 1)
@@ -220,18 +227,29 @@ run_gate "$T"; expect_block "Codex App nested patch is visible to Stop gate"
 { cturn turn-current; capp_exec outer1 'tools.apply_patch("...")'; capp_patch_result exec-nested /tmp/proj/app.py; capp_out outer1 "Script completed"; capp_exec outer2 'tools.exec_command({cmd:"pytest -q"})'; capp_out outer2 "Script completed"; } > "$T"
 run_gate "$T"; expect_block "Codex App outer cell success is not test evidence"
 
-# Soft gate, kill switch, malformed input, and pure Q&A remain fail-open.
+# Loop prevention, kill switches, and pure Q&A pass. Missing verification
+# infrastructure fails closed.
 { u "fix"; cedit e1 Edit /tmp/proj/app.py; cresult e1 false; } > "$T"
 run_gate "$T" true; expect_allow "stop_hook_active soft pass"
 run_gate "$T" false off; expect_allow "VERBS_VERIFY_GATE kill switch off"
 run_gate "$T" false "" turn-current off; expect_allow "PANDA_VERBS_VERIFY_GATE remains a 0.x fallback"
 run_gate "$T" false "" turn-current "" off; expect_allow "PANDASTACK_VERIFY_GATE remains a legacy fallback"
 run_gate "$T" false on turn-current off off; expect_block "VERBS_VERIFY_GATE wins over legacy env"
-run_gate "$WORK/missing.jsonl"; expect_allow "missing transcript fails open"
+rm -f "$FAIL_MARKER"
+run_gate "$WORK/missing.jsonl"; expect_block_reason "missing transcript fails closed" "$WANT_UNAVAILABLE"
 printf 'NOT-JSON\n{broken\n' > "$T"
-run_gate "$T"; expect_allow "malformed transcript fails open"
+rm -f "$FAIL_MARKER"
+run_gate "$T"; expect_block_reason "malformed transcript fails closed" "$WANT_UNAVAILABLE"
 u "what does this do" > "$T"
 run_gate "$T"; expect_allow "pure Q&A allows"
+
+# Completely unreadable hook stdin cannot expose stop_hook_active. Block once,
+# then the failure marker prevents an unbounded Stop loop.
+rm -f "$FAIL_MARKER"
+OUT=$(printf 'NOT-JSON' | VERBS_VERIFY_GATE_FAILURE_MARKER="$FAIL_MARKER" python3 "$GATE" 2>/dev/null)
+RC=$?; expect_block_reason "unreadable stdin first failure blocks" "$WANT_UNAVAILABLE"
+OUT=$(printf 'NOT-JSON' | VERBS_VERIFY_GATE_FAILURE_MARKER="$FAIL_MARKER" python3 "$GATE" 2>/dev/null)
+RC=$?; expect_allow "unreadable stdin second failure loop-prevents"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]

@@ -3,20 +3,24 @@
 
 Blocks the session's first stop when the current turn edited code files but
 never ran a test or verify command; the model gets one chance to run the
-check or state the change is unverified. Soft gate: the second stop
-(stop_hook_active=true) always passes, and any internal failure fails open
-with exit 0 plus a visible stderr notice — the gate must never break a session.
+check or state the change is unverified. The second stop
+(stop_hook_active=true) passes to prevent a hook loop. Missing/malformed
+verification infrastructure fails closed with a visible block; pure Q&A and
+turns with no successful code edit still pass.
 
 stdin: Claude Code or Codex Stop-hook JSON (transcript_path, stop_hook_active).
 stdout: exactly one {"decision":"block","reason":...} object, or nothing.
 Kill switch: VERBS_VERIFY_GATE=off. During the 0.x release line, the adapter
 also reads the legacy PANDA_VERBS_VERIFY_GATE and PANDASTACK_VERIFY_GATE names
 when the canonical variable is unset. Python 3.9+, stdlib only, no network, no
-file writes. Design ported from fable-harness verify_gate.py (MIT).
+append-only guard evidence. Design ported from fable-harness verify_gate.py
+(MIT).
 """
 import json
 import os
 import sys
+import tempfile
+from pathlib import Path
 
 try:
     from runtime_events import current_turn_events, is_code_path
@@ -24,18 +28,89 @@ try:
 except Exception:
     RUNTIME_IMPORT_OK = False
 
+try:
+    from guard_events import safe_append_guard_event
+    GUARD_EVENTS_IMPORT_OK = True
+except Exception:
+    GUARD_EVENTS_IMPORT_OK = False
+
 BLOCK_REASON = (
     "[verbs verify-gate] code changed this turn with no test or verify "
     "run — run the relevant check, or state the change is not yet verified."
 )
-FAIL_OPEN_NOTICE = (
+FAIL_CLOSED_REASON = (
     "[verbs verify-gate] unavailable: malformed or missing hook input; "
-    "allowing stop."
+    "blocking stop until verification evidence is readable."
 )
-RUNTIME_FAIL_OPEN_NOTICE = (
+RUNTIME_FAIL_CLOSED_REASON = (
     "[verbs verify-gate] unavailable: runtime event adapter missing; "
-    "allowing stop."
+    "blocking once. State that verification is unavailable and reinstall Verbs."
 )
+
+
+def record(payload, decision, reason_code):
+    level = os.environ.get("VERBS_GUARD_EVENT_LEVEL", "").strip().lower()
+    high_signal_allow = reason_code == "kill_switch_off"
+    if decision == "allow" and level != "all" and not high_signal_allow:
+        return
+    if GUARD_EVENTS_IMPORT_OK:
+        safe_append_guard_event(
+            payload,
+            "Stop",
+            "verify-gate",
+            decision,
+            reason_code,
+        )
+    else:
+        print(
+            "[verbs guard-events] unavailable: event helper missing; "
+            "decision unchanged.",
+            file=sys.stderr,
+        )
+
+
+def block(payload, reason, reason_code):
+    record(payload, "deny", reason_code)
+    print(json.dumps(
+        {"decision": "block", "reason": reason},
+        ensure_ascii=False, separators=(",", ":")))
+
+
+def allow(payload, reason_code):
+    record(payload, "allow", reason_code)
+
+
+def failure_marker_path():
+    configured = os.environ.get("VERBS_VERIFY_GATE_FAILURE_MARKER")
+    if configured:
+        return Path(configured)
+    return Path(tempfile.gettempdir()) / (
+        "verbs-verify-gate-failure-{}.marker".format(os.getppid())
+    )
+
+
+def clear_failure_marker():
+    try:
+        failure_marker_path().unlink()
+    except FileNotFoundError:
+        pass
+    except OSError:
+        pass
+
+
+def claim_failure_block():
+    """True once per consecutive infrastructure failure, then allow once."""
+    path = failure_marker_path()
+    try:
+        path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(fd)
+        return True
+    except FileExistsError:
+        clear_failure_marker()
+        return False
+    except OSError:
+        return False
 
 
 def analyze(entries, hook_payload=None):
@@ -59,6 +134,7 @@ def analyze(entries, hook_payload=None):
 
 
 def main():
+    data = {}
     try:
         gate_setting = os.environ.get("VERBS_VERIFY_GATE")
         if gate_setting is None:
@@ -66,14 +142,17 @@ def main():
         if gate_setting is None:
             gate_setting = os.environ.get("PANDASTACK_VERIFY_GATE", "")
         if gate_setting.strip().lower() == "off":
-            return 0
-        if not RUNTIME_IMPORT_OK:
-            print(RUNTIME_FAIL_OPEN_NOTICE, file=sys.stderr)
+            allow(data, "kill_switch_off")
             return 0
         data = json.loads(sys.stdin.read() or "{}")
         if not isinstance(data, dict):
             raise ValueError("hook payload must be an object")
+        clear_failure_marker()
         if data.get("stop_hook_active"):
+            allow(data, "loop_prevention")
+            return 0
+        if not RUNTIME_IMPORT_OK:
+            block(data, RUNTIME_FAIL_CLOSED_REASON, "runtime_adapter_missing")
             return 0
         transcript_path = data.get("transcript_path")
         if not isinstance(transcript_path, str) or not transcript_path:
@@ -94,11 +173,16 @@ def main():
             raise ValueError("transcript contains malformed events")
         code_edited, verified = analyze(entries, data)
         if code_edited and not verified:
-            print(json.dumps(
-                {"decision": "block", "reason": BLOCK_REASON},
-                ensure_ascii=False, separators=(",", ":")))
+            block(data, BLOCK_REASON, "code_edit_unverified")
+        elif code_edited:
+            allow(data, "code_edit_verified")
+        else:
+            allow(data, "no_code_edit")
     except Exception:
-        print(FAIL_OPEN_NOTICE, file=sys.stderr)
+        if claim_failure_block():
+            block(data, FAIL_CLOSED_REASON, "verification_input_unavailable")
+        else:
+            allow(data, "failure_loop_prevention")
     return 0
 
 
