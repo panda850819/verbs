@@ -19,8 +19,10 @@ This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md be
 | Skill | Purpose | Trigger |
 |---|---|---|
 | `verbs:grill` | Adversarial requirement discovery, atomic 5-10 min, surfaces unknown unknowns. Use `grill --brief` for structured-brief output. | grill me, stress test, draft a brief, structured intake |
+| `verbs:codebase-design` | Deep-module design vocabulary: interface / seam / adapter / depth-as-leverage, deletion test, testable through the interface. Reference core other skills cite. | design this module, where does the seam go, interface feels too wide |
 | `verbs:careful` | Confirmation gates for production / shared infra / destructive commands. | working on prod |
 | `verbs:ui` | Build/fix UI with a point of view: lock direction, verify render, build past happy path, decompose cited products. NOT browser-test (`qa`) or render-bug (`debug`). | design, 做頁面, 不好看, 很醜, 排版 |
+| `verbs:prototype` | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind `?variant=`. Verdict recorded, code lands on a prototype branch. NOT production UI (`ui`). | prototype this, try a few variants, does this state model feel right |
 | `verbs:qa` | Browser-based UI QA. | test this UI |
 | `verbs:review` | Risk-adaptive diff review with scoped evidence and cold-context escalation. | review PR |
 | `verbs:debug` | Systematic root-cause debugging: root-cause gate, hypothesis-explains-every-symptom, instrument-first by bug class, bisect, scope-blast. NOT diff review (`review`) or UI taste (`ui`). | bug, crash, regression, 報錯, 跑不通, used to work |

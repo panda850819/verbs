@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "verbs",
-      "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 11 composable skills.",
+      "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 13 composable skills.",
       "source": ".",
       "category": "development",
       "homepage": "https://github.com/panda850819/verbs"

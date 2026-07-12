@@ -17,6 +17,10 @@ Affected files:
 - `maintainer/writing-great-skills.md`
 - `maintainer/writing-great-skills-glossary.md`
 - `skills/productivity/grill/SKILL.md`
+- `skills/engineering/codebase-design/SKILL.md`
+- `skills/engineering/prototype/SKILL.md`
+- `skills/engineering/prototype/LOGIC.md`
+- `skills/engineering/prototype/UI.md`
 
 ### garrytan/gstack
 

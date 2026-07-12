@@ -5,8 +5,9 @@ description: |
   layout, typography, design review. Triggers: 設計, 做頁面, 做組件, 不好看,
   很醜, 突兀, 不協調, 字體, 排版, 樣式, 前端, UI, 截圖, design, build a
   page/component, make it look good, typography, this looks wrong. NOT for
-  backend logic, browser-test verification (use `qa`), or root-cause debugging
-  of a broken render (use `debug`).
+  backend logic, browser-test verification (use `qa`), root-cause debugging
+  of a broken render (use `debug`), or throwaway variant exploration before a
+  direction is chosen (use `prototype`).
 user-invocable: false
 ---
 # UI

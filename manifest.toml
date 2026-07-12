@@ -82,7 +82,7 @@ updated = "2026-07-12"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (8) — markdown-first, fresh-clone available
+# CORE (10) — markdown-first, fresh-clone available
 # Buckets on disk: engineering / productivity / writing / meta
 #
 # Git is the baseline software-work CLI, so review / debug stay core with a
@@ -140,6 +140,18 @@ tier = "core"
 resources = ["lib/learning-format.md"]
 composes = []
 description = "Browser-based UI QA through a host-provided browser automation capability."
+
+[skill.codebase-design]
+tier = "core"
+resources = []
+composes = []
+description = "Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms."
+
+[skill.prototype]
+tier = "core"
+resources = []
+composes = []
+description = "Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui)."
 
 # ============================================================================
 # EXT (3) — public CLI dependencies

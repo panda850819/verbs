@@ -13,6 +13,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Mechanical, file-scoped build units with locked spec | delegate — `handover` (Codex) or subagent; main model orchestrates |
 | Error / crash / regression / failing test / "used to work and now doesn't" | `debug` (root cause before any fix) |
 | Build / fix a UI surface, "looks off", 不好看 / 很醜 / 排版 / 字體 | `ui` (lock direction, fight defaults) |
+| Design question answerable by building it — try a few variants / does this state model feel right / 做個原型 | `prototype` (throwaway build; verdict outlives the code) |
 | UI already changed, verify it live — "test this", "QA", "check the page" | `qa` (browser evidence, not code reading) |
 | Focused build-to-ship session | `sprint` |
 | About to commit | `review`, then `ship` |
