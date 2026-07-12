@@ -44,27 +44,34 @@ fail_open() {
 trap 'fail_open "internal guard error"' ERR
 
 INPUT=$(cat) || fail_open "unable to read PreToolUse input"
-if ! TOOL=$(printf '%s' "$INPUT" | python3 -c '
+# Single parser pass: tool gate + command extraction in one python3 spawn
+# (was two — each cold interpreter start taxed every Bash tool call).
+if ! PARSED=$(printf '%s' "$INPUT" | python3 -c '
 import json, sys
-data = json.load(sys.stdin)
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
 if not isinstance(data, dict):
-    raise ValueError("hook payload must be an object")
-print(data.get("tool_name", ""))
+    sys.exit(1)
+if data.get("tool_name", "") != "Bash":
+    print("SKIP")
+    sys.exit(0)
+tool_input = data.get("tool_input")
+if not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):
+    print("BADBASH")
+    sys.exit(0)
+sys.stdout.write("BASH\n")
+sys.stdout.write(tool_input["command"])
 ' 2>/dev/null); then
   fail_open "malformed PreToolUse input"
 fi
-[ "$TOOL" = "Bash" ] || exit 0
-
-if ! CMD=$(printf '%s' "$INPUT" | python3 -c '
-import json, sys
-data = json.load(sys.stdin)
-tool_input = data.get("tool_input")
-if not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):
-    raise ValueError("Bash payload requires tool_input.command")
-print(tool_input["command"], end="")
-' 2>/dev/null); then
-  fail_open "malformed Bash tool input"
-fi
+case "$PARSED" in
+  SKIP) exit 0 ;;
+  BADBASH) fail_open "malformed Bash tool input" ;;
+  BASH) fail_open "empty Bash command" ;;
+esac
+CMD=${PARSED#BASH$'\n'}
 [ -n "$CMD" ] || fail_open "empty Bash command"
 
 # From here on, a defect in the danger detector must surface as a hook error;

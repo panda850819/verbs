@@ -8,6 +8,7 @@ ROOT="$(cd "$ROOT" && pwd -P)"
 MANIFEST="$ROOT/hooks/hooks.json"
 SESSION="$ROOT/hooks/session-start"
 GUARD="$ROOT/hooks/pretooluse-destructive-guard.sh"
+TICKET="$ROOT/hooks/pretooluse-ticket-gate-guard.sh"
 STOP="$ROOT/hooks/stop-verify-gate.py"
 WORK="$(mktemp -d)"
 trap '/bin/rm -rf "$WORK"' EXIT HUP INT TERM
@@ -47,6 +48,10 @@ expected = {
                 "type": "command",
                 "command": '"${CLAUDE_PLUGIN_ROOT}/hooks/pretooluse-destructive-guard.sh"',
                 "async": False,
+            }, {
+                "type": "command",
+                "command": '"${CLAUDE_PLUGIN_ROOT}/hooks/pretooluse-ticket-gate-guard.sh"',
+                "async": False,
             }],
         }],
         "Stop": [{
@@ -62,7 +67,7 @@ assert actual == expected, (actual, expected)
 PY
 record $? "manifest must register exactly SessionStart, PreToolUse Bash, and Stop"
 
-for executable in "$SESSION" "$GUARD" "$STOP"; do
+for executable in "$SESSION" "$GUARD" "$TICKET" "$STOP"; do
   [ -x "$executable" ]
   record $? "hook must be executable: $executable"
 done
@@ -179,6 +184,27 @@ printf 'NOT-JSON' | VERBS_DESTRUCTIVE_GUARD=off CLAUDE_PLUGIN_ROOT="$ROOT" bash 
   >"$WORK/guard-malformed-off.out" 2>"$WORK/guard-malformed-off.err"
 [ $? = 0 ] && [ ! -s "$WORK/guard-malformed-off.out" ] && [ ! -s "$WORK/guard-malformed-off.err" ]
 record $? "destructive guard kill switch must stay quiet on malformed input"
+
+# Ticket-gate: envelope-level checks only here (behavior suite lives in
+# tests/ticket-gate-guard-test.sh with fixture repos).
+TICKET_CMD=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["hooks"]["PreToolUse"][0]["hooks"][1]["command"])' "$MANIFEST")
+
+printf 'NOT-JSON git' | env -u PSTICKET_FORCE -u PANDA_FORCE -u VERBS_TICKET_GATE CLAUDE_PLUGIN_ROOT="$ROOT" bash -c "$TICKET_CMD" \
+  >"$WORK/ticket-malformed.out" 2>"$WORK/ticket-malformed.err"
+[ $? = 0 ] && [ ! -s "$WORK/ticket-malformed.out" ] && grep -Fq \
+  '[verbs ticket-gate] unavailable: malformed PreToolUse input; allowing command.' \
+  "$WORK/ticket-malformed.err"
+record $? "ticket-gate malformed payload must fail open visibly"
+
+printf 'NOT-JSON no relevant token' | env -u PSTICKET_FORCE -u PANDA_FORCE -u VERBS_TICKET_GATE CLAUDE_PLUGIN_ROOT="$ROOT" bash -c "$TICKET_CMD" \
+  >"$WORK/ticket-prefilter.out" 2>"$WORK/ticket-prefilter.err"
+[ $? = 0 ] && [ ! -s "$WORK/ticket-prefilter.out" ] && [ ! -s "$WORK/ticket-prefilter.err" ]
+record $? "ticket-gate pre-filter must skip payloads without git quietly"
+
+printf 'NOT-JSON git' | VERBS_TICKET_GATE=off CLAUDE_PLUGIN_ROOT="$ROOT" bash -c "$TICKET_CMD" \
+  >"$WORK/ticket-off.out" 2>"$WORK/ticket-off.err"
+[ $? = 0 ] && [ ! -s "$WORK/ticket-off.out" ] && [ ! -s "$WORK/ticket-off.err" ]
+record $? "ticket-gate kill switch must stay quiet on malformed input"
 
 # Stop: an edit without verify blocks once. The loop-prevention pass, kill
 # switch, and malformed infrastructure input all allow; only the latter warns.

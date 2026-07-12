@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.7.1 — Ticket-Gate Guard Reinstated
+
+Released: 2026-07-12
+
+### Added
+
+- `hooks/pretooluse-ticket-gate-guard.sh`: hard-blocks `git commit` on the
+  default branch (main/master), `git push` with an explicit main/master
+  refspec, and bare `git push` while on main. GitHub-issue-keyed flow (Linear
+  retired in substrate v0.9.13). Bypass `PSTICKET_FORCE=1` / `PANDA_FORCE=1`;
+  kill switch `VERBS_TICKET_GATE=off`; per-repo opt-out via a
+  `.verbs-ticket-gate-off` file at the repo toplevel; fails open on
+  guard-internal ambiguity. Branch naming stays advisory. (#203)
+- `tests/ticket-gate-guard-test.sh`: offline fixture-repo suite (29 cases).
+
+### Changed
+
+- `pretooluse-destructive-guard.sh` parses hook input with a single python3
+  invocation (was two) — lower fixed overhead on every Bash tool call.
+- DISPATCH.md: `qa` gains a routing row (was orphaned — reachable only via
+  frontmatter matching); the 3+-files row no longer names nonexistent
+  "grill-lite".
+
 ## v0.7.0 — Current-Model Surface Recut
 
 Released: 2026-07-12
