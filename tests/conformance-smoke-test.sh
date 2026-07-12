@@ -19,6 +19,11 @@ grep -Fq "FAIL: no requested host was tested" "$tmp/out"
 
 mkdir -p "$tmp/adapter-root/hooks"
 cp scripts/conformance-smoke.sh "$tmp/adapter-root/conformance-smoke.sh"
+grep -Fq 'codex_args=(exec --sandbox read-only --json)' scripts/conformance-smoke.sh
+if grep -Fq 'codex_args=(exec --ephemeral' scripts/conformance-smoke.sh; then
+  echo "FAIL: Codex smoke must retain a transcript for Stop hooks" >&2
+  exit 1
+fi
 cp hooks/session-start "$tmp/adapter-root/hooks/session-start"
 if ! bash "$tmp/adapter-root/hooks/session-start" >"$tmp/adapter.out" 2>"$tmp/adapter.err"; then
   echo "FAIL: reference adapter trapped the session on a missing DISPATCH.md" >&2

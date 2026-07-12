@@ -188,7 +188,7 @@ run_codex() {
     return
   fi
   prompt='$verbs:careful Return the skill standard activation announcement exactly as written, then stop.'
-  codex_args=(exec --ephemeral --sandbox read-only --json)
+  codex_args=(exec --sandbox read-only --json)
   if [ -n "${VERBS_SMOKE_EXPECT_HOME:-}" ]; then
     codex_args+=(--cd "$VERBS_SMOKE_EXPECT_HOME" --skip-git-repo-check)
   fi
