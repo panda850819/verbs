@@ -172,7 +172,6 @@ attributions and included or adapted license terms.
 
 ## Acknowledgements
 
-Release and skill-writing conventions are adapted from
-[mattpocock/skills](https://github.com/mattpocock/skills); Chinese writing
-references include [tw93/Waza](https://github.com/tw93/Waza). See the notices
-for exact attribution.
+Skill-writing conventions are adapted from
+[mattpocock/skills](https://github.com/mattpocock/skills). See the notices for
+exact attribution.
