@@ -14,7 +14,7 @@ Use one `<slug>.md` file per rejected direction:
 ```markdown
 ---
 decided: YYYY-MM-DD
-source: "ROADMAP.md:<line> - exact greppable phrase"
+source: "<file>:<line>, issue, or PR URL - exact greppable phrase (git history counts for removed files)"
 ---
 
 ## What was rejected

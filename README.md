@@ -66,8 +66,22 @@ bash scripts/bootstrap.sh --codex     # print Codex CLI install steps
 
 **Work dirs** (`Inbox/`, `docs/briefs/`, etc.) are auto-created on first write; you don't pre-make them.
 
-Full install, verification, and migration commands are in
-[`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md).
+### Verify an install
+
+```bash
+claude plugin list --json
+python3 scripts/verbs doctor --host claude --strict
+codex plugin list --json
+python3 scripts/verbs doctor --host codex --strict --live-hooks
+bash scripts/conformance-smoke.sh claude   # or codex
+```
+
+`doctor --strict` compares plugin version, skill set, `DISPATCH.md`, and the
+registered hook tree against this checkout. For a local-checkout install, use
+`claude plugin marketplace add "$PWD" --scope user` or
+`codex plugin marketplace add "$PWD" --json` with the same install commands
+above. `python3 scripts/verbs init --host <claude|codex|hermes> --dry-run`
+prints the local install commands without changing the host.
 
 ## Manual chaining examples
 
@@ -120,13 +134,34 @@ sessions.
    an issue branch.
 2. Run `python3 scripts/verbs sync` and `bash tests/run-all.sh` from a clean
    commit, then merge the green PR to `main`.
-3. Optionally tag `vX.Y.Z` and create a GitHub release with
-   `gh release create` from the changelog heading. GitHub supplies the
-   standard source archives; no custom release assets.
+3. Optionally tag `vX.Y.Z` and push the tag;
+   `.github/workflows/release.yml` publishes a GitHub release with generated
+   notes. GitHub supplies the standard source archives; no custom assets.
 
 The version bump is what refreshes installed plugin caches; reinstall or
 `/reload-plugins` after merging.
 
+
+## Roadmap
+
+Verbs is pre-1.0 and personal-first: a public, installable skill pack whose
+primary user is its author. 0.x releases may break contracts when real usage
+exposes a bad boundary; breaking changes ship with migration notes in the
+changelog. The work queue is limited to failures found through daily use of
+the 11 active skills, Claude/Codex parity checks, and reinstall drills.
+
+Cut `v1.0.0` only when: the product identifiers and install contracts survive
+two consecutive 0.x releases without a breaking rename; both hosts pass fresh
+install, reinstall, cold-start invocation, and full hook registration on the
+author's machines; one model-upgrade audit (capability / context / neither
+recut) has run against the then-current frontier model without a load-bearing
+regression; and no P0/P1 product-contract failure is open.
+
+Out of scope: identity, personal context, brain or memory, project truth,
+runtime/model selection, scheduling, autonomous drivers, connectors, global
+routing, and fresh-user certification — see
+[`.out-of-scope/`](.out-of-scope/) for rejected directions and their reopen
+conditions.
 
 ## License
 

@@ -59,3 +59,20 @@ test the scanner; they do not prove the real installer.
 
 Keep runtime-specific coordination on the host side. A new adapter should add
 the smallest install and translation layer that can pass the verification gate.
+
+## Hermes: selective manual import
+
+Hermes has no manifest, hooks adapter, or packaged parity. Import only the
+skills you have checked against Hermes' tool vocabulary:
+
+```bash
+mkdir -p "$HOME/.hermes/skills"
+ln -sfn /absolute/path/to/verbs/skills/productivity/grill \
+  "$HOME/.hermes/skills/grill"
+```
+
+Repeat per selected skill, start a fresh Hermes session, and verify the skill
+name and its required tools resolve. Imported skills receive no Verbs reference
+adapters; skills that require unavailable tools remain unsupported on that
+host. `git pull` updates symlinked skill content in place; re-run the same real
+invocation after any skill or Hermes upgrade.

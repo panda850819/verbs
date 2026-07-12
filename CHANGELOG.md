@@ -7,7 +7,8 @@ Released: 2026-07-12
 ### Removed
 
 - The fresh-user certification layer: `release-preflight.sh` and its test,
-  `release.yml` and `release-workflow-test.sh`, `installer-smoke.sh` and its
+  the preflight `release.yml` pipeline and `release-workflow-test.sh` (a
+  minimal tag → generated-notes workflow replaces it), `installer-smoke.sh` and its
   structural test, the portable `npx skills` surface with
   `portable-skills-test.py` and the pinned external installer proof,
   `legal-files-test.sh`, and the per-skill `eval.md` hash-freshness ceremony
@@ -34,11 +35,18 @@ Released: 2026-07-12
   STEP_PASS assertion protocol, the verification rigor order, and report
   routing — while step-by-step coaching that current models carry natively is
   removed.
-- README, INSTALL_FOR_AGENTS, ROADMAP, CLAUDE.md, and ADDING_A_HOST describe
-  the Marketplace-Plugin-only surface; completed v3/RC migration playbooks
-  compressed to a pointer at git history; the v1.0 gate is personal-first
-  (author-machine install proof and a model-upgrade audit instead of
-  three-non-author-user certification).
+- Docs describe the Marketplace-Plugin-only surface; completed v3/RC migration
+  playbooks compressed to a pointer at git history; the v1.0 gate is
+  personal-first (author-machine install proof and a model-upgrade audit
+  instead of three-non-author-user certification).
+- Doc surface consolidated for AI iteration (upstream mattpocock/skills
+  shape): `CLAUDE.md` rewritten as the repo iteration contract (layout, sync
+  obligations, verify, authoring bar); `INSTALL_FOR_AGENTS.md` and
+  `ROADMAP.md` folded into `README.md`; `docs/HERMES.md` folded into
+  `docs/ADDING_A_HOST.md`; `docs/firewall-l5.md` folded into the frontmatter
+  spec, which moved to `maintainer/SKILL-FRONTMATTER.md`;
+  `docs/out-of-scope/` relocated to `.out-of-scope/`. Root markdown surface
+  10 → 7 files.
 
 ### Kept deliberately
 

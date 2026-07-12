@@ -1,7 +1,7 @@
 # Install Verbs in Codex
 
-See [`INSTALL_FOR_AGENTS.md`](../INSTALL_FOR_AGENTS.md) for the install and
-migration source of truth.
+See the root [`README.md`](../README.md) for the install and verification
+source of truth.
 
 Recommended Marketplace Plugin:
 

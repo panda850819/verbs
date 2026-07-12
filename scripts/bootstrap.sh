@@ -125,7 +125,7 @@ EOF
   Pick a host:
     Claude Code:  bash scripts/bootstrap.sh --claude
     Codex CLI:    bash scripts/bootstrap.sh --codex
-    Hermes:       see docs/HERMES.md (manual symlink into ~/.hermes/skills/)
+    Hermes:       see docs/ADDING_A_HOST.md (manual symlink into ~/.hermes/skills/)
 EOF
     ;;
 esac
