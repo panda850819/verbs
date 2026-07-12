@@ -82,7 +82,7 @@ updated = "2026-07-12"
 # etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
 
 # ============================================================================
-# CORE (10) — markdown-first, fresh-clone available
+# CORE (11) — markdown-first, fresh-clone available
 # Buckets on disk: engineering / productivity / writing / meta
 #
 # Git is the baseline software-work CLI, so review / debug stay core with a
@@ -152,6 +152,12 @@ tier = "core"
 resources = []
 composes = []
 description = "Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui)."
+
+[skill.wayfinder]
+tier = "core"
+resources = []
+composes = ["grill", "prototype"]
+description = "Cross-session decision-map worker: take ONE unblocked entry, resolve it by type (research / grilling / prototype / task), write the decision back, graduate the fog. grill charts the map; wayfinder walks it."
 
 # ============================================================================
 # EXT (3) — public CLI dependencies

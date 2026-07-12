@@ -21,6 +21,7 @@ Affected files:
 - `skills/engineering/prototype/SKILL.md`
 - `skills/engineering/prototype/LOGIC.md`
 - `skills/engineering/prototype/UI.md`
+- `skills/productivity/wayfinder/SKILL.md`
 
 ### garrytan/gstack
 

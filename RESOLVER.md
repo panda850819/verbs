@@ -19,6 +19,7 @@ This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md be
 | Skill | Purpose | Trigger |
 |---|---|---|
 | `verbs:grill` | Adversarial requirement discovery, atomic 5-10 min, surfaces unknown unknowns. Use `grill --brief` for structured-brief output. | grill me, stress test, draft a brief, structured intake |
+| `verbs:wayfinder` | Cross-session decision-map worker: ONE unblocked entry per session, resolved by type (research / grilling / prototype / task), decision written back, fog graduated. grill charts the map; wayfinder walks it. | resume the map, continue the effort, 接續 map |
 | `verbs:codebase-design` | Deep-module design vocabulary: interface / seam / adapter / depth-as-leverage, deletion test, testable through the interface. Reference core other skills cite. | design this module, where does the seam go, interface feels too wide |
 | `verbs:careful` | Confirmation gates for production / shared infra / destructive commands. | working on prod |
 | `verbs:ui` | Build/fix UI with a point of view: lock direction, verify render, build past happy path, decompose cited products. NOT browser-test (`qa`) or render-bug (`debug`). | design, 做頁面, 不好看, 很醜, 排版 |
