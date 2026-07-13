@@ -24,7 +24,8 @@ def _result(decision, reason, detail="", artifact=""):
     print("\t".join(str(field).replace("\t", " ").replace("\n", " ") for field in fields))
 
 
-def _segments(command):
+def _stream(command):
+    """Yield ('cmd', tokens) and ('punct', token) items in shell order."""
     lexer = shlex.shlex(
         command.replace("\n", " ; "),
         posix=True,
@@ -36,12 +37,24 @@ def _segments(command):
     for token in lexer:
         if token and set(token) <= set(";&|()`"):
             if current:
-                yield current
+                yield "cmd", current
                 current = []
+            yield "punct", token
         else:
             current.append(token)
     if current:
-        yield current
+        yield "cmd", current
+
+
+def _punct_runs(token):
+    """Split a punctuation token into operator runs: ');&&' -> [')', ';', '&&']."""
+    runs = []
+    for char in token:
+        if runs and runs[-1][0] == char and char in "&|":
+            runs[-1] += char
+        else:
+            runs.append(char)
+    return runs
 
 
 def _git_start(tokens):
@@ -107,24 +120,46 @@ def _git_start(tokens):
     return None
 
 
-def _apply_cd(tokens, current_dir):
-    """Working directory after a cd/pushd segment; None means unresolvable."""
-    target = None
-    for token in tokens[1:]:
-        if token == "-":
-            return None
-        if token.startswith("-"):
-            continue
-        target = token
-        break
-    if target is None:
-        return Path(os.path.expanduser("~"))
-    candidate = Path(os.path.expanduser(target))
-    if candidate.is_absolute():
-        return candidate
-    if current_dir is None:
-        return None
-    return current_dir / candidate
+# Targets holding runtime shell expansions the guard cannot resolve statically.
+_UNSAFE_TARGET_CHARS = set("$*?[{")
+
+
+def _after_dir_change(base, tokens, current, oldpwd, stack, fallback):
+    """(current, oldpwd, pushd_stack) after a cd/pushd/popd, modeling bash.
+
+    Anything the guard cannot resolve statically falls back to the session
+    cwd — the pre-tracking behavior — so tracking never weakens the gate.
+    A cd to a nonexistent directory fails in the shell and keeps the current
+    directory, so it does here too.
+    """
+    stack = list(stack)
+    if base == "popd":
+        return (stack.pop() if stack else fallback), current, stack
+    args = [t for t in tokens[1:] if t == "-" or not t.startswith("-")]
+    if not args:
+        if base == "pushd":
+            if stack:
+                top = stack.pop()
+                stack.append(current)
+                return top, current, stack
+            return fallback, current, stack
+        return Path(os.path.expanduser("~")), current, stack
+    if len(args) > 1:
+        new = fallback  # two-arg cd is shell-dependent (zsh substitutes)
+    else:
+        target = args[0]
+        if target == "-":
+            new = oldpwd
+        elif set(target) & _UNSAFE_TARGET_CHARS:
+            new = fallback
+        else:
+            candidate = Path(os.path.expanduser(target))
+            if not candidate.is_absolute():
+                candidate = current / candidate
+            new = candidate if candidate.is_dir() else current
+    if base == "pushd":
+        stack.append(current)
+    return new, current, stack
 
 
 def _parse_git(tokens, current_dir):
@@ -148,12 +183,7 @@ def _parse_git(tokens, current_dir):
             else:
                 return None
             candidate = Path(os.path.expanduser(value))
-            if candidate.is_absolute():
-                repo_dir = candidate
-            elif repo_dir is None:
-                return None
-            else:
-                repo_dir = repo_dir / candidate
+            repo_dir = candidate if candidate.is_absolute() else repo_dir / candidate
             index += 1
             continue
         if option in GIT_OPTIONS_WITH_VALUE:
@@ -165,7 +195,7 @@ def _parse_git(tokens, current_dir):
             index += 1
             continue
         break
-    if index >= len(tokens) or repo_dir is None:
+    if index >= len(tokens):
         return None
     return tokens[index], tokens[index + 1 :], repo_dir.resolve()
 
@@ -231,19 +261,48 @@ def classify(payload):
     if not isinstance(cwd, str):
         cwd = os.getcwd()
 
-    current_dir = Path(cwd)
-    for tokens in _segments(command):
+    fallback = Path(cwd)
+    current, oldpwd, pushd_stack = fallback, fallback, []
+    scopes = []  # saved dir state at each '(' or opening backtick
+    backtick_open = False
+    pending = None  # dir state from a cd, applied only if the separator keeps it
+
+    for kind, item in _stream(command):
+        if kind == "punct":
+            for run in _punct_runs(item):
+                if run == "(":
+                    if pending is not None:
+                        current, oldpwd, pushd_stack = pending
+                        pending = None
+                    scopes.append((current, oldpwd, list(pushd_stack)))
+                elif run == ")" or run == "`":
+                    if run == "`" and not backtick_open:
+                        backtick_open = True
+                        scopes.append((current, oldpwd, list(pushd_stack)))
+                        pending = None
+                        continue
+                    if run == "`":
+                        backtick_open = False
+                    if scopes:
+                        current, oldpwd, pushd_stack = scopes.pop()
+                    else:
+                        current, oldpwd, pushd_stack = fallback, fallback, []
+                    pending = None
+                elif run in {"|", "&"}:
+                    pending = None  # pipeline / background: the cd ran in a subshell
+                else:  # ';', '&&', '||'
+                    if pending is not None:
+                        current, oldpwd, pushd_stack = pending
+                        pending = None
+            continue
+        tokens = item
         base = tokens[0].rsplit("/", 1)[-1]
-        if base == "cd":
-            current_dir = _apply_cd(tokens, current_dir)
+        if base in {"cd", "pushd", "popd"}:
+            pending = _after_dir_change(
+                base, tokens, current, oldpwd, pushd_stack, fallback
+            )
             continue
-        if base == "pushd":
-            current_dir = _apply_cd(tokens, current_dir) if len(tokens) > 1 else None
-            continue
-        if base == "popd":
-            current_dir = None
-            continue
-        parsed = _parse_git(tokens, current_dir)
+        parsed = _parse_git(tokens, current)
         if parsed is None:
             continue
         subcommand, args, repo_dir = parsed

@@ -94,6 +94,20 @@ check 2 "cd then bare push on main"     "$NONREPO"     "cd $REPO_MAIN && git pus
 check 2 "pushd into main repo, commit"  "$NONREPO"     "pushd $REPO_MAIN && git commit -m x"
 check 2 "tilde -C resolves via HOME"    "$NONREPO"     'git -C ~/main-repo commit -m x' "HOME=$TMPROOT"
 check 2 "cd elsewhere, -C back to main" "$REPO_MAIN"   "cd $NONREPO && git -C $REPO_MAIN commit -m x"
+check 2 "subshell cd does not leak"     "$REPO_MAIN"   "(cd $REPO_FEAT); git commit -m x"
+check 2 "command-subst cd no leak"      "$REPO_MAIN"   "echo \$(cd $REPO_FEAT); git commit -m x"
+check 2 "backtick cd does not leak"     "$REPO_MAIN"   "echo \`cd $REPO_FEAT\`; git commit -m x"
+check 2 "piped cd does not apply"       "$REPO_MAIN"   "cd $REPO_FEAT | git commit -m x"
+check 2 "backgrounded cd no apply"      "$REPO_MAIN"   "cd $REPO_FEAT & git commit -m x"
+check 2 "two-arg cd falls back"         "$REPO_MAIN"   "cd $REPO_FEAT /invalid; git commit -m x"
+check 2 "failed cd keeps directory"     "$REPO_MAIN"   "cd $TMPROOT/does-not-exist; git commit -m x"
+check 2 "pushd popd restores main"      "$REPO_MAIN"   "pushd $REPO_FEAT && popd && git commit -m x"
+check 2 "dollar target falls back"      "$REPO_MAIN"   'cd "$PWD" && git commit -m x'
+check 2 "cd dash swaps to oldpwd"       "$REPO_MAIN"   "cd $REPO_FEAT && cd - && git commit -m x"
+check 2 "cd dash falls back to cwd"     "$REPO_MAIN"   'cd - && git commit -m x'
+check 2 "bare popd falls back to cwd"   "$REPO_MAIN"   'popd && git commit -m x'
+check 2 "variable cd falls back"        "$REPO_MAIN"   'cd "$DIR" && git commit -m x'
+check 2 "commit inside subshell cd"     "$NONREPO"     "(cd $REPO_MAIN && git commit -m x)"
 
 # --- must ALLOW (exit 0) ---
 check 0 "commit on issue branch"      "$REPO_FEAT"   'git commit -m msg'
@@ -122,10 +136,10 @@ check 0 "PSTICKET_FORCE bypass"       "$REPO_MAIN"   'git commit -m msg' 'PSTICK
 check 0 "PANDA_FORCE bypass"          "$REPO_MAIN"   'git commit -m msg' 'PANDA_FORCE=1'
 check 0 "cd into marker repo, commit" "$REPO_MAIN"   "cd $REPO_OFF && git commit -m x"
 check 0 "cd into feat repo, commit"   "$REPO_MAIN"   "cd $REPO_FEAT && git commit -m x"
-check 0 "cd dash unresolvable"        "$REPO_MAIN"   'cd - && git commit -m x'
-check 0 "popd unresolvable"           "$REPO_MAIN"   'popd && git commit -m x'
-check 0 "cd variable unresolvable"    "$REPO_MAIN"   'cd "$DIR" && git commit -m x'
 check 0 "cd nonrepo, commit"          "$REPO_MAIN"   "cd $NONREPO && git commit -m x"
+check 0 "subshell restores marker"    "$REPO_OFF"    "(cd $REPO_MAIN); git commit -m x"
+check 0 "pushd into marker repo"      "$REPO_MAIN"   "pushd $REPO_OFF && git commit -m x"
+check 0 "cd dash dash swaps back"     "$REPO_OFF"    "cd $REPO_MAIN && cd - && git commit -m x"
 
 # --- payload shapes ---
 raw_check 0 "tool is not Bash"        '{"tool_name":"Read","tool_input":{"file_path":"/tmp/git"}}'

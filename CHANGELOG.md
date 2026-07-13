@@ -8,8 +8,13 @@
   chain, so `cd <repo> && git commit` is judged against the cd target instead
   of the session cwd. Before: committing to an opted-out repo from a gated cwd
   was falsely denied, and `cd <gated-repo> && git commit` from elsewhere
-  escaped the gate. Unresolvable targets (`cd -`, `popd`, `cd "$VAR"`) fail
-  open, matching the guard's existing posture. (#236)
+  escaped the gate. Tracking models shell semantics — subshell/backtick
+  scoping, pipe and background cancellation, failed cd keeping the directory,
+  `cd -` via OLDPWD, a real pushd stack — and anything not statically
+  resolvable (`cd "$VAR"`, two-arg cd) reverts to the session cwd, so the
+  gate never judges against a weaker repo than the pre-tracking guard.
+  Posture hardened after a Codex cross-model review found the initial
+  fail-open-on-unknown design allowed subshell/pipe/`cd -` bypasses. (#236)
 - `git -C ~/path` values and cd targets are now `expanduser`'d; tilde paths
   previously never resolved to a repo and silently failed open. (#236)
 
