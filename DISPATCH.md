@@ -25,6 +25,8 @@ Before responding to any task-shaped message, match it against this table. On ma
 
 This opt-in protocol uses the host's native subagents. Start at most two
 depth-one workers, disable nested delegation, and keep every pilot worker read-only.
+Read-only pilot workers default to the cheapest model tier (`model: haiku`);
+reserve a higher tier for a worker whose task itself needs judgment.
 
 - WorkOrder: `objective`, `scope`, `deliverable`, `acceptance`, `permissions`, `budget`.
 - WorkerResult: `status`, `findings`, `evidence`, `gaps`.

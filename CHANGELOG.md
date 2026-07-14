@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.9.5 — Pilot worker model-tier default
+
+### Changed
+
+- `DISPATCH.md` Agent Worker protocol: read-only pilot workers now default
+  to the cheapest model tier (`model: haiku`), reserving higher tiers for
+  workers whose task itself needs judgment. Closes the gap where read-only
+  research workers silently inherited the main-session frontier model and
+  burned premium quota on reconnaissance. Pattern verified against a live
+  probe (built-in Explore resolved to Opus 4.8 under a Fable 5 session);
+  prior art: Nanako0129/pilotfish role tiering.
+
 ## v0.9.4 — Verify-gate headless allowance
 
 ### Fixed
