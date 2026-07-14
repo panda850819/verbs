@@ -24,10 +24,108 @@ def _result(decision, reason, detail="", artifact=""):
     print("\t".join(str(field).replace("\t", " ").replace("\n", " ") for field in fields))
 
 
+def _heredoc_delimiter(line, index):
+    """Read the (possibly quoted/escaped) delimiter word at index.
+
+    Returns (word, index_past_word) so the caller resumes after quotes too.
+    """
+    length = len(line)
+    word = []
+    quote = None
+    while index < length:
+        char = line[index]
+        if quote:
+            if char == quote:
+                quote = None
+            else:
+                word.append(char)
+            index += 1
+            continue
+        if char in "'\"":
+            quote = char
+            index += 1
+            continue
+        if char == "\\":
+            index += 1
+            if index < length:
+                word.append(line[index])
+                index += 1
+            continue
+        if char in " \t;&|()<>":
+            break
+        word.append(char)
+        index += 1
+    return "".join(word), index
+
+
+def _heredoc_openers(line):
+    """Return (delimiter, strip_tabs) for each unquoted heredoc opener."""
+    openers = []
+    quote = None
+    index = 0
+    length = len(line)
+    while index < length:
+        char = line[index]
+        if quote:
+            if char == "\\" and quote == '"':
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in "'\"":
+            quote = char
+            index += 1
+            continue
+        if char == "\\":
+            index += 2
+            continue
+        if char == "<":
+            if line[index : index + 3] == "<<<":  # herestring, not a heredoc
+                index += 3
+                continue
+            if line[index : index + 2] == "<<":
+                index += 2
+                strip_tabs = index < length and line[index] == "-"
+                if strip_tabs:
+                    index += 1
+                while index < length and line[index] in " \t":
+                    index += 1
+                delimiter, index = _heredoc_delimiter(line, index)
+                if delimiter:
+                    openers.append((delimiter, strip_tabs))
+                continue
+        index += 1
+    return openers
+
+
+def _strip_heredocs(command):
+    """Drop heredoc body lines so they are never classified as commands.
+
+    Bodies run from the line after an unquoted '<<'/'<<-' opener to the
+    terminator line (FIFO when one line opens several). An unterminated
+    heredoc swallows the rest of the command, matching bash. The opener
+    line itself is kept: commands after the operator still execute.
+    """
+    kept = []
+    pending = []  # FIFO of (delimiter, strip_tabs)
+    for line in command.split("\n"):
+        if pending:
+            delimiter, strip_tabs = pending[0]
+            check = line.lstrip("\t") if strip_tabs else line
+            if check == delimiter:
+                pending.pop(0)
+            continue
+        pending.extend(_heredoc_openers(line))
+        kept.append(line)
+    return "\n".join(kept)
+
+
 def _stream(command):
     """Yield ('cmd', tokens) and ('punct', token) items in shell order."""
     lexer = shlex.shlex(
-        command.replace("\n", " ; "),
+        _strip_heredocs(command).replace("\n", " ; "),
         posix=True,
         punctuation_chars=";&|()`",
     )

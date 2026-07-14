@@ -141,6 +141,17 @@ check 0 "subshell restores marker"    "$REPO_OFF"    "(cd $REPO_MAIN); git commi
 check 0 "pushd into marker repo"      "$REPO_MAIN"   "pushd $REPO_OFF && git commit -m x"
 check 0 "cd dash dash swaps back"     "$REPO_OFF"    "cd $REPO_MAIN && cd - && git commit -m x"
 
+# --- heredoc bodies are data, not commands (#233) ---
+check 0 "heredoc body git commit"       "$REPO_MAIN"   $'cat > /tmp/tg-doc.md <<EOF\ngit commit -m x\ngit push origin main\nEOF'
+check 0 "quoted-delim heredoc body"     "$REPO_MAIN"   $'cat <<\'EOF\'\ngit commit -m x\nEOF'
+check 0 "dash heredoc tab terminator"   "$REPO_MAIN"   $'cat <<-EOF\n\tgit commit -m x\n\tEOF'
+check 0 "unterminated heredoc swallows" "$REPO_MAIN"   $'cat <<EOF\ngit commit -m x'
+check 0 "two heredocs both dropped"     "$REPO_MAIN"   $'cat <<A\ngit commit -m x\nA\ncat <<B\ngit push origin main\nB'
+check 2 "commit after heredoc ends"     "$REPO_MAIN"   $'cat > /tmp/tg-doc.md <<EOF\nnotes\nEOF\ngit commit -m x'
+check 2 "same-line cmd after operator"  "$REPO_MAIN"   $'cat > /tmp/tg-doc.md <<EOF && git commit -m x\nbody\nEOF'
+check 2 "herestring does not swallow"   "$REPO_MAIN"   $'grep x <<< "git commit"\ngit commit -m x'
+check 2 "quoted << is not an opener"    "$REPO_MAIN"   $'echo "a << b"\ngit commit -m x'
+
 # --- payload shapes ---
 raw_check 0 "tool is not Bash"        '{"tool_name":"Read","tool_input":{"file_path":"/tmp/git"}}'
 raw_check 0 "malformed json fail-open" '{"tool_name":"Bash","tool_input":{"command":"git commit'

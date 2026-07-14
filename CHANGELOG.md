@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.9.6 — Ticket-gate ignores heredoc bodies
+
+### Fixed
+
+- `ticket_gate.py` no longer classifies heredoc body lines as commands.
+  `_stream()` turned every newline into `;`, so writing a document whose
+  body contained a line starting with `git commit` / `git push` triggered
+  a false deny (#233 mode 2; mode 1 was fixed by #237). A quote-aware
+  scanner now strips bodies between an unquoted `<<`/`<<-` opener and its
+  terminator line before streaming: quoted delimiters, tab-indented
+  `<<-` terminators, multiple heredocs per line (FIFO), and unterminated
+  bodies all match bash; herestrings (`<<<`) and quoted `<<` are left
+  alone, and commands on the opener line after the operator are still
+  gated. 9 new truth-table cases — 87/87. (#233)
+
 ## v0.9.5 — Pilot worker model-tier default
 
 ### Changed
