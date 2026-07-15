@@ -7,9 +7,10 @@ check or state the change is unverified. The second stop
 (stop_hook_active=true) passes to prevent a hook loop. Missing/malformed
 verification infrastructure fails closed with a visible block; pure Q&A and
 turns with no successful code edit still pass. A transcript_path whose file
-does not exist is a headless run (codex exec, install smoke tests) that never
-writes a transcript — blocking there can produce no verification behavior, so
-the gate allows with a stderr notice and a high-signal guard event instead.
+is null or whose file does not exist is a transcriptless run (Codex side
+conversation, codex exec, install smoke tests). Blocking there can produce no
+verification behavior, so the gate allows with a stderr notice and a
+high-signal guard event instead.
 
 stdin: Claude Code or Codex Stop-hook JSON (transcript_path, stop_hook_active).
 stdout: exactly one {"decision":"block","reason":...} object, or nothing.
@@ -50,8 +51,8 @@ RUNTIME_FAIL_CLOSED_REASON = (
     "blocking once. State that verification is unavailable and reinstall Verbs."
 )
 TRANSCRIPT_MISSING_NOTICE = (
-    "[verbs verify-gate] transcript not found; assuming headless run with no "
-    "transcript; skipping verify gate."
+    "[verbs verify-gate] transcript unavailable; assuming a transcriptless "
+    "run; skipping verify gate."
 )
 
 
@@ -162,6 +163,10 @@ def main():
             block(data, RUNTIME_FAIL_CLOSED_REASON, "runtime_adapter_missing")
             return 0
         transcript_path = data.get("transcript_path")
+        if transcript_path is None and "transcript_path" in data:
+            print(TRANSCRIPT_MISSING_NOTICE, file=sys.stderr)
+            allow(data, "transcript_missing")
+            return 0
         if not isinstance(transcript_path, str) or not transcript_path:
             raise ValueError("missing transcript_path")
         entries = []

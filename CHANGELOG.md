@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.9.7 — Verify-gate transcriptless side conversations
+
+### Fixed
+
+- `stop-verify-gate.py` now treats an explicitly null `transcript_path` as an
+  observable transcriptless run, matching the existing allowance for a path
+  whose file was never created. Codex side conversations do not emit rollout
+  JSONL files, so fail-closing on their valid nullable Stop payload repeatedly
+  blocked pure Q&A without any transcript from which verification could be
+  recovered. A completely absent field, malformed hook JSON, and malformed
+  transcript content remain fail-closed. (#242)
+
 ## v0.9.6 — Ticket-gate ignores heredoc bodies
 
 ### Fixed
