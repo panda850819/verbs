@@ -7,6 +7,17 @@ description: |
   verification path); NOT for code-diff review (use `review`).
 capability_required:
   - host browser automation
+reads:
+  - repo: "**"
+  - repo: CLAUDE.md
+  - repo: AGENTS.md
+  - repo: docs/briefs/**
+  - skill: lib/learning-format.md
+  - skill: lib/qa-evidence-format.md
+  - cli: git
+writes:
+  - cli: stdout
+  - repo: ".git/verbs/qa-evidence.md"
 user-invocable: true
 ---
 # QA
@@ -19,7 +30,10 @@ assertions a merge decision can trust, not a test-writing tutorial.
 Read the `## verbs` config from `CLAUDE.md` or `AGENTS.md`; resolve
 `{learnings_dir}` (default `docs/learnings`) and search it for `type: pitfall`
 entries related to the changed UI (shape per `lib/learning-format.md`). Read
-the brief in `docs/briefs/` when one exists.
+the brief in `docs/briefs/` when one exists. Bind the intent source and assign
+stable `AC-1`, `AC-2`, ... identifiers to its acceptance criteria. No issue,
+brief, or explicit user goal means `INTENT GAP`; QA can test behavior but cannot
+claim that the intended outcome is verified.
 
 ## Plan
 
@@ -57,16 +71,28 @@ Verification, in order of rigor — use the strongest available:
 4. **Screenshot + visual judgment** (weakest): only for properties the accessibility tree cannot capture
 
 Every `STEP_FAIL` gets a screenshot and a `[BUG]` report per
-`lib/test-output-format.md`. After all tests:
+`lib/qa-evidence-format.md`. After all tests:
 
 ```
 Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
 ```
 
+## Acceptance evidence handoff
+
+Map every acceptance criterion to the strongest relevant step evidence. Emit
+the marker-delimited block from `lib/qa-evidence-format.md`, including intent,
+artifact identity, per-criterion `PASS` / `FAIL` / `UNPROVEN`, totals, gaps,
+and timestamp. Also persist the exact block at the Git metadata path returned
+by `git rev-parse --git-path verbs/qa-evidence.md`; do not dirty the worktree.
+
+QA does not write to GitHub. `ship` owns the pull-request upsert because it
+already owns PR mutation and may run after QA but before a PR exists. A later
+code change invalidates the evidence until the affected checks rerun.
+
 ## Fix
 
 Execute each bug report's `Action` field using the routing contract in
-`lib/test-output-format.md`; never reclassify it here. After an AUTO-FIX,
+`lib/qa-evidence-format.md`; never reclassify it here. After an AUTO-FIX,
 re-run the affected flow. ASK items remain explicit pending decisions and are
 never reported as fixed.
 

@@ -11,6 +11,7 @@ reads:
   - repo: docs/briefs/**
   - repo: docs/learnings/**
   - skill: lib/learning-format.md
+  - skill: lib/qa-evidence-format.md
   - skill: lib/trigger-first-skill-evolution.md
   - skill: lib/quote-gate.md
   - skill: lib/rationalizations.md
@@ -22,6 +23,8 @@ writes:
   - cli: git tag
   - cli: git push
   - cli: gh pr create
+  - cli: gh pr comment
+  - cli: gh api
   - cli: gh release create
   - cli: stdout
 forbids:
@@ -70,10 +73,21 @@ to write a commit; this skill is the gate sequence, not the coaching.
    `git diff {prev-tag}..{tag} --stat` — the notes describe what the tag
    contains, nothing more. On mismatch fix the notes, never re-tag.
    Otherwise skip both.
-9. **Push + PR + closure evidence** — push with `-u` (plus tags if created);
+9. **Push + PR** — push with `-u` (plus tags if created);
    `gh pr create` with a title under 70 chars and a what/why/how-to-test
-   body. Done means the PR URL and pushed commit/branch are printed. Missing
-   delivery evidence → name the gap and do not claim done.
+   body. Resolve an existing PR instead of creating a duplicate.
+10. **QA evidence upsert** — when `qa` ran, read the handoff from the Git
+    metadata path defined in `lib/qa-evidence-format.md`. Recompute its artifact
+    identity against the PR head, then create or update the authenticated
+    viewer's single marker comment. Read the comment back before reporting its
+    URL. A stale artifact, malformed block, `FAIL`, or `UNPROVEN` row still gets
+    published as `Acceptance: NOT VERIFIED`, but blocks a ready/done claim. For
+    a UI diff that required `qa`, missing evidence also blocks completion. For
+    non-UI work, state `QA evidence: not applicable`; never fabricate a report.
+    Re-running `ship` updates the same comment rather than adding another.
+11. **Closure evidence** — done means the PR URL, pushed commit/branch, and,
+    when QA ran, the verified QA comment URL are printed. Missing delivery
+    evidence → name the gap and do not claim done.
 
 ## Learning candidate
 

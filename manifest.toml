@@ -44,7 +44,7 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.9.7"
+version = "0.10.0"
 schema  = "skill-tier-v1"
 updated = "2026-07-15"
 
@@ -137,9 +137,9 @@ description = "Build/fix UI with a committed point of view. Four override reflex
 
 [skill.qa]
 tier = "core"
-resources = ["lib/learning-format.md"]
+resources = ["lib/learning-format.md", "lib/qa-evidence-format.md"]
 composes = []
-description = "Browser-based UI QA through a host-provided browser automation capability."
+description = "Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability."
 
 [skill.codebase-design]
 tier = "core"
@@ -166,9 +166,9 @@ description = "Chart or work cross-session decision maps: with a large, fuzzy to
 [skill.ship]
 tier = "ext"
 requires = ["cli:git", "cli:gh"]
-resources = ["lib/learning-format.md", "lib/trigger-first-skill-evolution.md"]
+resources = ["lib/learning-format.md", "lib/qa-evidence-format.md", "lib/trigger-first-skill-evolution.md"]
 composes = []
-description = "Close completed code work through test, commit, push, and PR. Needs `gh`, hence ext."
+description = "Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext."
 
 [skill.handover]
 tier = "ext"

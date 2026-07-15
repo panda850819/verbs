@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.10.0 — QA evidence on pull requests
+
+### Added
+
+- `qa` now maps the issue, brief, or explicit user goal into acceptance rows
+  and emits a marker-delimited evidence block with artifact identity,
+  per-criterion `PASS` / `FAIL` / `UNPROVEN`, test totals, and gaps.
+- `ship` now validates that evidence against the PR head and upserts one
+  marker-based PR comment. Re-runs update the same comment; stale evidence or
+  any unproven criterion remains visible and blocks a verified completion
+  claim. (#244)
+
+### Changed
+
+- The old QA-only failure-report reference is promoted into the shared
+  `qa-evidence-format` resource consumed by both `qa` and `ship`.
+
 ## v0.9.7 — Verify-gate transcriptless side conversations
 
 ### Fixed
