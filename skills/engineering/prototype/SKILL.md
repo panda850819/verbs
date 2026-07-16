@@ -35,7 +35,9 @@ the top of the prototype. Getting the branch wrong wastes the whole prototype.
   are hard to reason about on paper.
 - **"What should this look like?"** → [UI.md](UI.md): several structurally
   different variants on one route, switchable via `?variant=` and a floating
-  bottom bar.
+  bottom bar. Single round by default; UI.md's converge mode runs repeated
+  rounds down the visual design tree when the user (or a wayfinder entry)
+  asks for it.
 
 ## Rules (both branches)
 
