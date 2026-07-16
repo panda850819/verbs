@@ -25,7 +25,7 @@ This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md be
 | `verbs:ui` | Build/fix UI with a point of view: lock direction, verify render, build past happy path, decompose cited products. NOT browser-test (`qa`) or render-bug (`debug`). | design, 做頁面, 不好看, 很醜, 排版 |
 | `verbs:prototype` | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind `?variant=`. Verdict recorded, code lands on a prototype branch. NOT production UI (`ui`). | prototype this, try a few variants, does this state model feel right |
 | `verbs:qa` | Browser-based UI QA. | test this UI |
-| `verbs:review` | Risk-adaptive diff review with scoped evidence and cold-context escalation. | review PR |
+| `verbs:review` | Risk-adaptive diff review with a bounded low-risk fast path, scoped evidence, and cold-context escalation. | review PR |
 | `verbs:debug` | Systematic root-cause debugging: root-cause gate, hypothesis-explains-every-symptom, instrument-first by bug class, bisect, scope-blast. NOT diff review (`review`) or UI taste (`ui`). | bug, crash, regression, 報錯, 跑不通, used to work |
 | `verbs:ship` | Test + commit + PR in git mode. CLOSES finished work. | code done, ship it |
 | `verbs:handover` | Hand unfinished work to Codex to DO: sync (spawn `codex exec` now) or `--async` (write an anchored file payload). Not `ship`, which closes finished work. | hand this to codex, let codex finish, 丟給 codex |

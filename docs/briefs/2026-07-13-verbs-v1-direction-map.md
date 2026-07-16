@@ -72,6 +72,9 @@ after ~4 weeks):**
   — two real diffs confirm `review` EDIT and justify a low-risk fast path; two
   write-enabled cases promote `sprint` from UNPROVEN to KEEP for Codex CLI +
   `gpt-5.6-sol` + low effort.
+- [Slim the low-risk review path](2026-07-13-verbs-v1-direction-map/12-slim-low-risk-review-path.md)
+  — the real low-risk canary used about 43% fewer tokens with the same outcome;
+  the trust-boundary canary retained executable evidence and cold review.
 
 ## Entries
 
@@ -161,7 +164,7 @@ If the pilot's gates then produce stable decisions, apply the same audit to
 cannot distinguish native parity, skill lift, and effort lift.
 
 ### 12. Slim the low-risk review path — `task` (AFK)
-status: open · blocked-by: [10. Close pilot evidence gaps](#10-close-pilot-evidence-gaps--task-afk)
+status: closed (2026-07-16) · blocked-by: [10. Close pilot evidence gaps](#10-close-pilot-evidence-gaps--task-afk) · decision: [12-slim-low-risk-review-path](2026-07-13-verbs-v1-direction-map/12-slim-low-risk-review-path.md) · issue #248
 
 Implement and evaluate a low-risk fast path for `review`: preserve provenance,
 one correctness pass, and self-refutation, but skip the full multi-pass envelope

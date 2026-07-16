@@ -1,7 +1,7 @@
 ---
 name: review
 description: |
-  Review a code diff before PR or on request. Adds scope provenance, risk-adaptive passes, cold-context escalation, and evidence-ranked findings beyond a host's ordinary single-pass review. NOT browser QA, prepared-plan critique, or external artifact trust checks.
+  Review a code diff before PR or on request. Uses a bounded low-risk fast path, scoped evidence, risk-triggered lenses, and cold-context escalation. NOT browser QA, prepared-plan critique, or external artifact trust checks.
 reads:
   - repo: "**"
   - repo: AGENTS.md
@@ -21,8 +21,8 @@ user-invocable: true
 # Code Review
 
 Native models already perform useful single-pass review. This skill earns its
-slot by binding the intended diff, scaling scrutiny to risk, separating a cold
-reviewer when confirmation bias matters, and refusing ungrounded findings.
+slot through scope provenance, a bounded low-risk path, risk-triggered lenses,
+cold-context escalation, and findings that survive an evidence gate.
 
 ## 1. Bind scope
 
@@ -31,37 +31,50 @@ reviewer when confirmation bias matters, and refusing ungrounded findings.
    Print the base and changed-file list. Never silently review the whole repo.
 3. Read the issue, brief, or user request that defines intent. If none exists,
    state `INTENT GAP` and infer only from the diff.
-4. Check branch state and uncommitted changes. Inspect history only when it
-   explains the diff; broad TODO or churn audits are out of scope.
+4. Check branch state and uncommitted changes. Use history only when it explains
+   the diff.
 
-Completion: the reviewed base, files, and intent source are explicit.
-
-## 2. Set the risk lane
-
-Choose one lane and say why:
+## 2. Choose the risk lane
 
 - **low**: local, reversible, no trust boundary or persistent-data change.
 - **medium**: shared behavior, multiple files, compatibility or concurrency.
 - **high**: auth, secrets, money, permissions, migrations, destructive writes,
   production infrastructure, or unfamiliar behavior whose failure is costly.
 
-Every lane gets one grounded correctness pass. Medium adds only the lenses
-triggered by changed surfaces. High adds all relevant lenses plus a cold review.
+Say why, run one grounded correctness pass, and promote when the diff, context,
+or first pass reveals a higher-risk surface.
 
-Triggered lenses are: security for attacker-controlled input or privilege;
-data integrity for schema, persistence, ordering, or retries; concurrency for
-shared mutable state; architecture for public interfaces or dependency flow;
-operations for deploy, rollback, observability, or failure recovery.
+### Low-risk fast path
 
-Completion: every changed surface maps to a used lens or an explicit skip.
+A review stays here when scope and intent are explicit, the diff is local and
+reversible, and it touches no trust boundary, persistent data, concurrency,
+public interface, generated contract, or production operation. Trace the
+changed path, match acceptance and branches to tests, then self-refute the
+assumption most likely to hide a defect.
 
-## 3. Review from evidence
+When that pass finds no candidate finding, concrete coverage gap, scope drift,
+or risk trigger, return this result and stop:
 
-Trace changed inputs through the real code path. Compare behavior with tests,
-callers, contracts, and failure handling. For each candidate finding, attempt
-to disprove it with the repository before reporting it.
+```markdown
+Review scope: <base>..<head> | <n> files | risk: low
+No actionable findings.
+Coverage: <verified check>
+Self-refute: <assumption and observed result>
+```
 
-A finding survives only when it has all of:
+Do not load review learnings or model anchors, enumerate lenses, or print empty
+scope-drift and cold-review fields. Any failed condition promotes the review
+without restarting scope discovery.
+
+## 3. Escalated review
+
+Read `lib/learning-recall.md` and apply relevant repo learnings. Map changed
+surfaces to security, data integrity, concurrency, architecture, or operations
+lenses. Medium uses only triggered lenses. High uses every relevant lens plus a
+cold review.
+
+Trace changed inputs through code, callers, contracts, tests, and failure
+handling. Attempt to disprove each candidate. A finding survives only with:
 
 - severity `P0` to `P3`;
 - exact file and tight line range;
@@ -69,37 +82,19 @@ A finding survives only when it has all of:
 - failure mechanism and user-visible consequence;
 - a concrete correction direction.
 
-Do not report style preferences, speculative risks with no reachable trigger,
-or pre-existing defects outside the diff. Do not edit code during review.
-
-## 4. Escalate only when earned
+Exclude style preferences, unreachable speculation, and pre-existing defects
+outside the diff. Review does not edit code.
 
 Use a cold-context reviewer when the lane is high, the diff exceeds roughly
 5K tokens, or a load-bearing conclusion remains disputed. Give it the bound
-diff and intent without the current review's conclusions. If a different model
-seat is available, select it from `lib/model-anchors.md`; never hardcode a model.
+diff and intent without current conclusions. Read `lib/model-anchors.md` only
+now and select its role. Merge findings by mechanism; disagreement becomes
+`NEEDS TRACE`, not a finding by vote.
 
-Merge duplicate findings by mechanism. Disagreement lowers confidence and is
-reported as `NEEDS TRACE`; it does not become a finding by vote count. Low-risk
-reviews do not pay cross-model or multi-agent overhead by default.
-
-## 5. Verify coverage and conclude
-
-Match each acceptance criterion and changed branch to existing or newly run
-tests. Run the narrowest relevant checks when read-only review authorization
-allows it. Report `COVERAGE GAP` only when a concrete behavior has no proof.
-Report `SCOPE DRIFT` only when a changed file or behavior cannot be traced to
-the intent source.
-
-Before concluding, self-refute once: name the highest-risk assumption and test
-it against code or a command. Completion requires a clean working tree after
-the review and one of these outcomes:
-
-- actionable findings, ordered by severity;
-- `No actionable findings.` with residual test or environment gaps;
-- `BLOCKED` with the missing diff, intent, dependency, or runtime proof.
-
-## Output format
+Match acceptance and branches to tests, run the narrowest available checks, and
+self-refute the highest-risk assumption. Report `COVERAGE GAP` only for
+unproved concrete behavior and `SCOPE DRIFT` only for changes outside intent.
+Conclude with findings, `No actionable findings.`, or `BLOCKED`.
 
 ```markdown
 Review scope: <base>..<head> | <n> files | risk: <lane>
@@ -119,6 +114,7 @@ Self-refute: <assumption and result>
 ## Anti-patterns
 
 - Fixed three-pass fan-out for a small reversible diff.
+- Printing the escalated envelope after a clean low-risk pass.
 - Treating a large repository scan as evidence about the changed code.
 - Auto-fixing findings and then reviewing one's own rewrite as independent proof.
 - Reporting hypothetical security language without an attacker-controlled path.

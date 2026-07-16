@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.10.1 — Low-risk review fast path
+
+### Changed
+
+- `review` now stops after provenance, one correctness pass, coverage, and
+  self-refutation when a clearly bounded low-risk diff stays clean. It loads
+  repo learnings only on the medium/high path and model anchors only when cold
+  review is earned, while escalated evidence rules stay unchanged. (#248)
+
 ## v0.10.0 — QA evidence on pull requests
 
 ### Added

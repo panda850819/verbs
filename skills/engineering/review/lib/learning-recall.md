@@ -6,7 +6,12 @@
 
 At the START of a dev unit, BEFORE planning or executing:
 
-- `sprint` Stage 0 · `review` Step 2 (its "Load Learnings" step) · `debug` opener.
+- `sprint` Stage 0 · `review` after it selects or promotes to medium/high ·
+  `debug` opener.
+
+Low-risk `review` stops before recall when its first pass finds no risk trigger,
+candidate finding, coverage gap, or scope drift. The recall cost is reserved for
+the escalated review path where repo history can change a lens or conclusion.
 
 Skip for atomic skills that do not open a development unit, such as `careful`.
 
