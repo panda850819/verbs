@@ -74,9 +74,10 @@ skill consumes that format and never forks it.
      Never answer the human's side yourself; no human available → leave the
      entry open and say so.
    - `prototype` (HITL) — make it concrete via `prototype`; the human's
-     reaction to the artifact is the decision input. An entry may pin the
-     prototype mode to run (e.g. `mode: converge` for a novel frontend
-     surface); honor the pin instead of re-deciding.
+     reaction to the artifact is the decision input. When the entry's text
+     names UI.md's converge mode (typical for a novel frontend surface), run
+     that mode instead of re-deciding; this is plain entry wording, not a new
+     map field.
    - `task` (HITL or AFK) — work that unblocks a decision (provision access,
      move data so its shape is visible). Do it, or hand the human a precise
      checklist; record the resulting facts later entries depend on.

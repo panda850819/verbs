@@ -64,9 +64,10 @@ from B with the sidebar from C" — that's the design they want.
 
 ### 6. Converge over rounds (optional)
 
-One round usually answers the question. When the user wants to design a whole
-surface by taste — or a wayfinder entry pins `converge` — run repeated rounds
-that walk down the visual design tree:
+One round usually answers the question. When the ONE question is surface-sized
+("what should this whole feature look like?") — the user asks to design it by
+taste, or a wayfinder entry names converge — decompose it into one question
+per round, walking down the visual design tree:
 
 - **Round 1: overall design.** Variants disagree about the page's structure.
   The verdict picks a direction (or a hybrid).
@@ -75,8 +76,10 @@ that walk down the visual design tree:
   to the surviving branch: everything already decided stays fixed, only the
   current level varies.
 - Ask for the verdict grill-style: one question per round ("which structure —
-  and what's wrong with the closest loser?"), and record each verdict before
-  regenerating. Stop when the user stops caring about the next level down.
+  and what's wrong with the closest loser?"). Before regenerating, record the
+  round's verdict where Capture puts the final one — the tracking issue or
+  brief driving the work — so no decision lives only in the discarded mock.
+  Stop when the user stops caring about the next level down.
 
 ### 7. Capture and clean up
 

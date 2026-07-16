@@ -37,7 +37,8 @@ the top of the prototype. Getting the branch wrong wastes the whole prototype.
   different variants on one route, switchable via `?variant=` and a floating
   bottom bar. Single round by default; UI.md's converge mode runs repeated
   rounds down the visual design tree when the user (or a wayfinder entry)
-  asks for it.
+  asks for it. Converge still only chooses a direction, at finer grain — it
+  never becomes the production build.
 
 ## Rules (both branches)
 
@@ -69,7 +70,8 @@ Done means the question is answered AND captured:
 
 ## Relationship to other skills
 
-- `prototype` diverges cheap to choose a direction; `ui` then converges and
-  builds the committed direction for production.
+- `prototype` diverges cheap to choose a direction — UI.md's converge mode
+  just repeats that choice level by level, still on throwaway mocks; `ui`
+  then builds the committed direction for production.
 - A grill open question of the shape "how should it look / behave" is often
   fastest resolved here; feed the verdict back into the brief.
