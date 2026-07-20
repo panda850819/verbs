@@ -12,7 +12,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Audit/reduce a live multi-runtime agent harness, installed skill/plugin surface, cold context, or attention load | `harness-slim` (post-adoption evaluation; propose reversible moves before execution) |
 | Bug fix / feature / refactor (3+ files or new abstraction) | a light `grill` plan pass first, not direct edits |
 | Explicit Agent Worker / parallel read-only research | use native subagents with the Agent Worker protocol below; main agent orchestrates and synthesizes |
-| Mechanical, file-scoped build units with locked spec | delegate — `handover` (Codex) or subagent; main model orchestrates |
+| Mechanical, file-scoped build unit with locked spec that benefits from fresh context | `handover` to one selected fresh Claude or Codex worker; original model orchestrates |
 | Error / crash / regression / failing test / "used to work and now doesn't" | `debug` (root cause before any fix) |
 | Build / fix a UI surface, "looks off", 不好看 / 很醜 / 排版 / 字體 | `ui` (lock direction, fight defaults) |
 | Design question answerable by building it — try a few variants / does this state model feel right / 做個原型 | `prototype` (throwaway build; verdict outlives the code) |

@@ -24,7 +24,7 @@ check_contract() {
 
 check_contract DISPATCH.md
 grep -Fq 'Native read-only Agent Worker fan-out' skills/engineering/handover/SKILL.md
-grep -Fq 'mechanical write delegation from Claude Code to Codex' skills/engineering/handover/SKILL.md
+grep -Fq 'delegation to one fresh Claude or Codex worker' skills/engineering/handover/SKILL.md
 
 claude_payload="$(mktemp)"
 codex_payload="$(mktemp)"

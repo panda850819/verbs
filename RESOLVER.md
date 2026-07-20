@@ -28,7 +28,7 @@ This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md be
 | `verbs:review` | Risk-adaptive diff review with a bounded low-risk fast path, scoped evidence, and cold-context escalation. | review PR |
 | `verbs:debug` | Systematic root-cause debugging: root-cause gate, hypothesis-explains-every-symptom, instrument-first by bug class, bisect, scope-blast. NOT diff review (`review`) or UI taste (`ui`). | bug, crash, regression, 報錯, 跑不通, used to work |
 | `verbs:ship` | Test + commit + PR in git mode. CLOSES finished work. | code done, ship it |
-| `verbs:handover` | Hand unfinished work to Codex to DO: sync (spawn `codex exec` now) or `--async` (write an anchored file payload). Not `ship`, which closes finished work. | hand this to codex, let codex finish, 丟給 codex |
+| `verbs:handover` | Hand one bounded unfinished task from a Claude or Codex orchestrator to a fresh Claude or Codex worker; the original agent waits, verifies, and keeps git. Codex-only `--async` still writes an anchored file payload. | fresh context, hand this to codex, hand this to claude, 交給 fresh agent |
 | `verbs:advisor` | Pull a decorrelated second opinion from a different model into the current session. `--panel` = blind cross-model critics on a prepared plan. The inbound half of the cross-runtime pair; `handover` is the outbound half. | second opinion, red-team this, 多角度審, am I sure about this |
 | `verbs:sprint` | Acceptance-driven focused execution with bounded review and delivery evidence. | small focused task |
 
@@ -63,7 +63,7 @@ If you are reviewing your own PR -> `verbs:review`. If you are deciding whether 
 
 ## Version
 
-This RESOLVER.md is for Verbs v0.12.0. Update it when adding, removing, or renaming skills.
+This RESOLVER.md is for Verbs v0.13.0. Update it when adding, removing, or renaming skills.
 
 ---
 

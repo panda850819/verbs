@@ -63,6 +63,15 @@ codex exec -m "{Model}" -c 'model_reasoning_effort="{Effort}"' \
 - The companion app-server path also rejected Sol at `xhigh` and `ultra`; `high`
   is the verified advisor effort on that path.
 
+## Fresh-run selection
+
+`scripts/verbs fresh-run` is a caller-neutral execution transport rather than a
+role key. The original orchestrator passes the worker runtime, model, and effort
+explicitly for every dispatch; same-runtime handoff does not require the same
+model. The command never inherits or silently substitutes a model and fails
+loud when the selected runtime rejects it. Existing handover role rows remain
+the compatibility defaults for Codex-targeted mechanical and risky work.
+
 ## Update gate
 
 Update an anchor only after a read-only fixed-token probe proves both the selected

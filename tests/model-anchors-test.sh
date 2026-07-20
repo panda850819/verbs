@@ -62,8 +62,10 @@ grep -Fq -- '--tools "" --no-session-persistence' "$anchor"
 grep -Fq 'Never inherit' "$anchor"
 
 bash -n scripts/bootstrap.sh
-grep -Fq 'ext_check_version "handover"       "codex"  "0.144.1"' scripts/bootstrap.sh
+grep -Fq 'ext_check_version "handover/codex" "codex"  "0.144.1"' scripts/bootstrap.sh
+grep -Fq 'ext_check_version "handover/claude" "claude" "2.1.206"' scripts/bootstrap.sh
+grep -Fq '`scripts/verbs fresh-run` is a caller-neutral execution transport' "$anchor"
 grep -Fq 'ext_check_version "advisor/codex"  "codex"  "0.144.1"' scripts/bootstrap.sh
 grep -Fq 'ext_check_version "advisor/claude" "claude" "2.1.206"' scripts/bootstrap.sh
 
-echo "OK: advisor and handover use explicit, single-sourced model anchors."
+echo "OK: advisor and handover use explicit, single-sourced model selection."

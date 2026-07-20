@@ -1,6 +1,9 @@
 # Codex invocation — the single SSOT
 
-> How to invoke Codex once: build the payload, spawn `codex exec`, collect + classify ONE structured result. Both `/handover` (sync) and `/sprint --delegate codex` (batch loop) call this. Verified against codex-cli 0.144.1 on this machine. Ported from EveryInc Compound Engineering `ce-work-beta`.
+> Legacy Codex-specific invocation used by `/handover --async` artifacts and
+> existing sprint delegation. Synchronous caller-neutral handoff uses
+> `fresh-run.md`. Verified against codex-cli 0.144.1 on this machine. Ported
+> from EveryInc Compound Engineering `ce-work-beta`.
 
 ## The XML payload
 

@@ -25,7 +25,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
 | `/verbs:qa` | core | Browser-based UI QA with acceptance evidence ready for a PR. |
 | `/verbs:ship` | ext | Test + commit + push + PR, including QA evidence comments when present. Needs cli:gh. |
-| `/verbs:handover` | ext | Hand unfinished work to Codex (sync or async). Needs cli:codex. |
+| `/verbs:handover` | ext | Hand bounded unfinished work from Claude or Codex to one fresh Claude or Codex worker. Needs both CLIs for the full four-route matrix. |
 | `/verbs:advisor` | ext | Cross-model second opinion. Needs cli:codex and cli:claude for opposite-seat routing. |
 | `/verbs:harness-slim` | ext | Post-adoption multi-runtime harness evaluation. Needs cli:git, cli:codex, and cli:claude. |
 

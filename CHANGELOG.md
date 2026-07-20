@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.13.0 — Fresh-context handoff primitive
+
+### Added
+
+- `scripts/verbs fresh-run` validates one allowlisted request, starts a fresh
+  Claude or Codex process, waits, normalizes one compact result, confines and
+  streams bounded artifact digests, then deletes scratch state. The original
+  agent remains orchestrator and worker recursion is blocked. Worker processes
+  receive an allowlisted environment; Claude uses isolated settings with a
+  fail-closed sandbox; write runs require a clean git root and cannot change
+  HEAD ownership. (#256)
+- Handover now supports the complete Claude-to-Claude, Claude-to-Codex,
+  Codex-to-Claude, and Codex-to-Codex synchronous matrix. Worker model and
+  effort are explicit per dispatch and never silently substituted. (#256)
+
+### Changed
+
+- `handover` is caller-neutral in synchronous mode. Existing Codex-only async
+  artifacts remain available; persistent sessions, ACP, parallel fan-out, and
+  a standalone library remain outside this release. (#256)
+
 ## v0.12.0 — Post-adoption harness evaluation
 
 ### Added
