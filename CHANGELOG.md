@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.13.1 — ui catches motion-feel complaints
+
+### Changed
+
+- `ui` triggers now include interaction-feel exemplars (很死 / 死板 / 生硬 /
+  沒動效 / 沒回饋感 / 切換好硬 / feels dead / stiff / janky transition) on both
+  the `DISPATCH.md` row and the SKILL.md frontmatter, so a non-designer's
+  "this feels dead" complaint routes to `ui` instead of falling through.
+  Function-ambiguous phrasings (點了沒反應) are deliberately excluded to avoid
+  poaching genuine bugs from `debug`. No motion knowledge doc and no body hook:
+  the fix relies on craft.md's existing Motion section plus model built-in. (#258)
+
 ## v0.13.0 — Fresh-context handoff primitive
 
 ### Added
