@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.13.2 — advisor description cut to routing signal
+
+### Changed
+
+- `advisor`'s frontmatter description drops from 999 B to 345 B, the largest
+  in the pack down to below its median. Every description is always-on: it
+  sits in cold-start context on every host whether or not the skill fires,
+  so mode prose that only matters after selection belongs in the body. The
+  seat-independence rule ("reach for the MOST INDEPENDENT model, not the
+  nominally highest tier") moved to Step 0 rather than being dropped; the
+  load-bearing trigger, the reversible-calls-just-decide gate, and all three
+  NOT-cases stay in the description where routing needs them.
+
 ## v0.13.1 — ui catches motion-feel complaints
 
 ### Changed

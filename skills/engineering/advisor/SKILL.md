@@ -1,10 +1,7 @@
 ---
 name: advisor
 description: |
-  Pull a decorrelated second opinion from a DIFFERENT model into the current session — the executor-calls-advisor pattern. Zero-config: self-locates the runtime seat and routes the call, never hardcodes a direction.
-  - default: one cross-model consult on a load-bearing judgment (a design fork, a decision, "am I sure about this").
-  - --panel: two mutually-blind cross-model critics on a PREPARED plan.
-  Fires only on a LOAD-BEARING judgment (expensive-if-wrong: a design fork, a plan before you commit, an irreversible or outward-facing decision, keep-vs-rewrite) — reversible small calls just decide, no consult. Reach for the MOST INDEPENDENT model, not the nominally highest tier: from an Opus seat a different provider (Codex/GPT) usually gives more new signal than a same-family model. "get a second opinion", "red-team this", "多角度審". NOT code-diff review (use review), NOT sending mechanical build work out to Codex (use handover), NOT self-interview to sharpen a fuzzy idea (use grill).
+  Pull a decorrelated second opinion from a DIFFERENT model on a LOAD-BEARING judgment: a design fork, a pre-commit plan, an irreversible or outward-facing call. Reversible calls just decide. `--panel` = blind critics on a prepared plan. NOT code-diff review (review), NOT mechanical work for Codex (handover), NOT sharpening a fuzzy idea (grill).
 reads:
   - skill: lib/gate-contract.md
   - skill: lib/model-anchors.md
@@ -45,6 +42,10 @@ Detect the current runtime only to guarantee that the outside opinion comes from
 
 This seat check chooses direction only. Authentication, budgets, and general
 model-routing policy remain host concerns.
+
+Reach for the MOST INDEPENDENT model, not the nominally highest tier. From an
+Opus seat a different provider (Codex/GPT) usually yields more new signal than
+a same-family model does.
 
 ## Step 1: Select roles, then probe (fail loud, never silently self-review)
 
