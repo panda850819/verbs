@@ -35,6 +35,9 @@ MANIFEST_PATH = Path(_env_value(
 DISPATCH_PATH = REPO_ROOT / "DISPATCH.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 RESOURCE_INDEX = Path("skills/.verbs-resource-index.json")
+README_PATH = Path("README.md")
+README_CATALOG_BEGIN = "<!-- BEGIN GENERATED: skill-catalog -->"
+README_CATALOG_END = "<!-- END GENERATED: skill-catalog -->"
 
 _PRODUCT_KEYS = (
     "id", "display_name", "marketplace_id", "repository", "homepage",
@@ -848,12 +851,11 @@ def run_init(args):
 
 
 # ---------------------------------------------------------------------------
-# Subcommand: sync (manifest.toml -> derived loader manifests)
+# Subcommand: sync (manifest.toml -> derived files)
 # ---------------------------------------------------------------------------
 #
 # manifest.toml is the only hand-authored product/skill identity. Host loader
-# manifests are committed generated files because the hosts need them before
-# this CLI can run.
+# manifests and the README skill catalog are committed generated files.
 
 
 def _sync_root():
@@ -1143,6 +1145,57 @@ def _generated_loaders(manifest_data):
     }
 
 
+def _markdown_cell(value):
+    """Render one compact, pipe-safe Markdown table cell."""
+    return " ".join(value.split()).replace("|", r"\|")
+
+
+def _generated_readme_catalog(manifest_data):
+    """Render the public skill catalog from manifest insertion order."""
+    lines = [
+        "| Skill | Tier | Purpose |",
+        "|---|---|---|",
+    ]
+    for name, spec in manifest_data.get("skill", {}).items():
+        if not isinstance(spec, dict):
+            raise ValueError(f"manifest skill {name} must be a table")
+        tier = spec.get("tier")
+        description = spec.get("description")
+        if not isinstance(tier, str) or not tier:
+            raise ValueError(f"manifest skill {name} tier must be a string")
+        if not isinstance(description, str) or not description:
+            raise ValueError(
+                f"manifest skill {name} description must be a string"
+            )
+        lines.append(
+            f"| `/verbs:{_markdown_cell(name)}` "
+            f"| {_markdown_cell(tier)} "
+            f"| {_markdown_cell(description)} |"
+        )
+    return "\n".join(lines)
+
+
+def _replace_generated_block(text, begin, end, body):
+    """Replace one marker-bounded block while preserving all other prose."""
+    if text.count(begin) != 1 or text.count(end) != 1:
+        raise ValueError(
+            f"{README_PATH} must contain exactly one {begin} / {end} block"
+        )
+    start = text.index(begin)
+    finish = text.index(end)
+    if start >= finish:
+        raise ValueError(f"{README_PATH} generated markers are out of order")
+    return (
+        text[:start]
+        + begin
+        + "\n"
+        + body
+        + "\n"
+        + end
+        + text[finish + len(end):]
+    )
+
+
 def _write_json_nofollow(path, data):
     """Write pretty JSON + trailing newline, refusing to follow a symlink."""
     if path.is_symlink():
@@ -1206,6 +1259,19 @@ def run_sync(args):
 
     check = getattr(args, "check", False)
     root = _sync_root()
+    readme_path = root / README_PATH
+    try:
+        _assert_no_symlink_components(root, readme_path)
+        readme_text = readme_path.read_text(encoding="utf-8")
+        expected_readme = _replace_generated_block(
+            readme_text,
+            README_CATALOG_BEGIN,
+            README_CATALOG_END,
+            _generated_readme_catalog(manifest_data),
+        )
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: cannot render {README_PATH}: {exc}", file=sys.stderr)
+        sys.exit(1)
     try:
         previous_resource_index = _load_resource_index(root)
     except ValueError as exc:
@@ -1230,6 +1296,20 @@ def run_sync(args):
         sys.exit(1)
     all_issues = []
     written = []
+    if readme_text != expected_readme:
+        all_issues.append(
+            f"{README_PATH}: generated skill catalog differs from manifest render"
+        )
+        if not check:
+            try:
+                _write_bytes_nofollow(
+                    readme_path, expected_readme.encode("utf-8")
+                )
+            except OSError as exc:
+                print(f"ERROR: {exc}", file=sys.stderr)
+                sys.exit(1)
+            written.append(str(README_PATH))
+
     for relative, data in generated.items():
         path = root / relative
         current = None
@@ -1356,7 +1436,7 @@ def main():
 
     syn = sub.add_parser(
         "sync",
-        help="Regenerate loader JSON from manifest.toml",
+        help="Regenerate derived files from manifest.toml",
     )
     syn.add_argument(
         "--check",

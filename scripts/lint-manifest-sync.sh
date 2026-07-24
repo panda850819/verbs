@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # lint-manifest-sync.sh — manifest.toml is the single source of truth for the
 # skill list. This lint fails when manifest entries and skills/ directories
-# drift, or when retired claims (38 skills, flows/, agents/) reappear in docs.
+# drift, or when retired/fixed-count claims reappear in living docs.
 #
 # Skills live one level deep under category buckets: skills/<bucket>/<skill>/.
 #
@@ -58,7 +58,7 @@ scan_docs=(
   "$repo_root/.codex-plugin/plugin.json"
   "$repo_root/PHILOSOPHY.md"
 )
-stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|3 documented compositions" \
+stale=$(grep -niE "38 skills|2[4-9] skills|[0-9]+ active skills|[0-9]+ personas?|persona skills|persona lenses|7 lifecycle flows|7 context recipes|3 documented compositions" \
   "${scan_docs[@]}" 2>/dev/null || true)
 current_counts=$(grep -niE "[0-9]+ skills? \(|\([0-9]+ core|[0-9]+ (core|ext)\b" \
   "${scan_docs[@]}" 2>/dev/null || true)
@@ -73,11 +73,11 @@ if [ -n "$stale" ]; then
   fail=1
 fi
 
-# Derived loader manifests restate the version + skill count from manifest.toml.
-# scripts/verbs sync is the generator; --check is the drift gate so the
-# Codex/Claude/marketplace JSON can never silently fall behind a manifest bump.
+# Derived files restate selected manifest data. scripts/verbs sync is the
+# generator; --check is the drift gate so loader JSON and the README skill
+# catalog cannot silently fall behind a manifest change.
 if ! sync_out="$(python3 "$repo_root/scripts/verbs" sync --check 2>&1)"; then
-  echo "FAIL: derived loader manifests drift from manifest.toml:"
+  echo "FAIL: derived files drift from manifest.toml:"
   echo "$sync_out" | sed 's/^/  /'
   fail=1
 fi

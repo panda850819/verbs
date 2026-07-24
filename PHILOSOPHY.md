@@ -12,8 +12,8 @@ The intelligence lives in the model plus the skill's own lore, not in swappable
 persona agents. A skill is a short sequence of steps that frames the task, loads the
 relevant lore, and manages the learnings loop. Verbs ships skills and thin host
 adapters. The recommended Marketplace Plugin registers only SessionStart
-dispatch, the Bash PreToolUse destructive guard, and the Stop verification
-gate. Manual skill imports are hook-free. The host owns
+dispatch, the Bash PreToolUse destructive and ticket-gate guards, and the Stop
+verification gate. Manual skill imports are hook-free. The host owns
 identity, brain or memory, scheduling, project truth, and global model routing.
 
 ### 2. Close the Loop

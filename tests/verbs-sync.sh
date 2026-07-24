@@ -23,13 +23,24 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Isolated fixture: complete [product], three skills, and all four loader docs
+# Isolated fixture: complete [product], three skills, and all derived docs
 # ---------------------------------------------------------------------------
 root="$tmp/root"
 man="$root/manifest.toml"
 mkdir -p "$root/.claude-plugin" "$root/.codex-plugin" \
          "$root/.agents/plugins" "$root/skills/engineering" "$root/lib"
 printf '%s\n' '# shared fixture resource' >"$root/lib/shared.md"
+cat >"$root/README.md" <<'EOF'
+# Fixture Verbs
+
+Handwritten introduction.
+
+<!-- BEGIN GENERATED: skill-catalog -->
+stale catalog sentinel
+<!-- END GENERATED: skill-catalog -->
+
+Handwritten ending.
+EOF
 
 cat >"$man" <<'EOF'
 [product]
@@ -50,16 +61,19 @@ version = "9.9.9"
 
 [skill.alpha]
 tier = "core"
+description = "Alpha purpose."
 resources = ["lib/shared.md"]
 composes = ["beta"]
 
 [skill.beta]
 tier = "core"
+description = "Beta purpose."
 resources = []
 composes = ["gamma"]
 
 [skill.gamma]
 tier = "ext"
+description = "Gamma purpose with a | pipe."
 resources = []
 composes = []
 EOF
@@ -93,9 +107,9 @@ run_sync() {
 # S02 -- check reports drift and never mutates any generated document
 # ---------------------------------------------------------------------------
 if run_sync --check >/dev/null 2>&1; then
-  fail_t "sync --check should exit nonzero on drifted four-document fixture"
+  fail_t "sync --check should exit nonzero on drifted fixture"
 else
-  pass "sync --check detects drift across the four generated loader docs"
+  pass "sync --check detects drift across generated files"
 fi
 
 if "$PY3" - "$root" <<'PY'
@@ -112,6 +126,7 @@ expected = {
 }
 for relative, sentinel in expected.items():
     assert json.loads((root / relative).read_text())["sentinel"] == sentinel
+assert "stale catalog sentinel" in (root / "README.md").read_text()
 PY
 then
   pass "sync --check did not mutate any generated document"
@@ -123,7 +138,7 @@ fi
 # S03 -- apply fully renders identity, repository, hero, category, and skills
 # ---------------------------------------------------------------------------
 if run_sync >/dev/null 2>&1; then
-  pass "sync apply renders all four loader docs"
+  pass "sync apply renders loaders, resources, and README catalog"
 else
   fail_t "sync apply should exit 0"
 fi
@@ -139,6 +154,7 @@ claude = json.loads((root / ".claude-plugin/plugin.json").read_text())
 market = json.loads((root / ".claude-plugin/marketplace.json").read_text())
 codex = json.loads((root / ".codex-plugin/plugin.json").read_text())
 agents = json.loads((root / ".agents/plugins/marketplace.json").read_text())
+readme = (root / "README.md").read_text()
 
 description = "Fixture software-work description. Includes 3 composable skills."
 homepage = "https://example.test/fixture-verbs"
@@ -179,6 +195,17 @@ assert agents["plugins"][0]["name"] == "fixture-verbs"
 assert agents["plugins"][0]["source"] == {"source": "local", "path": "."}
 assert agents["plugins"][0]["category"] == "Fixture Developer Tools"
 assert "version" not in agents
+
+catalog = """<!-- BEGIN GENERATED: skill-catalog -->
+| Skill | Tier | Purpose |
+|---|---|---|
+| `/verbs:alpha` | core | Alpha purpose. |
+| `/verbs:beta` | core | Beta purpose. |
+| `/verbs:gamma` | ext | Gamma purpose with a \\| pipe. |
+<!-- END GENERATED: skill-catalog -->"""
+assert catalog in readme
+assert readme.startswith("# Fixture Verbs\n\nHandwritten introduction.\n")
+assert readme.endswith("\nHandwritten ending.\n")
 
 resource = root / "skills/engineering/alpha/lib/shared.md"
 assert resource.read_text() == "# shared fixture resource\n"
@@ -245,6 +272,47 @@ expect_drift "hero" "$root/.claude-plugin/marketplace.json" \
   "description" "stale hero"
 expect_drift "category" "$root/.agents/plugins/marketplace.json" \
   "plugins.0.category" "Personal OS"
+
+"$PY3" - "$root/README.md" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+path.write_text(text.replace("Alpha purpose.", "stale README purpose", 1))
+PY
+if run_sync --check >/dev/null 2>&1; then
+  fail_t "README catalog drift should fail sync --check"
+elif grep -qF 'stale README purpose' "$root/README.md"; then
+  pass "sync --check detects README catalog drift without mutating prose"
+else
+  fail_t "sync --check mutated the README catalog"
+fi
+if run_sync >/dev/null 2>&1 \
+  && ! grep -qF 'stale README purpose' "$root/README.md"; then
+  pass "sync restores only the generated README catalog"
+else
+  fail_t "sync should restore README catalog drift"
+fi
+
+"$PY3" - "$root/README.md" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+path.write_text(text.replace(
+    "Handwritten introduction.",
+    "Handwritten introduction, edited manually.",
+    1,
+))
+PY
+if run_sync --check >/dev/null 2>&1 \
+  && grep -qF 'Handwritten introduction, edited manually.' "$root/README.md"; then
+  pass "sync preserves handwritten README prose outside generated markers"
+else
+  fail_t "handwritten README prose should remain outside sync ownership"
+fi
 
 # ---------------------------------------------------------------------------
 # S04 -- resource drift, stale cleanup, composition, and symlink safety

@@ -1,76 +1,170 @@
-# RESOLVER.md
+# Verbs Resolver
 
-> Map of every active skill in Verbs. Use this as the index when something looks like overlap or you cannot tell which skill to invoke.
->
-> Companion to PHILOSOPHY.md (the why) and the per-skill SKILL.md files (the how). The active tier list lives in `manifest.toml`.
+Use this document when you understand the request but cannot tell which Verbs
+skill owns it, how skills compose, or where an enforcement boundary begins.
 
-## Why this file exists
+The public sources have separate jobs:
 
-Verbs ships the skills cataloged in `manifest.toml` (core + ext tiers). Each skill owns its own contract; users and hosts compose them as needed.
+| Source | Ownership |
+|---|---|
+| `README.md` | The first-visit explanation: why Verbs exists, the normal path, and install surface. |
+| `RESOLVER.md` | The complete human-facing operating model and disambiguation guide. |
+| `DISPATCH.md` | The single source for machine routing injected by supported plugin hosts. |
+| `manifest.toml` | The skill catalog, tiers, requirements, composition metadata, resources, and product identity. |
+| Each `SKILL.md` | The actual procedure, gates, outputs, and stop conditions for one skill. |
+| `hooks/` | The narrow enforcement layer. Hooks block selected unsafe or unverified transitions; they do not run the workflow. |
 
-This is the pattern used by gstack and alirezarezvani: monorepo + RESOLVER.md beats multi-repo split, because the categorization lives next to the content.
+`PHILOSOPHY.md` explains the design principles behind these ownership
+boundaries.
 
----
+## Operating model
+
+Verbs is a set of composable procedures, not a fixed pipeline. The default
+development route is:
+
+```text
+unclear request
+  |
+  v
+grill
+  |
+  +-- bounded outcome and acceptance --> sprint
+  |                                      |
+  |                                      +--> verify --> review --> ship
+  |
+  +-- several unresolved decisions ----> decision map
+                                         |
+                                         +--> wayfinder resolves one frontier
+                                              until work becomes sprint-sized
+```
+
+This route answers three common selection questions:
+
+1. Use `grill` when intent, scope, constraints, or acceptance are still
+   unknown. It asks one question at a time and normally closes with a brief and
+   executable plan.
+2. Add `wayfinder` when the uncertainty itself spans multiple decisions or
+   sessions. With no map, `grill` charts it and stops. With a map, `wayfinder`
+   takes one unblocked frontier entry, records the decision, and updates the
+   map.
+3. Use `sprint` when the outcome and acceptance are concrete enough to execute.
+   Sprint owns the build-to-delivery loop and calls specialist stages when the
+   work requires them.
+
+`handover` is not an alternative planning path. It is allowed only after a
+plan contains one bounded, mechanical build unit with a locked specification
+that benefits from fresh context. The original orchestrator waits, verifies
+the returned evidence, and retains responsibility for acceptance and Git.
+
+### Typed on-ramps
+
+Some work starts with a known problem type and does not need the full default
+route:
+
+| Known condition | Start with | Continue when |
+|---|---|---|
+| Reproducible error, regression, crash, or failing test | `debug` | Root cause is evidenced; fix execution can enter `sprint`. |
+| Production UI needs to be built or corrected | `ui` | The direction and implementation are ready for live `qa`. |
+| One design question can be answered by building | `prototype` | Record the verdict; discard the prototype or turn the result into a production plan. |
+| A module boundary or abstraction seam is the problem | `codebase-design` | The interface and seam are concrete enough for implementation. |
+| An external artifact may be installed or adopted | `gatekeeper` | Trust evidence supports an adopt, restrict, or reject decision. |
+| Production, shared infrastructure, or destructive actions are involved | `careful` | Required confirmation and recovery evidence are present. |
+| A load-bearing judgment needs independent challenge | `advisor` | The executor evaluates the second opinion; agreement is not a mandate. |
+| A live multi-runtime harness has accumulated complexity | `harness-slim` | A verified, reversible reduction proposal exists. |
+
+### Execution and closing stages
+
+`sprint` is the normal owner of a focused build-to-ship session. The specialist
+stages remain independently callable because each has a distinct contract:
+
+- `qa` proves browser-visible acceptance after a UI change.
+- `review` inspects a diff for grounded correctness and risk findings.
+- `ship` tests, commits, pushes, and creates the PR for completed work.
+- `handover` executes one unfinished mechanical unit in fresh context.
+
+For several independent outcomes, run several bounded sprints. Do not turn
+`sprint` into a permanent autonomous driver or use `wayfinder` as a task
+scheduler.
+
+### Enforcement versus guidance
+
+Skill prose guides model judgment. Marketplace Plugin hooks enforce only these
+boundaries:
+
+| Boundary | Enforcement |
+|---|---|
+| Routing availability | `SessionStart` injects `DISPATCH.md` at startup, clear, and compact. It does not choose or invoke a skill. |
+| Destructive Bash commands | The destructive guard blocks positive scoped matches before execution. It is not a complete shell sandbox. |
+| Issue-branch discipline | The ticket gate blocks default-branch commits and pushes plus broad pushes. It does not create the issue, worktree, or PR. |
+| Verification before stopping | The Stop gate blocks the first stop after a code edit when no recognized verification ran, then allows a second stop to prevent a loop. |
+
+Manual skill imports are hook-free. They retain the procedure but not these
+enforcement guarantees.
 
 ## Skill catalog
 
-### Dev workflow
+### Development workflow
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `verbs:grill` | Adversarial requirement discovery, one question at a time, surfaces unknown unknowns; drills then writes a structured brief by default, chat-only on "quick". | grill me, stress test, draft a brief, structured intake |
-| `verbs:wayfinder` | Chart or work a cross-session decision map: with a large, fuzzy topic, grill creates the map and stops; with an existing map, wayfinder takes ONE unblocked entry per session, writes the decision back, and graduates the fog. | start or resume a large effort, continue the map, 接續 map |
-| `verbs:codebase-design` | Deep-module design vocabulary: interface / seam / adapter / depth-as-leverage, deletion test, testable through the interface. Reference core other skills cite. | design this module, where does the seam go, interface feels too wide |
-| `verbs:careful` | Confirmation gates for production / shared infra / destructive commands. | working on prod |
-| `verbs:ui` | Build/fix UI with a point of view: lock direction, verify render, build past happy path, decompose cited products. NOT browser-test (`qa`) or render-bug (`debug`). | design, 做頁面, 不好看, 很醜, 排版 |
-| `verbs:prototype` | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind `?variant=`. Verdict recorded, code lands on a prototype branch. NOT production UI (`ui`). | prototype this, try a few variants, does this state model feel right |
-| `verbs:qa` | Browser-based UI QA. | test this UI |
-| `verbs:review` | Risk-adaptive diff review with a bounded low-risk fast path, scoped evidence, and cold-context escalation. | review PR |
-| `verbs:debug` | Systematic root-cause debugging: root-cause gate, hypothesis-explains-every-symptom, instrument-first by bug class, bisect, scope-blast. NOT diff review (`review`) or UI taste (`ui`). | bug, crash, regression, 報錯, 跑不通, used to work |
-| `verbs:ship` | Test + commit + PR in git mode. CLOSES finished work. | code done, ship it |
-| `verbs:handover` | Hand one bounded unfinished task from a Claude or Codex orchestrator to a fresh Claude or Codex worker; the original agent waits, verifies, and keeps git. Codex-only `--async` still writes an anchored file payload. | fresh context, hand this to codex, hand this to claude, 交給 fresh agent |
-| `verbs:advisor` | Pull a decorrelated second opinion from a different model into the current session. `--panel` = blind cross-model critics on a prepared plan. The inbound half of the cross-runtime pair; `handover` is the outbound half. | second opinion, red-team this, 多角度審, am I sure about this |
-| `verbs:sprint` | Acceptance-driven focused execution with bounded review and delivery evidence. | small focused task |
+| `verbs:grill` | Adversarial requirement discovery, one question at a time. Normally writes a structured brief and executable plan; “quick” keeps the result in chat. | grill me, stress test, draft a brief, scope this |
+| `verbs:wayfinder` | Chart or work a cross-session decision map, one unblocked frontier entry at a time. | establish a map, resume the map, continue a large effort |
+| `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
+| `verbs:debug` | Establish root cause through hypotheses, instrumentation, bisecting, and scope analysis before changing code. | error, crash, regression, failing test, used to work |
+| `verbs:codebase-design` | Design a deep module behind a small interface at a clean, testable seam. | module design, abstraction boundary, interface too wide |
+| `verbs:prototype` | Build a throwaway artifact that answers exactly one logic or UI design question. | prototype this, compare variants, test this state model |
+| `verbs:ui` | Build or fix a production UI with an explicit visual direction and rendered verification. | design, layout, typography, janky interaction |
+| `verbs:qa` | Verify a changed UI in a browser and capture acceptance evidence. | test this UI, QA, check the page |
+| `verbs:review` | Review a code diff with risk-adaptive evidence and earned cold-context escalation. | review this diff or PR, about to commit |
+| `verbs:ship` | Close completed Git work through test, commit, push, PR, and QA evidence publication when present. | code is done, ship it, create a PR |
+| `verbs:handover` | Give one locked, bounded, unfinished mechanical unit to a fresh Claude or Codex worker while the original agent retains orchestration and Git. | fresh context would help this plan unit |
+| `verbs:advisor` | Pull a decorrelated opinion from a different model; `--panel` critiques a prepared plan blindly from multiple angles. | second opinion, design fork, red-team this plan |
+| `verbs:careful` | Add confirmation and recovery gates around production, shared infrastructure, or destructive work. | production, shared infra, destructive command |
 
-For multi-step sequential work, run multiple sprints in sequence.
+### Trust and harness evaluation
 
-Scope greenfield design (DB schema, service topology, ADRs) with `grill`, then build in a sprint.
-
-### Trust evaluation
-
-| Skill | Purpose |
-|---|---|
-| `verbs:gatekeeper` | Pre-adoption trust check for external skills / MCP / repos / packages / software services. NOT a code review skill. STRIDE classification at Step 0. |
-| `verbs:harness-slim` | Post-adoption evaluation of a live multi-runtime harness: installed parity, cold context, routing overlap, telemetry semantics, and attention load. Proposes reversible reductions; does not mutate. |
+| Skill | Purpose | Trigger |
+|---|---|---|
+| `verbs:gatekeeper` | Evaluate an external skill, MCP, repo, package, service, URL, or document before adoption. | should I install, clone, trust, or adopt this |
+| `verbs:harness-slim` | Audit an already-adopted multi-runtime harness for parity, cold context, routing overlap, telemetry semantics, and attention cost. | audit or reduce the live agent harness |
 
 ## Disambiguation
 
-### Five review surfaces
+### Review surfaces
 
 | Surface | What it reviews |
 |---|---|
-| Built-in `/review` | Generic PR review |
-| Built-in `/security-review` | Branch code for security issues |
-| `verbs:review` | YOUR code via risk-adaptive passes, grounded findings, and earned cold review |
-| `verbs:gatekeeper` | EXTERNAL agents / MCP / repos BEFORE you adopt them |
-| `verbs:harness-slim` | LIVE multi-runtime harness AFTER adoption |
+| Built-in `/review` | A generic PR or diff review. |
+| Built-in `/security-review` | Branch code for security issues. |
+| `verbs:review` | Your code through scoped, risk-adaptive passes and grounded findings. |
+| `verbs:gatekeeper` | Someone else’s artifact before it enters your system. |
+| `verbs:harness-slim` | Your live multi-runtime harness after adoption. |
 
-If you are reviewing your own PR -> `verbs:review`. If you are deciding whether to install someone else's MCP server or clone their skill repo -> `verbs:gatekeeper`.
+Use `review` for a diff, `qa` for rendered behavior, `debug` for an unexplained
+failure, `gatekeeper` for pre-adoption trust, and `harness-slim` for
+post-adoption system load.
 
-### Requirement discovery
+### Architecture, prototype, and UI
 
-- `verbs:grill` — adversarial, one-question-at-a-time, surfaces unknown unknowns. Drills, then a structured close writes a brief + executable plan by default; a chat-only opt-out ("quick", "don't write files") leaves just the log.
+- Use `codebase-design` when the answer is an interface or seam.
+- Use `prototype` when one design uncertainty can be answered cheaply by a
+  disposable build.
+- Use `ui` when the artifact is intended to become production UI.
+- Use `qa` after the UI exists and browser evidence is the remaining need.
 
-## Version
+### Grill, wayfinder, sprint, and handover
 
-This RESOLVER.md is for Verbs v0.13.0. Update it when adding, removing, or renaming skills.
-
----
+- `grill` discovers what the work must become.
+- `wayfinder` maintains progress across a decision map when one plan would
+  falsely imply certainty.
+- `sprint` executes a concrete outcome and owns final acceptance.
+- `handover` supplies fresh execution context for one locked plan unit; it
+  never owns the broader outcome.
 
 ## Aliases
 
-Only aliases still declared by an active SKILL.md appear here. They do not alias
-the retired v3 plugin namespace.
+Only aliases still declared by an active `SKILL.md` appear here. They do not
+alias the retired v3 plugin namespace.
 
 | Old name (alias) | New name | Renamed in | Grace until |
 |---|---|---|---|
