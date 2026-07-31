@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.19.5 — A failed sprint salvages what the attempt validated
+## v0.19.7 — A failed sprint salvages what the attempt validated
 
 ### Added
 
@@ -21,6 +21,50 @@
   skill that never came across, so the reference pointed at nothing. `stale` is
   host- or human-set, the same rule as `recurrence` and `last_seen`. A test now
   fails on any `during retro` string under `lib/` or `skills/`. (#295)
+
+## v0.19.6 — ship gate 3 dedups by query, not by "review ran"
+
+### Changed
+
+- `ship` gate 3 (Pitfall ack) still runs its own search and now skips only the
+  entries an earlier read this session already listed **by the same query**. The
+  premise it was going to be removed under does not hold: `review` and gate 3
+  read the same store with different queries. Recall ranks by topic-token
+  overlap against title and tags, takes the top 3-5, and drops effective
+  confidence below 3; gate 3 selects `type: pitfall` entries whose `files:`
+  touch changed files. The live pitfall in `docs/learnings/pitfalls/` confirms
+  the split — it carries a `files:` list recall never reads. So a pitfall naming
+  a changed file can sit outside recall's results entirely, and skipping gate 3
+  because an escalated `review` ran would have dropped exactly the check that
+  catches it. The other ten gates are unchanged. (#296)
+- `tests/review-fast-path-contract-test.sh` fails if gate 3 starts treating a
+  completed `review` as blanket evidence, or if the two-queries reason is
+  dropped. It matches whitespace-normalized text, so rewrapping the gate cannot
+  flip it. (#296)
+
+## v0.19.5 — The verify gate recognizes workspace test commands
+
+### Fixed
+
+- `runtime_events.TEST_CMD_RE` now allows package-manager flags between the
+  binary and the test script, so `pnpm -r test`, `pnpm --filter <pkg> test`,
+  `pnpm -C <dir> test`, `npm -w <pkg> test`, and `yarn workspace <pkg> test`
+  count as verification. Previously only the bare `pnpm test` shape matched,
+  which meant a pnpm monorepo's standard test command was invisible: the Stop
+  gate blocked every code-edit turn no matter how much real testing ran, and
+  the only way past it was to declare the change unverified — training exactly
+  the behavior the gate exists to prevent. The intervening tokens exclude
+  `;`, `&`, and `|` so the run cannot span a command boundary and match an
+  unrelated later word. (#299)
+- `bash <path>.test.sh` and `bash <path>-test.sh` are recognized, not only
+  scripts that live under a `tests/` directory. (#299)
+- `tests/stop-verify-gate-test.sh` gains a JS-runner truth table. It had no
+  JavaScript case at all, which is why the gap survived: the JS half of the
+  pattern was written as a flat list of canonical one-liners and no test ever
+  exercised a workspace invocation. The negative half of the table pins the
+  boundary — a pipe after a workspace runner is still rejected, because piping
+  hands the shell's exit status to the last command and destroys the evidence
+  the gate reads. (#299)
 
 ## v0.19.4 — A mid-interview skill switch is defined and announced
 
