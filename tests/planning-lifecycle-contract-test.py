@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
 INTERVIEW = (ROOT / "lib/interview.md").read_text()
 WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
+SPRINT = (ROOT / "skills/engineering/sprint/SKILL.md").read_text()
 README = (ROOT / "README.md").read_text()
 RESOLVER = (ROOT / "RESOLVER.md").read_text()
 DISPATCH = (ROOT / "DISPATCH.md").read_text()
@@ -60,6 +61,13 @@ require_words(README, "one independently reviewable and revertible PR", "one iss
 require(RESOLVER, "A human selects one unblocked implementation Issue.", "ownership")
 require(RESOLVER, "reports the frontier but does not choose work", "ownership")
 require(DISPATCH, "never schedules or claims the next frontier", "non-scheduling sprint")
+# The boundary must live in the body sprint loads when it runs, not only in the
+# SessionStart injection it may never see (#276).
+require_words(
+    SPRINT,
+    "never schedule follow-on work or claim the next frontier Issue",
+    "sprint carries its own no-claim boundary",
+)
 require(DISPATCH, "canonical GitHub Spec Issue / to spec", "spec dispatch")
 require(DISPATCH, "dependency graph / to tickets", "ticket dispatch")
 

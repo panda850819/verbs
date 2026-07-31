@@ -110,6 +110,11 @@ Completion: review is clean, explicitly skipped by policy, or names the blocker.
 If `ship` fails, the sprint is `PAUSED`; do not relabel local completion as
 delivery. Do not create tracker or knowledge writes outside the target repo.
 
+A sprint owns only the selected finish line. Report the end state and stop:
+never schedule follow-on work or claim the next frontier Issue, even when an
+adjacent one is unblocked and obvious. Selecting the next finish line is a
+human decision outside this sprint.
+
 ## Output format
 
 ```text
