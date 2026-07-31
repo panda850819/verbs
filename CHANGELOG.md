@@ -1,19 +1,24 @@
 # Changelog
 
-## v0.19.6 — ship gate 3 stops re-reading what review just read
+## v0.19.6 — ship gate 3 dedups by query, not by "review ran"
 
 ### Changed
 
-- `ship` gate 3 (Pitfall ack) now fires only when recall did not already run on
-  this diff: `/review` skipped at gate 5, or a low-risk `review` that stopped
-  before `lib/learning-recall.md`. An escalated `review` reads the same store
-  against the same diff, so the two gates read it twice one gate apart, and
-  `ship` is the longest gate sequence in the repo. The gate narrows instead of
-  disappearing because the low-risk path is exactly where a pitfall touching
-  changed files would otherwise go unseen — that path is the one a low-risk
-  verdict can be wrong about. The other ten gates are unchanged. (#296)
-- `tests/review-fast-path-contract-test.sh` fails if gate 3 reverts to an
-  unconditional search, or if the low-risk carve-out is dropped. (#296)
+- `ship` gate 3 (Pitfall ack) still runs its own search and now skips only the
+  entries an earlier read this session already listed **by the same query**. The
+  premise it was going to be removed under does not hold: `review` and gate 3
+  read the same store with different queries. `lib/learning-recall.md` ranks by
+  topic-token overlap against title and tags, takes the top 3-5, and drops
+  effective confidence below 3; gate 3 selects `type: pitfall` entries whose
+  `files:` touch changed files. The live pitfall in `docs/learnings/pitfalls/`
+  confirms the split — it carries a `files:` list recall never reads. So a
+  pitfall naming a changed file can sit outside recall's results entirely, and
+  skipping gate 3 because an escalated `review` ran would have dropped exactly
+  the check that catches it. The other ten gates are unchanged. (#296)
+- `tests/review-fast-path-contract-test.sh` fails if gate 3 starts treating a
+  completed `review` as blanket evidence, or if the two-queries reason is
+  dropped. It matches whitespace-normalized text, so rewrapping the gate cannot
+  flip it. (#296)
 
 ## v0.19.4 — A mid-interview skill switch is defined and announced
 

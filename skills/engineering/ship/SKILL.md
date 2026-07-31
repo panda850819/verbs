@@ -47,15 +47,15 @@ to write a commit; this skill is the gate sequence, not the coaching.
 2. **Pre-flight** — `git pull`; run the project's test/build command and STOP
    on failure with the output; inspect `git diff --stat`,
    `git log origin/{main}..HEAD --oneline`, and the current branch.
-3. **Pitfall ack** — only when recall did not already run on this diff:
-   `/review` was skipped at gate 5, or it took the low-risk fast path, which
-   stops before the learning recall an escalated review runs. Then search
-   `{learnings_dir}` for `type: pitfall` entries touching changed files; a
-   match must be listed and acknowledged before proceeding. An escalated
-   `review` read the same store against the same diff, so repeating it here
-   reads it twice one gate apart — but the low-risk path is exactly where a
-   pitfall touching changed files would otherwise go unseen, so the gate
-   narrows rather than disappears.
+3. **Pitfall ack** — search `{learnings_dir}` for `type: pitfall` entries whose
+   `files:` touch changed files; a match must be listed and acknowledged before
+   proceeding. Skip only what an earlier read this session already listed by
+   this same query: an escalated `review`'s RECALL block covers an entry only
+   when it actually named it. Running `review` is not itself evidence — its
+   recall ranks by topic-token overlap against title and tags, takes the top
+   3-5, and drops effective confidence below 3, so a pitfall naming a changed
+   file can sit outside its results entirely. Same store, different query.
+   Acknowledge the remainder here.
 4. **Scope check** — if a brief for this branch exists in `docs/briefs/`,
    compare the current full diff against its Scope In/Out and the diff at
    review time. Print `Scope: ON TRACK`, or `SCOPE DRIFT: [...]` /

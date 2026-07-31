@@ -25,9 +25,10 @@ ship="skills/engineering/ship/SKILL.md"
 # line-anchored grep would pass or fail on rewrapping rather than on meaning.
 ship_flat=$(tr '\n' ' ' < "$ship" | tr -s ' ')
 for fragment in \
-  'only when recall did not already run on this diff' \
-  'it took the low-risk fast path, which stops before' \
-  'the gate narrows rather than disappears'; do
+  'Skip only what an earlier read this session already listed by this same query' \
+  'Running `review` is not itself evidence' \
+  'takes the top 3-5, and drops effective confidence below 3' \
+  'Same store, different query'; do
   case "$ship_flat" in
     *"$fragment"*) ;;
     *) echo "FAIL: ship gate 3 missing contract fragment: $fragment" >&2; exit 1 ;;
