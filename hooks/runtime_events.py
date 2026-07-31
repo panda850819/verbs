@@ -21,13 +21,18 @@ TEST_CMD_RE = re.compile(
     r"((^|[;&|\n]\s*)(uv\s+run\s+|poetry\s+run\s+)?pytest\b"
     r"|python[3]?(\.exe)?\s+-m\s+pytest\b"
     r"|python[3]?(\.exe)?\s+(-m\s+unittest|(\S*[/\\])?(test\S*\.py|\S*_test\.py))"
-    r"|npm\s+(run\s+)?test\b|yarn\s+test\b|pnpm\s+(run\s+)?test\b|bun\s+test\b|node\s+--test"
+    # Workspace drivers put flags between the binary and the script
+    # (pnpm -r test, pnpm --filter pkg test, npm -w pkg test), so allow a short
+    # run of operator-free tokens. Excluding ; & | keeps the run from spanning
+    # a command boundary and matching an unrelated later word.
+    r"|(npm|pnpm|yarn|bun)\s+([^\s;&|]+\s+){0,4}(run\s+)?test\b|node\s+--test"
     r"|go\s+test|cargo\s+test"
     r"|(^|[;&|\n]\s*)(npx\s+|bunx\s+|yarn\s+|pnpm\s+)?(vitest|jest)\b"
     r"|mvnw?(\.cmd)?\s+(\S+\s+)*test(\s|$)|gradlew?(\.bat)?\s+(\S+\s+)*test(\s|$)|dotnet\s+test(\s|$)"
     r"|\brspec\b|\bphpunit\b|\bctest\b|make\s+test\b|rake\s+(\S+\s+)*test\b|mix\s+test\b"
     r"|(^|[;&|]\s*)(tox|nox)\b|deno\s+test|rails\s+test"
     r"|\b(ba)?sh\s+(\S*[/\\])?tests?[/\\]\S+\.sh"
+    r"|\b(ba)?sh\s+\S+[-.]test\.sh\b"
     r"|\b(ba)?sh\s+(\S*[/\\])?lint-\S+\.sh)",
     re.IGNORECASE,
 )
