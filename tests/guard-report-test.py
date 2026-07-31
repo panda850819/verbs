@@ -250,6 +250,27 @@ with tempfile.TemporaryDirectory() as tmp:
     check(len(data["candidates"]) == 3 and data["candidates_omitted"] == 1,
           "candidates stay bounded and the omitted count is not silent")
 
+    # T06b — the cap keeps the heaviest evidence, whatever its kind.
+    rows = [event("2026-07-01T0{}:00:00Z".format(hour), hook="Stop",
+                  action="verify-gate", reason_code="code_edit_unverified")
+            for hour in range(6)]
+    rows += [event("2026-07-02T0{}:00:00Z".format(hour), decision="error",
+                   reason_code="guard_unavailable") for hour in range(3)]
+    log = write_log(tmp, rows, name="ranked.jsonl")
+    data = report("--log", str(log), "--tests-dir", str(fixture_tests))
+    check([c["kind"] for c in data["candidates"]] == ["skill", "hook"],
+          "a heavier skill pattern outranks a lighter hook candidate")
+
+    # T06c — offset timestamps are normalized before the window is applied.
+    log = write_log(tmp, [
+        event("2026-07-03T09:00:00+08:00"),
+        event("2026-07-01T00:00:00Z"),
+    ], name="offset.jsonl")
+    data = report("--log", str(log), "--since", "2026-07-02T00:00:00Z")
+    check(data["events"]["included"] == 1
+          and data["window"]["first_included"] == "2026-07-03T01:00:00Z",
+          "non-UTC timestamps are normalized to UTC for windowing")
+
     # T07 — bad invocation input fails loud instead of guessing a window.
     report("--log", str(empty), "--since", "yesterday", expect_rc=2)
     report("--log", str(empty), "--since", "2026-07-05T00:00:00Z",

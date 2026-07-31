@@ -15,8 +15,8 @@
   denials at `NO CONCLUSION`. Missing logs, malformed rows, unsupported
   schemas, high-signal-only capture, and an unreadable regression corpus are
   named evidence gaps.
-- Improvement candidates are propose-only, capped at three with the omitted
-  count printed, and classified by mechanism: `hook` only on parser or
+- Improvement candidates are propose-only, capped at three by weight of
+  evidence with the omitted count printed, and classified by mechanism: `hook` only on parser or
   enforcement-defect evidence, `test` only when a repeated pattern has no
   regression coverage, `skill` only when a covered pattern repeats, and
   `NEEDS TRACE` whenever causality is unresolved.

@@ -322,6 +322,7 @@ def classify_candidates(patterns, defects, coverage_corpus):
         {
             "kind": "hook",
             "pattern": _label(defect),
+            "count": defect["count"],
             "evidence": _evidence(defect, "records")
             + "; the guard itself failed to observe or decide",
         }
@@ -337,6 +338,7 @@ def classify_candidates(patterns, defects, coverage_corpus):
             candidates.append({
                 "kind": NEEDS_TRACE,
                 "pattern": label,
+                "count": pattern["count"],
                 "evidence": evidence + "; regression coverage index unavailable",
             })
             continue
@@ -344,6 +346,7 @@ def classify_candidates(patterns, defects, coverage_corpus):
             candidates.append({
                 "kind": "test",
                 "pattern": label,
+                "count": pattern["count"],
                 "evidence": evidence + "; no regression test names this reason code",
             })
             continue
@@ -352,15 +355,21 @@ def classify_candidates(patterns, defects, coverage_corpus):
             candidates.append({
                 "kind": NEEDS_TRACE,
                 "pattern": label,
+                "count": pattern["count"],
                 "evidence": evidence + "; mechanism fields are unresolved",
             })
             continue
         candidates.append({
             "kind": "skill",
             "pattern": label,
+            "count": pattern["count"],
             "evidence": evidence
             + "; guarded operation reached repeatedly with existing coverage",
         })
+    # Mechanism decides the kind; weight of evidence decides which candidates
+    # survive the cap. Ordering by kind alone let a 7-record defect crowd out a
+    # 141-denial pattern, which is exactly the evidence an audit needs to see.
+    candidates.sort(key=lambda item: (-item["count"], item["kind"], item["pattern"]))
     omitted = max(0, len(candidates) - MAX_CANDIDATES)
     return candidates[:MAX_CANDIDATES], omitted
 
