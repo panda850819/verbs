@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.20.3 — Verify gates honor each repo's test command
+
+### Fixed
+
+- The Stop verify gate now reads the nearest `AGENTS.md` or `CLAUDE.md`
+  `## verbs > test:` command and recognizes it in both Claude and Codex event
+  streams. Token-aware matching accepts leading `cd`, environment prefixes,
+  runner arguments, and status-preserving redirections without trusting
+  substring mentions or masked shell status. (#307)
+- Repositories without a readable declared command continue to use the built-in
+  runner regex bank; config read and shell parse failures remain non-fatal.
+  (#307)
+
 ## v0.20.2 — Guard denials stop teaching bypasses
 
 ### Fixed

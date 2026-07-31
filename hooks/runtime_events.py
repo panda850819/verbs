@@ -43,6 +43,10 @@ VERIFY_NOOP_RE = re.compile(
 )
 VERIFY_SINGLE_PIPE_RE = re.compile(r"(?<!\|)\|(?!\|)")
 VERIFY_BACKGROUND_AMP_RE = re.compile(r"(?<![<>&])&(?![>&0-9])")
+VERBS_HEADING_RE = re.compile(r"^##[ \t]+verbs[ \t]*$", re.IGNORECASE)
+TOP_LEVEL_HEADING_RE = re.compile(r"^#{1,2}[ \t]+")
+VERBS_TEST_RE = re.compile(r"^[ \t]*test:[ \t]*(\S.*?)[ \t]*$")
+ENV_ASSIGNMENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=.*$", re.DOTALL)
 
 CLAUDE_EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 CLAUDE_SHELL_TOOLS = {"Bash", "PowerShell"}
@@ -72,13 +76,110 @@ def is_code_path(path: str) -> bool:
     return PurePath(path).suffix.lower() in CODE_EXTS
 
 
-def is_verify_command(command: str) -> bool:
+def _parse_declared_test(text: str) -> str:
+    in_verbs = False
+    for line in text.splitlines():
+        if VERBS_HEADING_RE.match(line):
+            in_verbs = True
+            continue
+        if in_verbs and TOP_LEVEL_HEADING_RE.match(line):
+            break
+        if in_verbs:
+            match = VERBS_TEST_RE.match(line)
+            if match:
+                return match.group(1)
+    return ""
+
+
+def _declared_test_for_cwd(cwd: str) -> str:
+    """Return the nearest AGENTS/CLAUDE `## verbs > test:` command."""
+    try:
+        current = Path(cwd or os.getcwd()).expanduser().resolve(strict=False)
+        if not current.is_dir():
+            current = current.parent
+        for directory in (current, *current.parents):
+            for name in ("AGENTS.md", "CLAUDE.md"):
+                path = directory / name
+                try:
+                    declared = _parse_declared_test(path.read_text(encoding="utf-8"))
+                except (FileNotFoundError, IsADirectoryError, OSError, UnicodeError):
+                    continue
+                if declared:
+                    return declared
+            if (directory / ".git").exists():
+                break
+    except (OSError, RuntimeError):
+        pass
+    return ""
+
+
+def _shell_tokens(command: str) -> List[str]:
+    lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|")
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    return list(lexer)
+
+
+def _unwrap_command_prefix(tokens: Sequence[str]) -> Sequence[str]:
+    """Strip status-preserving cwd and environment prefixes."""
+    index = 0
+    while index + 3 <= len(tokens) and tokens[index] == "cd":
+        if tokens[index + 2] != "&&":
+            break
+        index += 3
+
+    if index < len(tokens) and tokens[index] == "env":
+        index += 1
+    while index < len(tokens) and ENV_ASSIGNMENT_RE.match(tokens[index]):
+        index += 1
+    return tokens[index:]
+
+
+def _matches_declared_test(command: str, declared_test: str) -> bool:
+    if not declared_test:
+        return False
+    try:
+        actual = _unwrap_command_prefix(_shell_tokens(command))
+        declared = _shell_tokens(declared_test)
+    except ValueError:
+        return False
+    if not declared or any(token in {";", "&", "|", "||", "&&"} for token in declared):
+        return False
+    if len(actual) < len(declared) or list(actual[:len(declared)]) != declared:
+        return False
+    # Extra runner arguments are valid. Shell boundaries after the declared
+    # invocation keep the old trust rule: only status-preserving `&&` may
+    # follow; masking, pipelines, backgrounding, and sequential commands may not.
+    remainder = actual[len(declared):]
+    operators = []
+    for index, token in enumerate(remainder):
+        if token not in {";", "&", "|", "||", "&&"}:
+            continue
+        previous = remainder[index - 1] if index else ""
+        following = remainder[index + 1] if index + 1 < len(remainder) else ""
+        if token == "&" and (
+            previous.endswith((">", "<")) or following.startswith((">", "<"))
+        ):
+            continue
+        operators.append(token)
+    return not operators or operators == ["&&"]
+
+
+def is_verify_command(command: str, declared_test: str = "") -> bool:
     """Return true only when a recognized runner controls shell status."""
     match = TEST_CMD_RE.search(command)
-    if not match or VERIFY_NOOP_RE.search(command):
+    declared_match = _matches_declared_test(command, declared_test)
+    if (not match and not declared_match) or VERIFY_NOOP_RE.search(command):
         return False
     if "||" in command:
         return False
+
+    if declared_match:
+        if VERIFY_BACKGROUND_AMP_RE.search(command):
+            return False
+        if VERIFY_SINGLE_PIPE_RE.search(command):
+            return False
+        return True
 
     suffix = command[match.end():]
     if re.search(r"(?:;|\n)\s*\S", suffix):
@@ -186,7 +287,8 @@ def _claude_window(entries: Sequence[Dict[str, Any]]) -> Sequence[Dict[str, Any]
 
 
 def _claude_events(
-    entries: Sequence[Dict[str, Any]], hook_payload: Dict[str, Any]
+    entries: Sequence[Dict[str, Any]], hook_payload: Dict[str, Any],
+    declared_test: str = "",
 ) -> List[RuntimeEvent]:
     calls: List[Tuple[str, Dict[str, Any]]] = []
     outcomes: Dict[str, bool] = {}
@@ -212,7 +314,7 @@ def _claude_events(
                     }))
                 elif name in CLAUDE_SHELL_TOOLS and isinstance(tool_input, dict):
                     command = tool_input.get("command", "")
-                    if isinstance(command, str) and is_verify_command(command):
+                    if isinstance(command, str) and is_verify_command(command, declared_test):
                         # A backgrounded run returns only a launch ack, not the
                         # runner's exit status, so its outcome is unknown — mirror
                         # the Codex still-running path and keep success=None.
@@ -335,7 +437,8 @@ def _codex_window(
 
 
 def _codex_events(
-    entries: Sequence[Dict[str, Any]], hook_payload: Dict[str, Any]
+    entries: Sequence[Dict[str, Any]], hook_payload: Dict[str, Any],
+    declared_test: str = "",
 ) -> List[RuntimeEvent]:
     calls: List[Tuple[str, Dict[str, Any]]] = []
     outputs: Dict[str, Any] = {}
@@ -377,7 +480,7 @@ def _codex_events(
                     direct_edit_ids.add(call_id)
                 elif name == "exec_command":
                     command = _command_text(arguments.get("cmd") or arguments.get("command"))
-                    if command and is_verify_command(command):
+                    if command and is_verify_command(command, declared_test):
                         calls.append((call_id, {
                             "kind": "verify", "paths": (), "command": command,
                         }))
@@ -451,6 +554,7 @@ def current_turn_events(
     entries: Sequence[Dict[str, Any]], hook_payload: Dict[str, Any]
 ) -> List[RuntimeEvent]:
     """Return ordered edit/verify events for the current runtime turn."""
+    declared_test = _declared_test_for_cwd(hook_payload.get("cwd", ""))
     if any(entry.get("type") in {"turn_context", "response_item"} for entry in entries):
-        return _codex_events(entries, hook_payload)
-    return _claude_events(entries, hook_payload)
+        return _codex_events(entries, hook_payload, declared_test)
+    return _claude_events(entries, hook_payload, declared_test)
