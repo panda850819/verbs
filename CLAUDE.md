@@ -64,3 +64,4 @@ tag: semver
 release: true
 deploy: null
 learnings: docs/learnings
+tracker: github
