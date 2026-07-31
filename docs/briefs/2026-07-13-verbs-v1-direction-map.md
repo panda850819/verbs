@@ -22,6 +22,12 @@ after ~4 weeks):**
   bypassed the PR path). Verbs supplies the ticket contract those runs read and
   write, never the scheduler — that contract is what this gate tests. Revised
   2026-07-30 with entry 5.
+  Revised again 2026-07-31 with entry 7: "0 boundary violations" counts the
+  **server-enforced** boundaries only — no direct push to `main`, no diff
+  outside the declared ticket scope, no edit to `hooks/`, `.github/`, or
+  `manifest.toml`. Merge is NOT among them. On a user-owned repository the agent
+  runs as admin and can merge its own PR; that boundary is a human
+  responsibility, not a measured one. Do not restore an unprovable clause here.
 - **G-B alignment line**: 2 wayfinder maps complete the full cycle
   (charting → frontier empty → sprint delivery), ≥1 of them living entirely on
   the GitHub tracker.
@@ -166,9 +172,35 @@ untested is exactly the two questions above, which is also all that remains of
 entry 1.
 
 ### 7. Unattended guardrail mechanism — `task` (AFK-leaning)
-status: open, unblocked 2026-07-30 · blocked-by:
-[5. Redraw the scheduling ownership boundary](#5-redraw-the-scheduling-ownership-boundary--grilling-hitl),
-closed by reversal
+status: closed (2026-07-31) · decision:
+[07-unattended-guardrail-mechanism](2026-07-13-verbs-v1-direction-map/07-unattended-guardrail-mechanism.md)
+· issue #279
+
+The three candidate mechanisms in the original text were the wrong frame. A
+guard, an allowlist, and a branch rule all fail identically, because the agent
+holds the credential that outranks them: on a user-owned repository repo admin
+is the ceiling, and merge and push are both `Contents: write`, so no token scope
+says "may open a PR, may not merge".
+
+Decision: the merge gate stays soft and is documented as soft; every boundary
+beneath it moves server-side, out of any session's reach — `enforce_admins` on,
+a PR-required ruleset with no bypass actor, a file-path ruleset over `hooks/`,
+`.github/`, and `manifest.toml`, and a `pull_request_target` check binding each
+PR to a maintenance-labelled Issue and its declared scope. Verbs-side, the
+envelope moves into the `sprint` and `ship` skill bodies, plus a label scheme,
+claim protocol, and write-back format. Settings and the CI check are follow-on
+`sprint` work, not part of #279.
+
+Rejected on cost, not mechanism: a fork lane (needs an org — GitHub will not
+fork a repository into its own owner's account) and required approvals with no
+bypass actor (a solo author cannot approve their own PR, so it gates the author
+too).
+
+The claim protocol needs `assignees`, which `to-tickets` currently forbids
+(`skills/productivity/to-tickets/SKILL.md:131-132`). Entry 6 owns that conflict.
+
+Original text follows, retained because the frame it names is what the decision
+rejects.
 
 Make the permission envelope enforceable, not prose: how an unattended session
 is constrained to maintenance-class tickets and the PR ceiling (labels +
