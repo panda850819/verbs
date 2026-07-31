@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import fresh_run
+import guard_report
 
 
 def _env_value(canonical, legacy, default=None):
@@ -1445,6 +1446,7 @@ def main():
     )
 
     fresh_run.add_parser(sub)
+    guard_report.add_parser(sub)
 
     sub.add_parser("help", help="Show this help message")
 

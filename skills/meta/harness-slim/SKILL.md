@@ -49,16 +49,28 @@ attention surfaces after adoption.
 4. Normalize usage by event semantics and coverage. Zero-use pruning requires
    at least 30 days, 20 eligible opportunities for that skill, and verified
    outcome coverage. Lifetime counters cannot prove a windowed zero.
-5. Audit context. Measure content actually injected at cold start and classify
+5. Read guard telemetry through `python3 scripts/verbs guard-report`, the only
+   guard-event seam this audit uses. Run it read-only with an explicit window
+   and interpret it conservatively:
+   - `Rate: UNAVAILABLE` or `NO CONCLUSION` means the denominator is unknown.
+     Zero denials and zero use never prove a healthy surface.
+   - Propose a **Skill** candidate only when repeated denials show the agent
+     reaching a correctly guarded operation through an instruction or routing
+     gap; a **test** candidate only when a reproducible pattern lacks
+     regression coverage; a **hook** candidate only when the evidence traces a
+     parser or enforcement defect, never from frequency alone.
+   - Unresolved causality stays `NEEDS TRACE`. Every candidate is propose-only;
+     the audit edits no Skill, test, hook, or host state.
+6. Audit context. Measure content actually injected at cold start and classify
    each instruction as **always-on**, **deferred**, or **task-local**. Tool
    recipes, examples, and domain detail default to deferred loading. Name one
    owner and absorber for every duplicate responsibility.
-6. Audit attention. Long-running or parallel routes need a checkable exit,
+7. Audit attention. Long-running or parallel routes need a checkable exit,
    plateau/budget bound, quiet background behavior, and aggregated reporting.
    Preserve one foreground judgment lane. Resolve unknowns before long
    execution; use independent maker/verifier contexts only when subjective or
    high-risk output lacks a deterministic check.
-7. Classify each surface exactly once: **Keep**, **Slim**, **Resource**,
+8. Classify each surface exactly once: **Keep**, **Slim**, **Resource**,
    **Maintainer-only**, **Overlay**, or **Retire**. A major model change earns
    paired with-skill/without-skill fixtures before retirement.
 
@@ -68,7 +80,7 @@ attention surfaces after adoption.
 Harness slim
 Core health: green | red
 Runtime surface: source / installed / live
-Telemetry: event kinds, coverage, eligible sample
+Telemetry: guard-report window, event kinds, coverage, eligible sample
 Context: always-on / deferred / task-local, bytes or observed tokens
 Attention: foreground lane, background exits, aggregation, verifier policy
 Keep / Slim / Resource / Maintainer / Overlay / Retire: owner + evidence

@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.20.0 — Guard denials become harness-slim evidence
+
+### Added
+
+- `python3 scripts/verbs guard-report` aggregates `verbs.guard-event.v1`
+  records into one read-only audit report: an explicit inclusive window with
+  its effective first and last included timestamps, counts by `runtime`,
+  `hook`, `action`, `decision`, and `reason_code`, and named counts for the
+  Stop `code_edit_unverified`, ticket-gate, and destructive-guard denial and
+  override patterns.
+- The report separates the denominator from the counts. Without an
+  eligible-opportunity denominator it prints `Rate: UNAVAILABLE` and keeps zero
+  denials at `NO CONCLUSION`. Missing logs, malformed rows, unsupported
+  schemas, high-signal-only capture, and an unreadable regression corpus are
+  named evidence gaps.
+- Improvement candidates are propose-only, capped at three by weight of
+  evidence with the omitted count printed, and classified by mechanism: `hook` only on parser or
+  enforcement-defect evidence, `test` only when a repeated pattern has no
+  regression coverage, `skill` only when a covered pattern repeats, and
+  `NEEDS TRACE` whenever causality is unresolved.
+
+### Changed
+
+- `harness-slim` names `guard-report` as its guard telemetry seam and carries
+  the same conservative reading rules, so zero denials and zero use no longer
+  read as a healthy surface.
+
 ## v0.19.8 — SessionStart smoke isolates the Verbs hook
 
 ### Fixed
