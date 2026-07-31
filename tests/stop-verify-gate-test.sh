@@ -174,6 +174,26 @@ for cmd in "pytest -q && echo passed" "pytest -q 2>&1" \
   run_gate "$T"; expect_allow "Claude status-preserving verify accepted: $cmd"
 done
 
+# Workspace drivers put flags between the binary and the script; a monorepo's
+# standard test command must count, or the gate blocks every code turn there.
+for cmd in "pnpm test" "pnpm test:pg" "pnpm -r test" \
+           "pnpm --filter @scope/api test" "pnpm -C apps/api test" \
+           "npm -w packages/core test" "yarn workspace api test" \
+           "node --test scripts/ci/gate.test.mjs" \
+           "bash scripts/ci/governance.test.sh"; do
+  { u "fix"; cedit e1 Edit /tmp/proj/app.ts; cresult e1 false; cbash v1 "$cmd"; cresult v1 false; } > "$T"
+  run_gate "$T"; expect_allow "Claude workspace verify accepted: $cmd"
+done
+
+# The flag run must not reach across a command boundary, and piping a workspace
+# runner still hides its exit status.
+for cmd in "pnpm -r test | tail -30" "pnpm --filter @scope/api test | grep pass" \
+           "pnpm build && echo nothing here" "pnpm -r typecheck" \
+           "pnpm -r test --help"; do
+  { u "fix"; cedit e1 Edit /tmp/proj/app.ts; cresult e1 false; cbash v1 "$cmd"; cresult v1 false; } > "$T"
+  run_gate "$T"; expect_block "Claude masked/non-test workspace command rejected: $cmd"
+done
+
 # Codex: canonical rollout calls, explicit patch/test outcomes, and turn_id.
 T="$WORK/codex.jsonl"
 { cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; } > "$T"
