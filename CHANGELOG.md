@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.19.4 — A mid-interview skill switch is defined and announced
+
+### Added
+
+- `lib/interview.md` defines what happens when the user names a different
+  interviewing skill while an interview is unfinished, in both directions
+  (`/grill` during a `wayfinder` charting session, `/wayfinder` during a `grill`
+  one). The answers so far carry forward under the new caller — the same
+  carry-forward the already-ran guard performs for a finished interview — and
+  the original caller's close is dropped. Previously only the finished case was
+  guarded, so a half-charted map could be lost with nothing said. The rule lives
+  in the shared module because it is the one place both callers read, and the
+  switch must be announced in one line naming the answers kept and the artifact
+  dropped. (#289)
+- `tests/planning-lifecycle-contract-test.py` pins the section, both directions,
+  and the announcement line, so a future edit cannot quietly restore the silent
+  switch. (#289)
+
 ## v0.19.3 — Dispatch routes to a map by name, not by size
 
 ### Changed
