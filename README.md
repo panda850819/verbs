@@ -202,6 +202,24 @@ registered hook tree against this checkout. For a local-checkout install, use
 above. `python3 scripts/verbs init --host <claude|codex|hermes> --dry-run`
 prints the local install commands without changing the host.
 
+### Read guard telemetry
+
+The guard hooks append privacy-minimal `verbs.guard-event.v1` records.
+`guard-report` is the read-only way to turn that stream into audit evidence,
+and the seam `/verbs:harness-slim` uses:
+
+```bash
+python3 scripts/verbs guard-report --since 2026-07-01T00:00:00Z
+python3 scripts/verbs guard-report --json --eligible 40
+```
+
+It counts denials by `runtime`, `hook`, `action`, `decision`, and
+`reason_code`, names every evidence gap (missing log, malformed rows,
+unsupported schema, high-signal-only capture), and proposes at most three
+bounded Skill, test, or hook candidates. A count is not a rate: without an
+eligible-opportunity denominator it prints `Rate: UNAVAILABLE`, and zero
+denials stays `NO CONCLUSION` rather than proof of a healthy harness.
+
 ## Host support
 
 | Host | Status |

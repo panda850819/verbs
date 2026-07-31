@@ -10,7 +10,11 @@ check_contract() {
   for token in actual_invocation dispatch_selection load_proxy \
                "source / installed / live" "always-on / deferred / task-local" \
                "foreground lane" "Propose before any move" \
-               "at least 30 days" "20 eligible opportunities"; do
+               "at least 30 days" "20 eligible opportunities" \
+               "scripts/verbs guard-report" "Rate: UNAVAILABLE" \
+               "NO CONCLUSION" "NEEDS TRACE" \
+               "Zero denials and zero use never prove a healthy surface" \
+               "never from frequency alone"; do
     grep -Fq "$token" "$target" || return 1
   done
 }
