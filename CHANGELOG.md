@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.19.5 — The verify gate recognizes workspace test commands
+
+### Fixed
+
+- `runtime_events.TEST_CMD_RE` now allows package-manager flags between the
+  binary and the test script, so `pnpm -r test`, `pnpm --filter <pkg> test`,
+  `pnpm -C <dir> test`, `npm -w <pkg> test`, and `yarn workspace <pkg> test`
+  count as verification. Previously only the bare `pnpm test` shape matched,
+  which meant a pnpm monorepo's standard test command was invisible: the Stop
+  gate blocked every code-edit turn no matter how much real testing ran, and
+  the only way past it was to declare the change unverified — training exactly
+  the behavior the gate exists to prevent. The intervening tokens exclude
+  `;`, `&`, and `|` so the run cannot span a command boundary and match an
+  unrelated later word. (#299)
+- `bash <path>.test.sh` and `bash <path>-test.sh` are recognized, not only
+  scripts that live under a `tests/` directory. (#299)
+- `tests/stop-verify-gate-test.sh` gains a JS-runner truth table. It had no
+  JavaScript case at all, which is why the gap survived: the JS half of the
+  pattern was written as a flat list of canonical one-liners and no test ever
+  exercised a workspace invocation. The negative half of the table pins the
+  boundary — a pipe after a workspace runner is still rejected, because piping
+  hands the shell's exit status to the last command and destroys the evidence
+  the gate reads. (#299)
+
 ## v0.19.4 — A mid-interview skill switch is defined and announced
 
 ### Added
