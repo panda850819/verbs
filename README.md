@@ -134,7 +134,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:qa` | core | Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability. |
 | `/verbs:codebase-design` | core | Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
-| `/verbs:wayfinder` | core | Chart or work cross-session decision maps: with a large, fuzzy topic, use grill to create the map and stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. |
+| `/verbs:wayfinder` | core | Chart or work cross-session decision maps: with a large, fuzzy topic, run the interview and write the map here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. |
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |

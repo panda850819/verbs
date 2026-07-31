@@ -3,13 +3,14 @@ name: wayfinder
 type: skill
 description: |
   Chart or work a decision map across sessions until the route to its
-  destination is clear. With a large, fuzzy topic and no map, delegate charting
-  to grill and stop after the map is created. With an existing map, take
-  ONE unblocked entry, resolve it by type (research / grilling / prototype /
-  task), write the decision back, and graduate the fog. Use when starting or
-  resuming a multi-session effort. NOT executing a locked plan (sprint).
+  destination is clear. With a large, fuzzy topic and no map, run the interview
+  and write the map here, then stop. With an existing map, take ONE unblocked
+  entry, resolve it by type (research / grilling / prototype / task), write the
+  decision back, and graduate the fog. Use when starting or resuming a
+  multi-session effort. NOT executing a locked plan (sprint).
 reads:
   - repo: docs/briefs/**
+  - skill: lib/interview.md
   - skill: grill
   - skill: prototype
 writes:
@@ -34,14 +35,23 @@ Use this mode when the user gives a large, fuzzy topic and no map exists.
 
 1. **Name the destination.** If the user has not supplied a topic, ask for the
    destination before charting. Do not invent the effort the map should cover.
-2. **Delegate charting to `grill`.** Grill runs its structured close and
-   its wayfinder exit writes the map at
-   `docs/briefs/{YYYY-MM-DD}-{slug}-map.md`.
-3. **Stop after creation.** Report the map path and leave its entries unresolved.
-   Charting and working the first entry are separate sessions.
+   What reaching the end looks like — a spec, a locked decision, a change made
+   in place — shapes every entry, so settle it first.
+2. **Run the interview.** Follow `@lib/interview.md` here, in this session: one
+   question at a time, facts looked up rather than asked, delete-first before
+   any axis, and its stopping rule. Do not hand this to another skill and stop —
+   charting the map is this skill's own work.
+3. **Write the map.** Create `docs/briefs/{YYYY-MM-DD}-{slug}-map.md` in the
+   format below. Chart one typed entry per decision the interview made visible
+   (`research` / `prototype` / `grilling` / `task`) with its blocking links.
+   Do not chart decisions still hidden by fog; those stay under Not yet
+   specified until an entry graduates them.
+4. **Stop after creation.** Report the map path and leave its entries
+   unresolved. Charting and working the first entry are separate sessions.
 
-If grill concludes that the effort is small enough to proceed without a map,
-stop there and follow grill's recommended next skill.
+If the interview shows the effort fits one session after all, write no map. Say
+so and route to `grill` for its structured close, which owns the spec-sized and
+smaller-work paths.
 
 ## The map
 
@@ -54,10 +64,10 @@ of open entries whose blockers are all closed. Work one entry per session; the
 fog retreats one decision at a time until the route to the destination is clear
 and no entries remain.
 
-`docs/briefs/{YYYY-MM-DD}-{slug}-map.md` is exactly the format that grill's
-wayfinder exit writes: Destination, Notes, Decisions so far, typed investigation
-entries with blocking links, Not yet specified (the fog), and Out of scope. This
-skill consumes that format and never forks it.
+`docs/briefs/{YYYY-MM-DD}-{slug}-map.md` carries: Destination, Notes, Decisions
+so far, typed investigation entries with blocking links, Not yet specified (the
+fog), and Out of scope. This skill owns that format — it writes maps when
+charting and reads them when working, and nothing else in Verbs writes one.
 
 ## Work an existing map
 

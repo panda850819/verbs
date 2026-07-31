@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.19.0 — Wayfinder charts its own maps
+
+### Changed
+
+- `wayfinder` charting now runs the interview inline via `lib/interview.md` and
+  writes `docs/briefs/{YYYY-MM-DD}-{slug}-map.md` itself. It owns the map
+  format; nothing else in Verbs writes a map. (#285)
+- `grill`'s large-and-foggy route hands off to `wayfinder` instead of charting.
+  It passes the drilling so far so the charting session does not re-ask what is
+  already answered. Dispatch and Resolver follow the moved ownership. (#285)
+- Contract assertions now cover both sides: `grill` must say it does not write
+  the map, and `wayfinder` must not delegate charting back. (#285)
+
 ## v0.18.0 — Interview as a shared primitive
 
 ### Changed

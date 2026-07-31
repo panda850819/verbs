@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
 INTERVIEW = (ROOT / "lib/interview.md").read_text()
+WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
 README = (ROOT / "README.md").read_text()
 RESOLVER = (ROOT / "RESOLVER.md").read_text()
 DISPATCH = (ROOT / "DISPATCH.md").read_text()
@@ -39,7 +40,16 @@ require(GRILL, "require two or more implementation Issues", "spec threshold")
 require(GRILL, "even one PR changes a\n   public contract, schema or migration, or security boundary", "spec threshold")
 require(GRILL, "Do not write a competing repository brief, executable plan", "single source")
 require(GRILL, "**Smaller work -> local close.** Continue to Stage C", "small-work branch")
-require(GRILL, "**Large and foggy -> Wayfinder.**", "wayfinder branch")
+require(GRILL, "**Large and foggy -> `wayfinder`.**", "wayfinder branch")
+
+# wayfinder owns charting: it interviews and writes the map, grill hands off (#285).
+require(GRILL, "Do not write a map here", "grill does not chart")
+require(WAYFINDER, "@lib/interview.md", "wayfinder runs the interview itself")
+require(WAYFINDER, "docs/briefs/{YYYY-MM-DD}-{slug}-map.md", "wayfinder writes the map")
+require(WAYFINDER, "This skill owns that format", "wayfinder owns the map format")
+assert "Delegate charting to `grill`" not in WAYFINDER, (
+    "wayfinder must not delegate charting back to grill"
+)
 
 require(README, "to-spec --> canonical GitHub Spec Issue", "public lifecycle")
 require(README, "to-tickets --> child Issue graph", "public lifecycle")
