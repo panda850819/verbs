@@ -16,9 +16,12 @@ after ~4 weeks):**
 
 - **G-A unattended maintenance line**: 10 unattended PRs merged (agent claimed
   a bug/optimization ticket, resolved it, opened the PR without a human in the
-  session), across ≥2 repos, ≥5 of them fired by a scheduler rather than a
-  manually started session, with 0 boundary violations (touched non-maintenance
-  scope, or bypassed the PR path).
+  session), across ≥2 repos, ≥5 of them fired by a **host-native** scheduler
+  (GitHub Actions, a `claude schedule` routine) rather than a manually started
+  session, with 0 boundary violations (touched non-maintenance scope, or
+  bypassed the PR path). Verbs supplies the ticket contract those runs read and
+  write, never the scheduler — that contract is what this gate tests. Revised
+  2026-07-30 with entry 5.
 - **G-B alignment line**: 2 wayfinder maps complete the full cycle
   (charting → frontier empty → sprint delivery), ≥1 of them living entirely on
   the GitHub tracker.
@@ -44,13 +47,15 @@ after ~4 weeks):**
 - **v1.0 is a personal milestone, not a public-product gate** — 流程完善 for
   human + AI triggering, full engineering cycle, project-level goal alignment;
   the old three-external-users gate is dead (#220/#221 made this official).
-- **Scheduling / autonomous drivers move INTO Verbs scope** — the old
-  out-of-scope line "Verbs does not own scheduling, autonomous drivers" is
-  overturned for v1.0; the exact new boundary is entry
-  [Redraw the scheduling ownership boundary](#entries).
-  **Contested since 2026-07-30**: `CHANGELOG.md` for v0.17.0 (#269) records the
-  opposite, "keeping scheduling outside Verbs". Both are on record and they
-  cannot both hold. Entry 5 opens by killing one of them.
+- **Scheduling / autonomous drivers stay OUT of Verbs scope** — reversed
+  2026-07-30, entry 5. The 2026-07-13 charting decision to pull them in was
+  never implemented, and the shipped product decided the other way twice:
+  `README.md:115-116` (Product boundary) and `README.md:262-263` (v1.0 cut
+  criteria) both name scheduling and autonomous drivers as out of scope, and
+  the v0.17.0 CHANGELOG (#269) reaffirms it. What Verbs owns instead is the
+  ticket-side contract an externally scheduled agent reads and writes; entry 7
+  defines it. Decision:
+  [2026-07-30-scheduling-ownership-boundary](2026-07-30-scheduling-ownership-boundary.md).
 - **Unattended permission envelope** — maintenance-class work (optimizations,
   bug fixes) up to PR; main development requires the human present; merge is
   always human.
@@ -133,24 +138,19 @@ is still markdown-only. So the question is no longer wayfinder-versus-grill;
 it is where the line falls across four skills.
 
 ### 5. Redraw the scheduling ownership boundary — `grilling` (HITL)
-status: open, unblocked 2026-07-30 · blocked-by: none (was
-[2. Unattended runtime options](#2-unattended-runtime-options--research-afk),
-closed)
+status: closed by reversal (2026-07-30) · decision:
+[2026-07-30-scheduling-ownership-boundary](2026-07-30-scheduling-ownership-boundary.md)
+· issue #277
 
-Scheduling is now in scope — but what exactly does Verbs own: protocol only
-(ticket shapes, claim/write-back contract), protocol + one reference trigger on
-one host, or trigger implementations per host? Pick, and rewrite the
-out-of-scope boundary text accordingly.
+The entry's premise did not survive. It assumed scheduling had entered scope
+and only the line needed drawing; the shipped `README.md` says the opposite in
+two places and nothing was ever implemented. There is no boundary to redraw.
 
-Precondition: settle the contradiction flagged under "Decisions so far" —
-this map says scheduling moved into scope, `CHANGELOG.md` for v0.17.0 says it
-stayed out. Kill one before picking a boundary.
-
-Inputs are in
-[02-unattended-runtime-options](2026-07-13-verbs-v1-direction-map/02-unattended-runtime-options.md).
-Note in particular that cloud routines and the GitHub Action each already
-enforce a harder native PR ceiling than the Verbs ticket gate does, which bears
-on whether Verbs should own a trigger at all.
+Verbs owns no scheduler, trigger, or driver. It owns the ticket-side contract
+an externally scheduled agent reads and writes — what a claimable ticket looks
+like, what claiming means, what gets written back, where the PR ceiling is
+asserted. Defining that contract is entry 7, which does not die with this
+entry: unattended is not the same as scheduled.
 
 ### 6. Tracker-native wayfinder trial — `prototype` (HITL)
 status: open · blocked-by: [1. Tracker mechanics inventory](#1-tracker-mechanics-inventory--research-afk)
@@ -166,12 +166,26 @@ untested is exactly the two questions above, which is also all that remains of
 entry 1.
 
 ### 7. Unattended guardrail mechanism — `task` (AFK-leaning)
-status: open · blocked-by: [5. Redraw the scheduling ownership boundary](#5-redraw-the-scheduling-ownership-boundary--grilling-hitl)
+status: open, unblocked 2026-07-30 · blocked-by:
+[5. Redraw the scheduling ownership boundary](#5-redraw-the-scheduling-ownership-boundary--grilling-hitl),
+closed by reversal
 
 Make the permission envelope enforceable, not prose: how an unattended session
 is constrained to maintenance-class tickets and the PR ceiling (labels +
 PreToolUse guard? allowlist? branch rules). Deliverable: the mechanism decision
 and its enforcement point; implementation itself hands off to sprint.
+
+Re-scoped 2026-07-30 with entry 5: this covers **unattended, not scheduled**.
+An unattended session can be manually fired, so the envelope must hold
+regardless of what starts it. Entry 5's reversal also hands this entry the
+ticket-side contract to define, since that contract is now the whole of what
+Verbs owns on this line.
+
+The sharpest constraint is in
+[02-unattended-runtime-options](2026-07-13-verbs-v1-direction-map/02-unattended-runtime-options.md):
+`claude schedule` cloud routines have no plugin surface, so none of the four
+Verbs hooks fire there. In that lane the ticket contract is the only
+enforcement that exists — a PreToolUse-guard answer cannot reach it.
 
 ### 8. Skill-model fitness audit — `research` (AFK)
 status: closed (2026-07-16) · decision: [08-skill-model-fitness-audit](2026-07-13-verbs-v1-direction-map/08-skill-model-fitness-audit.md)
