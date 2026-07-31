@@ -3,11 +3,13 @@ name: wayfinder
 type: skill
 description: |
   Chart or work a decision map across sessions until the route to its
-  destination is clear. With a large, fuzzy topic and no map, run the interview
-  and write the map here, then stop. With an existing map, take ONE unblocked
-  entry, resolve it by type (research / grilling / prototype / task), write the
-  decision back, and graduate the fog. Use when starting or resuming a
-  multi-session effort. NOT executing a locked plan (sprint).
+  destination is clear. Use when the request itself names a map: charting one,
+  or resuming an existing one. With no map yet, run the interview and write the
+  map here, then stop. With an existing map, take ONE unblocked entry, resolve
+  it by type (research / grilling / prototype / task), write the decision back,
+  and graduate the fog. A large effort that names no map goes to `grill`, which
+  hands off here once the drilling shows the route is unclear. NOT executing a
+  locked plan (sprint).
 reads:
   - repo: docs/briefs/**
   - skill: lib/interview.md
@@ -26,12 +28,13 @@ user-invocable: true
 ---
 # Wayfinder
 
-Wayfinder has two modes. Charting establishes the map for a large, fuzzy
-effort; working advances one existing map entry per session.
+Wayfinder has two modes. Charting establishes the map; working advances one
+existing map entry per session.
 
 ## Chart a new map
 
-Use this mode when the user gives a large, fuzzy topic and no map exists.
+Use this mode when a map is asked for and none exists yet — the user names one
+directly, or `grill` hands the effort over as large and foggy.
 
 1. **Name the destination.** If the user has not supplied a topic, ask for the
    destination before charting. Do not invent the effort the map should cover.

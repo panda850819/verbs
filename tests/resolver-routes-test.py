@@ -11,6 +11,13 @@ MANIFEST = (ROOT / "manifest.toml").read_text(encoding="utf-8")
 RESOLVER = (ROOT / "RESOLVER.md").read_text(encoding="utf-8")
 DISPATCH = (ROOT / "DISPATCH.md").read_text(encoding="utf-8")
 
+WAYFINDER_SKILL = (
+    ROOT / "skills/productivity/wayfinder/SKILL.md"
+).read_text(encoding="utf-8").split("\n---\n", 1)[0]
+WAYFINDER_MANIFEST_DESCRIPTION = MANIFEST.split("[skill.wayfinder]", 1)[-1].split(
+    "\n[skill.", 1
+)[0]
+
 EXPECTED = set(re.findall(r"^\[skill\.([a-z0-9-]+)\]$", MANIFEST, re.M))
 ACTIVE_RESOLVER = RESOLVER.split("\n## Aliases\n", 1)[0]
 CATALOG_SECTION = ACTIVE_RESOLVER.split(
@@ -29,6 +36,37 @@ OWNERSHIP_CLAIMS = {
     "DISPATCH.md": "machine routing",
     "manifest.toml": "skill catalog",
 }
+
+
+# Dispatch must route on a signal visible in the message, never on how big the
+# effort is (#290). The wayfinder row keys on naming a map; every other fuzzy
+# input belongs to grill, which hands off once the drilling shows the route.
+SIZE_LANGUAGE = re.compile(
+    r"large|big effort|spanning sessions|multi-session|fuzzy", re.I
+)
+
+
+def wayfinder_dispatch_row(text):
+    """The row wayfinder OWNS, matched on its Invoke cell.
+
+    Substring matching would also catch grill's row, whose Invoke cell names
+    `wayfinder` as a hand-off target and whose Signal cell legitimately says
+    "large" — leaving the check dependent on row order.
+    """
+    for line in text.splitlines():
+        cells = line.split("|")
+        if len(cells) > 2 and cells[2].strip().startswith("`wayfinder`"):
+            return line
+    return ""
+
+
+def size_keyed_map_route(text):
+    """True when the wayfinder dispatch row claims work by size, not by map."""
+    row = wayfinder_dispatch_row(text)
+    if not row:
+        return False
+    signal = row.split("|")[1]
+    return bool(SIZE_LANGUAGE.search(signal))
 
 
 def retired_routes(text):
@@ -78,6 +116,39 @@ def main():
         failures.append(f"retired command routes remain: {found_retired}")
     if not retired_routes("Run /office-hours now."):
         failures.append("seeded retired-route mutation was not detected")
+    if not wayfinder_dispatch_row(DISPATCH):
+        failures.append("dispatch has no wayfinder row")
+    if size_keyed_map_route(DISPATCH):
+        failures.append(
+            "dispatch routes to wayfinder by effort size; it must key on the "
+            "message naming a map"
+        )
+    if "a large effort with no map yet" not in DISPATCH:
+        failures.append(
+            "dispatch grill row must absorb a large effort that has no map yet"
+        )
+    if "A large effort with no map still enters `grill`" not in RESOLVER:
+        failures.append("resolver does not agree with the dispatch map split")
+    if not size_keyed_map_route(
+        "| Large/fuzzy effort spanning sessions / 建立 map | `wayfinder` (x) |"
+    ):
+        failures.append("seeded size-keyed map-route mutation was not detected")
+    # The description is the hot routing surface (maintainer/SKILL-FRONTMATTER.md
+    # "the description is the routing surface"), so the split must hold there too
+    # or DISPATCH and the skill index disagree.
+    for label, text in (
+        ("wayfinder SKILL.md", WAYFINDER_SKILL),
+        ("manifest wayfinder entry", WAYFINDER_MANIFEST_DESCRIPTION),
+    ):
+        if "names a map" not in text:
+            failures.append(
+                f"{label} description must key on the request naming a map"
+            )
+        for size_trigger in ("large, fuzzy topic", "multi-session effort"):
+            if size_trigger in text:
+                failures.append(
+                    f"{label} description still routes by size: {size_trigger!r}"
+                )
     if failures:
         print("FAIL: resolver route contract")
         for failure in failures:
