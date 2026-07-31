@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.20.4 — Regressions route to debug deterministically
+
+### Fixed
+
+- The broad multi-file planning route now covers features and refactors, not
+  bug fixes. Regressions enter `debug` regardless of expected file count, then
+  hand evidenced fixes to `sprint`; `RESOLVER.md` states the same precedence.
+  (#308)
+- Resolver contract tests reject any return of `Bug fix` to the broad route and
+  require both dispatch and resolver to keep cross-file regressions under
+  `debug`. (#308)
+
 ## v0.20.3 — Verify gates honor each repo's test command
 
 ### Fixed

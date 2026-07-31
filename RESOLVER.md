@@ -88,7 +88,7 @@ route:
 
 | Known condition | Start with | Continue when |
 |---|---|---|
-| Reproducible error, regression, crash, or failing test | `debug` | Root cause is evidenced; fix execution can enter `sprint`. |
+| Reproducible error, regression, crash, or failing test, including fixes expected to touch 3+ files | `debug` | Root cause is evidenced; fix execution can enter `sprint`. |
 | Production UI needs to be built or corrected | `ui` | The direction and implementation are ready for live `qa`. |
 | One design question can be answered by building | `prototype` | Record the verdict; discard the prototype or turn the result into a production plan. |
 | A module boundary or abstraction seam is the problem | `codebase-design` | The interface and seam are concrete enough for implementation. |
