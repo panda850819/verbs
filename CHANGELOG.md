@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.18.0 — Interview as a shared primitive
+
+### Changed
+
+- The interview protocol moved out of `grill` into `lib/interview.md`: the
+  one-question cadence, rehearsed-answer handling, facts-vs-decisions,
+  delete-first, the eight-axis search space, the stopping rule, and the escape
+  hatch. `grill` consumes it and keeps its own contract — the chat-only opt-out
+  and the structured close. Behaviour at the interview surface is unchanged.
+  (#284)
+
 ## v0.17.0 — Tracker-native planning lifecycle
 
 ### Changed

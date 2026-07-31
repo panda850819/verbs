@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
+INTERVIEW = (ROOT / "lib/interview.md").read_text()
 README = (ROOT / "README.md").read_text()
 RESOLVER = (ROOT / "RESOLVER.md").read_text()
 DISPATCH = (ROOT / "DISPATCH.md").read_text()
@@ -19,6 +20,20 @@ def require(text: str, fragment: str, scenario: str) -> None:
 def require_words(text: str, fragment: str, scenario: str) -> None:
     require(" ".join(text.split()), " ".join(fragment.split()), scenario)
 
+
+# The interview protocol lives in lib/interview.md, not inlined in grill (#284).
+require(INTERVIEW, "**ONE question at a time.**", "interview cadence")
+require(INTERVIEW, "**Facts vs decisions.**", "facts vs decisions")
+require(INTERVIEW, "**Delete-first — drill whether before how.**", "delete-first")
+require(INTERVIEW, "1. **Existence**", "eight-axis search space")
+require(INTERVIEW, "8. **Success signal**", "eight-axis search space")
+require(INTERVIEW, "### Escape hatch (hard cap)", "escape hatch")
+require(GRILL, "@lib/interview.md", "grill consumes the interview primitive")
+for fragment in ("1. **Existence**", "### Escape hatch (hard cap)"):
+    assert fragment not in GRILL, (
+        f"grill must not restate the interview protocol: found {fragment!r}. "
+        "It belongs to lib/interview.md."
+    )
 
 require(GRILL, "require two or more implementation Issues", "spec threshold")
 require(GRILL, "even one PR changes a\n   public contract, schema or migration, or security boundary", "spec threshold")
