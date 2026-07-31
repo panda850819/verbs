@@ -99,6 +99,19 @@ require_words(
     "never schedule follow-on work or claim the next frontier Issue",
     "sprint carries its own no-claim boundary",
 )
+# Only SHIPPED reaches ship, so a failed attempt salvages its own learning (#295).
+require_words(
+    SPRINT,
+    "**A `FAILED` or `ABORTED_BY_USER` sprint emits ONE learning candidate "
+    "before it prints the end state**",
+    "failed sprint salvages what it validated",
+)
+require_words(SPRINT, "Nothing validated → print no extra line.", "silent when nothing validated")
+# skills/retro/ was absorbed into a pandastack skill that never came over (#295).
+for path in sorted(ROOT.glob("lib/*.md")) + sorted(ROOT.glob("skills/*/*/**/*.md")):
+    assert "during retro" not in path.read_text(), (
+        f"{path.relative_to(ROOT)} points at a retro surface Verbs does not have"
+    )
 require(DISPATCH, "canonical GitHub Spec Issue / to spec", "spec dispatch")
 require(DISPATCH, "dependency graph / to tickets", "ticket dispatch")
 

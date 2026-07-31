@@ -85,7 +85,7 @@ How to catch this earlier next time.
 - Calculate effective confidence: `max(0, confidence - floor(days_since_created / 30))`
 - `user-stated` sources never decay.
 - Skip learnings with effective confidence < 3.
-- Skip `status: stale` learnings entirely (kept for provenance; flagged during retro, human sets them). Passive decay only *suppresses*; an explicit stale mark is the corpus correcting itself.
+- Skip `status: stale` learnings entirely (kept for provenance; the host or human sets them, same as `recurrence` and `last_seen`). Passive decay only *suppresses*; an explicit stale mark is the corpus correcting itself.
 - A high host-provided `recurrence` (>= 2) marks a repeat offender — surface it
   even at lower effective confidence.
 - When a learning matches the current work, display: "Prior learning: [key] (confidence N/10, recurrence M, from [date])"

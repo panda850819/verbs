@@ -12,6 +12,7 @@ reads:
   - skill: ship
   - skill: handover
   - skill: lib/verify-the-test-loop.md
+  - skill: lib/learning-format.md
 writes:
   - cli: stdout
   - git: commits via ship
@@ -106,6 +107,15 @@ Completion: review is clean, explicitly skipped by policy, or names the blocker.
 - `FAILED`: acceptance failed or the bounded review loop was exhausted. Print
   the reproduced failure and last known-good point.
 - `ABORTED_BY_USER`: stop all writes and print current diff and cleanup state.
+
+**A `FAILED` or `ABORTED_BY_USER` sprint emits ONE learning candidate before it
+prints the end state**, covering what the attempt actually validated — a dead
+end and the reason it was dead included. Only the `SHIPPED` path reaches `ship`,
+and `ship` emits only when a concrete artifact surfaced, which a validated
+negative result never is; under the ticket-gated flow the branch is removed next
+and the reasoning is unrecoverable. Fields per `@lib/learning-format.md`;
+storage belongs to the host/project, unchanged. Nothing validated → print no
+extra line. `PAUSED` work is recoverable and emits nothing.
 
 If `ship` fails, the sprint is `PAUSED`; do not relabel local completion as
 delivery. Do not create tracker or knowledge writes outside the target repo.
