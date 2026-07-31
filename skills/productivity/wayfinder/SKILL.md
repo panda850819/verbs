@@ -50,6 +50,12 @@ directly, or `grill` hands the effort over as large and foggy.
    here — arrives with the drilling done. Carry that result forward and start
    at step 3. The skip needs a prior interview; without one, run it here rather
    than delegating it away.
+
+   **If an interview is still unfinished when the user switches skills, say so
+   before the next question.** In either direction — arriving here mid-interview,
+   or leaving here for another caller — the answers carry forward and the new
+   caller's close replaces the old one. `@lib/interview.md` owns the rule and the
+   exact line to print; a silent switch drops an artifact with nothing said.
 3. **Write the map.** Create `docs/briefs/{YYYY-MM-DD}-{slug}-map.md` in the
    format below. Chart one typed entry per decision the interview made visible
    (`research` / `prototype` / `grilling` / `task`) with its blocking links.

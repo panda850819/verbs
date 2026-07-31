@@ -58,6 +58,14 @@ for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder")):
         "**If the interview already ran this session, do not run it again.**",
         f"{scenario} carries the re-interview guard",
     )
+    # The announcement must fire at injection time, so it lives in the skill the
+    # host just loaded, not only in the far-upstream shared module (#289).
+    require_words(
+        skill_text,
+        "**If an interview is still unfinished when the user switches skills, "
+        "say so before the next question.**",
+        f"{scenario} carries the mid-interview switch announcement",
+    )
 
 # An unfinished interview that switches callers is defined, and visible (#289).
 require(INTERVIEW, "## Switching callers mid-interview", "mid-interview switch rule")

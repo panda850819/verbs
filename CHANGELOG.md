@@ -14,9 +14,15 @@
   in the shared module because it is the one place both callers read, and the
   switch must be announced in one line naming the answers kept and the artifact
   dropped. (#289)
+- Both `grill` and `wayfinder` carry the announcement requirement in their own
+  `SKILL.md`, following the precedent the already-ran guard already set. The
+  full rule stays single-sourced in `lib/interview.md`, but that module is a
+  pointer the model follows with a read, not content the host injects — the
+  switch happens exactly when a new `SKILL.md` is loaded, so a rule living only
+  in the module may not be in the working set at the moment it must fire. (#289)
 - `tests/planning-lifecycle-contract-test.py` pins the section, both directions,
   and the announcement line, so a future edit cannot quietly restore the silent
-  switch. (#289)
+  switch. The existing both-skills loop now also pins the mirrored line. (#289)
 
 ## v0.19.3 — Dispatch routes to a map by name, not by size
 
