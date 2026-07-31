@@ -13,6 +13,8 @@ GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-destructive-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
 pass=0 fail=0
 WANT_NOTICE='BLOCKED by Verbs destructive-guard:'
+WANT_GUIDANCE='Narrow the target or remove the destructive flag before retrying.'
+BYPASS_NAME_RE='# FORCE_OK|VERBS_FORCE|PSTICKET_FORCE'
 
 # check <expect 0|2> <description> <command-string> [ENV=val]
 check() {
@@ -24,7 +26,11 @@ check() {
     notice=$(printf '%s' "$json" | "$GUARD" 2>&1 >/dev/null)
   fi
   got=$?
-  if [ "$got" = "$expect" ] && { [ "$expect" != 2 ] || printf '%s' "$notice" | grep -qF "$WANT_NOTICE"; }; then
+  if [ "$got" = "$expect" ] && { [ "$expect" != 2 ] || {
+       printf '%s' "$notice" | grep -qF "$WANT_NOTICE" \
+         && printf '%s' "$notice" | grep -qF "$WANT_GUIDANCE" \
+         && ! printf '%s' "$notice" | grep -qE "$BYPASS_NAME_RE";
+     }; }; then
     pass=$((pass+1))
   else
     fail=$((fail+1))
@@ -42,6 +48,7 @@ check 2 "loop do rm -rf"            'for d in a b; do rm -rf "$d"; done'
 check 2 "git push --force"          'git push --force'
 check 2 "git push -f short"         'git push -f origin main'
 check 2 "git -C dir push --force"   'git -C /repo push --force origin main'
+check 2 "bypass name in env data"   'VERBS_FORCE=0 git push --force'
 check 2 "git push +ref"             'git push origin +main'
 check 2 "git reset --hard"          'git reset --hard HEAD~3'
 check 2 "git clean -fd"             'git clean -fd'
