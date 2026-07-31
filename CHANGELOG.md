@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.19.1 — Sprint carries its own no-claim boundary
+
+### Fixed
+
+- `sprint` now states the no-claim boundary in its own body: it owns only the
+  selected finish line and never schedules follow-on work or claims the next
+  frontier Issue. Previously the rule existed only in `DISPATCH.md`, so a
+  `sprint` invoked directly, or in a session where the SessionStart injection
+  was absent or compacted away, never loaded it. The contract test now asserts
+  against the skill body as well. (#276)
+
 ## v0.19.0 — Wayfinder charts its own maps
 
 ### Changed
