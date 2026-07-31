@@ -61,8 +61,9 @@ DOC_PATCH=$'*** Begin Patch\n*** Update File: README.md\n@@\n-old\n+new\n*** End
 # run_gate <transcript> [active] [canonical env] [turn] [panda legacy] [stack legacy]
 run_gate() {
   local transcript="$1" active="${2:-false}" new_gate_env="${3:-}" turn_id="${4:-turn-current}" panda_gate_env="${5:-}" stack_gate_env="${6:-}" payload
+  local gate_cwd="${GATE_CWD:-/tmp/proj}"
   local env_args=(-u VERBS_VERIFY_GATE -u PANDA_VERBS_VERIFY_GATE -u PANDASTACK_VERIFY_GATE "VERBS_VERIFY_GATE_FAILURE_MARKER=$FAIL_MARKER")
-  payload=$(python3 -c 'import json,sys; print(json.dumps({"session_id":"t","turn_id":sys.argv[3],"hook_event_name":"Stop","stop_hook_active":sys.argv[2]=="true","transcript_path":sys.argv[1],"cwd":"/tmp/proj"}))' "$transcript" "$active" "$turn_id")
+  payload=$(python3 -c 'import json,sys; print(json.dumps({"session_id":"t","turn_id":sys.argv[3],"hook_event_name":"Stop","stop_hook_active":sys.argv[2]=="true","transcript_path":sys.argv[1],"cwd":sys.argv[4]}))' "$transcript" "$active" "$turn_id" "$gate_cwd")
   [ -n "$new_gate_env" ] && env_args+=("VERBS_VERIFY_GATE=$new_gate_env")
   [ -n "$panda_gate_env" ] && env_args+=("PANDA_VERBS_VERIFY_GATE=$panda_gate_env")
   [ -n "$stack_gate_env" ] && env_args+=("PANDASTACK_VERIFY_GATE=$stack_gate_env")
@@ -194,6 +195,40 @@ for cmd in "pnpm -r test | tail -30" "pnpm --filter @scope/api test | grep pass"
   run_gate "$T"; expect_block "Claude masked/non-test workspace command rejected: $cmd"
 done
 
+# A repo-declared verifier outside the built-in regex bank must count in both
+# runtimes. Matching is token-aware: wrappers may establish cwd/environment and
+# append arguments, but mentions, command-name prefixes, and masked status do not
+# become verification evidence.
+CUSTOM_REPO="$WORK/custom-repo"
+mkdir -p "$CUSTOM_REPO/.git"
+cat > "$CUSTOM_REPO/AGENTS.md" <<'EOF'
+# Test project
+
+## verbs
+
+test: cargo clippy --all-targets
+EOF
+GATE_CWD="$CUSTOM_REPO"
+for cmd in \
+  "cargo clippy --all-targets" \
+  "cargo clippy --all-targets --all-features" \
+  "cd $CUSTOM_REPO && cargo clippy --all-targets --all-features" \
+  "RUSTFLAGS=-Dwarnings cargo clippy --all-targets" \
+  "env RUSTFLAGS=-Dwarnings cargo clippy --all-targets --all-features" \
+  "cargo clippy --all-targets 2>&1" \
+  "cargo clippy --all-targets &>clippy.log"; do
+  { u "fix"; cedit e1 Edit "$CUSTOM_REPO/app.rs"; cresult e1 false; cbash v1 "$cmd"; cresult v1 false; } > "$T"
+  run_gate "$T"; expect_allow "Claude declared verifier accepted: $cmd"
+done
+for cmd in \
+  "echo cargo clippy --all-targets" \
+  "cargo clippy-extra --all-targets" \
+  "cargo clippy --all-targets || true" \
+  "cargo clippy --all-targets | tee clippy.log"; do
+  { u "fix"; cedit e1 Edit "$CUSTOM_REPO/app.rs"; cresult e1 false; cbash v1 "$cmd"; cresult v1 false; } > "$T"
+  run_gate "$T"; expect_block "Claude false declared verifier rejected: $cmd"
+done
+
 # Codex: canonical rollout calls, explicit patch/test outcomes, and turn_id.
 T="$WORK/codex.jsonl"
 { cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; } > "$T"
@@ -202,6 +237,33 @@ run_gate "$T" false "" turn-missing; expect_allow "Unknown Codex turn id fails o
 
 { cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process exited with code 0"; } > "$T"
 run_gate "$T"; expect_allow "Codex passing exec_command verifies"
+
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "env RUSTFLAGS=-Dwarnings cargo clippy --all-targets --all-features"; cout v1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_allow "Codex repo-declared exec_command verifies"
+
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "cargo clippy --all-targets"; cout v1 "Process exited with code 1"; } > "$T"
+run_gate "$T"; expect_block "Codex failing repo-declared verifier never verifies"
+
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "echo cargo clippy --all-targets"; cout v1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_block "Codex declared verifier mention is rejected"
+
+# An unreadable/malformed project config must not crash the hook adapter; the
+# built-in regex bank remains the compatibility fallback.
+BROKEN_REPO="$WORK/broken-repo"
+mkdir -p "$BROKEN_REPO/AGENTS.md"
+GATE_CWD="$BROKEN_REPO"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_allow "Codex unreadable project config falls back to regex bank"
+GATE_CWD="$CUSTOM_REPO"
+
+PARENT_REPO="$WORK/parent-repo"
+CHILD_REPO="$PARENT_REPO/child-repo"
+mkdir -p "$CHILD_REPO/.git"
+cp "$CUSTOM_REPO/AGENTS.md" "$PARENT_REPO/AGENTS.md"
+GATE_CWD="$CHILD_REPO"
+{ cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "cargo clippy --all-targets"; cout v1 "Process exited with code 0"; } > "$T"
+run_gate "$T"; expect_block "Codex declared verifier does not cross child repo boundary"
+GATE_CWD="$CUSTOM_REPO"
 
 { cturn turn-current; cpatch p1 "$CODE_PATCH"; cpatch_result p1 true; cexec v1 "pytest -q"; cout v1 "Process exited with code 1"; } > "$T"
 run_gate "$T"; expect_block "Codex failing exec_command never verifies"
