@@ -4,8 +4,8 @@ Before responding to any task-shaped message, match it against this table. On ma
 
 | Signal | Invoke |
 |---|---|
-| Large/fuzzy effort spanning sessions / start or resume a decision map / 建立 map | `wayfinder` (chart via `grill`, then work one frontier entry per session) |
-| Fuzzy idea / scope not locked / 想討論 | `grill` (drills, then routes large foggy, spec-sized, or smaller work; say "quick" for a chat-only log) |
+| Large/fuzzy effort spanning sessions / start or resume a decision map / 建立 map | `wayfinder` (interviews and charts the map itself, then works one frontier entry per session) |
+| Fuzzy idea / scope not locked / 想討論 | `grill` (drills, then routes large foggy work to `wayfinder`, spec-sized to `to-spec`, smaller to a local close; say "quick" for a chat-only log) |
 | Prepared plan, want independent multi-angle critique | `advisor --panel` (blind cross-model critics) |
 | Load-bearing judgment / design fork / decision expensive-if-wrong, want a second opinion | `advisor` (pull a decorrelated cross-model take) |
 | Touching prod, shared infra, or harness paths (`~/.agents`, `~/.claude`, `~/.codex`) | `careful` first |

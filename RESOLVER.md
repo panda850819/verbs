@@ -55,9 +55,10 @@ This route answers three common selection questions:
    unknown. It asks one question at a time, then chooses a close based on the
    resulting work shape.
 2. Add `wayfinder` when the uncertainty itself spans multiple decisions or
-   sessions. With no map, `grill` charts it and stops. With a map, `wayfinder`
-   takes one unblocked frontier entry, records the decision, and updates the
-   map.
+   sessions. With no map, `wayfinder` runs the interview, writes the map, and
+   stops. With a map, it takes one unblocked frontier entry, records the
+   decision, and updates the map. `wayfinder` is the only skill that writes a
+   map; `grill` hands large foggy work to it rather than charting one itself.
 3. Use `to-spec` when the work is expected to need at least two implementation
    Issues, or when even one PR changes a public contract, schema or migration,
    or security boundary. Its GitHub Spec Issue becomes the only requirements
@@ -134,7 +135,7 @@ enforcement guarantees.
 | `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
 | `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |
 | `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
-| `verbs:wayfinder` | Chart or work a cross-session decision map, one unblocked frontier entry at a time. | establish a map, resume the map, continue a large effort |
+| `verbs:wayfinder` | Chart a cross-session decision map by interviewing and writing it here, or work one unblocked frontier entry at a time. | establish a map, resume the map, continue a large effort |
 | `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
 | `verbs:debug` | Establish root cause through hypotheses, instrumentation, bisecting, and scope analysis before changing code. | error, crash, regression, failing test, used to work |
 | `verbs:codebase-design` | Design a deep module behind a small interface at a clean, testable seam. | module design, abstraction boundary, interface too wide |

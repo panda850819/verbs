@@ -53,6 +53,12 @@ time, pushback via `lib/push-once.md`, facts looked up rather than asked,
 delete-first before any axis, the eight-axis search space, and its stopping
 rule and escape hatch. Do not restate or fork it here.
 
+**If the interview already ran this session, do not run it again.** A caller
+that hands work over mid-flow — `wayfinder` deciding the effort fits one session
+after all — arrives with the drilling done. Carry that result forward and start
+at the structured close. Re-asking answered questions is the failure this
+primitive exists to prevent.
+
 Grill's own contract is what happens around that interview: the chat-only
 opt-out below, and the structured close further down.
 
@@ -104,13 +110,13 @@ exactly one route from the routing gate; do not skip or reorder them.
 
 Apply these branches in order:
 
-1. **Large and foggy -> Wayfinder.** If the effort is both too big for one
-   session and the route is still unclear, write
-   `docs/briefs/{YYYY-MM-DD}-{slug}-map.md`: one typed investigation per visible
-   decision (`research` / `prototype` / `grilling` / `task`) with blocking
-   links. Do not chart decisions still hidden by fog. Work one investigation
-   per Wayfinder session; each produces a decision note, not code. Stop. Once
-   the route is clear, re-enter Stage A or this routing gate.
+1. **Large and foggy -> `wayfinder`.** If the effort is both too big for one
+   session and the route is still unclear, hand off to `wayfinder` and stop.
+   It owns charting: it runs the interview itself and writes
+   `docs/briefs/{YYYY-MM-DD}-{slug}-map.md`. Do not write a map here — one
+   skill writes maps, and it is not this one. Pass the drilling so far so the
+   charting session does not re-ask what is already answered. Once the route is
+   clear, re-enter Stage A or this routing gate.
 2. **Spec-sized -> `to-spec`.** Route here when the chosen work is expected to
    require two or more implementation Issues, or when even one PR changes a
    public contract, schema or migration, or security boundary. Give `to-spec`
@@ -143,6 +149,6 @@ own:
 ## Relationship to other skills
 
 - **Structured close is the default** — Spec-sized work routes to `to-spec`;
-  smaller work writes a local brief and executable plan; large foggy work
-  becomes a Wayfinder decision map.
+  smaller work writes a local brief and executable plan; large foggy work hands
+  off to `wayfinder`, which charts the map itself.
 - **Before a host closes a decision record** — if you're closing a work topic and realize scope was never grilled.
