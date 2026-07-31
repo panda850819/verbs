@@ -44,6 +44,9 @@ OWNERSHIP_CLAIMS = {
 SIZE_LANGUAGE = re.compile(
     r"large|big effort|spanning sessions|multi-session|fuzzy", re.I
 )
+DEBUG_SIGNAL_LANGUAGE = re.compile(
+    r"\b(?:bug|fix|regression|error|crash)\b|failing test", re.I
+)
 
 
 def wayfinder_dispatch_row(text):
@@ -76,6 +79,15 @@ def retired_routes(text):
         text,
         re.I,
     )
+
+
+def dispatch_signal_for(text, invoke_fragment):
+    """Return the signal cell for the row that directly invokes a skill."""
+    for line in text.splitlines():
+        cells = line.split("|")
+        if len(cells) > 2 and invoke_fragment in cells[2]:
+            return cells[1].strip()
+    return ""
 
 
 def main():
@@ -129,6 +141,21 @@ def main():
         )
     if "A large effort with no map still enters `grill`" not in RESOLVER:
         failures.append("resolver does not agree with the dispatch map split")
+    grill_signal = dispatch_signal_for(DISPATCH, "`grill` plan pass")
+    debug_signal = dispatch_signal_for(DISPATCH, "`debug`")
+    if not grill_signal or DEBUG_SIGNAL_LANGUAGE.search(grill_signal):
+        failures.append(
+            "dispatch broad multi-file route must exclude bug fixes so "
+            "regressions deterministically enter debug"
+        )
+    if "regression" not in debug_signal:
+        failures.append("dispatch debug row must own regressions")
+    if "including fixes expected to touch 3+ files" not in RESOLVER:
+        failures.append(
+            "resolver must state that cross-file regressions still enter debug"
+        )
+    if not DEBUG_SIGNAL_LANGUAGE.search("Regression / feature (3+ files)"):
+        failures.append("seeded overlapping regression route was not detected")
     if not size_keyed_map_route(
         "| Large/fuzzy effort spanning sessions / 建立 map | `wayfinder` (x) |"
     ):

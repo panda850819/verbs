@@ -13,7 +13,7 @@ Before responding to any task-shaped message, match it against this table. On ma
 | Set up or repair a repository's Verbs issue tracker / tracker-dependent workflow reports missing config | `setup-verbs` (derive GitHub identity from Git, preview one idempotent `## verbs` edit, then confirm) |
 | Turn established discussion or requirements into a canonical GitHub Spec Issue / to spec | `to-spec` (synthesize without another interview, confirm test seams once, publish one Issue) |
 | Turn a canonical Spec Issue into implementation tickets or a dependency graph / to tickets | `to-tickets` (approve vertical slices and blocking edges, publish child Issues, report frontier without claiming it) |
-| Bug fix / feature / refactor (3+ files or new abstraction) | a light `grill` plan pass first, not direct edits |
+| Feature / refactor (3+ files or new abstraction) | a light `grill` plan pass first, not direct edits |
 | Explicit Agent Worker / parallel read-only research | use native subagents with the Agent Worker protocol below; main agent orchestrates and synthesizes |
 | Mechanical, file-scoped build unit with locked spec that benefits from fresh context | `handover` to one selected fresh Claude or Codex worker; original model orchestrates |
 | Error / crash / regression / failing test / "used to work and now doesn't" | `debug` (root cause before any fix) |
