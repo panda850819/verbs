@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.19.2 — Both hand-off directions skip a finished interview
+
+### Fixed
+
+- `wayfinder` now carries the reciprocal re-interview guard: an interview
+  already run this session carries forward, and charting starts at
+  destination-naming and map-writing. Work routed from `grill` as large and
+  foggy was previously re-interviewed from scratch. The guard needs a prior
+  interview; without one `wayfinder` still runs it rather than delegating it
+  away. (#288)
+
 ## v0.19.1 — Sprint carries its own no-claim boundary
 
 ### Fixed

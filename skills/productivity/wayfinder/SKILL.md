@@ -41,6 +41,12 @@ Use this mode when the user gives a large, fuzzy topic and no map exists.
    question at a time, facts looked up rather than asked, delete-first before
    any axis, and its stopping rule. Do not hand this to another skill and stop —
    charting the map is this skill's own work.
+
+   **If the interview already ran this session, do not run it again.** A caller
+   that hands work over mid-flow — `grill` routing a large and foggy effort
+   here — arrives with the drilling done. Carry that result forward and start
+   at step 3. The skip needs a prior interview; without one, run it here rather
+   than delegating it away.
 3. **Write the map.** Create `docs/briefs/{YYYY-MM-DD}-{slug}-map.md` in the
    format below. Chart one typed entry per decision the interview made visible
    (`research` / `prototype` / `grilling` / `task`) with its blocking links.
