@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.20.1 — Sync inventories every skill lib file
+
+### Fixed
+
+- `scripts/verbs sync` now rejects every file under `skills/*/*/lib/` that is
+  neither generated from a manifest `resources[]` entry nor named in the
+  explicit skill-local allowlist. This closes the gap where an undeclared copy
+  could remain invisible while `sync --check` reported clean. (#305)
+- Removed five undeclared, unreferenced skill-local files that had accumulated
+  behind that gap. Regression coverage proves both check and apply modes fail
+  closed without deleting a newly introduced undeclared file. (#305)
+
 ## v0.20.0 — Guard denials become harness-slim evidence
 
 ### Added

@@ -87,9 +87,9 @@ write_skill() {
 write_skill alpha
 write_skill beta
 write_skill gamma
-mkdir -p "$root/skills/engineering/alpha/lib"
-printf '%s\n' '# handwritten local helper' \
-  >"$root/skills/engineering/alpha/lib/handwritten.md"
+local_resource="$root/skills/engineering/careful/lib/rationalizations.md"
+mkdir -p "$(dirname "$local_resource")"
+printf '%s\n' '# intentional skill-local helper' >"$local_resource"
 
 printf '%s\n' '{"sentinel":"claude-plugin"}' >"$root/.claude-plugin/plugin.json"
 printf '%s\n' '{"sentinel":"claude-marketplace"}' >"$root/.claude-plugin/marketplace.json"
@@ -314,6 +314,28 @@ else
   fail_t "handwritten README prose should remain outside sync ownership"
 fi
 
+undeclared="$root/skills/engineering/alpha/lib/undeclared.md"
+printf '%s\n' '# undeclared helper' >"$undeclared"
+if run_sync --check >"$tmp/undeclared-check.out" 2>&1; then
+  fail_t "sync --check should reject an undeclared skill lib file"
+elif grep -qF 'skills/engineering/alpha/lib/undeclared.md' \
+       "$tmp/undeclared-check.out" \
+  && grep -qF '# undeclared helper' "$undeclared"; then
+  pass "sync --check inventories and rejects undeclared skill lib files"
+else
+  fail_t "sync --check rejected the undeclared file without a stable diagnostic"
+fi
+if run_sync >"$tmp/undeclared-apply.out" 2>&1; then
+  fail_t "sync apply should reject an undeclared skill lib file"
+elif grep -qF 'skills/engineering/alpha/lib/undeclared.md' \
+       "$tmp/undeclared-apply.out" \
+  && grep -qF '# undeclared helper' "$undeclared"; then
+  pass "sync apply fails closed without deleting undeclared skill lib files"
+else
+  fail_t "sync apply rejected the undeclared file without preserving it"
+fi
+rm "$undeclared"
+
 # ---------------------------------------------------------------------------
 # S04 -- resource drift, stale cleanup, composition, and symlink safety
 # ---------------------------------------------------------------------------
@@ -437,13 +459,12 @@ import sys
 
 path = Path(sys.argv[1])
 data = json.loads(path.read_text())
-data["files"].append("skills/engineering/alpha/lib/handwritten.md")
+data["files"].append("skills/engineering/careful/lib/rationalizations.md")
 path.write_text(json.dumps(data, indent=2) + "\n")
 PY
 if run_sync >/dev/null 2>&1; then
   fail_t "poisoned resource index should not authorize local-file deletion"
-elif grep -qF '# handwritten local helper' \
-  "$root/skills/engineering/alpha/lib/handwritten.md"; then
+elif grep -qF '# intentional skill-local helper' "$local_resource"; then
   pass "poisoned resource index cannot delete a handwritten local helper"
 else
   fail_t "poisoned resource index deleted or changed a handwritten helper"
@@ -452,7 +473,7 @@ cp "$tmp/resource-index-clean.json" "$index"
 
 # A whole-skill retirement removes the manifest entry before sync prunes its
 # generated resource copies. The canonical-byte proof must still authorize the
-# generated deletion without touching handwritten files in that directory.
+# generated deletion without touching an allowlisted skill-local file.
 cp "$man" "$tmp/manifest-before-whole-skill-retire.toml"
 mv "$root/skills/engineering/alpha/SKILL.md" \
    "$tmp/alpha-retired-SKILL.md"
@@ -468,8 +489,7 @@ path.write_text(text[:start] + text[end:])
 PY
 if run_sync >"$tmp/whole-skill-retire.out" 2>&1 \
   && [ ! -e "$root/skills/engineering/alpha/lib/shared.md" ] \
-  && grep -qF '# handwritten local helper' \
-       "$root/skills/engineering/alpha/lib/handwritten.md"; then
+  && grep -qF '# intentional skill-local helper' "$local_resource"; then
   pass "sync prunes generated resources after whole-skill retirement"
 else
   cat "$tmp/whole-skill-retire.out" >&2
