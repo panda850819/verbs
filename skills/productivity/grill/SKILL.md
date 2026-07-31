@@ -8,6 +8,7 @@ description: |
   "grill me", "stress test this scope", "what am I missing", "draft a brief", or
   structured intake. Skip when scope is already concrete.
 reads:
+  - skill: lib/interview.md
   - skill: lib/push-once.md
   - skill: lib/stop-rule.md
   - skill: lib/output-templates.md
@@ -47,61 +48,15 @@ only the confirmed/open log instead.
 
 ## Protocol
 
-**ONE question at a time.** Wait for the answer. Then pick the next question based on what the answer revealed, not from a pre-baked list.
+**The interview protocol is @lib/interview.md.** Run it: one question at a
+time, pushback via `lib/push-once.md`, facts looked up rather than asked,
+delete-first before any axis, the eight-axis search space, and its stopping
+rule and escape hatch. Do not restate or fork it here.
 
-**Expect rehearsed first answers.** A polished first reply is not evidence. When
-an answer is rehearsed, vague, or unsupported, use the pushback contract below;
-a concrete supported answer needs no ritual second push.
+Grill's own contract is what happens around that interview: the chat-only
+opt-out below, and the structured close further down.
 
-**Pushback uses the 5-pattern catalog in `lib/push-once.md`.** When a reply is
-rehearsed, vague, or unsupported, select the highest-leverage matching pattern,
-print its label, and ask its exact prompt. Do not add a pattern-selection turn.
-
-**Facts vs decisions.** Before asking, classify the question: an answer
-derivable from the codebase, knowledge base, or docs is a **fact** — look it
-up and state the finding with its source. The human gets only **decisions**:
-tradeoffs, preferences, intent no source can settle. A question the agent
-could have answered itself is a wasted push.
-
-**Delete-first — drill whether before how.** Before drilling scope or edges, try to delete the whole requirement: can it be removed entirely? Who owns it, and can that person waive it? Requirements from smart or senior people are the most dangerous, because you question them least; optimizing something that should not exist is the most expensive mistake. Only what survives deletion is worth the axes below.
-
-Drill across these axes (not as a checklist — as a search space):
-
-1. **Existence** — does this already exist partially? What's the status quo?
-2. **Boundaries** — what's IN scope vs OUT? Where's the line?
-3. **Retroactivity** — does this apply to existing data / users / state? Backfill?
-4. **Edge cases** — what happens at zero / max / null / concurrent / offline?
-5. **Stakeholders** — who else's workflow does this touch? Do they know?
-6. **Failure modes** — what's the worst that can happen if this is wrong?
-7. **Reversal** — how do we undo this if it turns out bad?
-8. **Success signal** — how do you know it worked? What metric / observation?
-
-For each answer:
-- If the answer reveals a NEW unknown, drill into that next.
-- If the answer is "I haven't thought about that", flag it and move on (don't force decisions in real time).
-- If the user gives a confident answer that contradicts something earlier, surface the contradiction explicitly.
-
-## Stopping rule
-
-Stop when one of:
-- 3 consecutive answers reveal no new unknowns
-- 7+ questions answered (avoid bike-shedding)
-- User triggers escape hatch (see below)
-
-### Escape hatch (hard cap)
-
-User signals impatience ("夠了" / "ship it" / "skip the questions" / "just do it"):
-
-**First push-back:** acknowledge once, ask the 2 most critical remaining axes, then stop.
-> "聽到。剩兩題收。"
-
-**Second push-back (same session):** stop immediately. Write a line to the grill log:
-> `Stopped at user request after Q{N}. Unprocessed axes: {list}.`
-Proceed to Output. Flag unprocessed axes as OPEN_QUESTIONS in the log.
-
-**Do NOT ask a third time.** No "are you sure?", no "one more thing". Respect the second stop.
-
-### Chat-only opt-out
+## Chat-only opt-out
 
 Distinct from the escape hatch. The escape hatch stops the DRILLING early; the
 chat-only opt-out keeps the drilling but skips the structured close. When the
@@ -138,8 +93,8 @@ fired; otherwise it is the running record and the structured close below follows
 
 Unless the chat-only opt-out fired, the drilling ends here: a structured close
 with a canonical Spec Issue or local brief and plan, layered on top of the log above.
-After the stopping rule fires, run Stage A, Stage B, then exactly one route
-from the routing gate; do not skip or reorder them.
+After the `@lib/interview.md` stopping rule fires, run Stage A, Stage B, then
+exactly one route from the routing gate; do not skip or reorder them.
 
 **Stage A — Alternatives (forced).** @lib/stop-rule.md Generate 2-3 named approaches: one minimal-viable (fewest files, ships fastest), one ideal-architecture (best long-term trajectory), optional lateral. Each carries Summary / Effort {S/M/L} / Pros / Cons. Print a **RECOMMENDATION**: {A/B/C} because {one-line reason}. Then a per-approach gate, one at a time, never batched — `APPROACH {X}: Carry forward? [Add / Defer / Reject]` — STOP and wait on each.
 
@@ -176,11 +131,14 @@ Apply these branches in order:
 
 ## Anti-patterns
 
-- ❌ Asking 5 questions in one message ("also, and what about, also")
-- ❌ Reading off a checklist regardless of context
-- ❌ Forcing the user to decide on the spot when they say "I haven't thought about that"
-- ❌ Continuing after the user signals enough
-- ❌ Pretending to grill when scope is already concrete (just acknowledge and proceed)
+Interview anti-patterns live with the protocol in `lib/interview.md`. Grill's
+own:
+
+- ❌ Skipping the structured close because the drilling felt conclusive
+- ❌ Writing a local brief for spec-sized work instead of routing to `to-spec`
+- ❌ Writing both a Spec Issue and a competing repository brief
+- ❌ Batching the per-approach gates in Stage A
+- ❌ Closing with "want me to start it?" instead of naming the next skill
 
 ## Relationship to other skills
 

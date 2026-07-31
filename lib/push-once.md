@@ -9,7 +9,8 @@
 
 Skills that take user input on a fuzzy / unverified claim and need to drill before accepting it. Specifically:
 
-- `grill` Protocol step — a reply is rehearsed, vague, or unsupported
+- `lib/interview.md` — a reply is rehearsed, vague, or unsupported; this is the
+  interview protocol's pushback step, reached through any skill that runs it
 - `grill` premise challenge — a claim needs one concrete challenge
 
 Do NOT load for skills where input is already concrete (bug fix, typo, executing a confirmed plan).
