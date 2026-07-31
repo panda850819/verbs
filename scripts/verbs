@@ -40,6 +40,17 @@ README_PATH = Path("README.md")
 README_CATALOG_BEGIN = "<!-- BEGIN GENERATED: skill-catalog -->"
 README_CATALOG_END = "<!-- END GENERATED: skill-catalog -->"
 
+# Exact repo-relative files that are intentionally owned by one skill instead
+# of vendored from a canonical manifest resource.
+SKILL_LOCAL_LIB_ALLOWLIST = frozenset({
+    Path("skills/engineering/careful/lib/rationalizations.md"),
+    Path("skills/engineering/careful/lib/stopping-discipline.md"),
+    Path("skills/engineering/debug/lib/diagnosis.md"),
+    Path("skills/engineering/ship/lib/quote-gate.md"),
+    Path("skills/engineering/ship/lib/rationalizations.md"),
+    Path("skills/meta/gatekeeper/lib/stride-rationale.md"),
+})
+
 _PRODUCT_KEYS = (
     "id", "display_name", "marketplace_id", "repository", "homepage",
     "description", "hero", "support", "category", "environment_prefix",
@@ -970,6 +981,25 @@ def _resource_index_data(resources):
     }
 
 
+def _undeclared_skill_lib_files(root, owned_resources):
+    """Inventory every skill lib file not generated or explicitly local."""
+    found = set()
+    for lib_dir in sorted((root / "skills").glob("*/*/lib")):
+        _assert_no_symlink_components(root, lib_dir)
+        if not lib_dir.is_dir():
+            raise ValueError(f"skill lib path is not a directory: {lib_dir}")
+        for path in sorted(lib_dir.rglob("*")):
+            _assert_no_symlink_components(root, path)
+            if path.is_dir():
+                continue
+            if not path.is_file():
+                raise ValueError(f"skill lib entry is not a file: {path}")
+            found.add(path.relative_to(root))
+
+    authorized = set(owned_resources) | SKILL_LOCAL_LIB_ALLOWLIST
+    return sorted(found - authorized)
+
+
 def _load_resource_index(root):
     """Read and validate the previous generated-resource ownership index."""
     path = root / RESOURCE_INDEX
@@ -1287,6 +1317,23 @@ def run_sync(args):
     previous_resource_paths = {
         Path(item) for item in previous_resource_index["files"]
     }
+    try:
+        undeclared_skill_lib_files = _undeclared_skill_lib_files(
+            root, set(resources) | previous_resource_paths
+        )
+    except ValueError as exc:
+        print(f"ERROR: cannot inventory skill lib files: {exc}", file=sys.stderr)
+        sys.exit(1)
+    if undeclared_skill_lib_files:
+        print("ERROR: undeclared skill lib files:", file=sys.stderr)
+        for relative in undeclared_skill_lib_files:
+            print(f"  {relative}", file=sys.stderr)
+        print(
+            "  Declare each generated copy in manifest.toml resources[] or "
+            "add an intentional skill-local path to SKILL_LOCAL_LIB_ALLOWLIST.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     stale_resource_paths = previous_resource_paths - set(resources)
     try:
         stale_resource_deletions = _validate_stale_resource_deletions(
