@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.20.5 — Manifest history matches the Verbs version line
+
+### Changed
+
+- Removed the duplicated pandastack v2.2.0–v1.4.0 release notes from
+  `manifest.toml`. The manifest now carries only current Verbs `0.x` metadata
+  plus a pointer to the preserved pre-rename history in this changelog. No
+  runtime behavior changed. (#309)
+
 ## v0.20.4 — Regressions route to debug deterministically
 
 ### Fixed

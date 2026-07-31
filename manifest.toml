@@ -44,42 +44,11 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.20.4"
+version = "0.20.5"
 schema  = "skill-tier-v1"
 updated = "2026-07-31"
 
-# v2.2.0 (2026-05-09): scope tightening. Public package shrinks 38 → 26 skills.
-#   - Archived (true cuts): think-like-naval, think-like-alan-chan (mimicry not
-#     insight), inbox-triage (brain `find_orphans` replaces), scout (ad-hoc gh +
-#     WebFetch suffices), summarize (gbrain ingest paths replace), work-ship
-#     (folded into /ship knowledge as decision-note variant).
-#   - Deleted (use MCP): notion, slack — Claude.ai Notion/Slack MCP via OAuth
-#     replaces local-CLI-with-keychain-token model.
-#   - Moved to the personal overlay (~/.agents/skills/): bird, brief-morning, evening-distill,
-#     curate-feeds — all required private CLIs that cannot ship in a public
-#     package; the overlay is now their canonical home.
-#   - Deleted: plugins/pandastack/flows/ (7 .md specs). Lifecycle docs collapse
-#     into README "Lifecycle map" section covering 3 flows: dev / writing /
-#     knowledge. Other "flows" (research / work / decision / retro) demoted: not
-#     first-class flows, just compositions documented per-skill.
-#   - PHILOSOPHY shift: "pandastack ships verbs. The brain keeps state.
-#     Lifecycle discipline is your job, not the package's."
-# v2.1.1: small decoupling pass. brief-morning + evening-distill degrade
-# gracefully when `gog` is missing instead of hard-aborting. Hermes-specific
-# triggers in skill descriptions + RESOLVER changed to scheduler-agnostic
-# wording. CLAUDE.md hardcoded reads in init / checkpoint / qa / review / ship
-# now also accept AGENTS.md (Codex parity).
-# v2.1.0: cut gbq / gbrain dependency. deep-research removed (gbrain-core skill).
-# brief-morning + evening-distill drop gbq vault-focus seed (use file scan instead).
-# Sommet skills + work-sommet-abyss-po context removed from the personal overlay.
-# v2.0.1: cut env var requirement (PANDASTACK_VAULT / PANDASTACK_USER_EMAIL /
-# PANDASTACK_HOME). Skills derive vault from cwd; gog uses default account; persona
-# dispatch uses plugin-relative path resolution.
-# v2.0.0: cut 7 orphan skills (atomize, architect, execute-plan, think-like-karpathy,
-# process-decisions, wiki-lint, retro-prep-week). knowledge-ship + write-ship merged
-# into /ship as modes. Aliases keep old names resolving for 90 days.
-# v1.4.0: tool-* skills renamed to drop the prefix. tool-pdf -> pdf, tool-bird -> bird,
-# etc. 90-day alias grace via SKILL.md frontmatter `aliases:`.
+# History from before pandastack was renamed to Verbs is retained in CHANGELOG.md.
 
 # ============================================================================
 # CORE (12) — markdown-first, fresh-clone available
