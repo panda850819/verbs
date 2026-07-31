@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # PreToolUse guard — hard-blocks destructive Bash commands at code level.
 # Nisi principle: enforce, don't instruct. A prompt-level "please confirm"
-# can be skipped by the agent; an exit-2 hook cannot.
+# can be skipped by the agent; exit 2 blocks until a human supplies a documented
+# emergency override.
 #
 # Reads PreToolUse stdin JSON, inspects tool_input.command, exit 2 to block.
 # Strategy: a danger token only counts as a command when it appears UNQUOTED.
@@ -11,7 +12,7 @@
 # `rm -rf` (incl. behind sudo / nice / timeout / ( ) / $()) is unquoted and still
 # blocks. SQL DROP/TRUNCATE is command-scoped: the statement (seen raw) must also
 # reach an actually-invoked client (seen stripped), so a bare mention passes.
-# Bypass: a TRAILING `# FORCE_OK` comment (not a substring anywhere), or
+# Human-only bypass: a TRAILING `# FORCE_OK` comment (not a substring anywhere), or
 # VERBS_FORCE=1 in the environment.
 # Kill switch: VERBS_DESTRUCTIVE_GUARD=off. Infrastructure failures emit a
 # visible notice and allow the command; only a positive danger match exits 2.
@@ -107,10 +108,18 @@ if [ "${VERBS_FORCE:-}" = "1" ]; then
 fi
 
 block() {
-  local reason_code="$1" detail="$2"
+  local reason_code="$1" operation
+  case "$reason_code" in
+    database_drop_or_truncate) operation="database DROP/TRUNCATE operation" ;;
+    recursive_force_remove) operation="recursive forced removal" ;;
+    force_push) operation="force push" ;;
+    hard_reset) operation="hard reset" ;;
+    force_clean) operation="forced git clean" ;;
+    *) operation="high-blast-radius operation" ;;
+  esac
   log_event deny "$reason_code"
-  echo "BLOCKED by Verbs destructive-guard: $detail" >&2
-  echo "High-blast-radius op (force-push / recursive-force-rm / hard-reset / clean -f / DROP). Confirm explicitly or narrow it; append '# FORCE_OK' as a trailing comment to override." >&2
+  echo "BLOCKED by Verbs destructive-guard: $operation" >&2
+  echo "High-blast-radius operation blocked. Narrow the target or remove the destructive flag before retrying." >&2
   exit 2
 }
 

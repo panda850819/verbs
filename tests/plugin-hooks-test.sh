@@ -152,11 +152,17 @@ run_guard "python3 -c 'print(\"rm -rf /\")'"
 record $? "danger tokens used as data must allow"
 
 run_guard 'sudo -u www-data rm -rf /var/www'
-[ "$GUARD_RC" = 2 ] && grep -Fq 'BLOCKED by Verbs destructive-guard:' "$WORK/guard.err"
+[ "$GUARD_RC" = 2 ] \
+  && grep -Fq 'BLOCKED by Verbs destructive-guard:' "$WORK/guard.err" \
+  && grep -Fq 'Narrow the target or remove the destructive flag before retrying.' "$WORK/guard.err" \
+  && ! grep -Eq '# FORCE_OK|VERBS_FORCE|PSTICKET_FORCE' "$WORK/guard.err"
 record $? "destructive command behind an exec wrapper must block"
 
 run_guard 'x=$(rm -rf /data)'
-[ "$GUARD_RC" = 2 ] && grep -Fq 'BLOCKED by Verbs destructive-guard:' "$WORK/guard.err"
+[ "$GUARD_RC" = 2 ] \
+  && grep -Fq 'BLOCKED by Verbs destructive-guard:' "$WORK/guard.err" \
+  && grep -Fq 'Narrow the target or remove the destructive flag before retrying.' "$WORK/guard.err" \
+  && ! grep -Eq '# FORCE_OK|VERBS_FORCE|PSTICKET_FORCE' "$WORK/guard.err"
 record $? "destructive command substitution must block"
 
 run_guard 'git push --force' off

@@ -12,6 +12,8 @@ GUARD="$(cd "$(dirname "$0")/.." && pwd)/hooks/pretooluse-ticket-gate-guard.sh"
 [ -x "$GUARD" ] || { echo "guard not executable: $GUARD" >&2; exit 1; }
 pass=0 fail=0
 WANT_NOTICE='BLOCKED by Verbs ticket-gate:'
+WANT_GUIDANCE='Switch to feat/<issue>-slug or fix/<issue>-slug before committing or pushing.'
+BYPASS_NAME_RE='# FORCE_OK|VERBS_FORCE|PSTICKET_FORCE'
 
 TMPROOT=$(mktemp -d "${TMPDIR:-/tmp}/ticket-gate-test.XXXXXX")
 trap 'rm -rf "$TMPROOT"' EXIT
@@ -43,7 +45,11 @@ check() {
     notice=$(printf '%s' "$json" | "$GUARD" 2>&1 >/dev/null)
   fi
   got=$?
-  if [ "$got" = "$expect" ] && { [ "$expect" != 2 ] || printf '%s' "$notice" | grep -qF "$WANT_NOTICE"; }; then
+  if [ "$got" = "$expect" ] && { [ "$expect" != 2 ] || {
+       printf '%s' "$notice" | grep -qF "$WANT_NOTICE" \
+         && printf '%s' "$notice" | grep -qF "$WANT_GUIDANCE" \
+         && ! printf '%s' "$notice" | grep -qE "$BYPASS_NAME_RE";
+     }; }; then
     pass=$((pass+1))
   else
     fail=$((fail+1))

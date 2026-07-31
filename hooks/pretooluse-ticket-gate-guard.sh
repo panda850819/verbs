@@ -6,7 +6,8 @@
 # git -C paths, subcommand options, and refspecs are parsed by position.
 #
 # Opt-out: .verbs-ticket-gate-off at repo top.
-# Bypass: PSTICKET_FORCE=1 or PANDA_FORCE=1. Kill switch: VERBS_TICKET_GATE=off.
+# Human-only bypass: PSTICKET_FORCE=1 or PANDA_FORCE=1. Kill switch:
+# VERBS_TICKET_GATE=off.
 # Malformed input and unresolvable repo state fail open visibly.
 # cd/pushd/popd targets are tracked across the command chain (subshell and
 # backtick scoping, pipe/background cancellation, failed-cd modeling), so
@@ -73,7 +74,7 @@ EOF
 if [ "$DECISION" = "deny" ]; then
   log_event deny "$REASON_CODE" "$ARTIFACT_REF"
   echo "BLOCKED by Verbs ticket-gate: $DETAIL" >&2
-  echo "Code rides issue-keyed branches (feat/<issue>-slug / fix/local-<n>); the branch's PR is the only path to main. Emergency bypass: PSTICKET_FORCE=1. Non-code repos opt out with .verbs-ticket-gate-off." >&2
+  echo "Code changes require an issue-keyed branch and PR. Switch to feat/<issue>-slug or fix/<issue>-slug before committing or pushing." >&2
   exit 2
 fi
 log_event allow "${REASON_CODE:-no_policy_match}"

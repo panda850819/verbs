@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.20.2 — Guard denials stop teaching bypasses
+
+### Fixed
+
+- Destructive and ticket-gate denials now identify the blocked operation and
+  tell the caller how to narrow it without printing any emergency bypass name.
+  The bypasses and their audit events are unchanged and remain documented in
+  the guard headers for human maintainers. (#306)
+- Guard truth-table tests now reject denial text containing `# FORCE_OK`,
+  `VERBS_FORCE`, or `PSTICKET_FORCE`, while continuing to prove each override
+  path works. (#306)
+
 ## v0.20.1 — Sync inventories every skill lib file
 
 ### Fixed
