@@ -131,17 +131,25 @@ status: closed (2026-07-30) · decision: [02-unattended-runtime-options](2026-07
 status: closed (2026-07-13) · decision: [03-skill-invocation-matrix](2026-07-13-verbs-v1-direction-map/03-skill-invocation-matrix.md) · issue #234
 
 ### 4. Wayfinder charting ownership — `grilling` (HITL)
-status: open · blocked-by: none
+status: closed (2026-07-31) · decision:
+[04-wayfinder-charting-ownership](2026-07-13-verbs-v1-direction-map/04-wayfinder-charting-ownership.md)
+· issue #281
 
-Should wayfinder own its charting flow end to end (run the grilling inline,
-create map + entries + blocking itself, like the original) instead of
-delegating to `grill --brief` and stopping — the "轉接員" complaint from this
-charting session. Output: composition decision for wayfinder/grill.
+The entry named the wrong skill. `wayfinder` is thin at charting because `grill`
+is fat: the interview protocol is bundled with forced alternatives, premise
+refresh, and a routing gate that writes maps and calls `to-spec`, so a skill
+that wants only the interview must invoke all of it and stop at someone else's
+gate. The reference model inverts this — `mattpocock/skills` keeps `grilling` as
+the primitive and makes `grill-me`, `grill-with-docs`, and `wayfinder` thin
+entry points that compose it.
 
-The terrain moved on 2026-07-30. #269 routes spec-sized `grill` closes into
-`to-spec`, and `to-spec` / `to-tickets` are tracker-native, while `wayfinder`
-is still markdown-only. So the question is no longer wayfinder-versus-grill;
-it is where the line falls across four skills.
+Decision: extract the interview protocol from `grill` into its own primitive;
+`grill` and `wayfinder` each compose it. This also dissolves the escalation
+question — a skill taking over mid-effort re-enters the primitive without
+re-interviewing, so `grill` no longer needs map-writing as an escape hatch.
+
+The restructuring is spec-sized and does not happen in #281; it gets a canonical
+Spec Issue. Deliberately NOT bundled with the tracker move, which is entry 6.
 
 ### 5. Redraw the scheduling ownership boundary — `grilling` (HITL)
 status: closed by reversal (2026-07-30) · decision:
