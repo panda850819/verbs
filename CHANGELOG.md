@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.19.3 — Dispatch routes to a map by name, not by size
+
+### Changed
+
+- The `wayfinder` dispatch row now matches only when the message itself names a
+  map: charting one, resuming one, or naming an existing map file. Every other
+  fuzzy input belongs to `grill`, including a large effort that has no map yet;
+  `grill` hands off once the drilling shows the route is unclear. Rows 7 and 8
+  previously both matched a large fuzzy idea with no stated precedence, and the
+  distinguishing signal — how big the effort is — is not knowable when the
+  request is typed. `RESOLVER.md` selection guidance follows. (#290)
+- `wayfinder`'s description follows in both places a host reads it — the
+  `SKILL.md` frontmatter and the `manifest.toml` entry that renders into the
+  plugin JSONs and the README catalog. The description is the hot routing
+  surface loaded every session, so leaving it keyed on "a large, fuzzy topic"
+  would have rebuilt the overlap one layer below Dispatch. (#290)
+- `tests/resolver-routes-test.py` fails when the wayfinder row reclaims work by
+  effort size, or when either description reverts to a size trigger, with a
+  seeded-mutation self-check in the same shape as the retired-route guard.
+  (#290)
+
 ## v0.19.2 — Both hand-off directions skip a finished interview
 
 ### Fixed
