@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.19.5 — A failed sprint salvages what the attempt validated
+
+### Added
+
+- `sprint` § 5 emits one learning candidate before printing `FAILED` or
+  `ABORTED_BY_USER`, covering what the attempt validated including a dead end
+  and why it was dead. Only the `SHIPPED` path reaches `ship`, and `ship` fires
+  only when a concrete artifact surfaced — a validated negative result never is
+  — so under the ticket-gated flow the branch was removed next and the most
+  expensive output of a failed attempt was unrecoverable. Nothing validated
+  prints nothing; `PAUSED` is recoverable and emits nothing. Fields come from
+  `lib/learning-format.md`, now a declared `sprint` resource; persistence still
+  belongs to the host. (#295)
+
+### Fixed
+
+- `lib/learning-format.md` no longer says `status: stale` is "flagged during
+  retro". `skills/retro/` was absorbed into `retro-week` in v1.0.0, a pandastack
+  skill that never came across, so the reference pointed at nothing. `stale` is
+  host- or human-set, the same rule as `recurrence` and `last_seen`. A test now
+  fails on any `during retro` string under `lib/` or `skills/`. (#295)
+
 ## v0.19.4 — A mid-interview skill switch is defined and announced
 
 ### Added
