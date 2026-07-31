@@ -18,8 +18,8 @@ grep -Fq 'High uses every relevant lens plus a' "$skill"
 grep -Fq 'Cold review: <not earned | completed | unavailable>' "$skill"
 grep -Fq 'review` after it selects or promotes to medium/high' "$recall"
 
-# ship gate 3 must not re-read the store an escalated review just read, and must
-# still fire on the low-risk path where recall never ran (#296).
+# ship gate 3 keeps its own search: review recall and gate 3 query the same
+# store on different fields, so "review ran" is not evidence of coverage (#296).
 ship="skills/engineering/ship/SKILL.md"
 # Match on whitespace-normalized text: these fragments wrap across lines, and a
 # line-anchored grep would pass or fail on rewrapping rather than on meaning.
