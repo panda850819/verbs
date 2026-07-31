@@ -59,6 +59,12 @@ after all — arrives with the drilling done. Carry that result forward and star
 at the structured close. Re-asking answered questions is the failure this
 primitive exists to prevent.
 
+**If an interview is still unfinished when the user switches skills, say so
+before the next question.** In either direction — arriving here mid-interview,
+or leaving here for another caller — the answers carry forward and the new
+caller's close replaces the old one. `@lib/interview.md` owns the rule and the
+exact line to print; a silent switch drops an artifact with nothing said.
+
 Grill's own contract is what happens around that interview: the chat-only
 opt-out below, and the structured close further down.
 

@@ -80,6 +80,29 @@ Proceed to the caller's output. Flag unprocessed axes as OPEN_QUESTIONS.
 
 **Do NOT ask a third time.** No "are you sure?", no "one more thing". Respect the second stop.
 
+## Switching callers mid-interview
+
+The user names a different interviewing skill while this interview is still
+unfinished — `/grill` typed three questions into a `wayfinder` charting session,
+`/wayfinder` typed during a `grill` drilling session. Nothing is running that can
+be interrupted, so the switch happens whatever the combined prose implies; state
+it instead of letting it resolve silently.
+
+**The answers survive. The original caller's close does not.** Do not restart
+the interview and do not re-ask an answered question. Carry every answer so far
+into the new caller and resume from the next question under its contract, the
+same carry-forward the already-ran guard performs for a finished interview. What
+the original caller would have produced at the end — its map, its brief, its
+Spec Issue — is dropped, because the new caller now owns the close.
+
+**Say it in one line before the next question**, naming both halves:
+
+> `Switched to {new caller}. {N} answers carry over; {original caller}'s {artifact} will not be written.`
+
+Losing a charting session without saying so is the failure this rule exists to
+prevent, and that line is also what lets the user correct a switch they did not
+mean. It is a statement, not a gate: print it and continue.
+
 ## What this module does not own
 
 - Forced alternatives, premise refresh, and any per-decision gate — the caller's
@@ -95,5 +118,6 @@ Proceed to the caller's output. Flag unprocessed axes as OPEN_QUESTIONS.
 - ❌ Reading off a checklist regardless of context
 - ❌ Forcing the user to decide on the spot when they say "I haven't thought about that"
 - ❌ Continuing after the user signals enough
+- ❌ Switching callers mid-interview without saying which close was dropped
 - ❌ Asking the human a question the repository could have answered
 - ❌ Pretending to interview when scope is already concrete
