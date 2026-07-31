@@ -51,6 +51,13 @@ require(WAYFINDER, "This skill owns that format", "wayfinder owns the map format
 assert "Delegate charting to `grill`" not in WAYFINDER, (
     "wayfinder must not delegate charting back to grill"
 )
+# Both hand-off directions skip an interview that already ran (#288).
+for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder")):
+    require_words(
+        skill_text,
+        "**If the interview already ran this session, do not run it again.**",
+        f"{scenario} carries the re-interview guard",
+    )
 
 require(README, "to-spec --> canonical GitHub Spec Issue", "public lifecycle")
 require(README, "to-tickets --> child Issue graph", "public lifecycle")
