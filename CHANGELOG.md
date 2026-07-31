@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.19.6 — ship gate 3 stops re-reading what review just read
+
+### Changed
+
+- `ship` gate 3 (Pitfall ack) now fires only when recall did not already run on
+  this diff: `/review` skipped at gate 5, or a low-risk `review` that stopped
+  before `lib/learning-recall.md`. An escalated `review` reads the same store
+  against the same diff, so the two gates read it twice one gate apart, and
+  `ship` is the longest gate sequence in the repo. The gate narrows instead of
+  disappearing because the low-risk path is exactly where a pitfall touching
+  changed files would otherwise go unseen — that path is the one a low-risk
+  verdict can be wrong about. The other ten gates are unchanged. (#296)
+- `tests/review-fast-path-contract-test.sh` fails if gate 3 reverts to an
+  unconditional search, or if the low-risk carve-out is dropped. (#296)
+
 ## v0.19.4 — A mid-interview skill switch is defined and announced
 
 ### Added
