@@ -131,18 +131,18 @@ def completed_hook(message, event_name, installed_manifest):
     run = message.get("params", {}).get("run", {})
     if run.get("eventName") != event_name:
         return None
+    if Path(run.get("sourcePath", "")).resolve() != installed_manifest:
+        return None
     if run.get("source") != "plugin":
         fail("{} hook did not come from a plugin".format(event_name))
-    if Path(run.get("sourcePath", "")).resolve() != installed_manifest:
-        fail("{} hook came from the wrong manifest".format(event_name))
     return run
 
 
 def hook_inventory(server, profile):
     response = server.request("hooks/list", {"cwds": [str(profile)]})
     rows = response.get("data", [])
-    if len(rows) != 1 or rows[0].get("warnings") or rows[0].get("errors"):
-        fail("Codex hook inventory returned warnings, errors, or the wrong cwd count")
+    if len(rows) != 1 or rows[0].get("errors"):
+        fail("Codex hook inventory returned errors or the wrong cwd count")
     return rows[0].get("hooks", [])
 
 

@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.19.8 — SessionStart smoke isolates the Verbs hook
+
+### Fixed
+
+- Codex live-hook verification now ignores `SessionStart` completions from
+  user hooks and other plugins while it waits for the installed Verbs
+  manifest. It still rejects a target-manifest completion that does not come
+  from a plugin. Previously the first unrelated completion failed the smoke,
+  so a valid Verbs dispatch injection could never be observed on a host that
+  also registered Orca or another plugin's `SessionStart` hook. (#302)
+- Unrelated hook-inventory warnings no longer fail Verbs trust verification.
+  Inventory errors, wrong cwd cardinality, missing or extra Verbs hooks,
+  disabled hooks, manifest escapes, and untrusted hashes remain blocking.
+  This permits Codex's SessionEnd timeout-clamping warning from another plugin
+  without weakening the Verbs inventory checks. (#302)
+- The offline smoke regression covers unrelated warnings, inventory errors,
+  user and other-plugin completions, the target Verbs completion, and a
+  spoofed non-plugin source. The live smoke also runs against a host carrying
+  all three SessionStart sources. (#302)
+
 ## v0.19.7 — A failed sprint salvages what the attempt validated
 
 ### Added
