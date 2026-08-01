@@ -39,9 +39,9 @@ core_skills=$(grep -B1 '^tier = "core"' "$MANIFEST" \
 core_count=$(echo "$core_skills" | wc -l | tr -d ' ')
 
 # --------------------------------------------------
-# Core skills (markdown-only, ready now)
+# Core skills (markdown-first, ready now)
 # --------------------------------------------------
-echo "[1/3] Core skills (markdown-only)"
+echo "[1/3] Core skills (markdown-first)"
 ok "$core_count skills available without pack-managed optional CLIs"
 echo "      Host capabilities may still gate use (for example, QA needs browser automation)."
 echo "$core_skills" | awk '{ printf "      /%-20s", $0; if (NR % 3 == 0) print "" } END { if (NR % 3 != 0) print "" }'

@@ -114,4 +114,5 @@ Recommended skill:
 
 ## OPEN_QUESTIONS
 
-- None blocking. #289 stays open and its answer may reference this decision.
+- None blocking. #289 closed with the mid-interview switch rule and
+  referenced this decision.
