@@ -43,7 +43,7 @@ PATTERNS = {
 
 ROOT_FILES = (
     "README.md", ".codex/INSTALL.md", "CLAUDE.md",
-    "PHILOSOPHY.md", "RESOLVER.md", "DISPATCH.md",
+    "PHILOSOPHY.md", "RESOLVER.md",
     "THIRD_PARTY_NOTICES.md",
     "maintainer/SKILL-FRONTMATTER.md", "maintainer/writing-great-skills.md",
     "docs/ADDING_A_HOST.md",

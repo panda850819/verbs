@@ -4,9 +4,9 @@ An opinionated skill pack for taking software work from ambiguity to verified
 delivery. It gives coding agents named operating procedures for the points
 where software work usually goes wrong.
 
-The Marketplace Plugin is the recommended Claude Code and Codex surface.
-Portable, hook-free skill imports and selective Hermes import are also
-supported.
+The Marketplace Plugin is the recommended skills-only Claude Code and Codex
+surface. Pi can load the same skill tree directly; selective Hermes import is
+also supported.
 
 ## Why Verbs exists
 
@@ -87,31 +87,23 @@ Other skills are typed on-ramps or supporting gates:
   through `harness-slim`.
 
 [`RESOLVER.md`](RESOLVER.md) is the complete human-facing operating model.
-[`DISPATCH.md`](DISPATCH.md) is the compact machine-routing table injected into
-supported hosts.
+Each `SKILL.md` description is the machine-routing surface.
 
-## Enforcement boundaries
+## Invocation boundaries
 
-Skills describe how to work. Plugin hooks enforce only the small set of
-boundaries where advice is too easy to skip:
+Verbs relies on each host's native skill discovery and invocation controls. It
+registers no lifecycle hooks, injects no routing context, and intercepts no tool
+or stop events.
 
-| Hook | Where it runs | What it enforces | What it does not do |
-|---|---|---|---|
-| `SessionStart` | Startup, clear, and compact events | Injects `DISPATCH.md` so the host can route the next message. | It does not invoke a skill, schedule work, or choose a model. |
-| `PreToolUse: Bash` destructive guard | Before Bash commands | Blocks positive matches for scoped destructive commands, with explicit escape hatches. | It is not a complete shell sandbox; documented parser residuals fail visibly or remain out of scope. |
-| `PreToolUse: Bash` ticket gate | Before Git-changing Bash commands | Blocks commits on `main`/`master`, pushes to default branches, and broad pushes that bypass the issue-branch contract. | It does not create issues, branches, worktrees, or PRs. |
-| `Stop` verify gate | When the agent tries to stop | Blocks the first stop after a code edit when no recognized verification ran, then allows a second stop to prevent a loop. | It does not prove the chosen test was sufficient or block prose-only work. |
-
-The destructive and ticket guards are safety gateways: they prevent known
-high-cost shortcuts before execution. The Stop gate is an evidence gateway: it
-prevents a code-editing turn from silently ending without verification. Manual
-skill imports are hook-free, so they provide procedures without these
-enforcement guarantees.
+Most skills remain available to both people and models. Human-initiated-only
+entry points declare `disable-model-invocation: true` for Claude Code and Pi,
+plus the matching `allow_implicit_invocation: false` policy for Codex. Skill prose owns
+safety and verification discipline; Verbs does not claim host-level enforcement.
 
 ## Product boundary
 
-Verbs ships **skills, shared procedural primitives, dispatch, narrow host
-adapters, install manifests, evals, and tests**. It does not own identity,
+Verbs ships **skills, shared procedural primitives, install manifests, evals,
+and tests**. It does not own identity,
 context, brain or memory, project truth, runtimes, scheduling, autonomous
 drivers, connectors, or global model routing.
 
@@ -123,11 +115,11 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 <!-- BEGIN GENERATED: skill-catalog -->
 | Skill | Tier | Purpose |
 |---|---|---|
-| `/verbs:careful` | core | Confirmation gate before destructive commands. |
+| `/verbs:careful` | core | Confirmation gate for production, shared infrastructure, live harness paths, and destructive commands. |
 | `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
-| `/verbs:grill` | core | Adversarial requirement discovery that routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
+| `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
 | `/verbs:setup-verbs` | core | Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate. |
-| `/verbs:review` | core | Risk-adaptive diff review with a bounded low-risk fast path, scoped evidence, and cold-context escalation. |
+| `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |
 | `/verbs:debug` | core | Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui). |
 | `/verbs:sprint` | core | Acceptance-driven execution with bounded review and delivery evidence. |
 | `/verbs:ui` | core | Build/fix UI with a committed point of view. Four override reflexes + craft lore in references (reflex-font blocklist, CJK+Latin type, OKLCH, CSS bans+rewrites, strategic omissions). NOT browser-test (qa) or render-bug debugging (debug). |
@@ -138,9 +130,9 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
-| `/verbs:handover` | ext | Hand unfinished mechanical work from a Claude or Codex orchestrator to one fresh Claude or Codex worker through a bounded synchronous contract; Codex-only --async remains available. |
+| `/verbs:handover` | ext | Hand unfinished mechanical work to one fresh Claude or Codex worker, or run explicit native Agent Worker / parallel read-only research with at most two depth-one workers. |
 | `/verbs:advisor` | ext | Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206. |
-| `/verbs:harness-slim` | ext | Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, telemetry semantics, and human-attention load. Proposes reversible reductions; does not mutate the harness. |
+| `/verbs:harness-slim` | ext | Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, available usage evidence, and human-attention load. Proposes reversible reductions; does not mutate the harness. |
 <!-- END GENERATED: skill-catalog -->
 
 ## Install
@@ -165,13 +157,18 @@ Inside a repository, invoke `verbs:setup-verbs` once to configure the issue
 tracker in its existing `## verbs` block. Repository identity stays derived
 from the Git remote.
 
-The Marketplace Plugin registers three lifecycle adapters: SessionStart
-dispatch, Bash PreToolUse destructive + ticket-gate guards, and the Stop
-verification gate. High-signal guard decisions append to
-`$XDG_STATE_HOME/verbs/guard-events.jsonl` when set, otherwise
-`~/.local/state/verbs/guard-events.jsonl`. Override the path with
-`VERBS_GUARD_EVENT_LOG`, disable it with `off`, or set
-`VERBS_GUARD_EVENT_LEVEL=all` to include routine allow decisions.
+The Marketplace Plugins distribute the same skill directories and register no
+lifecycle hooks.
+
+Pi loads the checkout directly through `~/.pi/agent/settings.json`:
+
+```json
+{
+  "skills": ["/absolute/path/to/verbs/skills"]
+}
+```
+
+This adds no Pi extension, package, hook, or copied skill tree.
 
 ### Inspect or develop locally
 
@@ -191,41 +188,24 @@ bash scripts/bootstrap.sh --codex     # print Codex CLI install steps
 claude plugin list --json
 python3 scripts/verbs doctor --host claude --strict
 codex plugin list --json
-python3 scripts/verbs doctor --host codex --strict --live-hooks
+python3 scripts/verbs doctor --host codex --strict
 bash scripts/conformance-smoke.sh claude   # or codex
 ```
 
-`doctor --strict` compares plugin version, skill set, `DISPATCH.md`, and the
-registered hook tree against this checkout. For a local-checkout install, use
+`doctor --strict` compares plugin version and skill set against this checkout.
+For a local-checkout install, use
 `claude plugin marketplace add "$PWD" --scope user` or
 `codex plugin marketplace add "$PWD" --json` with the same install commands
 above. `python3 scripts/verbs init --host <claude|codex|hermes> --dry-run`
 prints the local install commands without changing the host.
 
-### Read guard telemetry
-
-The guard hooks append privacy-minimal `verbs.guard-event.v1` records.
-`guard-report` is the read-only way to turn that stream into audit evidence,
-and the seam `/verbs:harness-slim` uses:
-
-```bash
-python3 scripts/verbs guard-report --since 2026-07-01T00:00:00Z
-python3 scripts/verbs guard-report --json --eligible 40
-```
-
-It counts denials by `runtime`, `hook`, `action`, `decision`, and
-`reason_code`, names every evidence gap (missing log, malformed rows,
-unsupported schema, high-signal-only capture), and proposes at most three
-bounded Skill, test, or hook candidates. A count is not a rate: without an
-eligible-opportunity denominator it prints `Rate: UNAVAILABLE`, and zero
-denials stays `NO CONCLUSION` rather than proof of a healthy harness.
-
 ## Host support
 
 | Host | Status |
 |---|---|
-| Claude Code | Marketplace Plugin |
-| Codex CLI | Marketplace Plugin |
+| Claude Code | Skills-only Marketplace Plugin |
+| Codex CLI | Skills-only Marketplace Plugin |
+| Pi | Direct Agent Skills loading |
 | Hermes | Selective manual skill import |
 
 ## Version reset
@@ -269,12 +249,12 @@ Verbs is pre-1.0 and personal-first: a public, installable skill pack whose
 primary user is its author. 0.x releases may break contracts when real usage
 exposes a bad boundary; breaking changes ship with migration notes in the
 changelog. The work queue is limited to failures found through daily use,
-Claude/Codex parity checks, and reinstall drills.
+Claude/Codex/Pi parity checks, and reinstall drills.
 
 Cut `v1.0.0` only when: the product identifiers and install contracts survive
-two consecutive 0.x releases without a breaking rename; both hosts pass fresh
-install, reinstall, cold-start invocation, and full hook registration on the
-author's machines; one model-upgrade audit (capability / context / neither
+two consecutive 0.x releases without a breaking rename; supported hosts pass
+fresh install, reinstall, and cold-start invocation on the author's machines;
+one model-upgrade audit (capability / context / neither
 recut) has run against the then-current frontier model without a load-bearing
 regression; and no P0/P1 product-contract failure is open.
 

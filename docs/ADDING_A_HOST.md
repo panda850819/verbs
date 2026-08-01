@@ -1,6 +1,6 @@
 # Adding a Host to Verbs
 
-A host adapter makes the existing skill pack discoverable in one runtime. It
+A host integration makes the existing skill pack discoverable in one runtime. It
 does not add identity, brain or memory, scheduling, project truth, or global
 model routing to Verbs.
 
@@ -8,14 +8,12 @@ model routing to Verbs.
 
 - `manifest.toml` owns product identity, version, and the active skill set.
 - `scripts/verbs sync` generates the Claude, Codex, and Agents loader metadata.
-- `DISPATCH.md` owns public routing.
-- `hooks/` contains SessionStart dispatch, the Bash PreToolUse destructive
-  guard, and the Stop verification gate. The Marketplace Plugin registers them;
-  manual skill imports are hook-free.
-- Each `SKILL.md` owns its workflow and tool assumptions.
+- Each `SKILL.md` description owns machine routing; its body owns the workflow
+  and tool assumptions.
+- Distribution manifests expose skills only and register no lifecycle hooks.
 
-Do not fork skill content merely to rename tools. Keep any translation in the
-adapter and state the unsupported cases.
+Do not fork skill content merely to rename tools. Keep any translation in host
+documentation and state the unsupported cases.
 
 ## Adapter contract
 
@@ -27,11 +25,11 @@ Before claiming support, define:
 | Discovery | How the host exposes exactly the manifest skill set |
 | Namespace | Whether the host displays `verbs:<name>` or plain names |
 | Tools | Explicit mapping for read, edit, shell, browser, and delegation |
-| Hooks | Whether the surface registers native adapters or is explicitly hook-free |
+| Runtime behavior | Proof that installation registers skills only |
 | Boundary | Native, degraded, selective, experimental, or unsupported |
 
-The adapter may support a subset, but it must not imply parity for skills or
-adapters it does not enable.
+The integration may support a subset, but it must not imply parity for skills
+or tools it does not enable.
 
 One host profile uses one install surface.
 
@@ -41,7 +39,7 @@ A host becomes supported only after all of these pass:
 
 1. A clean profile installs through the documented host command.
 2. The discovered names equal `manifest.toml` with no missing or extra skill.
-3. The namespace is the documented `verbs` identity; any opt-in adapter is named explicitly.
+3. The namespace is the documented `verbs` identity and no lifecycle hook is registered.
 4. One real skill invocation completes through the host's normal tool path.
 5. Update and removal are reproducible without editing registries by hand.
 
@@ -52,17 +50,18 @@ test the scanner; they do not prove the real installer.
 
 | Host | Status | Install surface |
 |---|---|---|
-| Claude Code | Verified | Marketplace Plugin |
-| Codex | Verified | Marketplace Plugin |
+| Claude Code | Verified | Skills-only Marketplace Plugin |
+| Codex | Verified | Skills-only Marketplace Plugin |
+| Pi | Direct loading | `skills/` configured in Pi settings |
 | Hermes | Selective manual import | Individual skill directories |
 | OpenClaw | Unsupported / experimental | None |
 
-Keep runtime-specific coordination on the host side. A new adapter should add
-the smallest install and translation layer that can pass the verification gate.
+Keep runtime-specific coordination on the host side. A new integration should
+add the smallest install surface that can pass the verification gate.
 
 ## Hermes: selective manual import
 
-Hermes has no manifest, hooks adapter, or packaged parity. Import only the
+Hermes has no manifest or packaged parity. Import only the
 skills you have checked against Hermes' tool vocabulary:
 
 ```bash
@@ -72,7 +71,7 @@ ln -sfn /absolute/path/to/verbs/skills/productivity/grill \
 ```
 
 Repeat per selected skill, start a fresh Hermes session, and verify the skill
-name and its required tools resolve. Imported skills receive no Verbs reference
-adapters; skills that require unavailable tools remain unsupported on that
-host. `git pull` updates symlinked skill content in place; re-run the same real
+name and its required tools resolve. Skills that require unavailable tools
+remain unsupported on that host. `git pull` updates symlinked skill content in
+place; re-run the same real
 invocation after any skill or Hermes upgrade.

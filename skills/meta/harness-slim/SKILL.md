@@ -2,8 +2,8 @@
 name: harness-slim
 description: |
   Audit and reduce a live multi-runtime agent harness after adoption. Use for
-  installed skill/plugin parity, cold-start context, routing overlap, telemetry,
-  or human-attention load. Produces a reversible proposal; it does not mutate
+  installed skill/plugin parity, cold-start context, routing overlap, available
+  usage evidence, or human-attention load. Produces a reversible proposal; it does not mutate
   the harness.
 reads:
   - repo: AGENTS.md
@@ -39,7 +39,7 @@ attention surfaces after adoption.
 
 1. Read the host contract and machine-state documentation. Resolve the
    authoritative source manifest, installed registrations/caches, cold-start
-   adapters, available doctor commands, and telemetry. Missing paths remain
+   context, available doctor commands, and usage evidence. Missing paths remain
    named evidence gaps; do not invent defaults.
 2. Run read-only doctors first. Report source truth, installed truth, and live
    runtime truth independently; one green surface cannot mask another red one.
@@ -49,19 +49,14 @@ attention surfaces after adoption.
 4. Normalize usage by event semantics and coverage. Zero-use pruning requires
    at least 30 days, 20 eligible opportunities for that skill, and verified
    outcome coverage. Lifetime counters cannot prove a windowed zero.
-5. Read guard telemetry through `python3 scripts/verbs guard-report`, the only
-   guard-event seam this audit uses. Run it read-only with an explicit window
-   and interpret it conservatively:
-   - `Rate: UNAVAILABLE` or `NO CONCLUSION` means the denominator is unknown.
-     Zero denials and zero use never prove a healthy surface.
-   - Propose a **Skill** candidate only when repeated denials show the agent
-     reaching a correctly guarded operation through an instruction or routing
-     gap; a **test** candidate only when a reproducible pattern lacks
-     regression coverage; a **hook** candidate only when the evidence traces a
-     parser or enforcement defect, never from frequency alone.
-   - Unresolved causality stays `NEEDS TRACE`. Every candidate is propose-only;
-     the audit edits no Skill, test, hook, or host state.
-6. Audit context. Measure content actually injected at cold start and classify
+5. Use only usage evidence the host actually exposes. Name its event semantics,
+   window, denominator, and coverage before drawing a conclusion. Unknown
+   denominators remain `Rate: UNAVAILABLE`; zero observed use remains
+   `NO CONCLUSION`, and unresolved causality stays `NEEDS TRACE`. Verbs no
+   longer supplies a usage denominator; without host evidence, zero-use pruning
+   is unavailable and the audit proposes no usage-based retirement. Every
+   candidate is propose-only; the audit edits no Skill, test, or host state.
+6. Audit context. Measure content actually present at cold start and classify
    each instruction as **always-on**, **deferred**, or **task-local**. Tool
    recipes, examples, and domain detail default to deferred loading. Name one
    owner and absorber for every duplicate responsibility.
@@ -80,7 +75,7 @@ attention surfaces after adoption.
 Harness slim
 Core health: green | red
 Runtime surface: source / installed / live
-Telemetry: guard-report window, event kinds, coverage, eligible sample
+Usage evidence: source, window, event kinds, coverage, eligible sample
 Context: always-on / deferred / task-local, bytes or observed tokens
 Attention: foreground lane, background exits, aggregation, verifier policy
 Keep / Slim / Resource / Maintainer / Overlay / Retire: owner + evidence

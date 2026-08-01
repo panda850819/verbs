@@ -18,9 +18,8 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 # Non-deterministic / external-dependency tests, excluded from the blocking gate.
-# NB: the scripts/ semantic linters run offline via tests/lint-suite.sh, which
-# invokes only conformance-smoke.sh's offline `adapter` subtarget; host probes
-# run only as explicit live evidence. Currently empty.
+# NB: host conformance probes require installed CLIs and real model calls, so
+# they run only as explicit release evidence. Currently empty.
 EXCLUDE=""
 
 TIMEOUT="${VERBS_TEST_TIMEOUT:-${PANDA_VERBS_TEST_TIMEOUT:-240}}"

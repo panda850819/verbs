@@ -1,0 +1,5 @@
+interface:
+  display_name: "Sprint"
+  short_description: "Execute one concrete outcome through delivery"
+policy:
+  allow_implicit_invocation: false

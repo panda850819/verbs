@@ -1,7 +1,7 @@
 ---
 name: review
 description: |
-  Review a code diff before PR or on request. Uses a bounded low-risk fast path, scoped evidence, risk-triggered lenses, and cold-context escalation. NOT browser QA, prepared-plan critique, or external artifact trust checks.
+  Review a code diff when asked, before committing, or before a PR. Uses a bounded low-risk fast path, scoped evidence, risk-triggered lenses, and cold-context escalation. NOT browser QA, prepared-plan critique, or external artifact trust checks.
 reads:
   - repo: "**"
   - repo: AGENTS.md

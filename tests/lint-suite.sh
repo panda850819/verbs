@@ -8,9 +8,8 @@
 # exits nonzero on drift. This wrapper runs them all and aggregates, so one
 # failure does not mask the rest, then exits nonzero if any failed.
 #
-# conformance-smoke.sh: only its `adapter` subtarget runs here. That subtarget is
-# offline — it verifies the optional session-start JSON envelopes. Claude/Codex
-# host probes make real LLM calls and run only in installer/release evidence.
+# Claude/Codex conformance probes make real LLM calls and run only in
+# installer/release evidence; offline structure is covered by tests/.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -33,7 +32,6 @@ run lint-invocation-axis  bash    scripts/lint-invocation-axis.sh
 run lint-refs-resolve     python3 scripts/lint-refs-resolve.py
 run lint-reads-block      python3 scripts/lint-reads-block.py
 run lint-meta-sync        python3 scripts/lint-meta-sync.py
-run conformance-smoke:adapter bash scripts/conformance-smoke.sh adapter
 
 if [ "$fail" -ne 0 ]; then
   echo "lint-suite: one or more offline linters failed"

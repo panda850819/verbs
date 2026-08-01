@@ -82,13 +82,15 @@ if ! sync_out="$(python3 "$repo_root/scripts/verbs" sync --check 2>&1)"; then
   fail=1
 fi
 
-# DISPATCH.md must exist (session-start hook injects it).
-if [ ! -f "$repo_root/DISPATCH.md" ]; then
-  echo "FAIL: DISPATCH.md missing (session-start hook injects it)"
-  fail=1
-fi
+# Skill descriptions are the machine-routing surface. A second dispatch
+# artifact or runtime hook tree would silently restore the retired architecture.
+for retired_surface in "$repo_root/DISPATCH.md" "$repo_root/hooks"; do
+  if [ -e "$retired_surface" ]; then
+    echo "FAIL: retired runtime surface returned: ${retired_surface#"$repo_root/"}"
+    fail=1
+  fi
+done
 
-# State store + its schema doc travel together.
 if [ "$fail" -eq 0 ]; then
   echo "OK: manifest and skills/ in sync ($count skills), no stale claims."
 fi

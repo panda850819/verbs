@@ -34,18 +34,6 @@ Affected files:
 - `lib/push-once.md`
 - `lib/stop-rule.md`
 
-### obra/superpowers
-
-Copyright (c) 2025 Jesse Vincent
-
-MIT license: https://github.com/obra/superpowers/blob/main/LICENSE
-
-Affected implementation:
-
-- `hooks/session-start`
-
-The hook structure and host-shim design acknowledge the upstream pattern.
-
 ### SlowMist / slowmist-agent-security
 
 Copyright (c) 2026 evilcos
