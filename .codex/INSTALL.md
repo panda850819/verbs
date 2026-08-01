@@ -10,8 +10,7 @@ codex plugin marketplace add panda850819/verbs --json
 codex plugin add verbs@verbs --json
 ```
 
-It registers SessionStart dispatch, the Bash PreToolUse destructive guard, and
-the Stop verification gate.
+It distributes skills only and registers no lifecycle hooks.
 
 Local checkout for development:
 
@@ -25,7 +24,7 @@ Restart Codex, then verify:
 
 ```bash
 codex plugin list --json
-python3 scripts/verbs doctor --host codex --strict --live-hooks
+python3 scripts/verbs doctor --host codex --strict
 bash scripts/conformance-smoke.sh codex
 ```
 

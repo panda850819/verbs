@@ -1,5 +1,34 @@
 # Changelog
 
+## v0.21.0 — Skills are the runtime surface
+
+### Changed
+
+- Claude Code and Codex plugins now distribute skills only. SessionStart
+  dispatch injection, destructive and ticket PreToolUse guards, the Stop verify
+  gate, their runtime adapters, telemetry, and live-hook doctor checks are
+  removed. Skill prose remains guidance rather than host-level enforcement.
+  (#315)
+- `SKILL.md` descriptions now own machine routing directly; `DISPATCH.md` is
+  retired after its remaining Agent Worker contract moved into `handover`.
+  `sprint` and `to-tickets` are explicit human-only entry points on both Claude
+  Code and Codex metadata. (#315)
+- Pi is supported through direct loading of the existing `skills/` tree without
+  an extension or adapter. Doctor now verifies only plugin version and exact
+  skill parity. (#315)
+
+### Migration
+
+- Reinstall or reload Verbs `0.21.0` so cached hook registrations disappear.
+  Remove `--live-hooks` and `guard-report` from local verification commands;
+  use `doctor --host <claude|codex> --strict` plus the host conformance smoke.
+- The retired hook settings no longer have an effect: `VERBS_DESTRUCTIVE_GUARD`,
+  `VERBS_TICKET_GATE`, `VERBS_VERIFY_GATE`, `VERBS_VERIFY_GATE_FAILURE_MARKER`,
+  `VERBS_SESSION_ADAPTER`, `VERBS_FORCE`, `VERBS_GUARD_EVENT_LOG`,
+  `VERBS_GUARD_EVENT_LEVEL`, `PANDA_FORCE`, `PSTICKET_FORCE`,
+  `PANDA_VERBS_VERIFY_GATE`, and `PANDASTACK_VERIFY_GATE`. Remove any host
+  contract that still claims Verbs structurally enforces these gates.
+
 ## v0.20.5 — Manifest history matches the Verbs version line
 
 ### Changed

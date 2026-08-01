@@ -11,7 +11,6 @@ WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
 SPRINT = (ROOT / "skills/engineering/sprint/SKILL.md").read_text()
 README = (ROOT / "README.md").read_text()
 RESOLVER = (ROOT / "RESOLVER.md").read_text()
-DISPATCH = (ROOT / "DISPATCH.md").read_text()
 MANIFEST = (ROOT / "manifest.toml").read_text()
 
 
@@ -91,9 +90,7 @@ require_words(README, "one independently reviewable and revertible PR", "one iss
 
 require(RESOLVER, "A human selects one unblocked implementation Issue.", "ownership")
 require(RESOLVER, "reports the frontier but does not choose work", "ownership")
-require(DISPATCH, "never schedules or claims the next frontier", "non-scheduling sprint")
-# The boundary must live in the body sprint loads when it runs, not only in the
-# SessionStart injection it may never see (#276).
+# The boundary must live in the sprint body itself.
 require_words(
     SPRINT,
     "never schedule follow-on work or claim the next frontier Issue",
@@ -112,11 +109,8 @@ for path in sorted(ROOT.glob("lib/*.md")) + sorted(ROOT.glob("skills/*/*/**/*.md
     assert "during retro" not in path.read_text(), (
         f"{path.relative_to(ROOT)} points at a retro surface Verbs does not have"
     )
-require(DISPATCH, "canonical GitHub Spec Issue / to spec", "spec dispatch")
-require(DISPATCH, "dependency graph / to tickets", "ticket dispatch")
-
+require_words(GRILL, "routes to `to-spec`", "spec skill composition")
 assert "[skill.implement]" not in MANIFEST, "must not add implement"
 assert "[skill.to-prd]" not in MANIFEST, "must not add to-prd"
-assert "structured brief by default" not in DISPATCH, "dispatch must expose conditional close"
 
 print("planning lifecycle contract: ok")

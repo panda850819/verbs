@@ -49,27 +49,6 @@ def write_skill(root, rel, name):
     )
 
 
-def write_live_hook_smoke(root, returncode, required_args=()):
-    path = root / "scripts" / "codex-hook-smoke.py"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    required = ("--inventory-only", "--require-trusted", "--codex-home") \
-        + tuple(required_args)
-    required_check = "".join(
-        f"assert {arg!r} in sys.argv, 'missing required argument: {arg}'\n"
-        for arg in required
-    )
-    path.write_text(
-        "#!/usr/bin/env python3\n"
-        "import os\n"
-        "import sys\n"
-        "for key in ('AWS_SECRET_ACCESS_KEY', 'DATABASE_URL', 'SSH_AUTH_SOCK'):\n"
-        "    assert key not in os.environ, f'sensitive environment leaked: {key}'\n"
-        f"{required_check}"
-        f"raise SystemExit({returncode})\n",
-        encoding="utf-8",
-    )
-
-
 def write_claude_settings(home, enabled):
     write_json(
         home / ".claude/settings.json",
@@ -144,10 +123,6 @@ def make_fixture(base):
         root / ".codex-plugin/plugin.json",
         {"name": "verbs", "version": VERSION, "skills": "./skills/"},
     )
-    (root / "DISPATCH.md").write_text("# Dispatch\n", encoding="utf-8")
-    (root / "hooks").mkdir(parents=True, exist_ok=True)
-    (root / "hooks/hook.sh").write_text("#!/bin/sh\n", encoding="utf-8")
-    write_live_hook_smoke(root, 91)
     return root, home
 
 
@@ -307,37 +282,12 @@ def case_clean_installed_caches(base):
 
 def case_codex_enabled_local_marketplace_source(base):
     root, home = make_fixture(base)
-    write_live_hook_smoke(root, 0, ("--allow-external-installed-root",))
     write_codex_config(home, {"verbs@verbs": True}, root)
-    rc, result = doctor(
-        root, home, "--host", "codex", "--strict", "--live-hooks")
+    rc, result = doctor(root, home, "--host", "codex", "--strict")
     assert rc == 0
     codex = surface(result)["installed"]["codex"]
     assert codex["status"] == "ok"
     assert codex["path"] == str(root)
-    assert result["checks"]["live_hooks"]["status"] == "trusted"
-
-
-def case_codex_live_hook_trust_is_strict(base):
-    root, home = make_fixture(base)
-    install_current_caches(root, home)
-    write_live_hook_smoke(root, 0)
-
-    rc, result = doctor(
-        root, home, "--host", "codex", "--strict", "--live-hooks")
-    assert rc == 0
-    assert result["checks"]["live_hooks"] == {
-        "ok": True,
-        "status": "trusted",
-        "issues": [],
-    }
-
-    write_live_hook_smoke(root, 1)
-    rc, result = doctor(
-        root, home, "--host", "codex", "--strict", "--live-hooks")
-    assert rc == 1
-    assert result["checks"]["live_hooks"]["ok"] is False
-    assert result["checks"]["live_hooks"]["status"] == "untrusted"
 
 
 def case_legacy_claude_registry_requires_migration(base):
@@ -420,9 +370,9 @@ def case_cache_skill_drift(base):
     assert "checkpoint" in codex["extra"] and "skills" in codex["drift"]
 
 
-def case_cache_artifact_drift(base):
+def case_cache_version_drift(base):
     root, home = make_fixture(base)
-    claude_cache, codex_cache = install_current_caches(root, home)
+    _, codex_cache = install_current_caches(root, home)
 
     manifest = codex_cache / ".codex-plugin/plugin.json"
     data = json.loads(manifest.read_text())
@@ -430,16 +380,6 @@ def case_cache_artifact_drift(base):
     write_json(manifest, data)
     rc, result = doctor(root, home, "--host", "codex", "--strict")
     assert rc == 1 and "version" in surface(result)["installed"]["codex"]["drift"]
-
-    (claude_cache / "DISPATCH.md").write_text("stale\n", encoding="utf-8")
-    rc, result = doctor(root, home, "--host", "claude", "--strict")
-    assert rc == 1
-    assert "dispatch_sha256" in surface(result)["installed"]["claude"]["drift"]
-
-    (codex_cache / "hooks/hook.sh").write_text("stale\n", encoding="utf-8")
-    rc, result = doctor(root, home, "--host", "codex", "--strict")
-    assert rc == 1
-    assert "hooks_sha256" in surface(result)["installed"]["codex"]["drift"]
 
 
 def case_malformed_claude_registry_reports_drift(base):
@@ -500,12 +440,11 @@ CASES = [
     case_source_registration_cannot_escape_root,
     case_clean_installed_caches,
     case_codex_enabled_local_marketplace_source,
-    case_codex_live_hook_trust_is_strict,
     case_legacy_claude_registry_requires_migration,
     case_legacy_codex_cache_requires_migration,
     case_old_and_new_installs_conflict,
     case_cache_skill_drift,
-    case_cache_artifact_drift,
+    case_cache_version_drift,
     case_malformed_claude_registry_reports_drift,
     case_cache_without_enabled_receipt_fails,
     case_disabled_receipt_fails,

@@ -5,8 +5,9 @@ description: |
   requirements / unknown unknowns. Its structured close routes spec-sized work to
   `to-spec`, large foggy work to `wayfinder`, and smaller work to a local brief plus
   executable plan. Say "quick" or "don't write files" for a chat-only log. Use for
-  "grill me", "stress test this scope", "what am I missing", "draft a brief", or
-  structured intake. Skip when scope is already concrete.
+  "grill me", "stress test this scope", "what am I missing", "draft a brief",
+  structured intake, or a feature/refactor expected to touch 3+ files or add an
+  abstraction. Skip when scope is already concrete.
 reads:
   - skill: lib/interview.md
   - skill: lib/push-once.md

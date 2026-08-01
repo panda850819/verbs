@@ -26,6 +26,7 @@ capability_required:
   - skill: review
   - skill: ship
 user-invocable: true
+disable-model-invocation: true
 ---
 # Sprint
 

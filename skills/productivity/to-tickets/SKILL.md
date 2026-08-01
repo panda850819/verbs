@@ -16,6 +16,7 @@ writes:
 domain: shared
 classification: exec
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # To Tickets

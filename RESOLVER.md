@@ -9,10 +9,8 @@ The public sources have separate jobs:
 |---|---|
 | `README.md` | The first-visit explanation: why Verbs exists, the normal path, and install surface. |
 | `RESOLVER.md` | The complete human-facing operating model and disambiguation guide. |
-| `DISPATCH.md` | The single source for machine routing injected by supported plugin hosts. |
 | `manifest.toml` | The skill catalog, tiers, requirements, composition metadata, resources, and product identity. |
-| Each `SKILL.md` | The actual procedure, gates, outputs, and stop conditions for one skill. |
-| `hooks/` | The narrow enforcement layer. Hooks block selected unsafe or unverified transitions; they do not run the workflow. |
+| Each `SKILL.md` | The machine-routing description plus the actual procedure, gates, outputs, and stop conditions for one skill. |
 
 `PHILOSOPHY.md` explains the design principles behind these ownership
 boundaries.
@@ -114,20 +112,14 @@ For several independent outcomes, run several bounded sprints. Selection stays
 manual: do not turn `sprint` into a permanent autonomous driver, let it claim
 the next frontier, or use `wayfinder` as a task scheduler.
 
-### Enforcement versus guidance
+### Invocation and guidance
 
-Skill prose guides model judgment. Marketplace Plugin hooks enforce only these
-boundaries:
-
-| Boundary | Enforcement |
-|---|---|
-| Routing availability | `SessionStart` injects `DISPATCH.md` at startup, clear, and compact. It does not choose or invoke a skill. |
-| Destructive Bash commands | The destructive guard blocks positive scoped matches before execution. It is not a complete shell sandbox. |
-| Issue-branch discipline | The ticket gate blocks default-branch commits and pushes plus broad pushes. It does not create the issue, worktree, or PR. |
-| Verification before stopping | The Stop gate blocks the first stop after a code edit when no recognized verification ran, then allows a second stop to prevent a loop. |
-
-Manual skill imports are hook-free. They retain the procedure but not these
-enforcement guarantees.
+Each host routes from the descriptions in `SKILL.md`; Verbs injects no separate
+routing table. Most skills allow native model invocation. `sprint` and
+`to-tickets` are human-initiated-only entry points because they begin execution
+or publish an Issue graph; Claude Code and Pi honor their frontmatter flag,
+while Codex honors the matching `agents/openai.yaml` policy. Skills carry safety
+and verification guidance, not host-level enforcement.
 
 ## Skill catalog
 
@@ -135,7 +127,7 @@ enforcement guarantees.
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `verbs:grill` | Adversarial requirement discovery, one question at a time. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this |
+| `verbs:grill` | Adversarial requirement discovery, one question at a time. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
 | `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
 | `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |
 | `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
@@ -148,7 +140,7 @@ enforcement guarantees.
 | `verbs:qa` | Verify a changed UI in a browser and capture acceptance evidence. | test this UI, QA, check the page |
 | `verbs:review` | Review a code diff with risk-adaptive evidence and earned cold-context escalation. | review this diff or PR, about to commit |
 | `verbs:ship` | Close completed Git work through test, commit, push, PR, and QA evidence publication when present. | code is done, ship it, create a PR |
-| `verbs:handover` | Give one locked, bounded, unfinished mechanical unit to a fresh Claude or Codex worker while the original agent retains orchestration and Git. | fresh context would help this plan unit |
+| `verbs:handover` | Give one locked mechanical unit to a fresh Claude or Codex worker, or run bounded native read-only Agent Worker fan-out. | fresh context, parallel read-only research, agent workers |
 | `verbs:advisor` | Pull a decorrelated opinion from a different model; `--panel` critiques a prepared plan blindly from multiple angles. | second opinion, design fork, red-team this plan |
 | `verbs:careful` | Add confirmation and recovery gates around production, shared infrastructure, or destructive work. | production, shared infra, destructive command |
 
@@ -157,7 +149,7 @@ enforcement guarantees.
 | Skill | Purpose | Trigger |
 |---|---|---|
 | `verbs:gatekeeper` | Evaluate an external skill, MCP, repo, package, service, URL, or document before adoption. | should I install, clone, trust, or adopt this |
-| `verbs:harness-slim` | Audit an already-adopted multi-runtime harness for parity, cold context, routing overlap, telemetry semantics, and attention cost. | audit or reduce the live agent harness |
+| `verbs:harness-slim` | Audit an already-adopted multi-runtime harness for parity, cold context, routing overlap, available usage evidence, and attention cost. | audit or reduce the live agent harness |
 
 ## Disambiguation
 

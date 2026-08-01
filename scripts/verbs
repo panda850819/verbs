@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Verbs CLI: install checks, manifest sync, and bounded fresh runs. Stdlib only."""
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -12,7 +11,6 @@ import sys
 from pathlib import Path
 
 import fresh_run
-import guard_report
 
 
 def _env_value(canonical, legacy, default=None):
@@ -33,7 +31,6 @@ _DEFAULT_MANIFEST = REPO_ROOT / "manifest.toml"
 MANIFEST_PATH = Path(_env_value(
     "VERBS_MANIFEST", "PANDA_VERBS_MANIFEST", str(_DEFAULT_MANIFEST)
 ))
-DISPATCH_PATH = REPO_ROOT / "DISPATCH.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 RESOURCE_INDEX = Path("skills/.verbs-resource-index.json")
 README_PATH = Path("README.md")
@@ -155,29 +152,6 @@ def load_manifest():
 # ---------------------------------------------------------------------------
 # Runtime skill-surface parity
 # ---------------------------------------------------------------------------
-
-def _sha256_file(path):
-    if not path.is_file():
-        return None
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _sha256_tree(path):
-    """Hash a directory deterministically from relative paths + file bytes."""
-    if not path.is_dir():
-        return None
-    digest = hashlib.sha256()
-    files = sorted(
-        p for p in path.rglob("*")
-        if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"
-    )
-    for file_path in files:
-        digest.update(file_path.relative_to(path).as_posix().encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(file_path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
-
 
 def _skill_name(path):
     try:
@@ -365,8 +339,7 @@ def _not_installed():
     return {
         "status": "not_installed", "ok": None, "path": None,
         "version": None, "skills": [], "missing": [], "extra": [],
-        "issues": [], "dispatch_sha256": None, "hooks_sha256": None,
-        "drift": [],
+        "issues": [], "drift": [],
     }
 
 
@@ -388,25 +361,18 @@ def _legacy_conflict(result, issue):
     return conflicted
 
 
-def _installed_cache(host, cache_root, expected, expected_version,
-                     source_dispatch, source_hooks):
+def _installed_cache(host, cache_root, expected, expected_version):
     manifest_rel = (Path(".claude-plugin") / "plugin.json"
                     if host == "claude"
                     else Path(".codex-plugin") / "plugin.json")
     registration = _compare_surface(
         expected, _registration_scan(cache_root, manifest_rel)
     )
-    dispatch_hash = _sha256_file(cache_root / "DISPATCH.md")
-    hooks_hash = _sha256_tree(cache_root / "hooks")
     drift = []
     if not registration["ok"]:
         drift.append("skills")
     if registration.get("version") != expected_version:
         drift.append("version")
-    if dispatch_hash != source_dispatch:
-        drift.append("dispatch_sha256")
-    if hooks_hash != source_hooks:
-        drift.append("hooks_sha256")
     return {
         "status": "ok" if not drift else "drift",
         "ok": not drift,
@@ -416,14 +382,11 @@ def _installed_cache(host, cache_root, expected, expected_version,
         "missing": registration["missing"],
         "extra": registration["extra"],
         "issues": registration["issues"],
-        "dispatch_sha256": dispatch_hash,
-        "hooks_sha256": hooks_hash,
         "drift": drift,
     }
 
 
-def _claude_installed(expected, expected_version, source_dispatch, source_hooks,
-                      product):
+def _claude_installed(expected, expected_version, product):
     def _registry_drift(message):
         result = _not_installed()
         result.update(
@@ -480,8 +443,7 @@ def _claude_installed(expected, expected_version, source_dispatch, source_hooks,
             "enabled", install_path,
         )
     result = _installed_cache(
-        "claude", Path(install_path), expected, expected_version,
-        source_dispatch, source_hooks,
+        "claude", Path(install_path), expected, expected_version
     )
     if legacy_records:
         result = _legacy_conflict(
@@ -491,8 +453,7 @@ def _claude_installed(expected, expected_version, source_dispatch, source_hooks,
     return result
 
 
-def _codex_installed(expected, expected_version, source_dispatch, source_hooks,
-                     product):
+def _codex_installed(expected, expected_version, product):
     def _version_key(path):
         parts = path.name.split(".")
         if parts and all(part.isdigit() for part in parts):
@@ -546,10 +507,8 @@ def _codex_installed(expected, expected_version, source_dispatch, source_hooks,
                 "status": "drift", "ok": False, "path": str(standalone),
                 "version": None, "skills": scan["skills"],
                 "missing": scan["missing"], "extra": scan["extra"],
-                "issues": scan["issues"], "dispatch_sha256": None,
-                "hooks_sha256": None,
-                "drift": ["version", "dispatch_sha256", "hooks_sha256"]
-                + ([] if scan["ok"] else ["skills"]),
+                "issues": scan["issues"],
+                "drift": ["version"] + ([] if scan["ok"] else ["skills"]),
             }
         else:
             return _receipt_drift(
@@ -557,8 +516,7 @@ def _codex_installed(expected, expected_version, source_dispatch, source_hooks,
                 "registry", codex_home / "config.toml",
             )
     result = _installed_cache(
-        "codex", cache_root, expected, expected_version,
-        source_dispatch, source_hooks,
+        "codex", cache_root, expected, expected_version
     )
     if legacy_state is not None or legacy_cache.exists() or legacy_standalone.exists():
         result = _legacy_conflict(
@@ -588,15 +546,8 @@ def build_runtime_surface(manifest_data):
         host for host in ("claude", "codex")
         if versions[host] != expected_version
     )
-    dispatch_hash = _sha256_file(DISPATCH_PATH)
-    hooks_hash = _sha256_tree(REPO_ROOT / "hooks")
-    artifact_issues = []
-    if dispatch_hash is None:
-        artifact_issues.append(f"missing dispatch file: {DISPATCH_PATH}")
-    if hooks_hash is None:
-        artifact_issues.append(f"missing hooks directory: {REPO_ROOT / 'hooks'}")
     source_ok = recursive["ok"] and claude["ok"] and codex["ok"] \
-        and not version_drift and not artifact_issues
+        and not version_drift
     source = {
         "ok": source_ok,
         "expected": expected,
@@ -605,18 +556,12 @@ def build_runtime_surface(manifest_data):
         "codex_registration": codex,
         "versions": versions,
         "version_drift": version_drift,
-        "dispatch_sha256": dispatch_hash,
-        "hooks_sha256": hooks_hash,
-        "issues": artifact_issues,
+        "issues": [],
         "skill_files": recursive["skill_files"],
     }
     installed = {
-        "claude": _claude_installed(
-            expected, expected_version, dispatch_hash, hooks_hash, product
-        ),
-        "codex": _codex_installed(
-            expected, expected_version, dispatch_hash, hooks_hash, product
-        ),
+        "claude": _claude_installed(expected, expected_version, product),
+        "codex": _codex_installed(expected, expected_version, product),
     }
     installed_problem = any(
         item["status"] in ("drift", "migration_required")
@@ -666,60 +611,6 @@ def check_manifest_skills(manifest_data, runtime_surface):
 # ---------------------------------------------------------------------------
 
 
-def _codex_live_hook_trust(installed):
-    if installed["status"] != "ok" or not installed.get("path"):
-        return {
-            "ok": False,
-            "status": "not_ready",
-            "issues": ["Codex cache parity must be exact before live hook trust"],
-        }
-
-    smoke = REPO_ROOT / "scripts" / "codex-hook-smoke.py"
-    if not smoke.is_file():
-        return {
-            "ok": False,
-            "status": "unavailable",
-            "issues": [f"missing live hook verifier: {smoke}"],
-        }
-
-    allowed_env = {
-        "PATH", "LANG", "LC_ALL", "LC_CTYPE",
-        "TMPDIR", "TMP", "TEMP", "SYSTEMROOT",
-    }
-    env = {key: value for key, value in os.environ.items() if key in allowed_env}
-
-    codex_home = _codex_home().resolve()
-    installed_root = Path(installed["path"]).resolve()
-    command = [
-        sys.executable,
-        str(smoke),
-        "--inventory-only",
-        "--require-trusted",
-        "--codex-home",
-        str(codex_home),
-    ]
-    try:
-        installed_root.relative_to((codex_home / "plugins").resolve())
-    except ValueError:
-        command.append("--allow-external-installed-root")
-    command.extend([str(Path.home()), str(installed_root)])
-    proc = subprocess.run(
-        command,
-        env=env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if proc.returncode == 0:
-        return {"ok": True, "status": "trusted", "issues": []}
-
-    message = next(
-        (line.strip() for line in proc.stderr.splitlines() if line.strip()),
-        "Codex live hook trust verification failed",
-    )
-    return {"ok": False, "status": "untrusted", "issues": [message]}
-
-
 def run_doctor(args):
     manifest_ok, manifest_err, manifest_data = load_manifest()
     if not manifest_ok:
@@ -728,15 +619,10 @@ def run_doctor(args):
 
     host = getattr(args, "host", "auto") or "auto"
     strict = getattr(args, "strict", False)
-    live_hooks = getattr(args, "live_hooks", False)
     if strict and host not in ("claude", "codex"):
         print("ERROR: --strict requires --host claude or --host codex",
               file=sys.stderr)
         sys.exit(2)
-    if live_hooks and host != "codex":
-        print("ERROR: --live-hooks requires --host codex", file=sys.stderr)
-        sys.exit(2)
-
     runtime_surface = build_runtime_surface(manifest_data)
     manifest_check = check_manifest_skills(manifest_data, runtime_surface)
     output = {
@@ -749,13 +635,9 @@ def run_doctor(args):
             "runtime_surface": runtime_surface,
         },
     }
-    if live_hooks:
-        output["checks"]["live_hooks"] = _codex_live_hook_trust(
-            runtime_surface["installed"]["codex"])
     strict_fail = strict and (
         not runtime_surface["source"]["ok"]
         or runtime_surface["installed"][host]["status"] != "ok"
-        or (live_hooks and not output["checks"]["live_hooks"]["ok"])
     )
 
     if args.json:
@@ -793,12 +675,6 @@ def _print_doctor_text(out):
             print(f"    {issue}")
         if installed["drift"]:
             print(f"    Drift: {', '.join(installed['drift'])}")
-    if "live_hooks" in out["checks"]:
-        live = out["checks"]["live_hooks"]
-        symbol = "+" if live["ok"] else "!"
-        print(f"[{symbol}] codex live hooks: {live['status']}")
-        for issue in live["issues"]:
-            print(f"    {issue}")
     print()
 
 
@@ -1467,11 +1343,6 @@ def main():
         action="store_true",
         help="Exit nonzero unless the selected Claude/Codex cache matches source",
     )
-    doc.add_argument(
-        "--live-hooks",
-        action="store_true",
-        help="With --host codex, verify all installed Verbs hooks are trusted",
-    )
     ini = sub.add_parser("init", help="Print host install commands")
     ini.add_argument(
         "--host",
@@ -1493,7 +1364,6 @@ def main():
     )
 
     fresh_run.add_parser(sub)
-    guard_report.add_parser(sub)
 
     sub.add_parser("help", help="Show this help message")
 

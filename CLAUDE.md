@@ -10,9 +10,8 @@ the iteration contract: what an agent must keep true when changing this repo.
   skills, tiered core / ext in `manifest.toml`.
 - `lib/` — canonical shared modules. The copies under `skills/*/lib/` are
   GENERATED from each skill's `resources[]`; never edit a vendored copy.
-- `hooks/` — the enforcement layer (SessionStart dispatch injection, Bash
-  destructive + ticket-gate guards, Stop verify gate). Prose suggests; hooks
-  block.
+- `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/` — GENERATED
+  skills-only distribution metadata.
 - `maintainer/` — skill-writing lore and the frontmatter spec. Not a runtime
   surface.
 - `.out-of-scope/` — rejected directions with reopen conditions. Check it
@@ -28,8 +27,8 @@ When adding, renaming, re-scoping, or removing a skill:
    (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`), the vendored lib
    copies, and the resource index. Hand-editing a generated file is drift the
    suite rejects.
-3. Update the `RESOLVER.md` catalog row; touch `DISPATCH.md` only when routing
-   changes.
+3. Update the `RESOLVER.md` catalog row and the skill's own description when
+   routing changes.
 4. Bump `[manifest] version` — the bump is what refreshes installed plugin
    caches on both hosts.
 5. Record the change in `CHANGELOG.md`.
@@ -40,7 +39,7 @@ canonical file — in that order; sync fails loud otherwise.
 
 ## Verify
 
-`bash tests/run-all.sh` — hook truth tables, sync determinism, doctor parity,
+`bash tests/run-all.sh` — invocation policy, sync determinism, doctor parity,
 structural lint. Green before any PR; CI runs the same suite on macOS.
 
 ## Authoring bar
@@ -48,7 +47,7 @@ structural lint. Green before any PR; CI runs the same suite on macOS.
 `maintainer/writing-great-skills.md` (construction lore) and
 `maintainer/SKILL-FRONTMATTER.md` (frontmatter contract). A new skill must
 name the surface it replaces or extends, clear `.out-of-scope/` precedent,
-and take a RESOLVER row plus a dispatch slot if model-routed.
+and take a RESOLVER row plus a concrete routing description.
 
 ## Learnings
 

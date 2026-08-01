@@ -1,9 +1,10 @@
 ---
 name: careful
 description: |
-  Use when working on production code, shared infrastructure, or
-  unfamiliar codebases. Adds confirmation gates before destructive
-  commands (force push, rm -rf, publish, DROP).
+  Use when working on production code, shared infrastructure, live harness paths
+  such as ~/.agents, ~/.claude, or ~/.codex, or unfamiliar codebases. Adds
+  confirmation gates before destructive commands (force push, rm -rf, publish,
+  DROP).
 writes:
   - cli: stdout
 forbids:

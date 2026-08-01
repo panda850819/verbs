@@ -61,6 +61,52 @@ check_doctor() {
   fi
 }
 
+check_planning_invocation() {
+  host="$1"
+  out="$2"
+  if printf '%s\n' "$out" | python3 -c '
+import json
+import sys
+
+host = sys.argv[1]
+events = []
+for raw in sys.stdin:
+    try:
+        events.append(json.loads(raw))
+    except json.JSONDecodeError:
+        pass
+
+if host == "claude":
+    discovered = any(
+        event.get("type") == "system"
+        and event.get("subtype") == "init"
+        and "verbs:sprint" in event.get("slash_commands", [])
+        for event in events
+    )
+    completed = any(
+        event.get("type") == "result"
+        and "Execution: NOT_RUN" in event.get("result", "")
+        for event in events
+    )
+    ok = discovered and completed
+else:
+    completed = any(
+        event.get("type") == "item.completed"
+        and event.get("item", {}).get("type") == "agent_message"
+        and "Execution: NOT_RUN" in event.get("item", {}).get("text", "")
+        for event in events
+    )
+    ok = completed and any(event.get("type") == "turn.completed" for event in events)
+
+raise SystemExit(0 if ok else 1)
+' "$host"; then
+    echo "PASS [$host]: explicit human-only sprint invocation completed"
+  else
+    echo "FAIL [$host]: explicit human-only sprint invocation lacks proof" >&2
+    fail=1
+  fi
+}
+
 check_invocation() {
   host="$1"
   out="$2"
@@ -160,6 +206,14 @@ run_claude() {
     return
   }
   check_invocation claude "$out"
+  planning_out="$(claude -p --tools Skill --no-session-persistence \
+    --output-format stream-json --verbose \
+    '/verbs:sprint This request is planning-only. Follow the skill boundary and do not act.' 2>&1)" || {
+    echo "FAIL [claude]: explicit sprint invocation error" >&2
+    fail=1
+    return
+  }
+  check_planning_invocation claude "$planning_out"
 }
 
 run_codex() {
@@ -192,9 +246,6 @@ run_codex() {
   if [ -n "${VERBS_SMOKE_EXPECT_HOME:-}" ]; then
     codex_args+=(--cd "$VERBS_SMOKE_EXPECT_HOME" --skip-git-repo-check)
   fi
-  if [ "${VERBS_SMOKE_BYPASS_HOOK_TRUST:-0}" = 1 ]; then
-    codex_args+=(--dangerously-bypass-hook-trust)
-  fi
   if [ -n "${VERBS_SMOKE_MODEL:-}" ]; then
     codex_args+=(--model "$VERBS_SMOKE_MODEL")
   fi
@@ -208,41 +259,25 @@ run_codex() {
     return
   }
   check_invocation codex "$out"
-}
-
-run_adapter() {
-  hook="$repo_root/hooks/session-start"
-  for envelope in codex claude cursor; do
-    case "$envelope" in
-      codex) out="$(env -u CLAUDE_PLUGIN_ROOT -u CURSOR_PLUGIN_ROOT -u COPILOT_CLI bash "$hook")" ;;
-      claude) out="$(env -u CURSOR_PLUGIN_ROOT -u COPILOT_CLI CLAUDE_PLUGIN_ROOT=/tmp bash "$hook")" ;;
-      cursor) out="$(env -u COPILOT_CLI CURSOR_PLUGIN_ROOT=/tmp bash "$hook")" ;;
-    esac
-    if printf '%s' "$out" | python3 -c '
-import json,sys
-data=json.load(sys.stdin)
-payload=data.get("additional_context") or data.get("additionalContext") or data.get("hookSpecificOutput",{}).get("additionalContext","")
-assert "# Dispatch" in payload
-assert "AGENTS.md" not in payload and "gbrain" not in payload
-' 2>/dev/null; then
-      echo "PASS [adapter:$envelope]: reference session-start envelope is valid"
-    else
-      echo "FAIL [adapter:$envelope]: invalid reference session-start envelope" >&2
-      fail=1
-    fi
-  done
+  planning_out="$(env -u VERBS_REPO_ROOT -u VERBS_MANIFEST \
+    codex "${codex_args[@]}" \
+    '$verbs:sprint This request is planning-only. Follow the skill boundary and do not act.' 2>&1)" || {
+    echo "FAIL [codex]: explicit sprint invocation error" >&2
+    fail=1
+    return
+  }
+  check_planning_invocation codex "$planning_out"
 }
 
 target="${1:-all}"
 case "$target" in
   claude) run_claude ;;
   codex) run_codex ;;
-  adapter|hook) run_adapter ;;
   all) run_claude; run_codex ;;
-  *) echo "unknown host: $target (claude|codex|adapter|all)" >&2; exit 2 ;;
+  *) echo "unknown host: $target (claude|codex|all)" >&2; exit 2 ;;
 esac
 
-if [ "$target" != adapter ] && [ "$target" != hook ] && [ "$host_ran" -eq 0 ]; then
+if [ "$host_ran" -eq 0 ]; then
   echo "FAIL: no requested host was tested" >&2
   exit 1
 fi

@@ -11,10 +11,9 @@ check_contract() {
                "source / installed / live" "always-on / deferred / task-local" \
                "foreground lane" "Propose before any move" \
                "at least 30 days" "20 eligible opportunities" \
-               "scripts/verbs guard-report" "Rate: UNAVAILABLE" \
-               "NO CONCLUSION" "NEEDS TRACE" \
-               "Zero denials and zero use never prove a healthy surface" \
-               "never from frequency alone"; do
+               "Use only usage evidence the host actually exposes" \
+               "Rate: UNAVAILABLE" "NO CONCLUSION" "NEEDS TRACE" \
+               "without host evidence, zero-use pruning"; do
     grep -Fq "$token" "$target" || return 1
   done
 }
@@ -28,7 +27,6 @@ grep -Fq 'requires = ["cli:git", "cli:codex", "cli:claude"]' manifest.toml
 grep -Fq 'harness-slim/codex' scripts/bootstrap.sh
 grep -Fq 'harness-slim/claude' scripts/bootstrap.sh
 grep -Fq '`verbs:harness-slim`' RESOLVER.md
-grep -Fq '| Audit/reduce a live multi-runtime agent harness' DISPATCH.md
 grep -Fq '/verbs:harness-slim' README.md
 
 if rg -n '/Users/|~/.agents/skills/harness-slim|brain\.pdzeng\.com' "$skill"; then
