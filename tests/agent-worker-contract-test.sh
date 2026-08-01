@@ -24,7 +24,9 @@ check_contract() {
 }
 
 check_contract "$contract"
-[ "$(rg -l 'Explicit Agent Worker or parallel read-only research' skills | wc -l | tr -d ' ')" -eq 1 ]
+[ "$(grep -RIl --include='SKILL.md' \
+  'Explicit Agent Worker or parallel read-only research' skills \
+  | wc -l | tr -d ' ')" -eq 1 ]
 test ! -e skills/engineering/agent-worker/SKILL.md
 test ! -e scripts/agent-worker
 
