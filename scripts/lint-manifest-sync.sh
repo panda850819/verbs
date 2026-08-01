@@ -73,6 +73,18 @@ if [ -n "$stale" ]; then
   fail=1
 fi
 
+# Operational copy must use the current product name and the manifest's
+# markdown-first core semantics. These surfaces sit outside the living-doc
+# brand scan, so pin the exact retired claims here.
+copy_drift=$(grep -nEi 'pandastack|markdown-only' \
+  "$repo_root/.github/workflows/ci.yml" \
+  "$repo_root/scripts/bootstrap.sh" 2>/dev/null || true)
+if [ -n "$copy_drift" ]; then
+  echo "FAIL: stale operational copy found:"
+  echo "$copy_drift" | sed 's/^/  /'
+  fail=1
+fi
+
 # Derived files restate selected manifest data. scripts/verbs sync is the
 # generator; --check is the drift gate so loader JSON and the README skill
 # catalog cannot silently fall behind a manifest change.
