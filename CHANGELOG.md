@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.22.0 — Ask Boss routes uncertainty to existing callers
+
+### Added
+
+- Added the thin `ask-boss` orientation skill for unclear owner, target,
+  reference, or next-route requests. It retrieves facts, chooses one existing
+  specialist, and emits a carry-forward context packet without starting generic
+  grilling or writing downstream artifacts. (#320)
+- Added a caller handoff packet to the shared interview protocol so answers,
+  references, missing decisions, contradictions, and exit conditions survive a
+  caller switch while the receiving caller owns the artifact and close. (#320)
+- Documented the `ask-boss -> wayfinder -> optional Grilling Session` route for
+  multi-session decision fog. (#320)
+
 ## v0.21.0 — Skills are the runtime surface
 
 ### Changed

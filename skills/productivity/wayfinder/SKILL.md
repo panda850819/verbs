@@ -3,13 +3,13 @@ name: wayfinder
 type: skill
 description: |
   Chart or work a decision map across sessions until the route to its
-  destination is clear. Use when the request itself names a map: charting one,
-  or resuming an existing one. With no map yet, run the interview and write the
-  map here, then stop. With an existing map, take ONE unblocked entry, resolve
-  it by type (research / grilling / prototype / task), write the decision back,
-  and graduate the fog. A large effort that names no map goes to `grill`, which
-  hands off here once the drilling shows the route is unclear. NOT executing a
-  locked plan (sprint).
+  destination is clear. Use when the request itself names a map, resumes one,
+  or an `ask-boss` handoff identifies multi-session decision fog. With no map
+  yet, run the interview and write the map here, then stop. With an existing
+  map, take ONE unblocked entry, resolve it by type (research / grilling /
+  prototype / task), write the decision back, and graduate the fog. A request
+  without a named map that only needs one-session requirement discovery goes to
+  `grill`. NOT executing a locked plan (sprint).
 reads:
   - repo: docs/briefs/**
   - skill: lib/interview.md
@@ -31,10 +31,23 @@ user-invocable: true
 Wayfinder has two modes. Charting establishes the map; working advances one
 existing map entry per session.
 
+## Handoff from `ask-boss`
+
+When `ask-boss` identifies multi-session decision fog, it has already performed
+orientation. Carry its destination, known context, source references, authority,
+and contradictions into this skill. Do not re-run orientation or ask for facts
+already present in the packet.
+
+`wayfinder` owns the map, its one-entry-at-a-time close, and the map artifact.
+It may start the shared interview for decisions the map still needs. If another
+caller already started an unfinished interview, follow the shared switch rule
+and carry the answers forward rather than restarting it.
+
 ## Chart a new map
 
 Use this mode when a map is asked for and none exists yet — the user names one
-directly, or `grill` hands the effort over as large and foggy.
+directly, `ask-boss` hands over multi-session decision fog, or `grill` hands
+the effort over after its drilling shows that one session is not enough.
 
 1. **Name the destination.** If the user has not supplied a topic, ask for the
    destination before charting. Do not invent the effort the map should cover.

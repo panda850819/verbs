@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+ASK_BOSS = (ROOT / "skills/productivity/ask-boss/SKILL.md").read_text()
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
 INTERVIEW = (ROOT / "lib/interview.md").read_text()
 WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
@@ -21,6 +22,35 @@ def require(text: str, fragment: str, scenario: str) -> None:
 def require_words(text: str, fragment: str, scenario: str) -> None:
     require(" ".join(text.split()), " ".join(fragment.split()), scenario)
 
+
+# ask-boss is orientation only: it chooses a caller before any interview and
+# carries context forward instead of becoming a generic workflow engine.
+require(ASK_BOSS, "## Route", "ask-boss route")
+require_words(
+    ASK_BOSS,
+    "Select one existing specialist before opening any Grilling Session:",
+    "ask-boss chooses caller before session",
+)
+require_words(
+    ASK_BOSS,
+    "does not start a generic Grilling Session",
+    "ask-boss avoids generic grilling",
+)
+require_words(
+    ASK_BOSS,
+    "Do not intercept a clear typed request",
+    "ask-boss preserves typed on-ramps",
+)
+require_words(
+    ASK_BOSS,
+    "Output exactly one recommended route or one human decision question",
+    "ask-boss emits one route",
+)
+require_words(
+    ASK_BOSS,
+    "`wayfinder` owns the Decision Map",
+    "ask-boss wayfinder handoff",
+)
 
 # The interview protocol lives in lib/interview.md, not inlined in grill (#284).
 require(INTERVIEW, "**ONE question at a time.**", "interview cadence")
@@ -42,9 +72,16 @@ require(GRILL, "Do not write a competing repository brief, executable plan", "si
 require(GRILL, "**Smaller work -> local close.** Continue to Stage C", "small-work branch")
 require(GRILL, "**Large and foggy -> `wayfinder`.**", "wayfinder branch")
 
-# wayfinder owns charting: it interviews and writes the map, grill hands off (#285).
+# wayfinder owns charting: it interviews and writes the map, grill or ask-boss
+# hands off (#285).
 require(GRILL, "Do not write a map here", "grill does not chart")
 require(WAYFINDER, "@lib/interview.md", "wayfinder runs the interview itself")
+require(WAYFINDER, "Handoff from `ask-boss`", "wayfinder receives orientation packet")
+require_words(
+    WAYFINDER,
+    "Do not re-run orientation or ask for facts already present in the packet",
+    "wayfinder does not repeat ask-boss orientation",
+)
 require(WAYFINDER, "docs/briefs/{YYYY-MM-DD}-{slug}-map.md", "wayfinder writes the map")
 require(WAYFINDER, "This skill owns that format", "wayfinder owns the map format")
 assert "Delegate charting to `grill`" not in WAYFINDER, (
@@ -65,6 +102,23 @@ for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder")):
         "say so before the next question.**",
         f"{scenario} carries the mid-interview switch announcement",
     )
+
+# Caller handoff carries state while the receiving caller owns the close.
+require(INTERVIEW, "## Caller handoff packet", "caller handoff packet")
+for fragment in (
+    "workflow_intent",
+    "source_references",
+    "answered_questions",
+    "missing_decisions",
+    "open_contradictions",
+    "exit_condition",
+):
+    require(INTERVIEW, fragment, "caller handoff packet fields")
+require_words(
+    INTERVIEW,
+    "The receiving caller owns the artifact and close",
+    "caller owns close",
+)
 
 # An unfinished interview that switches callers is defined, and visible (#289).
 require(INTERVIEW, "## Switching callers mid-interview", "mid-interview switch rule")

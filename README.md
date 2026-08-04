@@ -16,6 +16,7 @@ turns those recurring failure modes into explicit routes:
 
 | Failure mode | Verbs route |
 |---|---|
+| The request lacks a clear owner, reference, or next route | `ask-boss` orients the work and selects one existing specialist. |
 | The request sounds clear but hides product choices | `grill` discovers requirements before implementation. |
 | The topic is too large for one plan or session | `grill` charts the map; `wayfinder` resolves one frontier at a time. |
 | The cause, design seam, or UI direction is unknown | `debug`, `codebase-design`, `prototype`, or `ui` answers the right kind of question. |
@@ -32,27 +33,30 @@ The normal development route is conditional, not a mandatory chain:
 ```text
 request
   |
-  v
-grill -- clarify the outcome and acceptance conditions
+  +-- clear typed -------------------------------> existing specialist
   |
-  +-- smaller work --> local brief / plan --> selected Issue
-  |                                               |
-  |                                               +--> sprint --> review --> ship
+  +-- owner / route / reference unclear ---------> ask-boss -> one specialist
   |
-  +-- spec-sized --> to-spec --> canonical GitHub Spec Issue
-  |                                  |
-  |                                  +--> to-tickets --> child Issue graph
-  |                                                           |
-  |                                                           +--> manually selected
-  |                                                                frontier Issue
-  |                                                                  |
-  |                                                                  +--> sprint
-  |                                                                       --> review
-  |                                                                       --> ship
+  +-- outcome / scope / acceptance unclear -----> grill
+  |                                                  |
+  |                                                  +--> local brief / plan
+  |                                                  +--> to-spec
+  |                                                  +--> wayfinder
   |
-  +-- large and still foggy --> decision map --> wayfinder resolves one
-                                                  decision frontier at a time
+  +-- several dependent decisions --------------> wayfinder
+
+selected implementation
+  -> sprint -> review / qa -> ship
 ```
+
+The canonical branches remain `to-spec --> canonical GitHub Spec Issue` and
+`to-tickets --> child Issue graph`; a human selects the implementation frontier
+before `sprint`.
+
+`ask-boss` is optional orientation, not a mandatory front door. It retrieves
+facts and selects one existing specialist when the owner, target, source of
+truth, or next route is unclear. Clear typed requests and named maps bypass it.
+The selected caller owns its interview, artifact, and close.
 
 Work is spec-sized when it is expected to require at least two implementation
 Issues, or when even one PR changes a public contract, schema or migration, or
@@ -75,6 +79,9 @@ and delivery loop.
 Other skills are typed on-ramps or supporting gates:
 
 - A reproducible failure enters through `debug`.
+- A named Decision Map or multi-session decision handoff enters through
+  `wayfinder`.
+- A clear bounded implementation enters through `sprint`.
 - A production UI change enters through `ui`; browser acceptance enters
   through `qa`.
 - An architecture seam enters through `codebase-design`; a single unresolved
@@ -117,6 +124,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 |---|---|---|
 | `/verbs:careful` | core | Confirmation gate for production, shared infrastructure, live harness paths, and destructive commands. |
 | `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
+| `/verbs:ask-boss` | core | Route unclear workplace requests to one existing specialist by retrieving facts and resolving intent, target, audience, and minimum sufficient authority. Use for an unclear starting point, owner, reference, or next route; clear typed requests, named maps, bugs, UI work, and code review go directly to their specialist. |
 | `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
 | `/verbs:setup-verbs` | core | Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate. |
 | `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |
@@ -126,7 +134,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:qa` | core | Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability. |
 | `/verbs:codebase-design` | core | Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
-| `/verbs:wayfinder` | core | Chart or work cross-session decision maps when the request itself names a map: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A large effort naming no map goes to grill, which hands off here. |
+| `/verbs:wayfinder` | core | Chart or work cross-session decision maps when the request itself names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
