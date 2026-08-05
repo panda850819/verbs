@@ -1,11 +1,10 @@
 ---
 name: codebase-design
 description: |
-  Deep-module design vocabulary: a lot of behaviour behind a small interface,
-  placed at a clean seam, testable through that interface. Use when designing
-  or reshaping a module's interface, deciding where a seam goes, judging
-  shallow vs deep, making code testable, or when another skill needs these
-  terms. NOT diff review (use `review`) or requirement discovery (use `grill`).
+  Deep-module design for choosing a small, testable interface at a clean seam.
+  Use when the design question is a module's interface, seam, depth, or test
+  surface, or when another skill needs these terms. NOT diff review (`review`) or
+  requirement discovery (`grill`).
 reads:
   - repo: "**"
 writes:
@@ -74,6 +73,8 @@ complexity hidden inside?
   wrong shape.
 - **One adapter means a hypothetical seam; two adapters make it real.** Don't
   introduce a seam until something actually varies across it.
+- **Native delta:** Native coding defaults can start with interfaces; this skill makes seam, depth, and test surface explicit before implementation.
+- **Done when:** Interface, seam, depth tradeoff, and test surface are explicit.
 
 ## Designing for testability
 

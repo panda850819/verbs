@@ -1,20 +1,18 @@
 ---
 name: ui
 description: |
-  Build or fix UI surfaces with a committed point of view: pages, components,
-  layout, typography, motion feel, design review. Triggers: 設計, 做頁面, 做組件,
-  不好看, 很醜, 突兀, 不協調, 字體, 排版, 樣式, 前端, UI, 截圖, 很死, 死板, 生硬,
-  沒動效, 沒回饋感, 切換好硬, design, build a page/component, make it look good,
-  typography, feels dead, stiff, lifeless, janky transition, this looks wrong. NOT for
-  backend logic, browser-test verification (use `qa`), root-cause debugging
-  of a broken render (use `debug`), or throwaway variant exploration before a
-  direction is chosen (use `prototype`).
+  Build or fix UI surfaces with a committed visual direction: pages, components,
+  layout, typography, motion, screenshots, or design review. Use for frontend
+  work or visual complaints such as 不好看、突兀、死板、沒回饋感. NOT for backend
+  logic, browser QA (`qa`), render bugs (`debug`), or throwaway exploration
+  (`prototype`).
 user-invocable: true
 ---
 # UI
 
-You know design. You lack the craft numbers (`references/craft.md`) and the will to
-fight your own defaults. A CJK gut-feel complaint (很傻 / 突兀 / 丑 / 乱) is taste, not a bug — keep the
+Native frontend tooling can render a surface; this skill adds a committed visual
+direction, craft review, and rendered evidence. Load `references/craft.md` before
+writing CSS, not after. A CJK gut-feel complaint (很傻 / 突兀 / 丑 / 乱) is taste, not a bug — keep the
 word, name the defect, fix; do not send it to `debug`.
 
 - **Fight your defaults.** Your first draft is the AI-default — Inter, purple→blue gradient, centered hero
@@ -25,5 +23,7 @@ word, name the defect, fix; do not send it to `debug`.
 - **Build past the happy path.** States (loading/empty/error) and the shippability layer a visual pass
   skips — 404, back-nav, form validation, skip-link, footer legal — are in `craft.md`.
 
+Done when the named direction passes the default-trap scan, required states are covered, and 375px/1280px screenshots are captured for every shipped locale.
+
 Everything else — fonts, CJK type, OKLCH, CSS bans, motion, spacing, content rules — is craft you cannot
-derive: `references/craft.md`. Read it before writing CSS, not after.
+derive: `references/craft.md`.
