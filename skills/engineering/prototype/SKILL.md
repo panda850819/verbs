@@ -1,14 +1,11 @@
 ---
 name: prototype
 description: |
-  Throwaway prototype that answers ONE design question. Logic branch ("does
-  this state model / data shape feel right?") → tiny interactive terminal
-  driver. UI branch ("what should this look like?") → several structurally
-  different variants behind a ?variant= param. Use when a design question is
-  answerable by building cheap and reacting: sanity-check a state model,
-  explore what a surface should look like, make a grill open question
-  concrete. NOT committed production UI work (use `ui`) and NOT the feature
-  itself (use `sprint`).
+  Throwaway prototype overrides the default production-build reflex with one cheap artifact
+  for one design question. Logic questions get a tiny interactive terminal
+  driver; UI questions get structurally different variants behind `?variant=`.
+  Use it to make a `grill` open question concrete. `ui` builds the chosen
+  direction; `sprint` ships the feature.
 reads:
   - repo: "**"
 writes:
