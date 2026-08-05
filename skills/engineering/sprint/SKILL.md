@@ -43,7 +43,8 @@ Read the repository contract and the issue, brief, plan, or request. State one
 outcome, in-scope files or subsystem, checkable acceptance evidence, exclusions,
 and irreversible operations. If one un-derivable choice changes the result,
 route only that question to `grill`; route bugs to `debug` and UI work to `ui`.
-For an existing plan, re-derive progress from git and acceptance checks.
+For an existing plan, treat it as read-only context; re-derive progress from git
+and acceptance checks instead of hand-editing status.
 
 Completion: the finish line can be proven by commands or named human evidence.
 
@@ -53,7 +54,8 @@ For each smallest coherent unit: inspect the seam, make the minimum change, run
 the narrowest relevant check, and inspect the diff. Execute in the main session
 by default; delegate only file-disjoint or mechanical work requested by the user
 or repository contract through `handover`. Consult `lib/model-anchors.md` for
-the model seat; never select a model ad hoc. Never weaken or skip a test.
+the model seat; never select a model ad hoc. Stop immediately before destructive
+or public actions that need authorization. Never weaken or skip a test.
 
 Completion: every changed line maps to the finish line and its check passes.
 

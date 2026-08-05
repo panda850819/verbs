@@ -70,10 +70,14 @@ closed.
 ## Work an existing map
 
 1. Read only the map index and linked notes required by the chosen entry.
-2. Mark one frontier entry `status: in-progress ({date})` before work.
-3. Resolve it by type: research writes cited facts; grilling uses `grill`;
-   prototype uses `prototype`; task changes the prerequisite or gives a precise
-   checklist.
+2. **Choose and claim.** If the user named an entry, take that one; otherwise
+   take the first frontier entry. Mark it `status: in-progress ({date})` before
+   work.
+3. **Resolve by type.** Research writes cited facts. `grilling` and `prototype`
+   are HITL: run the respective skill and wait for human input; never answer the
+   human's side yourself, and leave the entry open when no human is available.
+   The prototype reaction is the decision input. A `task` unblocks the decision
+   or produces a precise checklist.
 4. Write the full answer to `docs/briefs/{map-slug}/{NN}-{entry-slug}.md`, close
    the entry, and append one gist to Decisions so far.
 5. Graduate newly precise fog into typed entries, or move past-destination work
