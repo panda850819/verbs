@@ -1,10 +1,9 @@
 ---
 name: qa
 description: |
-  Browser-based QA. Use when UI has changed, or when asked to
-  "test this", "QA", or "check the page". Requires browser automation
-  from the host. NOT for non-UI checks (use the project's normal test or
-  verification path); NOT for code-diff review (use `review`).
+  Browser-based QA for UI changes or explicit "test this" / "QA" / "check the
+  page" requests. Requires host browser automation. NOT non-UI checks, diff
+  review (`review`).
 capability_required:
   - host browser automation
 reads:
@@ -22,40 +21,34 @@ user-invocable: true
 ---
 # QA
 
-You already know what to test. This skill is the evidence protocol: structured
-assertions a merge decision can trust, not a test-writing tutorial.
+QA is the evidence protocol: structured assertions a merge decision can trust,
+not a test-writing tutorial.
 
 ## Context
 
 Read the `## verbs` config from `CLAUDE.md` or `AGENTS.md`; resolve
-`{learnings_dir}` (default `docs/learnings`) and search it for `type: pitfall`
-entries related to the changed UI (shape per `lib/learning-format.md`). Read
-the brief in `docs/briefs/` when one exists. Bind the intent source and assign
-stable `AC-1`, `AC-2`, ... identifiers to its acceptance criteria. No issue,
-brief, or explicit user goal means `INTENT GAP`; QA can test behavior but cannot
-claim that the intended outcome is verified.
+`{learnings_dir}` (default `docs/learnings`) and search related `type: pitfall`
+entries using `lib/learning-format.md`. Read a matching brief from
+`docs/briefs/`. Bind the intent source and assign stable
+`AC-1`, `AC-2`, ... identifiers to its acceptance criteria. Without an issue,
+brief, or explicit goal, report `INTENT GAP`; behavior alone cannot prove intent.
 
 ## Plan
 
-From the diff, brief, or instructions, produce ONE numbered test list: core
-user flows first (each as action → expected result), then the paths a
-happy-path pass misses — error/empty/loading states, edge inputs, double
-submit, Escape mid-flow, keyboard-only nav, mobile viewport, console errors
-after interactions. Unclear what to test → ask: "What flows should I test?"
+Produce ONE numbered list of action → expected result checks: core user flows
+first, then error/empty/loading states, edge inputs, double submit, Escape,
+keyboard-only navigation, mobile viewport, and console errors. If the flows are
+unclear, ask what to test.
 
 ## Test
 
-Run directly for small changes. Fan out to host-provided isolated browser
-workers only when the list has 3+ groups AND session isolation is proven —
-otherwise run sequentially. Each worker gets its exact numbered tests, the
-assertion protocol below, and a step budget (~25 targeted / ~40 full page /
-~75 multi-page); at budget, accept partial results with `STEP_SKIP`. Never
-share one browser session across parallel workers; the main agent merges and
-summarizes.
+Run small changes directly. Use isolated browser workers only for 3+ groups when
+session isolation is proven; otherwise run sequentially. Give each worker its
+numbered tests, the assertion protocol below, and a step budget (~25 targeted / ~40 full page / ~75 multi-page);
+at budget accept partial results with `STEP_SKIP`; the main agent merges and
+summarizes worker results, and never share a browser session.
 
-### Assertion protocol
-
-Every test step MUST produce a structured marker:
+Every test step MUST emit one marker:
 
 ```
 STEP_PASS|<step-id>|<evidence>
@@ -63,15 +56,11 @@ STEP_FAIL|<step-id>|<expected> -> <actual>
 STEP_SKIP|<step-id>|<reason>
 ```
 
-Verification, in order of rigor — use the strongest available:
-
-1. **Deterministic check**: `eval` returns structured data (element count, field value, console errors)
-2. **Snapshot element match**: expected role/text exists in the accessibility tree
-3. **Before/after comparison**: snapshot, act, snapshot, verify the change
-4. **Screenshot + visual judgment** (weakest): only for properties the accessibility tree cannot capture
-
-Every `STEP_FAIL` gets a screenshot and a `[BUG]` report per
-`lib/qa-evidence-format.md`. After all tests:
+Use the strongest available verification in this order: deterministic evaluation,
+accessibility snapshots, before/after comparison, and screenshots only where the
+tree cannot prove the property. A
+`STEP_FAIL` always gets a screenshot and a `[BUG]` report per
+`lib/qa-evidence-format.md`. End with:
 
 ```
 Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
@@ -79,25 +68,21 @@ Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
 
 ## Acceptance evidence handoff
 
-Map every acceptance criterion to the strongest relevant step evidence. Emit
-the marker-delimited block from `lib/qa-evidence-format.md`, including intent,
-artifact identity, per-criterion `PASS` / `FAIL` / `UNPROVEN`, totals, gaps,
-and timestamp. Also persist the exact block at the Git metadata path returned
-by `git rev-parse --git-path verbs/qa-evidence.md`; do not dirty the worktree.
+Map every acceptance criterion to the strongest step evidence. Emit the exact
+marker block from `lib/qa-evidence-format.md`, including intent, current
+artifact identity, per-criterion `PASS` / `FAIL` / `UNPROVEN`, totals, gaps, and
+timestamp. Persist it at `git rev-parse --git-path verbs/qa-evidence.md` without
+dirtying the worktree.
 
-QA does not write to GitHub. `ship` owns the pull-request upsert because it
-already owns PR mutation and may run after QA but before a PR exists. A later
-code change invalidates the evidence until the affected checks rerun.
+QA does not write to GitHub; `ship` owns the PR upsert. A later code change
+invalidates the evidence until the affected checks rerun.
 
-## Fix
+## Fix and learning
 
-Execute each bug report's `Action` field using the routing contract in
-`lib/qa-evidence-format.md`; never reclassify it here. After an AUTO-FIX,
-re-run the affected flow. ASK items remain explicit pending decisions and are
-never reported as fixed.
+Run each bug report's `Action` through `lib/qa-evidence-format.md`; never
+reclassify it. Re-run an affected flow after `AUTO-FIX`; keep `ASK` pending.
+Emit one `type: pitfall` candidate only for a genuinely new UI pattern or
+browser pitfall; otherwise state no learning is warranted.
 
-## Learning candidate
-
-If a genuinely new UI pattern or browser pitfall surfaced, emit one
-`type: pitfall` candidate per `lib/learning-format.md` — persistence belongs
-to the host/project. Otherwise state "no learning warranted".
+Done when every acceptance criterion is mapped to current artifact-bound
+`PASS`, `FAIL`, or `UNPROVEN` evidence and the test totals are reported.
