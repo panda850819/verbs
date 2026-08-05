@@ -21,53 +21,50 @@ Verbs is a set of composable procedures, not a fixed pipeline. The default
 development route is:
 
 ```text
-unclear request
+request
   |
-  v
-grill
+  +-- clear typed request ------------------------------> existing specialist
   |
-  +-- smaller work --> local brief / plan --> selected Issue
-  |                                               |
-  |                                               +--> sprint --> review --> ship
+  +-- owner / route / reference unclear ---------------> ask-boss
+  |                                                       |
+  |                                                       +--> one specialist
   |
-  +-- spec-sized --> to-spec --> canonical GitHub Spec Issue
-  |                                  |
-  |                                  +--> to-tickets --> child Issue graph
-  |                                                           |
-  |                                                           +--> human selects
-  |                                                                one frontier Issue
-  |                                                                  |
-  |                                                                  +--> sprint
-  |                                                                       --> review
-  |                                                                       --> ship
+  +-- outcome / scope / acceptance unclear ------------> grill
+  |                                                       |
+  |                                                       +--> local brief / plan
+  |                                                       +--> to-spec
+  |                                                       +--> wayfinder
   |
-  +-- several unresolved decisions ----> decision map
-                                         |
-                                         +--> wayfinder resolves one frontier
-                                              until work becomes sprint-sized
+  +-- several unresolved decisions ---------------------> decision map
+                                                          |
+                                                          +--> wayfinder resolves one frontier
+                                                               until work becomes sprint-sized
+
+selected implementation
+  -> sprint -> review / qa -> ship
 ```
 
-This route answers three common selection questions:
+This route answers six common selection questions:
 
-1. Use `grill` when intent, scope, constraints, or acceptance are still
+1. Use `ask-boss` when the request's owner, source of truth, target, or next
+   route is unclear. It retrieves facts, chooses one existing specialist, and
+   passes a context packet. It does not start generic grilling or intercept a
+   clear typed request.
+2. Use `grill` when intent, scope, constraints, or acceptance are still
    unknown. It asks one question at a time, then chooses a close based on the
    resulting work shape.
-2. Use `wayfinder` when the request itself names a map — charting one, or
-   resuming an existing one. With no map, `wayfinder` runs the interview,
-   writes the map, and stops. With a map, it takes one unblocked frontier
-   entry, records the decision, and updates the map.
-   A large effort with no map still enters `grill`, which hands off once the
-   drilling shows the route is unclear. The size of an effort is not knowable
-   when the request is typed, and a wrong `grill` costs one hand-off while a
-   wrong `wayfinder` can leave an unwanted map behind. `wayfinder` is the only
-   skill that writes a map.
-3. Use `to-spec` when the work is expected to need at least two implementation
+3. Use `wayfinder` when the request itself names a map, resumes an existing
+   one, or an `ask-boss` handoff identifies multi-session decision fog. With no
+   map, `wayfinder` runs the interview, writes the map, and stops. With a map,
+   it takes one unblocked frontier entry, records the decision, and updates the
+   map. `wayfinder` is the only skill that writes a map.
+4. Use `to-spec` when the work is expected to need at least two implementation
    Issues, or when even one PR changes a public contract, schema or migration,
    or security boundary. Its GitHub Spec Issue becomes the only requirements
    source of truth.
-4. Use `to-tickets` to decompose that complete Spec into vertical-slice child
+5. Use `to-tickets` to decompose that complete Spec into vertical-slice child
    Issues and blocking edges. It reports the frontier but does not choose work.
-5. A human selects one unblocked implementation Issue. `sprint` owns only that
+6. A human selects one unblocked implementation Issue. `sprint` owns only that
    finish line through verification, review, and one independently reviewable
    and revertible PR.
 
@@ -86,6 +83,7 @@ route:
 
 | Known condition | Start with | Continue when |
 |---|---|---|
+| Owner, source of truth, or next route is unclear | `ask-boss` | One specialist route and its context packet are explicit. |
 | Reproducible error, regression, crash, or failing test, including fixes expected to touch 3+ files | `debug` | Root cause is evidenced; fix execution can enter `sprint`. |
 | Production UI needs to be built or corrected | `ui` | The direction and implementation are ready for live `qa`. |
 | One design question can be answered by building | `prototype` | Record the verdict; discard the prototype or turn the result into a production plan. |
@@ -128,10 +126,11 @@ and verification guidance, not host-level enforcement.
 | Skill | Purpose | Trigger |
 |---|---|---|
 | `verbs:grill` | Adversarial requirement discovery, one question at a time. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
+| `verbs:ask-boss` | Route unclear owner, target, reference, or next route to one existing specialist; facts first, no generic grilling. | where do I start, who decides, which reference, what route, unclear next step |
 | `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
 | `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |
 | `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
-| `verbs:wayfinder` | Chart a cross-session decision map by interviewing and writing it here, or work one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map |
+| `verbs:wayfinder` | Chart or work cross-session decision maps named by the request or handed off by `ask-boss`; resolve one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map, several dependent decisions |
 | `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
 | `verbs:debug` | Establish root cause through hypotheses, instrumentation, bisecting, and scope analysis before changing code. | error, crash, regression, failing test, used to work |
 | `verbs:codebase-design` | Design a deep module behind a small interface at a clean, testable seam. | module design, abstraction boundary, interface too wide |

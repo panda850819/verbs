@@ -80,6 +80,30 @@ Proceed to the caller's output. Flag unprocessed axes as OPEN_QUESTIONS.
 
 **Do NOT ask a third time.** No "are you sure?", no "one more thing". Respect the second stop.
 
+## Caller handoff packet
+
+A caller chooses the workflow close; this protocol only carries the interview
+state. When work moves to another caller, pass the smallest packet that prevents
+lost context or repeated questions:
+
+```text
+workflow_intent
+ target
+ authority / decision_owner
+ audience, if known
+ known_context
+ source_references
+ answered_questions
+ missing_decisions
+ open_contradictions
+ exit_condition
+```
+
+The receiving caller owns the artifact and close. It may replace the original
+caller's close, but it must not silently change the intent. A changed intent is a
+new session. Facts in the packet remain facts to retrieve or cite, not questions
+to ask again.
+
 ## Switching callers mid-interview
 
 The user names a different interviewing skill while this interview is still
@@ -89,9 +113,10 @@ be interrupted, so the switch happens whatever the combined prose implies; state
 it instead of letting it resolve silently.
 
 **The answers survive. The original caller's close does not.** Do not restart
-the interview and do not re-ask an answered question. Carry every answer so far
-into the new caller and resume from the next question under its contract, the
-same carry-forward the already-ran guard performs for a finished interview. What
+the interview and do not re-ask an answered question. Carry every answer so far,
+plus the caller handoff packet, into the new caller and resume from the next
+question under its contract, the same carry-forward the already-ran guard
+performs for a finished interview. What
 the original caller would have produced at the end — its map, its brief, its
 Spec Issue — is dropped, because the new caller now owns the close.
 
