@@ -30,103 +30,65 @@ disable-model-invocation: true
 ---
 # Sprint
 
-A sprint owns one finish line. It ends as `SHIPPED`, `PAUSED`, `FAILED`, or
-`ABORTED_BY_USER`; local edits alone are never `SHIPPED`.
+A sprint owns one finish line and ends `SHIPPED`, `PAUSED`, `FAILED`, or
+`ABORTED_BY_USER`; local edits are never `SHIPPED`.
 
-**Planning-only boundary:** when the request says hypothetical, asks only for a
-plan, or forbids action/tools, do not enter the sprint state machine. Return a
-concise execution outline labeled `Execution: NOT_RUN`. Never invent commands,
-test results, review findings, commits, pushes, or PR evidence.
+**Planning-only boundary:** for a hypothetical, plan-only, or no-tools request,
+do not enter the state machine. Return `Execution: NOT_RUN` without inventing
+commands or evidence.
 
 ## 1. Bind the finish line
 
-Read the repository contract and the issue, brief, plan, or request. State:
-
-- one outcome;
-- in-scope files or subsystem;
-- checkable acceptance evidence;
-- explicit exclusions and irreversible operations.
-
-If the outcome is already concrete, execute. If one un-derivable choice changes
-the result, invoke `grill` for that question only. Route root-cause work through
-`debug` and visual implementation through `ui`; return here for verification.
-
-For an existing plan, treat it as read-only decision context. Re-derive progress
-from git and acceptance checks before doing work, so resume is idempotent.
+Read the repository contract and the issue, brief, plan, or request. State one
+outcome, in-scope files or subsystem, checkable acceptance evidence, exclusions,
+and irreversible operations. If one un-derivable choice changes the result,
+route only that question to `grill`; route bugs to `debug` and UI work to `ui`.
+For an existing plan, re-derive progress from git and acceptance checks.
 
 Completion: the finish line can be proven by commands or named human evidence.
 
-## 2. Execute in tight loops
+## 2. Execute tight loops
 
-For each smallest coherent unit:
-
-1. inspect the actual seam and nearby style;
-2. make the minimum change that reaches the acceptance condition;
-3. run the narrowest relevant check;
-4. inspect the diff for unintended scope.
-
-The main session executes by default. Delegate only when the user or repository
-contract asks for it and the units are file-disjoint or mechanical. `handover`
-owns cross-runtime delegation. Consult `lib/model-anchors.md` for its model seat;
-never select a model ad hoc. Re-run acceptance locally after delegated work.
-
-Stop immediately on destructive or public actions that need authorization.
-Never weaken, skip, or special-case a test to manufacture green.
+For each smallest coherent unit: inspect the seam, make the minimum change, run
+the narrowest relevant check, and inspect the diff. Execute in the main session
+by default; delegate only file-disjoint or mechanical work requested by the user
+or repository contract through `handover`. Consult `lib/model-anchors.md` for
+the model seat; never select a model ad hoc. Never weaken or skip a test.
 
 Completion: every changed line maps to the finish line and its check passes.
 
 ## 3. Verify the artifact
 
-Run the real acceptance path, then the proportionate test, lint, type, or build
-checks required by the repository. If a human will test a build or deployment,
-use `lib/verify-the-test-loop.md` first to prove that artifact contains this
-change. An unproven artifact invalidates the human result.
-
-Self-refute once: identify the most likely input, state, or integration seam
-that could break the conclusion and exercise it. Record environment gaps as
-gaps; a weaker check cannot substitute for missing runtime proof.
+Run the real acceptance path and proportionate test, lint, type, or build checks.
+For human testing, apply `lib/verify-the-test-loop.md` to prove the artifact
+contains this change. Self-refute once at the most likely input, state, or
+integration seam; record environment gaps instead of substituting a weaker check.
 
 Completion: acceptance is observed after the final edit and survives self-refute.
 
-## 4. Review with a bounded correction loop
+## 4. Review with bounded correction
 
-Invoke `review` for non-trivial work or anything heading to a PR. A trivial
-single-file local change may use direct diff inspection when repository policy
-allows it. Feed actionable findings back through Steps 2 and 3, then review the
-new diff. Stop after three review cycles; a remaining P0/P1, coverage gap, or
-scope drift makes the sprint `FAILED` or `PAUSED`, never a fourth blind retry.
+Run `review` for non-trivial or PR-bound work. Feed findings through Steps 2–3
+and review the new diff. Stop after three cycles; a remaining P0/P1, coverage
+gap, or scope drift is `FAILED` or `PAUSED`, never a fourth blind retry.
 
 Completion: review is clean, explicitly skipped by policy, or names the blocker.
 
 ## 5. Decide and deliver
 
-- `READY_TO_SHIP`: acceptance and review are green, and shipping is authorized.
-  Invoke `ship`. Set `SHIPPED` only after it returns pushed commit or branch plus
-  PR evidence when a PR applies.
-- `PAUSED`: work is recoverable but an authorization, environment, dependency,
-  or review precondition is missing. Print the exact resume command or check.
-- `FAILED`: acceptance failed or the bounded review loop was exhausted. Print
-  the reproduced failure and last known-good point.
-- `ABORTED_BY_USER`: stop all writes and print current diff and cleanup state.
+`READY_TO_SHIP` requires acceptance, review, and authorization; invoke `ship`.
+Set `SHIPPED` only after pushed commit or branch plus PR evidence. If ship fails,
+set `PAUSED`. Otherwise report `FAILED` with the reproduced failure and last
+good point, or `ABORTED_BY_USER` with diff and cleanup state.
 
 **A `FAILED` or `ABORTED_BY_USER` sprint emits ONE learning candidate before it
-prints the end state**, covering what the attempt actually validated — a dead
-end and the reason it was dead included. Only the `SHIPPED` path reaches `ship`,
-and `ship` emits only when a concrete artifact surfaced, which a validated
-negative result never is; under the ticket-gated flow the branch is removed next
-and the reasoning is unrecoverable. Fields per `@lib/learning-format.md`;
-storage belongs to the host/project, unchanged. Nothing validated → print no
-extra line. `PAUSED` work is recoverable and emits nothing.
+prints the end state**; a validated negative result is still evidence. Nothing
+validated → print no extra line. `PAUSED` emits nothing.
 
-If `ship` fails, the sprint is `PAUSED`; do not relabel local completion as
-delivery. Do not create tracker or knowledge writes outside the target repo.
+A sprint owns only its finish line: never schedule follow-on work or claim the
+next frontier Issue. Do not create tracker or knowledge writes outside the repo.
 
-A sprint owns only the selected finish line. Report the end state and stop:
-never schedule follow-on work or claim the next frontier Issue, even when an
-adjacent one is unblocked and obvious. Selecting the next finish line is a
-human decision outside this sprint.
-
-## Output format
+## Output
 
 ```text
 Sprint: <topic>
@@ -137,11 +99,3 @@ Review: <clean/skipped/blocker and cycles>
 Delivery: <commit/branch/PR or missing precondition>
 Resume: <only when paused>
 ```
-
-## Anti-patterns
-
-- Running a requirements interview after scope and acceptance are already clear.
-- Default subagent fan-out for work the active model can complete directly.
-- Step-by-step narration that costs more attention than the work.
-- Marking build, commit, or local green as `SHIPPED` without delivery evidence.
-- Continuing after three same-shape review failures.
