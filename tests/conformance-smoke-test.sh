@@ -17,6 +17,7 @@ fi
 grep -Fq "FAIL [claude]: claude CLI not on PATH" "$tmp/out"
 grep -Fq "FAIL: no requested host was tested" "$tmp/out"
 grep -Fq 'codex_args=(exec --sandbox read-only --json)' scripts/conformance-smoke.sh
+grep -Fq 'python3 "$repo_root/scripts/conformance_events.py" "$host"' scripts/conformance-smoke.sh
 if grep -qE 'hooks/session-start|--dangerously-bypass-hook-trust|run_adapter' \
     scripts/conformance-smoke.sh; then
   echo "FAIL: skills-only conformance smoke retains a runtime adapter" >&2
