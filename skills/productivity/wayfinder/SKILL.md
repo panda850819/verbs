@@ -47,9 +47,9 @@ Use this mode when a map is named, `ask-boss` hands over multi-session fog, or
 `grill` hands over a large unclear effort.
 
 1. **Name the destination.** Ask for it if absent; do not invent the effort.
-2. **Interview.** Run **`@lib/interview.md`** here: one question at a time,
-   facts first, delete first, and its stopping rule. **If the interview already
-   ran this session, do not run it again.** **If an interview is still unfinished
+2. **Interview.** Run **`@lib/interview.md`** here: dependency-aware frontier
+   rounds, facts first, delete first, and its stopping rule. **If the interview
+   already ran this session, do not run it again.** **If an interview is still unfinished
    when the user switches skills, say so before the next question.** Carry the
    answers forward; the shared protocol owns the exact announcement.
 3. **Write the map.** Create `docs/briefs/{YYYY-MM-DD}-{slug}-map.md` with one

@@ -8,7 +8,8 @@
 > Origin: extracted from `grill` (2026-07-31, issue #284). `grill` bundled the
 > interview with its own close, so a skill wanting only the interview had to
 > invoke all of `grill` and stop at its routing gate. `wayfinder` was the
-> casualty; see the entry 4 decision note in the v1 direction map.
+> casualty; see the entry 4 decision note in the v1 direction map. The
+> frontier-round cadence was adapted from `mattpocock/skills` v1.2 in #328.
 
 ## When to load
 
@@ -21,10 +22,19 @@ theatre.
 ## Core rule
 
 The point is NOT to fill a structured questionnaire. The point is to surface
-**unknown unknowns** by interrogating one angle at a time until the answer
-surprises you.
+**unknown unknowns** while preserving the dependencies between decisions.
 
-**ONE question at a time.** Wait for the answer. Then pick the next question based on what the answer revealed, not from a pre-baked list.
+**Build a lightweight decision tree.** Answers expose new branches; they do not
+license a pre-baked list. The **frontier** is every active, undecided decision
+whose prerequisites are settled. Keep a question out of the frontier while any
+answer it depends on is still unknown.
+
+**Ask the whole frontier as one numbered round.** Number the questions `Q1`…`Qn`
+and ask only that frontier. Wait for the human's answers before recomputing the
+frontier. An omitted question remains active and cannot unblock its dependents.
+An explicit defer is parked under `missing_decisions`, omitted from later rounds
+unless the human reopens it, and never unblocks its dependent branch. If the
+frontier contains one decision, the round naturally contains one question.
 
 **Expect rehearsed first answers.** A polished first reply is not evidence. When
 an answer is rehearsed, vague, or unsupported, use the pushback contract below;
@@ -33,12 +43,16 @@ a concrete supported answer needs no ritual second push.
 **Pushback uses the 5-pattern catalog in `lib/push-once.md`.** When a reply is
 rehearsed, vague, or unsupported, select the highest-leverage matching pattern,
 print its label, and ask its exact prompt. Do not add a pattern-selection turn.
+The answer remains unsettled, so resolving it stays on the next frontier and is
+asked with the exact pushback prompt; its dependent branch stays blocked.
 
-**Facts vs decisions.** Before asking, classify the question: an answer
-derivable from the codebase, knowledge base, or docs is a **fact** — look it
-up and state the finding with its source. The human gets only **decisions**:
-tradeoffs, preferences, intent no source can settle. A question the agent
-could have answered itself is a wasted push.
+**Facts vs decisions.** Before adding a question to the tree, classify it: an
+answer derivable from the codebase, knowledge base, or docs is a **fact** — look
+it up and state the finding with its source. The human gets only **decisions**:
+tradeoffs, preferences, intent no source can settle. An unresolved fact lookup
+is an unsettled prerequisite: it blocks only its downstream decisions, not the
+rest of the frontier. A question the agent could have answered itself is a
+wasted push.
 
 **Delete-first — drill whether before how.** Before drilling scope or edges, try to delete the whole requirement: can it be removed entirely? Who owns it, and can that person waive it? Requirements from smart or senior people are the most dangerous, because you question them least; optimizing something that should not exist is the most expensive mistake. Only what survives deletion is worth the axes below.
 
@@ -56,22 +70,32 @@ Drill across these axes (not as a checklist — as a search space):
 8. **Success signal** — how do you know it worked? What metric / observation?
 
 For each answer:
-- If the answer reveals a NEW unknown, drill into that next.
-- If the answer is "I haven't thought about that", flag it and move on (don't force decisions in real time).
-- If the user gives a confident answer that contradicts something earlier, surface the contradiction explicitly.
+- If it reveals a NEW unknown, add that decision beneath the answer and ask it
+  only when its prerequisites are settled.
+- If it is "I haven't thought about that", flag the decision as deferred and
+  continue through the rest of the frontier; do not force it in real time or
+  advance its dependent branch.
+- If it confidently contradicts something earlier, surface the contradiction,
+  put its resolution on the next frontier, and leave the affected branch
+  unsettled.
 
 ## Stopping rule
 
-Stop when one of:
+Evaluate progress per answered question, not per round. After each round, stop
+before constructing another when one of:
 - 3 consecutive answers reveal no new unknowns
 - 7+ questions answered (avoid bike-shedding)
+- No active frontier remains; carry deferred and blocked branches as
+  `OPEN_QUESTIONS`
 - User triggers escape hatch (see below)
 
 ### Escape hatch (hard cap)
 
 User signals impatience ("夠了" / "ship it" / "skip the questions" / "just do it"):
 
-**First push-back:** acknowledge once, ask the 2 most critical remaining axes, then stop.
+**First push-back:** acknowledge once, ask one final numbered round containing
+the 2 most critical remaining frontier questions, then stop. If only one is
+unblocked, ask one.
 > "聽到。剩兩題收。"
 
 **Second push-back (same session):** stop immediately. Write a line to the caller's log:
@@ -94,6 +118,8 @@ workflow_intent
  known_context
  source_references
  answered_questions
+ current_frontier
+ blocked_decisions_with_prerequisites
  missing_decisions
  open_contradictions
  exit_condition
@@ -114,8 +140,8 @@ it instead of letting it resolve silently.
 
 **The answers survive. The original caller's close does not.** Do not restart
 the interview and do not re-ask an answered question. Carry every answer so far,
-plus the caller handoff packet, into the new caller and resume from the next
-question under its contract, the same carry-forward the already-ran guard
+plus the caller handoff packet, into the new caller and resume from the carried
+frontier round under its contract, the same carry-forward the already-ran guard
 performs for a finished interview. What
 the original caller would have produced at the end — its map, its brief, its
 Spec Issue — is dropped, because the new caller now owns the close.
@@ -139,7 +165,9 @@ mean. It is a statement, not a gate: print it and continue.
 
 ## Anti-patterns
 
-- ❌ Asking 5 questions in one message ("also, and what about, also")
+- ❌ Asking a dependent question in the same round as its unresolved prerequisite
+- ❌ Mixing an unnumbered pile of questions and calling it a frontier round
+- ❌ Recomputing the frontier before the human answers the current round
 - ❌ Reading off a checklist regardless of context
 - ❌ Forcing the user to decide on the spot when they say "I haven't thought about that"
 - ❌ Continuing after the user signals enough

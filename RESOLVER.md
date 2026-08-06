@@ -51,8 +51,8 @@ This route answers six common selection questions:
    passes a context packet. It does not start generic grilling or intercept a
    clear typed request.
 2. Use `grill` when intent, scope, constraints, or acceptance are still
-   unknown. It asks one question at a time, then chooses a close based on the
-   resulting work shape.
+   unknown. It asks dependency-aware frontier rounds, then chooses a close
+   based on the resulting work shape.
 3. Use `wayfinder` when the request itself names a map, resumes an existing
    one, or an `ask-boss` handoff identifies multi-session decision fog. With no
    map, `wayfinder` runs the interview, writes the map, and stops. With a map,
@@ -125,7 +125,7 @@ and verification guidance, not host-level enforcement.
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `verbs:grill` | Adversarial requirement discovery, one question at a time. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
+| `verbs:grill` | Adversarial requirement discovery through dependency-aware frontier rounds. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
 | `verbs:ask-boss` | Route unclear owner, target, reference, or next route to one existing specialist; facts first, no generic grilling. | where do I start, who decides, which reference, what route, unclear next step |
 | `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
 | `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |

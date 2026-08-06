@@ -53,7 +53,54 @@ require_words(
 )
 
 # The interview protocol lives in lib/interview.md, not inlined in grill (#284).
-require(INTERVIEW, "**ONE question at a time.**", "interview cadence")
+# Its cadence asks only dependency-free decisions together, then recomputes (#328).
+require_words(
+    INTERVIEW,
+    "The **frontier** is every active, undecided decision whose prerequisites are settled.",
+    "frontier eligibility",
+)
+require(INTERVIEW, "**Ask the whole frontier as one numbered round.**", "numbered frontier round")
+require_words(
+    INTERVIEW,
+    "Wait for the human's answers before recomputing the frontier.",
+    "round waits before recomputing",
+)
+require_words(
+    INTERVIEW,
+    "If the frontier contains one decision, the round naturally contains one question.",
+    "one-node frontier fallback",
+)
+require_words(
+    INTERVIEW,
+    "An explicit defer is parked under `missing_decisions`, omitted from later rounds unless the human reopens it, and never unblocks its dependent branch.",
+    "deferred decision is parked without unblocking dependents",
+)
+require_words(
+    INTERVIEW,
+    "An unresolved fact lookup is an unsettled prerequisite: it blocks only its downstream decisions, not the rest of the frontier.",
+    "fact lookup blocks only downstream decisions",
+)
+require_words(
+    INTERVIEW,
+    "The answer remains unsettled, so resolving it stays on the next frontier and is asked with the exact pushback prompt; its dependent branch stays blocked.",
+    "pushback blocks only its dependent branch",
+)
+require_words(
+    INTERVIEW,
+    "Evaluate progress per answered question, not per round.",
+    "stopping rule counts questions",
+)
+require_words(
+    INTERVIEW,
+    "No active frontier remains; carry deferred and blocked branches as `OPEN_QUESTIONS`",
+    "empty active frontier closes with visible gaps",
+)
+assert "**ONE question at a time.**" not in INTERVIEW, "rigid interview cadence must be retired"
+assert "recommended answer" not in INTERVIEW.lower(), "frontier rounds must not import recommendations"
+for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder"), (RESOLVER, "resolver")):
+    assert "one question at a time" not in skill_text.lower(), (
+        f"{scenario} must not promise the retired rigid cadence"
+    )
 require(INTERVIEW, "**Facts vs decisions.**", "facts vs decisions")
 require(INTERVIEW, "**Delete-first — drill whether before how.**", "delete-first")
 require(INTERVIEW, "1. **Existence**", "eight-axis search space")
@@ -109,6 +156,8 @@ for fragment in (
     "workflow_intent",
     "source_references",
     "answered_questions",
+    "current_frontier",
+    "blocked_decisions_with_prerequisites",
     "missing_decisions",
     "open_contradictions",
     "exit_condition",

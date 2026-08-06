@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.23.0 — Interviews ask the decision frontier
+
+### Changed
+
+- Replaced the shared interview protocol's rigid one-question cadence with
+  numbered frontier rounds: only decisions whose prerequisites are settled may
+  be asked together, and the frontier is recomputed after each human response.
+  (#328)
+- Fact lookups now block only their dependent decisions; deferred, omitted,
+  pushed-back, and contradictory answers remain unsettled without freezing
+  other unblocked branches. Existing search, stopping, escape, and caller-switch
+  contracts are preserved. (#328)
+- Updated `grill`, `wayfinder`, and the resolver to describe the shared frontier
+  cadence without adding a new skill or questionnaire route. (#328)
+
 ## v0.22.0 — Ask Boss routes uncertainty to existing callers
 
 ### Added
