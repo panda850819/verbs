@@ -15,6 +15,14 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="${REPO_ROOT}/manifest.toml"
 printf -v QUOTED_REPO_ROOT '%q' "$REPO_ROOT"
+VERSION_PROBE_TIMEOUT="${VERBS_VERSION_PROBE_TIMEOUT:-5}"
+
+case "$VERSION_PROBE_TIMEOUT" in
+  ''|*[!0-9]*|0)
+    echo "FATAL: VERBS_VERSION_PROBE_TIMEOUT must be a positive integer" >&2
+    exit 2
+    ;;
+esac
 
 if [ ! -f "$MANIFEST" ]; then
   echo "FATAL: manifest.toml not found at $MANIFEST" >&2
@@ -77,14 +85,60 @@ version_ge() {
   }'
 }
 
-ext_check_version() {
-  local skill="$1" cmd="$2" minimum="$3" install="$4" have
+probe_cli_version() {
+  local cmd="$1" output marker pid watchdog rc
+  PROBE_STATE="missing"
+  PROBE_VERSION=""
   if ! check_cmd "$cmd"; then
+    return 0
+  fi
+
+  output="$(mktemp "${TMPDIR:-/tmp}/verbs-version.XXXXXX")"
+  marker="${output}.timeout"
+  "$cmd" --version >"$output" 2>/dev/null &
+  pid=$!
+  (
+    sleep "$VERSION_PROBE_TIMEOUT"
+    if kill -0 "$pid" 2>/dev/null; then
+      : >"$marker"
+      kill -TERM "$pid" 2>/dev/null || true
+      sleep 1
+      kill -KILL "$pid" 2>/dev/null || true
+    fi
+  ) &
+  watchdog=$!
+
+  if wait "$pid" 2>/dev/null; then rc=0; else rc=$?; fi
+  kill "$watchdog" 2>/dev/null || true
+  wait "$watchdog" 2>/dev/null || true
+
+  if [ -e "$marker" ]; then
+    PROBE_STATE="unresponsive"
+  elif [ "$rc" -ne 0 ]; then
+    PROBE_STATE="unparseable"
+  else
+    PROBE_VERSION="$(grep -Eo '[0-9]+(\.[0-9]+){2}' "$output" | head -1 || true)"
+    if [ -n "$PROBE_VERSION" ]; then
+      PROBE_STATE="available"
+    else
+      PROBE_STATE="unparseable"
+    fi
+  fi
+  rm -f "$output" "$marker"
+}
+
+ext_check_version() {
+  local skill="$1" state="$2" have="$3" minimum="$4" install="$5"
+  if [ "$state" = "missing" ]; then
     printf "      %-18s \033[33m%-9s\033[0m %s\n" "$skill" "missing" "$install"
     return
   fi
-  have="$("$cmd" --version 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+){2}' | head -1 || true)"
-  if [ -z "$have" ] || ! version_ge "$have" "$minimum"; then
+  if [ "$state" = "unresponsive" ]; then
+    printf "      %-18s \033[33m%-9s\033[0m probe exceeded %ss; %s\n" \
+      "$skill" "unresponsive" "$VERSION_PROBE_TIMEOUT" "$install"
+    return
+  fi
+  if [ "$state" != "available" ] || ! version_ge "$have" "$minimum"; then
     printf "      %-18s \033[33m%-9s\033[0m need >=%s, found %s; %s\n" \
       "$skill" "outdated" "$minimum" "${have:-unparseable}" "$install"
     return
@@ -92,13 +146,40 @@ ext_check_version() {
   printf "      %-18s \033[32m%-9s\033[0m %s\n" "$skill" "ready" "(installed $have)"
 }
 
+ext_check_probe() {
+  local skill="$1" state="$2" install="$3"
+  case "$state" in
+    missing)
+      printf "      %-18s \033[33m%-9s\033[0m %s\n" "$skill" "missing" "$install"
+      ;;
+    unresponsive)
+      printf "      %-18s \033[33m%-9s\033[0m probe exceeded %ss; %s\n" \
+        "$skill" "unresponsive" "$VERSION_PROBE_TIMEOUT" "$install"
+      ;;
+    available)
+      printf "      %-18s \033[32m%-9s\033[0m %s\n" "$skill" "ready" "(installed)"
+      ;;
+    *)
+      printf "      %-18s \033[33m%-9s\033[0m version probe failed; %s\n" \
+        "$skill" "unavailable" "$install"
+      ;;
+  esac
+}
+
+probe_cli_version "codex"
+codex_probe_state="$PROBE_STATE"
+codex_probe_version="$PROBE_VERSION"
+probe_cli_version "claude"
+claude_probe_state="$PROBE_STATE"
+claude_probe_version="$PROBE_VERSION"
+
 ext_check "ship"           "gh"            "brew install gh"
-ext_check_version "handover/codex" "codex"  "0.144.1" "codex update"
-ext_check_version "handover/claude" "claude" "2.1.206" "claude update"
-ext_check_version "advisor/codex"  "codex"  "0.144.1" "codex update"
-ext_check_version "advisor/claude" "claude" "2.1.206" "claude update"
-ext_check "harness-slim/codex"     "codex"          "install Codex CLI"
-ext_check "harness-slim/claude"    "claude"         "install Claude Code"
+ext_check_version "handover/codex" "$codex_probe_state" "$codex_probe_version" "0.144.1" "codex update"
+ext_check_version "handover/claude" "$claude_probe_state" "$claude_probe_version" "2.1.206" "claude update"
+ext_check_version "advisor/codex" "$codex_probe_state" "$codex_probe_version" "0.144.1" "codex update"
+ext_check_version "advisor/claude" "$claude_probe_state" "$claude_probe_version" "2.1.206" "claude update"
+ext_check_probe "harness-slim/codex" "$codex_probe_state" "install Codex CLI"
+ext_check_probe "harness-slim/claude" "$claude_probe_state" "install Claude Code"
 
 echo
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.23.1 — Bootstrap bounds optional CLI probes
+
+### Fixed
+
+- Optional Claude and Codex version checks now have one portable, configurable
+  deadline and report an unresponsive binary instead of hanging the report-only
+  bootstrap. One probe is shared across every skill that depends on the same
+  CLI, so their readiness status cannot contradict. (#330)
+- The CLI front-door regression suite now supplies hermetic fake Claude and
+  Codex binaries, including ready, missing, outdated, unparseable, and hanging
+  cases, instead of inheriting the machine's real optional tools. (#330)
+
 ## v0.23.0 — Interviews ask the decision frontier
 
 ### Changed

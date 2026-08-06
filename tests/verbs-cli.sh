@@ -11,6 +11,22 @@ fail=0
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
+# Keep this suite hermetic even when the host has real Claude/Codex binaries.
+fake_cli_bin="$tmp/fake-cli-bin"
+mkdir -p "$fake_cli_bin"
+cat >"$fake_cli_bin/claude" <<'EOF'
+#!/bin/sh
+[ "${1:-}" = "--version" ] || exit 64
+printf '%s\n' '2.1.220 (Claude Code)'
+EOF
+cat >"$fake_cli_bin/codex" <<'EOF'
+#!/bin/sh
+[ "${1:-}" = "--version" ] || exit 64
+printf '%s\n' 'codex-cli 0.146.0'
+EOF
+chmod +x "$fake_cli_bin/claude" "$fake_cli_bin/codex"
+export PATH="$fake_cli_bin:$PATH"
+
 pass()   { echo "PASS: $1"; }
 fail_t() { echo "FAIL: $1"; fail=1; }
 
@@ -322,6 +338,78 @@ for host in claude codex hermes; do
     fail_t "init --host $host mutated HOME"
   fi
 done
+
+# ---------------------------------------------------------------------------
+# T04 -- optional CLI version probes are bounded and deterministic
+# ---------------------------------------------------------------------------
+probe_root="$tmp/probes"
+mkdir -p "$probe_root/old-and-bad" "$probe_root/hanging"
+
+cat >"$probe_root/old-and-bad/claude" <<'EOF'
+#!/bin/sh
+printf '%s\n' 'claude 1.0.0'
+EOF
+cat >"$probe_root/old-and-bad/codex" <<'EOF'
+#!/bin/sh
+printf '%s\n' 'version unknown'
+EOF
+cat >"$probe_root/hanging/claude" <<'EOF'
+#!/bin/sh
+exec /bin/sleep 30
+EOF
+cat >"$probe_root/hanging/codex" <<'EOF'
+#!/bin/sh
+printf '%s\n' 'codex-cli 0.146.0'
+EOF
+chmod +x "$probe_root"/*/*
+
+ready_probe="$(VERBS_VERSION_PROBE_TIMEOUT=10 bash "$repo_root/scripts/bootstrap.sh" --claude 2>&1)"
+if echo "$ready_probe" | grep -qF '(installed 0.146.0)' \
+   && echo "$ready_probe" | grep -qF '(installed 2.1.220)'; then
+  pass "responsive fake CLI probes report ready versions"
+else
+  fail_t "responsive fake CLI probes should report ready versions"
+fi
+
+missing_probe="$(PATH=/usr/bin:/bin VERBS_VERSION_PROBE_TIMEOUT=5 \
+  bash "$repo_root/scripts/bootstrap.sh" --claude 2>&1)"
+if echo "$missing_probe" | grep -qE 'handover/codex +.*missing' \
+   && echo "$missing_probe" | grep -qE 'handover/claude +.*missing'; then
+  pass "absent optional CLIs report missing"
+else
+  fail_t "absent optional CLIs should report missing"
+fi
+
+old_bad_probe="$(PATH="$probe_root/old-and-bad:/usr/bin:/bin" \
+  VERBS_VERSION_PROBE_TIMEOUT=10 bash "$repo_root/scripts/bootstrap.sh" --claude 2>&1)"
+if echo "$old_bad_probe" | grep -qE 'handover/claude +.*outdated.*found 1\.0\.0' \
+   && echo "$old_bad_probe" | grep -qE 'handover/codex +.*outdated.*found unparseable' \
+   && echo "$old_bad_probe" | grep -qE 'harness-slim/codex +.*unavailable.*version probe failed'; then
+  pass "outdated and unparseable CLI versions remain distinct evidence"
+else
+  fail_t "outdated or unparseable CLI version reporting regressed"
+fi
+
+probe_started="$(date +%s)"
+hanging_probe="$(PATH="$probe_root/hanging:/usr/bin:/bin" \
+  VERBS_VERSION_PROBE_TIMEOUT=5 bash "$repo_root/scripts/bootstrap.sh" --claude 2>&1)"
+probe_elapsed=$(( $(date +%s) - probe_started ))
+if [ "$probe_elapsed" -lt 20 ] \
+   && echo "$hanging_probe" | grep -qE 'handover/claude +.*unresponsive.*probe exceeded 5s' \
+   && echo "$hanging_probe" | grep -qE 'harness-slim/claude +.*unresponsive.*probe exceeded 5s'; then
+  pass "hanging optional CLI is bounded across every dependent skill"
+else
+  fail_t "hanging optional CLI probe was not bounded (${probe_elapsed}s)"
+fi
+
+if VERBS_VERSION_PROBE_TIMEOUT=invalid bash "$repo_root/scripts/bootstrap.sh" \
+    >/dev/null 2>"$tmp/probe-timeout.err"; then
+  fail_t "invalid version-probe timeout should exit nonzero"
+elif grep -qF 'must be a positive integer' "$tmp/probe-timeout.err"; then
+  pass "invalid version-probe timeout fails clearly"
+else
+  fail_t "invalid version-probe timeout should print a clear error"
+fi
 
 [ "$fail" -eq 0 ] && echo "OK: verbs-cli all green" || echo "FAILURES present"
 exit "$fail"
