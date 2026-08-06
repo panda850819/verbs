@@ -1,8 +1,9 @@
 ---
 name: grill
 description: |
-  Adversarial requirement discovery. Ask ONE question at a time, hunting for hidden
-  requirements / unknown unknowns. Its structured close routes spec-sized work to
+  Adversarial requirement discovery. Ask dependency-aware frontier rounds,
+  hunting for hidden requirements / unknown unknowns. Its structured close routes
+  spec-sized work to
   `to-spec`, large foggy work to `wayfinder`, and smaller work to a local brief plus
   executable plan. Say "quick" or "don't write files" for a chat-only log. Use for
   "grill me", "stress test this scope", "what am I missing", "draft a brief",
@@ -26,10 +27,10 @@ user-invocable: true
 ---
 # Grill
 
-Grill surfaces unknowns by interrogating one angle at a time; it is not a
-questionnaire. By default its structured close routes to `to-spec`, `wayfinder`,
-or a local brief and executable plan. Say `quick`, `just talk`, or `don't write files` to keep only
-the chat log.
+Grill surfaces unknowns by questioning only the current decision frontier; it
+is not a questionnaire. By default its structured close routes to `to-spec`,
+`wayfinder`, or a local brief and executable plan. Say `quick`, `just talk`, or
+`don't write files` to keep only the chat log.
 
 ## Use / skip
 
