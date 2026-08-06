@@ -259,12 +259,27 @@ exposes a bad boundary; breaking changes ship with migration notes in the
 changelog. The work queue is limited to failures found through daily use,
 Claude/Codex/Pi parity checks, and reinstall drills.
 
-Cut `v1.0.0` only when: the product identifiers and install contracts survive
-two consecutive 0.x releases without a breaking rename; supported hosts pass
-fresh install, reinstall, and cold-start invocation on the author's machines;
-one model-upgrade audit (capability / context / neither
-recut) has run against the then-current frontier model without a load-bearing
-regression; and no P0/P1 product-contract failure is open.
+`v0.21.0` is the install-contract reset: it removed runtime hooks and made
+skills the complete product surface. The stability count starts after that
+reset and requires two consecutive **tagged GitHub releases** whose product ID,
+plugin selector, manifest schema, and documented install commands remain
+compatible. Patch releases within one minor line do not restart the count.
+
+Each supported host passes through its declared install mode: fresh plugin
+install plus reinstall for Claude Code and Codex, direct-load setup plus reload
+for Pi, and import plus re-import of a reviewed selected skill for Hermes. Every
+lane also needs a cold-start invocation on the author's machine.
+
+| v1 gate | Observable pass condition | Current evidence (2026-08-06) | Status |
+|---|---|---|---|
+| Install-contract stability | Two consecutive tagged post-reset 0.x release lines satisfy the compatibility rule above. | `v0.22.0` is the first counted release; the `v0.23.x` line is merged but not yet released. | OPEN |
+| Supported-host install | Every declared host mode completes its fresh/reinstall-or-reload/cold-start drill on the version being cut. | PR #316 proved Claude, Codex, and Pi on `v0.21.0`; current Claude/Codex caches and Hermes import still need current-version evidence. | OPEN |
+| Current-model fitness | A recorded audit names exact host, model, effort, and skill commit, and has no load-bearing regression after the latest host-semantics or load-bearing skill change. | The July audit predates the skills-only reset and frontier-round change, so it is stale. | OPEN |
+| Product-contract failures | The query for [open `release-blocker` Issues](https://github.com/panda850819/verbs/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-blocker) returns zero. | Read the live query; individual Issue numbers are not copied here. | LIVE QUERY |
+
+The table above is the living v1 gate. GitHub Issues are the executable work
+queue; older decision maps remain evidence and must not be used as a second
+roadmap.
 
 Out of scope: identity, personal context, brain or memory, project truth,
 runtime/model selection, scheduling, autonomous drivers, connectors, global

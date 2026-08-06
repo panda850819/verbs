@@ -5,7 +5,8 @@ type: plan
 source: grill
 brief: docs/briefs/2026-07-18-grill-default-close.md
 execution: code
-status: todo
+status: shipped
+delivered_by: https://github.com/panda850819/verbs/pull/253
 ---
 
 # Collapse grill to one skill with a default structured close — executable plan

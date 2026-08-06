@@ -5,7 +5,8 @@ type: plan
 source: grill
 brief: docs/briefs/2026-07-31-dispatch-map-signal-split.md
 execution: code
-status: todo
+status: shipped
+delivered_by: https://github.com/panda850819/verbs/pull/293
 ---
 
 # Dispatch map-signal split — executable plan

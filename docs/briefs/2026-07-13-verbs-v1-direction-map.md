@@ -1,7 +1,13 @@
 # Decision map — Verbs v1.0 direction
 
-Charted: 2026-07-13, via `grill --brief` (wayfinder exit). Work with `wayfinder`,
-one entry per session.
+> **Historical decision record.** Superseded as a living roadmap on 2026-08-06
+> by [`README.md#Roadmap`](../../README.md#roadmap) after the v0.21 skills-only
+> reset. Preserve the decisions below as evidence, but do not claim or execute
+> this file's open entries as current work. GitHub Issues are the executable
+> queue.
+
+Charted: 2026-07-13, via the then-current `grill --brief` wayfinder exit.
+Originally worked one entry per session.
 
 ## Destination
 

@@ -5,7 +5,8 @@ type: plan
 source: grill
 brief: docs/briefs/2026-07-24-verbs-public-operating-model.md
 execution: code
-status: todo
+status: shipped
+delivered_by: https://github.com/panda850819/verbs/pull/264
 ---
 
 # Verbs public operating model — executable plan
