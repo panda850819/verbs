@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.23.2 — Codex smoke tolerates bounded skill loading
+
+### Fixed
+
+- Codex conformance now permits successful read-only `sed`, `cat`, and `wc`
+  loads of `SKILL.md` files from other installed plugins while still requiring
+  the exact namespaced Verbs result and rejecting writes, arbitrary file reads,
+  MCP/web calls, failed commands, and extra messages. This keeps a real
+  multi-plugin profile from failing merely because its always-on language skill
+  loads alongside Verbs. (#336)
+- Moved invocation-event validation behind one JSONL checker interface with
+  fixtures for both the zero-tool and bounded-read paths; Claude's evidence
+  contract is unchanged. (#336)
+
 ## v0.23.1 — Bootstrap bounds optional CLI probes
 
 ### Fixed

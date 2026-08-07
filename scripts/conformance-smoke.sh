@@ -110,62 +110,7 @@ raise SystemExit(0 if ok else 1)
 check_invocation() {
   host="$1"
   out="$2"
-  if printf '%s\n' "$out" | python3 -c '
-import json
-import sys
-
-host = sys.argv[1]
-activation = "CAREFUL mode ON. Will confirm before destructive actions."
-events = []
-for raw in sys.stdin:
-    try:
-        events.append(json.loads(raw))
-    except json.JSONDecodeError:
-        pass
-
-if host == "claude":
-    called = any(
-        item.get("type") == "tool_use"
-        and item.get("name") == "Skill"
-        and item.get("input", {}).get("skill") == "verbs:careful"
-        for event in events
-        if event.get("type") == "assistant"
-        for item in event.get("message", {}).get("content", [])
-    )
-    launched = any(
-        event.get("type") == "user"
-        and event.get("tool_use_result", {}).get("success") is True
-        and event.get("tool_use_result", {}).get("commandName") == "verbs:careful"
-        for event in events
-    )
-    completed = any(
-        event.get("type") == "result"
-        and event.get("subtype") == "success"
-        and event.get("result") == activation
-        for event in events
-    )
-    ok = called and launched and completed
-else:
-    messages = [
-        event.get("item", {}).get("text")
-        for event in events
-        if event.get("type") == "item.completed"
-        and event.get("item", {}).get("type") == "agent_message"
-    ]
-    tool_types = {
-        "command_execution", "file_change", "mcp_tool_call", "web_search",
-        "image_generation", "dynamic_tool_call", "tool_call",
-    }
-    used_tool = any(
-        event.get("type") == "item.completed"
-        and event.get("item", {}).get("type") in tool_types
-        for event in events
-    )
-    turn_done = any(event.get("type") == "turn.completed" for event in events)
-    ok = messages == [activation] and turn_done and not used_tool
-
-raise SystemExit(0 if ok else 1)
-' "$host"; then
+  if printf '%s\n' "$out" | python3 "$repo_root/scripts/conformance_events.py" "$host"; then
     echo "PASS [$host]: namespaced careful invocation completed"
   else
     echo "FAIL [$host]: namespaced careful invocation lacks dispatch proof" >&2
