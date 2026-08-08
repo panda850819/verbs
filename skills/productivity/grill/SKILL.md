@@ -44,9 +44,13 @@ drilling, pushback, search space, stopping rule, and escape hatch; do not fork
 it here. Its load-bearing first-turn contract is mandatory even before the
 shared file is available:
 
-1. Build a dependency graph before asking. If a decision's meaning, answer
-   options, or authority changes with another unsettled decision or fact, it is
-   blocked and cannot enter this round.
+1. Build a dependency graph before asking. Start the root frontier with
+   existence/waiver, decision owner, intended outcome, and scope boundary where
+   each is unsettled. Treat role details, lifecycle policy, edge behavior, and
+   success checks as downstream until those roots settle, unless repository
+   evidence proves independence. If a decision's meaning, answer options, or
+   authority changes with another unsettled decision or fact, it is blocked and
+   cannot enter this round.
 2. Separate repository-derivable facts into a `Fact lookups` list. Look them up
    when tools are available; otherwise mark each unresolved fact and block only
    its dependents. Never ask the human to supply a derivable value merely because

@@ -21,6 +21,8 @@ for text, label in ((GRILL, "Grill"), (INTERVIEW, "shared interview")):
 
 for fragment in (
     "never replace a multi-decision\n   frontier with one umbrella question",
+    "Start the root frontier with\n   existence/waiver, decision owner, intended outcome, and scope boundary",
+    "Treat role details, lifecycle policy, edge behavior, and\n   success checks as downstream",
     "Separate repository-derivable facts into a `Fact lookups` list",
     "Never ask the human to supply a derivable value",
     "`Blocked this round` with its prerequisite",
