@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.23.4 — Frontier interviews and maps pass current-model canaries
+
+### Fixed
+
+- Grill now carries its load-bearing first-turn contract in the directly loaded
+  skill body: separate fact lookups, compute dependency roots, ask every active
+  item as one numbered frontier round, list blocked dependents, and wait before
+  recomputing or closing. Both current-model fixtures now pass. (#341)
+- Wayfinder resolves status dates only from trustworthy host context or a tool;
+  without one it preserves the status transition and omits the date rather than
+  guessing. Two writable matched fixtures now show one-entry note/map/gist lift
+  without invented dates. (#345)
+
 ## v0.23.3 — Handover preserves explicit routing and detects Herdr
 
 ### Fixed

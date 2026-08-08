@@ -2,7 +2,7 @@
 
 Date: 2026-08-08  
 Issue: [#335](https://github.com/panda850819/verbs/issues/335)  
-Status: OPEN — Sprint boundary fixed and rerun; Grill cadence regression remains [#341](https://github.com/panda850819/verbs/issues/341)
+Status: PASS — changed load-bearing contracts pass after fixes #340, #341, and #345
 
 ## Frozen runtime identity
 
@@ -26,12 +26,16 @@ promoted from older July evidence or from the v0.23.2 host drill.
 
 - [`routing-cases.json`](fixtures/2026-08-current-model-fitness/routing-cases.json)
 - [`routing-results-low.json`](fixtures/2026-08-current-model-fitness/routing-results-low.json)
+- [`routing-rerun-changed-low.json`](fixtures/2026-08-current-model-fitness/routing-rerun-changed-low.json)
 - [`explicit-results-low.json`](fixtures/2026-08-current-model-fitness/explicit-results-low.json)
 - [`sprint-implicit-negative-medium.json`](fixtures/2026-08-current-model-fitness/sprint-implicit-negative-medium.json)
 - [`sprint-boundary-rerun-low.json`](fixtures/2026-08-current-model-fitness/sprint-boundary-rerun-low.json)
 - [`sprint-boundary-rerun-medium.json`](fixtures/2026-08-current-model-fitness/sprint-boundary-rerun-medium.json)
 - [`behavior-cases.json`](fixtures/2026-08-current-model-fitness/behavior-cases.json)
 - [`behavior-results-low.json`](fixtures/2026-08-current-model-fitness/behavior-results-low.json)
+- [`grill-rerun-low.json`](fixtures/2026-08-current-model-fitness/grill-rerun-low.json)
+- [`wayfinder-writable-results-low.json`](fixtures/2026-08-current-model-fitness/wayfinder-writable-results-low.json)
+- [`wayfinder-writable/`](fixtures/2026-08-current-model-fitness/wayfinder-writable/)
 
 The JSON records preserve every prompt, final response, selected skill read,
 resolved runtime, token count, wall time, and reported route. They intentionally
@@ -67,6 +71,13 @@ neighboring negative case against the full 19-skill catalogue.
 | `to-spec` | `to-spec` | `grill` | PASS |
 | `ui` | `ui` | `qa` | PASS |
 | `wayfinder` | `wayfinder` | `grill` | PASS |
+
+After the #340/#341/#345 body and description edits, the positive and negative
+pairs for every changed implicit routing surface (`handover`, `prototype`, and
+`wayfinder`) were rerun against the full isolated pack at commit `2b15d47`.
+All three positives selected and read their target; all three negatives kept the
+target absent. The six reruns used 23,318 tokens, 63.3 aggregate wall seconds,
+and `$0.0910` recorded provider cost.
 
 ### Explicit-only boundary
 
@@ -117,6 +128,37 @@ fixture stayed fixed.
 The 12 behavior arms used 12,078 tokens, 153.3 aggregate wall seconds, and
 `$0.1287` recorded provider cost.
 
+### Post-fix matched reruns — #341 and #345
+
+Commit `4fa6c2f` strengthened Grill's directly loaded body without hard-coding
+either fixture. Both low-effort treatment reruns now:
+
+- separate repository-derived facts into a lookup list;
+- ask every root-frontier decision in a numbered `Q1`…`Qn` round;
+- list downstream lifecycle and edge decisions with their blockers; and
+- stop before recomputing the frontier or beginning the structured close.
+
+The two Grill reruns used 3,933 tokens, 39.4 aggregate wall seconds, and
+`$0.0431` recorded provider cost. Compared with the original baselines, the
+post-fix treatments prevent premature dependent questions in both independent
+cases. Grill's changed interaction contract now passes.
+
+Wayfinder then received two writable matched fixtures at commit `7f7abc8`, with
+separate copied workspaces and `read`, `write`, and `edit` tools. In both cases
+treatment selected exactly the first unblocked entry, wrote one typed detail
+note, closed only that entry, appended one map gist, preserved the blocker link,
+and stopped without implementing the destination. The account-identity baseline
+wrote multiple map-level decisions and removed the blocker edge; the
+export-volume baseline inlined research into the map without the required detail
+note or decision gist. Treatment therefore shows repeatable primary-artifact
+lift, not only routing lift.
+
+The Wayfinder lane also exposed an invented status date when no date tool was
+available. #345 added a fail-safe rule: dates must come from host context or a
+tool and are omitted otherwise. The exact writable cases were rerun with no
+invented dates. Four arms used 11,245 tokens, 138.2 aggregate wall seconds, and
+`$0.0514` recorded provider cost.
+
 ## Five-gate findings and verdicts
 
 `UNPROVEN` is retained wherever the cases did not exercise the claimed primary
@@ -138,23 +180,24 @@ outcome. Routing success alone is not promoted into a behavior verdict.
 | `gatekeeper` | PASS | No current matched pre-adoption trust cases. | **UNPROVEN** |
 | `harness-slim` | PASS | No current matched harness-reduction cases. | **UNPROVEN** |
 | `ask-boss` | PASS | Two matched cases show repeatable orientation/handoff lift at justified interaction cost. | **KEEP** |
-| `grill` | PASS | Two matched cases improve dependency discipline but miss the exact numbered whole-frontier cadence. | **EDIT** |
+| `grill` | PASS | After #341, two reruns show numbered whole-root-frontier rounds, facts-first lookup boundaries, and explicit blocked dependents. | **KEEP** |
 | `to-spec` | PASS | No current matched canonical-Spec cases. | **UNPROVEN** |
 | `to-tickets` | Explicit and implicit boundary PASS | No current matched Issue-graph publication cases. | **UNPROVEN** |
 | `ui` | PASS | No current matched production UI cases. | **UNPROVEN** |
-| `wayfinder` | PASS | Two changed-contract canaries pass, but baseline matches them and no map artifact was exercised. | **UNPROVEN** |
+| `wayfinder` | PASS | Two writable matched cases show repeatable one-entry map/note/gist lift; #345 removes untrusted dates. | **KEEP** |
 
 ## Decision
 
-The current-model gate stays **OPEN**.
+The current-model gate is **PASS** for the changed load-bearing contracts.
 
-1. Merge the [#340](https://github.com/panda850819/verbs/issues/340) fix and its
-   passing low/medium Sprint boundary reruns.
-2. Fix the Grill cadence miss filed as [#341](https://github.com/panda850819/verbs/issues/341).
-3. Add writable map fixtures before assigning Wayfinder KEEP, EDIT, PIN, or CUT.
-4. Add matched primary-outcome cases incrementally for the remaining UNPROVEN
-   skills; do not infer behavior fitness from the clean routing matrix.
+- #340's indirect Sprint route stays absent at low and medium effort while
+  explicit invocation passes.
+- #341's two Grill fixtures now satisfy the numbered dependency-aware frontier
+  contract.
+- #345's two writable Wayfinder fixtures show primary-artifact lift without
+  invented dates.
 
-No skill is cut from this triage run. The Sprint boundary regression is fixed;
-the Grill interaction regression and unexercised Wayfinder map outcome keep
-current-model fitness open.
+No skill is cut from this triage run. Add matched primary-outcome cases
+incrementally for the remaining UNPROVEN skills; do not infer their behavior
+fitness from the clean routing matrix. Those evidence gaps are not promoted to
+KEEP, but no observed load-bearing regression remains.

@@ -72,7 +72,9 @@ closed.
 1. Read only the map index and linked notes required by the chosen entry.
 2. **Choose and claim.** If the user named an entry, take that one; otherwise
    take the first frontier entry. Mark it `status: in-progress ({date})` before
-   work.
+   work only when `{date}` comes from trustworthy host context or a tool. When
+   no current date is available, write `status: in-progress` without a date;
+   never infer or guess one. Apply the same rule to the final closed status.
 3. **Resolve by type.** Research writes cited facts. `grilling` and `prototype`
    are HITL: run the respective skill and wait for human input; never answer the
    human's side yourself, and leave the entry open when no human is available.
