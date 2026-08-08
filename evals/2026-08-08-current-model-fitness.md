@@ -26,6 +26,7 @@ promoted from older July evidence or from the v0.23.2 host drill.
 
 - [`routing-cases.json`](fixtures/2026-08-current-model-fitness/routing-cases.json)
 - [`routing-results-low.json`](fixtures/2026-08-current-model-fitness/routing-results-low.json)
+- [`routing-rerun-changed-low.json`](fixtures/2026-08-current-model-fitness/routing-rerun-changed-low.json)
 - [`explicit-results-low.json`](fixtures/2026-08-current-model-fitness/explicit-results-low.json)
 - [`sprint-implicit-negative-medium.json`](fixtures/2026-08-current-model-fitness/sprint-implicit-negative-medium.json)
 - [`sprint-boundary-rerun-low.json`](fixtures/2026-08-current-model-fitness/sprint-boundary-rerun-low.json)
@@ -70,6 +71,13 @@ neighboring negative case against the full 19-skill catalogue.
 | `to-spec` | `to-spec` | `grill` | PASS |
 | `ui` | `ui` | `qa` | PASS |
 | `wayfinder` | `wayfinder` | `grill` | PASS |
+
+After the #340/#341/#345 body and description edits, the positive and negative
+pairs for every changed implicit routing surface (`handover`, `prototype`, and
+`wayfinder`) were rerun against the full isolated pack at commit `2b15d47`.
+All three positives selected and read their target; all three negatives kept the
+target absent. The six reruns used 23,318 tokens, 63.3 aggregate wall seconds,
+and `$0.0910` recorded provider cost.
 
 ### Explicit-only boundary
 

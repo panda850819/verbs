@@ -1,0 +1,217 @@
+{
+  "host": "Pi",
+  "cli_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "effort": "low",
+  "skill_commit": "2b15d47b1e6079400a24cbb5b02bf1f0db65db34",
+  "tool_permissions": [
+    "read"
+  ],
+  "repo_snapshot": "full isolated 19-skill tree after changed description/body fixes",
+  "fresh_session_per_case": true,
+  "results": [
+    {
+      "id": "handover-positive",
+      "target": "handover",
+      "kind": "positive",
+      "prompt": "The plan is complete and contains one bounded mechanical build unit. Dispatch it to one fresh Claude or Codex worker and require evidence back; do not deliver the final PR.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.399,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/handover/SKILL.md"
+      ],
+      "reported_route": "handover",
+      "final_text": "Use **handover**: it dispatches one bounded mechanical unit from a completed plan to a fresh Claude or Codex worker, requires structured evidence, and retains review, git, and PR ownership in the source agent.\n\nROUTE: handover",
+      "usage": {
+        "input": 4473,
+        "output": 53,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4526,
+        "cost": {
+          "input": 0.022365000000000003,
+          "output": 0.00159,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.023955000000000004
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "handover-negative",
+      "target": "handover",
+      "kind": "negative",
+      "prompt": "Own this bounded implementation through tests, review, and delivery yourself. Do not delegate it.",
+      "exit_code": 0,
+      "elapsed_seconds": 12.775,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/ask-boss/SKILL.md"
+      ],
+      "reported_route": "ask-boss",
+      "final_text": "The implementation target is missing, so first clarify the assignment rather than selecting implementation, review, or shipping workflows.\n\nROUTE: ask-boss",
+      "usage": {
+        "input": 1052,
+        "output": 76,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 42,
+        "totalTokens": 3688,
+        "cost": {
+          "input": 0.005260000000000001,
+          "output": 0.00228,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.008820000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "prototype-positive",
+      "target": "prototype",
+      "kind": "positive",
+      "prompt": "Build a throwaway experiment to answer exactly one unresolved question: can this parser stream records under the memory limit? The verdict matters; the code does not.",
+      "exit_code": 0,
+      "elapsed_seconds": 8.983,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/prototype/SKILL.md"
+      ],
+      "reported_route": "prototype",
+      "final_text": "This is a **prototype**: a disposable experiment answering one concrete technical question, where only the measured verdict matters.\n\nROUTE: prototype",
+      "usage": {
+        "input": 1170,
+        "output": 31,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 3761,
+        "cost": {
+          "input": 0.00585,
+          "output": 0.00093,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.008060000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "prototype-negative",
+      "target": "prototype",
+      "kind": "negative",
+      "prompt": "Implement the already-approved parser design as production code with tests.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.254,
+      "loaded_skill_paths": [],
+      "reported_route": "none",
+      "final_text": "This is ordinary implementation of a settled design with tests; no specialized Verbs skill is warranted.\n\nROUTE: none",
+      "usage": {
+        "input": 2900,
+        "output": 126,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 97,
+        "totalTokens": 3026,
+        "cost": {
+          "input": 0.0145,
+          "output": 0.00378,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01828
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-positive",
+      "target": "wayfinder",
+      "kind": "positive",
+      "prompt": "Open the named Identity Decision Map, take exactly one unblocked frontier entry, resolve it by type, and write the decision back.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.474,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/wayfinder/SKILL.md"
+      ],
+      "reported_route": "wayfinder",
+      "final_text": "The request explicitly matches working an existing Decision Map: take one unblocked frontier entry, resolve it by type, and record the decision.\n\nROUTE: wayfinder",
+      "usage": {
+        "input": 4005,
+        "output": 36,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4041,
+        "cost": {
+          "input": 0.020025,
+          "output": 0.00108,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.021105000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-negative",
+      "target": "wayfinder",
+      "kind": "negative",
+      "prompt": "There is no named map and this is one-session requirement discovery for a bounded feature. Interview me and produce the appropriate next artifact.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.413,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/grill/SKILL.md"
+      ],
+      "reported_route": "grill",
+      "final_text": "This is a direct match for `grill`: one-session requirement discovery for a bounded feature, followed by a local brief and executable plan when appropriate.\n\nROUTE: grill",
+      "usage": {
+        "input": 1678,
+        "output": 38,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4276,
+        "cost": {
+          "input": 0.00839,
+          "output": 0.00114,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01081
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    }
+  ]
+}
