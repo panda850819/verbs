@@ -728,7 +728,8 @@ def run_init(args):
         print("  SKILL_NAME='<skill>'")
         print('  ln -sfn "$SKILL_DIR" "$HOME/.hermes/skills/$SKILL_NAME"')
         print("  # Repeat only for each reviewed, selected skill.")
-        print("See docs/HERMES.md for the direct-import support model.")
+        print("See docs/ADDING_A_HOST.md#hermes-selective-manual-import "
+              "for the direct-import support model.")
         print("No mutation of ~/.hermes will be performed by this command.")
     else:
         print(f"Unknown host: {host}. Use --host claude|codex|hermes",
