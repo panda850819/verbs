@@ -29,6 +29,28 @@ assert codex_human_only == EXPECTED_HUMAN_ONLY, (
 )
 assert claude_human_only == codex_human_only
 
+
+def indirect_human_only_refs(text):
+    return {
+        name for name in EXPECTED_HUMAN_ONLY
+        if re.search(rf"(?<![a-z0-9-]){re.escape(name)}(?![a-z0-9-])", text, re.I)
+    }
+
+
+# An implicitly available skill body must not become a dispatch bridge into a
+# human-only skill. Human-facing cross-route documentation belongs in RESOLVER.
+for skill_file in sorted(ROOT.glob("skills/*/*/SKILL.md")):
+    name = skill_file.parent.name
+    if name in EXPECTED_HUMAN_ONLY:
+        continue
+    leaked = indirect_human_only_refs(skill_file.read_text(encoding="utf-8"))
+    assert not leaked, (
+        f"{name} indirectly references human-only routes: {sorted(leaked)}"
+    )
+
+assert indirect_human_only_refs("Use `sprint` for this task.") == {"sprint"}
+assert indirect_human_only_refs("Run /to-tickets next.") == {"to-tickets"}
+
 for manifest in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
     text = (ROOT / manifest).read_text(encoding="utf-8")
     assert '"hooks"' not in text and "DISPATCH" not in text, (

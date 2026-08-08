@@ -171,7 +171,7 @@ tier = "ext"
 requires = ["cli:git", "cli:codex", "cli:claude"]
 resources = ["lib/model-anchors.md"]
 composes = []
-description = "Hand unfinished mechanical work to one fresh Claude or Codex worker, or run explicit native Agent Worker / parallel read-only research with at most two depth-one workers."
+description = "Hand one unfinished mechanical unit to an explicit fresh worker while the source agent keeps ownership. Detect a managed Herdr pane before choosing sibling-agent transport; otherwise use Claude/Codex fresh-run or an async payload."
 
 [skill.advisor]
 tier = "ext"

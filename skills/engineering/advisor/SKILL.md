@@ -84,7 +84,7 @@ caller owns the decision.
 
 ## Step 3: --panel — blind cross-model critique
 
-Only for a plan that is **expensive if wrong** (irreversible, outward-facing, multi-day). A daily plan uses the review pass built into `sprint`, not a panel. The panel is a forcing function, not a ritual.
+Only for a plan that is **expensive if wrong** (irreversible, outward-facing, multi-day). A daily plan uses its execution workflow's built-in review pass, not a panel. The panel is a forcing function, not a ritual.
 
 Spawn two mutually-blind critics, each a **different model** and a **distinct
 lens** (correctness / user outcome / simplicity / missing constraints / failure
@@ -101,4 +101,4 @@ the prompt, not the model's priors. Pick one likely-failure lens per critic.
   `lib/gate-contract.md`: `Apply? [approve / edit / reject / skip]`.
   Outside-voice findings are informational; the caller decides each.
 
-Stop after the gated list. advisor returns judgment; it does not execute (that is `sprint`).
+Stop after the gated list. Advisor returns judgment to its caller; it does not execute or select an execution entry point.

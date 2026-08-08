@@ -72,9 +72,11 @@ selects one implementation Issue, and one Sprint owns that Issue through one
 independently reviewable and revertible PR.
 
 Use `handover` only when a plan already contains a bounded, mechanical build
-unit that benefits from fresh context. The worker returns evidence to the
-orchestrator; it does not replace `sprint` ownership of the final acceptance
-and delivery loop.
+unit that benefits from fresh context. It detects `HERDR_ENV=1` before choosing
+Herdr sibling-agent transport; outside a managed Herdr pane it keeps the
+Claude/Codex fresh-run or async path. Herdr owns pane lifecycle while Handover
+owns task scope and evidence. The worker does not replace human-selected
+execution ownership of final acceptance and delivery.
 
 Other skills are typed on-ramps or supporting gates:
 
@@ -138,7 +140,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
-| `/verbs:handover` | ext | Hand unfinished mechanical work to one fresh Claude or Codex worker, or run explicit native Agent Worker / parallel read-only research with at most two depth-one workers. |
+| `/verbs:handover` | ext | Hand one unfinished mechanical unit to an explicit fresh worker while the source agent keeps ownership. Detect a managed Herdr pane before choosing sibling-agent transport; otherwise use Claude/Codex fresh-run or an async payload. |
 | `/verbs:advisor` | ext | Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206. |
 | `/verbs:harness-slim` | ext | Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, available usage evidence, and human-attention load. Proposes reversible reductions; does not mutate the harness. |
 <!-- END GENERATED: skill-catalog -->
