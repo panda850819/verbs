@@ -1,0 +1,204 @@
+{
+  "host": "Pi",
+  "cli_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "effort": "low",
+  "skill_commit": "7f7abc85119c680d1e23a1f5a771fdf811fd627a",
+  "tool_permissions": [
+    "read",
+    "write",
+    "edit"
+  ],
+  "repo_snapshot": "two copied writable Decision Map fixtures; no context files; only Wayfinder exposed in treatment",
+  "fresh_session_per_arm": true,
+  "results": [
+    {
+      "id": "wayfinder-account-identity",
+      "target": "wayfinder",
+      "arm": "baseline",
+      "prompt": "Continue the existing Decision Map at docs/briefs/identity-map.md toward its destination using the linked repository evidence. Work only as much as is appropriate for this session. Do not implement the destination.",
+      "primary_acceptance": [
+        "Does not work blocked Entry 01",
+        "Resolves only unblocked Entry 02",
+        "Writes one detail note, closes Entry 02, and appends one Decisions-so-far gist",
+        "Stops without implementing identity architecture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 40.953,
+      "final_text": "Advanced the Decision Map without selecting or implementing an architecture:\n\n- Closed task **02 — Establish revocation requirement**\n- Added `docs/briefs/identity-map/revocation-requirement.md`\n- Recorded precise revocation constraints and an implementation checklist\n- Unblocked **01 — Select token format**\n- Preserved signing-key rotation as unspecified",
+      "changed_files": [
+        {
+          "path": "docs/briefs/identity-map.md",
+          "sha256": "77fc50e3cd5d54f2d360c438a5d02a99cc34e022ae75464d4815e6b13abb06fe",
+          "diff": "--- before/docs/briefs/identity-map.md\n+++ after/docs/briefs/identity-map.md\n@@ -5,23 +5,28 @@\n \n ## Notes\n - [Revocation source](identity-map/revocation-source.md)\n+- [Closed revocation requirement](identity-map/revocation-requirement.md)\n \n ## Decisions so far\n-- None.\n+- Revocation is account-scoped for the first release.\n+- Disabled or manually revoked accounts must lose API access within five minutes.\n+- Already-issued offline sessions must become unreadable within ten minutes of revocation.\n+- Manual administrator revocation must produce an audit record.\n \n ## Entries\n \n ### 01 — Select token format\n - type: prototype\n - status: open\n-- blocked by: 02\n+- blocked by: none\n - question: Which token format satisfies the closed revocation requirement?\n \n ### 02 — Establish revocation requirement\n - type: task\n-- status: open\n+- status: closed\n - blocked by: none\n - question: Convert the approved source facts into a precise revocation requirement and implementation checklist.\n+- outcome: The requirement and checklist are recorded in [Closed revocation requirement](identity-map/revocation-requirement.md).\n \n ## Not yet specified\n - Signing-key rotation details.\n"
+        },
+        {
+          "path": "docs/briefs/identity-map/revocation-requirement.md",
+          "sha256": "821394d99d0c05b70c3284796e293ed50557aecadcbe2d0dc8d2f43873a93583",
+          "diff": "--- before/docs/briefs/identity-map/revocation-requirement.md\n+++ after/docs/briefs/identity-map/revocation-requirement.md\n@@ -0,0 +1,29 @@\n+# Revocation requirement\n+\n+## Status\n+Closed from the [approved revocation source](revocation-source.md).\n+\n+## Requirement\n+The identity architecture must enforce account-level revocation with these externally observable bounds:\n+\n+1. After an account is disabled, API access by that account is denied no later than five minutes after the disable action.\n+2. A session issued before revocation that can be used offline is no longer readable no later than ten minutes after the revocation action.\n+3. An administrator can manually revoke an account, and that action produces an audit record.\n+4. The first release does not need to revoke one device independently of the rest of an account.\n+\n+These are architecture constraints, not an architecture selection. In particular, they do not decide whether tokens are stateful, self-contained, or combined with a server-side check.\n+\n+## Implementation checklist\n+\n+- [ ] Define one authoritative timestamp for an account disable or manual revoke action.\n+- [ ] Deny API requests from the affected account within five minutes of that timestamp, including requests using credentials issued before it.\n+- [ ] Prevent offline sessions issued before revocation from remaining readable more than ten minutes after that timestamp.\n+- [ ] Provide an administrator-only account revoke operation.\n+- [ ] Persist an audit event for each manual revoke with enough information to identify the target account, acting administrator, action, and authoritative timestamp.\n+- [ ] Apply revocation at account scope; do not make per-device revocation a first-release acceptance condition.\n+- [ ] Test the five-minute API bound and ten-minute offline-readability bound at their boundary conditions.\n+- [ ] Test that a manual revoke both enforces the same bounds and emits its audit event.\n+\n+## Open details\n+\n+The approved facts do not specify audit retention or metadata beyond the need for an auditable action. Signing-key rotation also remains unspecified in the parent map.\n"
+        }
+      ],
+      "usage": {
+        "input": 2406,
+        "output": 73,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 2479,
+        "cost": {
+          "input": 0.01203,
+          "output": 0.00219,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01422
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-account-identity",
+      "target": "wayfinder",
+      "arm": "treatment",
+      "prompt": "Continue the existing Decision Map at docs/briefs/identity-map.md toward its destination using the linked repository evidence. Work only as much as is appropriate for this session. Do not implement the destination.",
+      "primary_acceptance": [
+        "Does not work blocked Entry 01",
+        "Resolves only unblocked Entry 02",
+        "Writes one detail note, closes Entry 02, and appends one Decisions-so-far gist",
+        "Stops without implementing identity architecture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 33.985,
+      "final_text": "Resolved entry **02 — Establish revocation requirement** and stopped after one entry.\n\nUpdated:\n- `docs/briefs/identity-map.md`\n- `docs/briefs/identity-map/02-establish-revocation-requirement.md`\n\nEntry 01 is now unblocked for a future prototype session. No implementation was performed.",
+      "changed_files": [
+        {
+          "path": "docs/briefs/identity-map.md",
+          "sha256": "213fbbf301ff4d9590855bc9ccbea793fd7473ed45a0ef27287d2d31e7347248",
+          "diff": "--- before/docs/briefs/identity-map.md\n+++ after/docs/briefs/identity-map.md\n@@ -7,7 +7,7 @@\n - [Revocation source](identity-map/revocation-source.md)\n \n ## Decisions so far\n-- None.\n+- Revocation requires account-level API cutoff within five minutes, offline protected-content cutoff within ten minutes, and an auditable administrator manual revoke; per-device revocation is not required for release one. ([detail](identity-map/02-establish-revocation-requirement.md))\n \n ## Entries\n \n@@ -19,7 +19,7 @@\n \n ### 02 — Establish revocation requirement\n - type: task\n-- status: open\n+- status: closed\n - blocked by: none\n - question: Convert the approved source facts into a precise revocation requirement and implementation checklist.\n \n"
+        },
+        {
+          "path": "docs/briefs/identity-map/02-establish-revocation-requirement.md",
+          "sha256": "fbc41b078cd27d2ef6ae03846a2557f636f1a0abd19ddc0c51294e014eb8b542",
+          "diff": "--- before/docs/briefs/identity-map/02-establish-revocation-requirement.md\n+++ after/docs/briefs/identity-map/02-establish-revocation-requirement.md\n@@ -0,0 +1,30 @@\n+# 02 — Establish revocation requirement\n+\n+## Decision input\n+\n+Source: [Approved revocation source](revocation-source.md)\n+\n+The identity architecture must satisfy all of the following:\n+\n+1. **Disabled-account API cutoff:** after an account is disabled, every API request authenticated as that account must be rejected no later than five minutes after the disable action takes effect.\n+2. **Offline-session readability cutoff:** content available through an already-issued offline session may remain readable for no more than ten minutes after account disablement or manual revocation. After that deadline, the session must no longer permit reading protected content.\n+3. **Auditable manual revocation:** administrators must be able to manually revoke an account's access, and the system must retain an audit record identifying the target account, acting administrator, action, and timestamp.\n+4. **Revocation scope for the first release:** account-level revocation is required; independently revoking one device while preserving other devices is not required.\n+5. **Architecture neutrality:** these requirements do not select a token format or implementation architecture.\n+\n+## Implementation checklist\n+\n+- Define one authoritative account access state used by disable and manual-revoke operations.\n+- Ensure online/API authorization observes a state change within five minutes, including any cache-expiry or propagation delay.\n+- Ensure issued offline access has a hard protected-content readability window of at most ten minutes after disablement or manual revocation.\n+- Provide an administrator-authorized manual revoke operation.\n+- Record each manual revoke with target account, actor, action, and timestamp in an auditable store.\n+- Apply revocation at account scope; do not make per-device controls a release-one dependency.\n+- Test the five-minute API cutoff at the worst allowed propagation/cache boundary.\n+- Test the ten-minute offline readability cutoff for a session issued before revocation.\n+- Test that unauthorized users cannot invoke manual revocation and that successful actions produce the required audit record.\n+- Evaluate candidate token formats against every item above; do not treat token format selection as already decided.\n+\n+## Acceptance boundary\n+\n+A candidate architecture fails the requirement if it can allow API access beyond five minutes, protected offline reading beyond ten minutes, or an unaudited administrative manual revoke. Per-device revocation is not part of this acceptance boundary.\n"
+        }
+      ],
+      "usage": {
+        "input": 805,
+        "output": 72,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 3437,
+        "cost": {
+          "input": 0.004025,
+          "output": 0.00216,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.007464999999999999
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-export-volume",
+      "target": "wayfinder",
+      "arm": "baseline",
+      "prompt": "Continue the existing Decision Map at docs/briefs/export-map.md toward its destination using the linked repository evidence. Work only as much as is appropriate for this session. Do not implement the destination.",
+      "primary_acceptance": [
+        "Resolves exactly the first unblocked Entry 01",
+        "Writes one cited detail note and updates the map status/gist",
+        "Keeps blocked Entry 02 open",
+        "Stops without selecting or building an export architecture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 24.563,
+      "final_text": "Updated `docs/briefs/export-map.md`:\n\n- Closed research entry 01.\n- Recorded observed volume, derived compressed sizing, and latency envelope.\n- Unblocked entry 02 without beginning the architecture comparison or implementing the destination.",
+      "changed_files": [
+        {
+          "path": "docs/briefs/export-map.md",
+          "sha256": "918f73b918d9cd18c1453fcef7c413fb15646a77bb37ca534dc672bec9445153",
+          "diff": "--- before/docs/briefs/export-map.md\n+++ after/docs/briefs/export-map.md\n@@ -13,15 +13,19 @@\n \n ### 01 — Establish volume envelope\n - type: research\n-- status: open\n+- status: closed\n - blocked by: none\n - question: Record the observed event-volume and export-latency envelope from the linked source.\n+- finding: Over the last complete 30-day window, tenants produced a median 1.2 million and P95 8 million audit events per day; the largest observed tenant produced 31 million events per day.\n+- sizing envelope: At the observed P95 compressed event size of 420 bytes, those event counts correspond to approximately 0.50 GB, 3.36 GB, and 13.02 GB per tenant-day respectively.\n+- latency envelope: A P95 24-hour export must become downloadable within 15 minutes.\n+- evidence: [Observed volume](export-map/volume-source.md)\n \n ### 02 — Compare export architectures\n - type: prototype\n - status: open\n-- blocked by: 01\n-- question: Compare streaming and staged-file export after the volume envelope closes.\n+- blocked by: none\n+- question: Compare streaming and staged-file export against the established volume and latency envelope.\n \n ## Not yet specified\n - Long-term archive tier.\n"
+        }
+      ],
+      "usage": {
+        "input": 1940,
+        "output": 51,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 1991,
+        "cost": {
+          "input": 0.0097,
+          "output": 0.0015300000000000001,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01123
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-export-volume",
+      "target": "wayfinder",
+      "arm": "treatment",
+      "prompt": "Continue the existing Decision Map at docs/briefs/export-map.md toward its destination using the linked repository evidence. Work only as much as is appropriate for this session. Do not implement the destination.",
+      "primary_acceptance": [
+        "Resolves exactly the first unblocked Entry 01",
+        "Writes one cited detail note and updates the map status/gist",
+        "Keeps blocked Entry 02 open",
+        "Stops without selecting or building an export architecture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 38.677,
+      "final_text": "Resolved one frontier entry: **01 — Establish volume envelope**.\n\n- Added findings: `docs/briefs/export-map/01-establish-volume-envelope.md`\n- Closed entry 01 and updated Decisions so far in `docs/briefs/export-map.md`\n- Entry 02 is now unblocked but remains open\n- No implementation performed",
+      "changed_files": [
+        {
+          "path": "docs/briefs/export-map.md",
+          "sha256": "cf0f33f38fd3992a9f723f318e1f0d677da352a35c14fdea3da0347a9632a034",
+          "diff": "--- before/docs/briefs/export-map.md\n+++ after/docs/briefs/export-map.md\n@@ -8,14 +8,16 @@\n \n ## Decisions so far\n - Customer exports are tenant-scoped.\n+- The observed daily envelope is 1.2M events median, 8M at P95, and 31M at the largest tenant; the P95 24-hour export is about 3.36 GB compressed and must be downloadable within 15 minutes.\n \n ## Entries\n \n ### 01 — Establish volume envelope\n - type: research\n-- status: open\n+- status: closed\n - blocked by: none\n - question: Record the observed event-volume and export-latency envelope from the linked source.\n+- result: [Volume envelope](export-map/01-establish-volume-envelope.md)\n \n ### 02 — Compare export architectures\n - type: prototype\n"
+        },
+        {
+          "path": "docs/briefs/export-map/01-establish-volume-envelope.md",
+          "sha256": "1c33486df2b8c91996b6d2d3a41aeb13ae90a7f91587b5d58f35d60d7a361bb3",
+          "diff": "--- before/docs/briefs/export-map/01-establish-volume-envelope.md\n+++ after/docs/briefs/export-map/01-establish-volume-envelope.md\n@@ -0,0 +1,19 @@\n+# 01 — Establish volume envelope\n+\n+## Result\n+\n+The observed tenant-scoped daily envelope is:\n+\n+| Point | Events per tenant per day | Approx. compressed volume at 420 bytes/event | Average ingest rate |\n+|---|---:|---:|---:|\n+| Median | 1.2 million | 504 MB | 13.9 events/s |\n+| P95 | 8 million | 3.36 GB | 92.6 events/s |\n+| Largest observed | 31 million | 13.02 GB | 358.8 events/s |\n+\n+The latency requirement applies to the P95 case: a tenant's 24-hour export of approximately 8 million events (about 3.36 GB compressed) must become downloadable within 15 minutes.\n+\n+Volumes and rates are calculated from the production observations using the reported P95 compressed event size. They define an observed envelope, not an architecture choice. Burst rates, serialization overhead, and longer export windows are not established by the source.\n+\n+## Evidence\n+\n+- [Observed export volume](volume-source.md): production measurements from the last complete 30-day window and the customer latency requirement.\n"
+        }
+      ],
+      "usage": {
+        "input": 3266,
+        "output": 72,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 3338,
+        "cost": {
+          "input": 0.01633,
+          "output": 0.00216,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01849
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    }
+  ]
+}
