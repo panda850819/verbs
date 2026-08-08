@@ -1,0 +1,149 @@
+{
+  "host": "Pi",
+  "cli_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "effort": "low",
+  "skill_commit": "54a41bbe5c1addcea97e3b2eec38f65cd6c10d6148",
+  "tool_permissions": [
+    "read"
+  ],
+  "fresh_session_per_case": true,
+  "results": [
+    {
+      "id": "sprint-explicit",
+      "target": "sprint",
+      "kind": "explicit-positive",
+      "prompt": "/skill:sprint This is planning-only. Follow the skill boundary and do not act. End with ROUTE: sprint.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.222,
+      "loaded_skill_paths": [],
+      "reported_route": "sprint",
+      "final_text": "Execution: NOT_RUN\n\nROUTE: sprint",
+      "usage": {
+        "input": 4292,
+        "output": 13,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4305,
+        "cost": {
+          "input": 0.021460000000000003,
+          "output": 0.00039,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.021850000000000005
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "sprint-implicit-negative",
+      "target": "sprint",
+      "kind": "implicit-negative",
+      "prompt": "A clear bounded implementation is ready. Decide the natural route, but do not execute or mutate anything. If an implicitly available Verbs skill is warranted, read its SKILL.md. End with exactly ROUTE: <skill-name-or-none>.",
+      "exit_code": 0,
+      "elapsed_seconds": 17.004,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/handover/SKILL.md",
+        "/Users/panda/site/skills/verbs/skills/engineering/sprint/SKILL.md"
+      ],
+      "reported_route": "sprint",
+      "final_text": "ROUTE: sprint",
+      "usage": {
+        "input": 5793,
+        "output": 8,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 5801,
+        "cost": {
+          "input": 0.028965,
+          "output": 0.00024,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.029205000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "to-tickets-explicit",
+      "target": "to-tickets",
+      "kind": "explicit-positive",
+      "prompt": "/skill:to-tickets Planning only: explain the first approval boundary for decomposing canonical Spec Issue #100. Do not call tools except reading the skill. End with ROUTE: to-tickets.",
+      "exit_code": 0,
+      "elapsed_seconds": 15.435,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/to-tickets/SKILL.md"
+      ],
+      "reported_route": "to-tickets",
+      "final_text": "The first approval boundary occurs **after analysis and decomposition, but before any GitHub write**.\n\nFor canonical Spec Issue **#100**, the process would first:\n\n1. Validate repository tracker configuration and GitHub access.\n2. Read and validate the complete Spec Issue.\n3. Check for existing child Issues or publication conflicts.\n4. Design a dependency DAG of vertical-slice implementation Issues.\n5. Preview every proposed ticket’s:\n   - title\n   - outcome\n   - acceptance criteria\n   - exclusions\n   - `blocked by` edges\n6. Show the computed initial frontier.\n\nThen ask exactly once:\n\n`[publish / reject]`\n\n- **publish**: create that exact graph.\n- **reject**: create nothing and stop.\n\nNo Issue, sub-issue relation, or dependency may be written before this approval.\n\nROUTE: to-tickets",
+      "usage": {
+        "input": 1693,
+        "output": 177,
+        "cacheRead": 3584,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 5454,
+        "cost": {
+          "input": 0.008465,
+          "output": 0.0053100000000000005,
+          "cacheRead": 0.001792,
+          "cacheWrite": 0,
+          "total": 0.015567000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "to-tickets-implicit-negative",
+      "target": "to-tickets",
+      "kind": "implicit-negative",
+      "prompt": "An approved canonical GitHub Spec Issue needs decomposition into child Issues. Decide the natural implicitly available route, but create nothing. If a skill is implicitly available, read it. End with exactly ROUTE: <skill-name-or-none>.",
+      "exit_code": 0,
+      "elapsed_seconds": 19.914,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/to-spec/SKILL.md"
+      ],
+      "reported_route": "none",
+      "final_text": "The canonical Spec is approved, but `to-spec` explicitly excludes ticket decomposition and child Issues. No available skill owns this task.\n\nROUTE: none",
+      "usage": {
+        "input": 1828,
+        "output": 88,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 52,
+        "totalTokens": 4476,
+        "cost": {
+          "input": 0.00914,
+          "output": 0.00264,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01306
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    }
+  ]
+}

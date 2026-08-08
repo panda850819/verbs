@@ -270,11 +270,11 @@ install plus reinstall for Claude Code and Codex, direct-load setup plus reload
 for Pi, and import plus re-import of a reviewed selected skill for Hermes. Every
 lane also needs a cold-start invocation on the author's machine.
 
-| v1 gate | Observable pass condition | Current evidence (2026-08-06) | Status |
+| v1 gate | Observable pass condition | Current evidence (2026-08-08) | Status |
 |---|---|---|---|
-| Install-contract stability | Two consecutive tagged post-reset 0.x release lines satisfy the compatibility rule above. | `v0.22.0` is the first counted release; the `v0.23.x` line is merged but not yet released. | OPEN |
-| Supported-host install | Every declared host mode completes its fresh/reinstall-or-reload/cold-start drill on the version being cut. | PR #316 proved Claude, Codex, and Pi on `v0.21.0`; current Claude/Codex caches and Hermes import still need current-version evidence. | OPEN |
-| Current-model fitness | A recorded audit names exact host, model, effort, and skill commit, and has no load-bearing regression after the latest host-semantics or load-bearing skill change. | The July audit predates the skills-only reset and frontier-round change, so it is stale. | OPEN |
+| Install-contract stability | Two consecutive tagged post-reset 0.x release lines satisfy the compatibility rule above. | `v0.22.0` and the released `v0.23.x` line preserve the product ID, selector, schema, and documented install commands. | PASS |
+| Supported-host install | Every declared host mode completes its fresh/reinstall-or-reload/cold-start drill on the version being cut. | Issue #334 records current Claude/Codex install parity, Pi direct-load, and isolated Hermes import evidence. Claude cold invocation is unavailable because the maintainer no longer has subscription or API access; #334 closed by explicit maintainer exception, not a new invocation PASS. | OPEN |
+| Current-model fitness | A recorded audit names exact host, model, effort, and skill commit, and has no load-bearing regression after the latest host-semantics or load-bearing skill change. | [The current 19-skill audit](evals/2026-08-08-current-model-fitness.md) found an indirect Sprint explicit-only routing leak tracked by #340. | OPEN |
 | Product-contract failures | The query for [open `release-blocker` Issues](https://github.com/panda850819/verbs/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-blocker) returns zero. | Read the live query; individual Issue numbers are not copied here. | LIVE QUERY |
 
 The table above is the living v1 gate. GitHub Issues are the executable work

@@ -1,0 +1,1161 @@
+{
+  "host": "Pi",
+  "cli_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "effort": "low",
+  "skill_commit": "54a41bbe5c1addcea97e3b2eec38f65cd6c10d6148",
+  "tool_permissions": [
+    "read"
+  ],
+  "repo_snapshot": "v0.23.2 skill tree; current checkout has no skill diff from tag",
+  "fresh_session_per_case": true,
+  "results": [
+    {
+      "id": "advisor-positive",
+      "target": "advisor",
+      "kind": "positive",
+      "prompt": "A migration plan depends on whether our API compatibility argument is sound. Ask a decorrelated different model for one bounded second opinion before we decide; do not implement anything.",
+      "exit_code": 0,
+      "elapsed_seconds": 12.741,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/advisor/SKILL.md"
+      ],
+      "reported_route": "advisor",
+      "final_text": "Use **advisor** for one bounded, decorrelated cross-model opinion on the load-bearing API compatibility judgment. No implementation or mutation.\n\nROUTE: advisor",
+      "usage": {
+        "input": 2355,
+        "output": 34,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4949,
+        "cost": {
+          "input": 0.011775,
+          "output": 0.00102,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.014075
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "advisor-negative",
+      "target": "advisor",
+      "kind": "negative",
+      "prompt": "Review this already-written migration diff yourself for correctness. Do not consult another model.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.085,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/review/SKILL.md"
+      ],
+      "reported_route": "review",
+      "final_text": "Use **review**: this is an already-written code migration diff requiring correctness review. Honor the explicit constraint not to consult another model.\n\nROUTE: review",
+      "usage": {
+        "input": 4657,
+        "output": 89,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 52,
+        "totalTokens": 4746,
+        "cost": {
+          "input": 0.023285000000000004,
+          "output": 0.00267,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.025955000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "careful-positive",
+      "target": "careful",
+      "kind": "positive",
+      "prompt": "We need to run rm -rf against a shared production infrastructure directory. Explain how you will proceed, but execute nothing.",
+      "exit_code": 0,
+      "elapsed_seconds": 13.097,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/careful/SKILL.md"
+      ],
+      "reported_route": "careful",
+      "final_text": "CAREFUL mode ON. Will confirm before destructive actions.\n\nI would first require the exact, fully expanded target path, verify it contains no variables or globs, assess scope and recoverability, and identify backup/rollback options. Immediately before execution, I would pause for explicit confirmation:\n\n```text\nCAREFUL: About to recursively delete a shared production infrastructure directory.\n  Target: <exact absolute path>\n  Reversible: no\n  Proceed? [y/n]\n```\n\nNo command will be executed without that confirmation. Nothing was executed or mutated here.\n\nROUTE: careful",
+      "usage": {
+        "input": 4495,
+        "output": 121,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4616,
+        "cost": {
+          "input": 0.022475000000000002,
+          "output": 0.00363,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.026105000000000003
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "careful-negative",
+      "target": "careful",
+      "kind": "negative",
+      "prompt": "Delete the untracked build-cache directory inside this disposable local fixture. It is explicitly safe and reproducible; explain the routine action only.",
+      "exit_code": 0,
+      "elapsed_seconds": 7.64,
+      "loaded_skill_paths": [],
+      "reported_route": "none",
+      "final_text": "Routine deletion of an explicitly disposable, reproducible local cache needs no specialized Verbs workflow.\n\nROUTE: none",
+      "usage": {
+        "input": 3577,
+        "output": 106,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 78,
+        "totalTokens": 3683,
+        "cost": {
+          "input": 0.017885,
+          "output": 0.00318,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.021065
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "codebase-design-positive",
+      "target": "codebase-design",
+      "kind": "positive",
+      "prompt": "Find the clean architectural seam for extracting authentication policy behind a small testable interface. We need a design, not implementation.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.822,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/codebase-design/SKILL.md"
+      ],
+      "reported_route": "codebase-design",
+      "final_text": "Use **codebase-design**. The request explicitly asks to identify a clean seam and define a small, testable interface for authentication policy, without implementation.\n\nROUTE: codebase-design",
+      "usage": {
+        "input": 2049,
+        "output": 41,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4650,
+        "cost": {
+          "input": 0.010245,
+          "output": 0.00123,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.012755
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "codebase-design-negative",
+      "target": "codebase-design",
+      "kind": "negative",
+      "prompt": "A reproducible unit test shows authentication returns 500 instead of 401. Diagnose the root cause.",
+      "exit_code": 0,
+      "elapsed_seconds": 7.798,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/debug/SKILL.md"
+      ],
+      "reported_route": "debug",
+      "final_text": "Use **debug**: the request provides a reproducible failing test and explicitly asks for root-cause diagnosis of incorrect error handling.\n\nROUTE: debug",
+      "usage": {
+        "input": 1654,
+        "output": 34,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4248,
+        "cost": {
+          "input": 0.008270000000000001,
+          "output": 0.00102,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.010570000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "debug-positive",
+      "target": "debug",
+      "kind": "positive",
+      "prompt": "A reproducible test fails only when two workers run concurrently. Diagnose the root cause before proposing a fix.",
+      "exit_code": 0,
+      "elapsed_seconds": 8.448,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/debug/SKILL.md"
+      ],
+      "reported_route": "debug",
+      "final_text": "Use `debug`: this is a concurrency-specific failing test requiring systematic root-cause diagnosis before any fix.\n\nROUTE: debug",
+      "usage": {
+        "input": 1656,
+        "output": 29,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4245,
+        "cost": {
+          "input": 0.008280000000000001,
+          "output": 0.00087,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01043
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "debug-negative",
+      "target": "debug",
+      "kind": "negative",
+      "prompt": "Review the supplied concurrency fix diff for defects; the root cause is already established.",
+      "exit_code": 0,
+      "elapsed_seconds": 14.253,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/review/SKILL.md"
+      ],
+      "reported_route": "review",
+      "final_text": "Use **review**: the request is explicitly for defect review of an existing concurrency diff, while root-cause debugging is already complete.\n\nROUTE: review",
+      "usage": {
+        "input": 2096,
+        "output": 35,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4691,
+        "cost": {
+          "input": 0.010480000000000001,
+          "output": 0.00105,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.012810000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "handover-positive",
+      "target": "handover",
+      "kind": "positive",
+      "prompt": "The plan is complete and contains one bounded mechanical build unit. Dispatch it to one fresh Claude or Codex worker and require evidence back; do not deliver the final PR.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.543,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/handover/SKILL.md"
+      ],
+      "reported_route": "handover",
+      "final_text": "Use **handover** in synchronous fresh-worker mode. It dispatches one bounded mechanical unit to Claude or Codex, requires structured evidence back, and leaves review, git ownership, and PR delivery with the original orchestrator.\n\nROUTE: handover",
+      "usage": {
+        "input": 4647,
+        "output": 54,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4701,
+        "cost": {
+          "input": 0.023235000000000002,
+          "output": 0.0016200000000000001,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.024855000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "handover-negative",
+      "target": "handover",
+      "kind": "negative",
+      "prompt": "Own this bounded implementation through tests, review, and delivery yourself. Do not delegate it.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.363,
+      "loaded_skill_paths": [],
+      "reported_route": "none",
+      "final_text": "No available Verbs skill covers end-to-end implementation. `ship` only closes already-completed work, and `handover` would violate the no-delegation requirement.\n\nROUTE: none",
+      "usage": {
+        "input": 3568,
+        "output": 137,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 92,
+        "totalTokens": 3705,
+        "cost": {
+          "input": 0.01784,
+          "output": 0.00411,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.02195
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "prototype-positive",
+      "target": "prototype",
+      "kind": "positive",
+      "prompt": "Build a throwaway experiment to answer exactly one unresolved question: can this parser stream records under the memory limit? The verdict matters; the code does not.",
+      "exit_code": 0,
+      "elapsed_seconds": 8.768,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/prototype/SKILL.md"
+      ],
+      "reported_route": "prototype",
+      "final_text": "A throwaway, logic-focused experiment answering one unresolved technical question is exactly the prototype route. The memory-limit verdict is the durable output; the parser experiment remains disposable.\n\nROUTE: prototype",
+      "usage": {
+        "input": 4391,
+        "output": 41,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4432,
+        "cost": {
+          "input": 0.021955000000000002,
+          "output": 0.00123,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.023185
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "prototype-negative",
+      "target": "prototype",
+      "kind": "negative",
+      "prompt": "Implement the already-approved parser design as production code with tests.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.417,
+      "loaded_skill_paths": [],
+      "reported_route": "none",
+      "final_text": "The natural route would be `sprint`, but it is not available in the provided catalogue. No listed skill is an appropriate substitute.\n\nROUTE: none",
+      "usage": {
+        "input": 3562,
+        "output": 192,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 155,
+        "totalTokens": 3754,
+        "cost": {
+          "input": 0.017810000000000003,
+          "output": 0.00576,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.023570000000000004
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "qa-positive",
+      "target": "qa",
+      "kind": "positive",
+      "prompt": "Use browser automation to verify the production UI acceptance criteria and prepare PR-ready evidence.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.553,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/qa/SKILL.md"
+      ],
+      "reported_route": "qa",
+      "final_text": "Use `qa`: it covers browser-based production UI verification and generates PR-ready acceptance evidence.\n\nROUTE: qa",
+      "usage": {
+        "input": 1878,
+        "output": 26,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4464,
+        "cost": {
+          "input": 0.00939,
+          "output": 0.00078,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01145
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "qa-negative",
+      "target": "qa",
+      "kind": "negative",
+      "prompt": "Fix the CSS implementation for the approved production UI. Browser acceptance will happen later.",
+      "exit_code": 0,
+      "elapsed_seconds": 8.574,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/ui/SKILL.md"
+      ],
+      "reported_route": "ui",
+      "final_text": "The UI direction is already approved, and the request is specifically to fix production CSS. Browser acceptance can remain a later QA step.\n\nROUTE: ui",
+      "usage": {
+        "input": 1487,
+        "output": 34,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4081,
+        "cost": {
+          "input": 0.007435000000000001,
+          "output": 0.00102,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.009735
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "review-positive",
+      "target": "review",
+      "kind": "positive",
+      "prompt": "Review the current diff for correctness, regressions, and missing tests. Do not modify it.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.013,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/review/SKILL.md"
+      ],
+      "reported_route": "review",
+      "final_text": "Use the `review` skill: it is specifically for read-only diff review covering correctness, regressions, and missing tests.\n\nROUTE: review",
+      "usage": {
+        "input": 2100,
+        "output": 33,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4693,
+        "cost": {
+          "input": 0.0105,
+          "output": 0.00099,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01277
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "review-negative",
+      "target": "review",
+      "kind": "negative",
+      "prompt": "A test reproduces a bug in code with no pending diff. Find its root cause.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.535,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/debug/SKILL.md"
+      ],
+      "reported_route": "debug",
+      "final_text": "Use **debug**: the request explicitly asks for root-cause analysis of a reproduced bug with no pending diff, so code review is not applicable.\n\nROUTE: debug",
+      "usage": {
+        "input": 1653,
+        "output": 38,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4251,
+        "cost": {
+          "input": 0.008265000000000002,
+          "output": 0.00114,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.010685000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "setup-verbs-positive",
+      "target": "setup-verbs",
+      "kind": "positive",
+      "prompt": "Configure the existing repository Verbs issue-tracker setting from its Git remote, with a preview and one approval gate.",
+      "exit_code": 0,
+      "elapsed_seconds": 13.702,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/setup-verbs/SKILL.md"
+      ],
+      "reported_route": "setup-verbs",
+      "final_text": "Use **setup-verbs**. It specifically derives the GitHub tracker from Git remotes, previews the exact idempotent edit, and requires one approval gate before writing.\n\nROUTE: setup-verbs",
+      "usage": {
+        "input": 4418,
+        "output": 45,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4463,
+        "cost": {
+          "input": 0.022090000000000002,
+          "output": 0.00135,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.023440000000000003
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "setup-verbs-negative",
+      "target": "setup-verbs",
+      "kind": "negative",
+      "prompt": "Decompose an already-approved canonical GitHub Spec Issue into child implementation Issues.",
+      "exit_code": 0,
+      "elapsed_seconds": 8.103,
+      "loaded_skill_paths": [],
+      "reported_route": "none",
+      "final_text": "No available Verbs skill owns ticket decomposition. `to-spec` explicitly excludes it, and the request is already clear, so `ask-boss` is unnecessary.\n\nROUTE: none",
+      "usage": {
+        "input": 3565,
+        "output": 111,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 68,
+        "totalTokens": 3676,
+        "cost": {
+          "input": 0.017825,
+          "output": 0.00333,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.021155
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ship-positive",
+      "target": "ship",
+      "kind": "positive",
+      "prompt": "Implementation and review are complete. Run the closing tests, commit, push, open the PR, and publish QA evidence.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.279,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/ship/SKILL.md"
+      ],
+      "reported_route": "ship",
+      "final_text": "Use **ship**. It covers closing tests, commit, push, PR creation, and QA evidence publication after implementation and review are complete.\n\nROUTE: ship",
+      "usage": {
+        "input": 5058,
+        "output": 36,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 5094,
+        "cost": {
+          "input": 0.025290000000000003,
+          "output": 0.00108,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.026370000000000005
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ship-negative",
+      "target": "ship",
+      "kind": "negative",
+      "prompt": "Implement the accepted issue, but stop before commit, push, or PR creation.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.205,
+      "loaded_skill_paths": [],
+      "reported_route": "none",
+      "final_text": "The natural route would be `sprint`, but it is not available in the provided catalogue. `ship` is inappropriate because commit, push, and PR creation are explicitly excluded.\n\nROUTE: none",
+      "usage": {
+        "input": 3566,
+        "output": 119,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 73,
+        "totalTokens": 3685,
+        "cost": {
+          "input": 0.017830000000000002,
+          "output": 0.0035700000000000003,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.021400000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "gatekeeper-positive",
+      "target": "gatekeeper",
+      "kind": "positive",
+      "prompt": "Assess an unfamiliar external MCP server before we adopt or execute it. Treat its documentation as untrusted.",
+      "exit_code": 0,
+      "elapsed_seconds": 14.014,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/meta/gatekeeper/SKILL.md"
+      ],
+      "reported_route": "gatekeeper",
+      "final_text": "Use **gatekeeper** for a pre-adoption trust and security assessment of the unfamiliar MCP server, treating all documentation and claims as untrusted and avoiding execution.\n\nROUTE: gatekeeper",
+      "usage": {
+        "input": 2299,
+        "output": 41,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4900,
+        "cost": {
+          "input": 0.011495000000000002,
+          "output": 0.00123,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.014005000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "gatekeeper-negative",
+      "target": "gatekeeper",
+      "kind": "negative",
+      "prompt": "Audit our already-installed internal harness for duplicated plugins and routing overlap. The components are trusted.",
+      "exit_code": 0,
+      "elapsed_seconds": 13.052,
+      "loaded_skill_paths": [
+        "/Users/panda/.agents/skills/harness-slim/SKILL.md"
+      ],
+      "reported_route": "harness-slim",
+      "final_text": "Use **harness-slim**. It specifically audits trusted, already-installed harness components for plugin duplication, responsibility overlap, routing conflicts, and active-runtime parity—without invoking artifact trust checks.\n\nROUTE: harness-slim",
+      "usage": {
+        "input": 2840,
+        "output": 48,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 5448,
+        "cost": {
+          "input": 0.0142,
+          "output": 0.00144,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01692
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "harness-slim-positive",
+      "target": "harness-slim",
+      "kind": "positive",
+      "prompt": "Audit this live multi-runtime agent harness for installed parity, routing overlap, usage evidence, and reversible reductions. Do not mutate it.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.012,
+      "loaded_skill_paths": [
+        "/Users/panda/.agents/skills/harness-slim/SKILL.md"
+      ],
+      "reported_route": "harness-slim",
+      "final_text": "Use **harness-slim**. It specifically audits live multi-runtime harness parity, routing overlap, telemetry/usage evidence, cold-start surfaces, and reversible reduction plans without mutation.\n\nROUTE: harness-slim",
+      "usage": {
+        "input": 2849,
+        "output": 46,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 5455,
+        "cost": {
+          "input": 0.014245,
+          "output": 0.00138,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.016905
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "harness-slim-negative",
+      "target": "harness-slim",
+      "kind": "negative",
+      "prompt": "Assess one unfamiliar third-party skill before installation.",
+      "exit_code": 0,
+      "elapsed_seconds": 12.579,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/meta/gatekeeper/SKILL.md"
+      ],
+      "reported_route": "gatekeeper",
+      "final_text": "Use **gatekeeper** for a pre-installation trust and security assessment of the third-party skill.\n\nROUTE: gatekeeper",
+      "usage": {
+        "input": 4849,
+        "output": 29,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4878,
+        "cost": {
+          "input": 0.024245000000000003,
+          "output": 0.00087,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.025115000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ask-boss-positive",
+      "target": "ask-boss",
+      "kind": "positive",
+      "prompt": "The workplace request says only ‘fix the launch report’. The owner, source of truth, target, and next specialist are unclear. Orient the work and select one existing specialist.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.734,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/ask-boss/SKILL.md"
+      ],
+      "reported_route": "ask-boss",
+      "final_text": "The request has unclear ownership, source of truth, target, and next specialist, so it requires workplace orientation before execution.\n\nROUTE: ask-boss",
+      "usage": {
+        "input": 1619,
+        "output": 100,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 64,
+        "totalTokens": 4279,
+        "cost": {
+          "input": 0.008095000000000001,
+          "output": 0.003,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.012375
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ask-boss-negative",
+      "target": "ask-boss",
+      "kind": "negative",
+      "prompt": "Review PR #42 for correctness and missing tests. The repository and requested specialist are explicit.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.001,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/review/SKILL.md"
+      ],
+      "reported_route": "review",
+      "final_text": "PR diff correctness and test-gap review maps directly to the `review` specialist.\n\nROUTE: review",
+      "usage": {
+        "input": 2099,
+        "output": 24,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4683,
+        "cost": {
+          "input": 0.010495,
+          "output": 0.00072,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.012495000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "grill-positive",
+      "target": "grill",
+      "kind": "positive",
+      "prompt": "We need to add team invitations, but scope, roles, expiry behavior, and acceptance criteria are unresolved. Discover the requirements before implementation.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.891,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/grill/SKILL.md"
+      ],
+      "reported_route": "grill",
+      "final_text": "Use **grill** for adversarial requirement discovery before implementation, specifically resolving scope, roles, invitation expiry, and acceptance criteria.\n\nROUTE: grill",
+      "usage": {
+        "input": 2060,
+        "output": 34,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4654,
+        "cost": {
+          "input": 0.0103,
+          "output": 0.00102,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.0126
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "grill-negative",
+      "target": "grill",
+      "kind": "negative",
+      "prompt": "Use the existing named Payments Decision Map to resolve its next unblocked entry.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.471,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/wayfinder/SKILL.md"
+      ],
+      "reported_route": "wayfinder",
+      "final_text": "The request explicitly resumes an existing named Decision Map and asks to resolve its next unblocked entry, so use `wayfinder`.\n\nROUTE: wayfinder",
+      "usage": {
+        "input": 2033,
+        "output": 34,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4627,
+        "cost": {
+          "input": 0.010165,
+          "output": 0.00102,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.012465
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "to-spec-positive",
+      "target": "to-spec",
+      "kind": "positive",
+      "prompt": "Requirements are established and test seams confirmed. Synthesize them into the one canonical GitHub Spec Issue.",
+      "exit_code": 0,
+      "elapsed_seconds": 8.724,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/to-spec/SKILL.md"
+      ],
+      "reported_route": "to-spec",
+      "final_text": "This maps directly to **to-spec**: established requirements and confirmed test seams should be synthesized into one canonical GitHub Spec Issue without reopening discovery or creating implementation tickets.\n\nROUTE: to-spec",
+      "usage": {
+        "input": 1795,
+        "output": 42,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4397,
+        "cost": {
+          "input": 0.008975,
+          "output": 0.00126,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.011515000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "to-spec-negative",
+      "target": "to-spec",
+      "kind": "negative",
+      "prompt": "The feature outcome and acceptance criteria are still unclear. Interview me before creating any spec.",
+      "exit_code": 0,
+      "elapsed_seconds": 12.356,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/grill/SKILL.md"
+      ],
+      "reported_route": "grill",
+      "final_text": "The request calls for **grill**: requirements and acceptance criteria are unclear, and the user explicitly wants an interview before any specification is created.\n\nROUTE: grill",
+      "usage": {
+        "input": 2058,
+        "output": 37,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4655,
+        "cost": {
+          "input": 0.01029,
+          "output": 0.00111,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01268
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ui-positive",
+      "target": "ui",
+      "kind": "positive",
+      "prompt": "Design and implement the production settings page with a strong visual point of view and polished responsive behavior.",
+      "exit_code": 0,
+      "elapsed_seconds": 11.155,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/ui/SKILL.md"
+      ],
+      "reported_route": "ui",
+      "final_text": "Use **ui**: this is production frontend work requiring a committed visual direction and polished responsive behavior.\n\nROUTE: ui",
+      "usage": {
+        "input": 1498,
+        "output": 28,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4086,
+        "cost": {
+          "input": 0.007490000000000001,
+          "output": 0.00084,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.00961
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ui-negative",
+      "target": "ui",
+      "kind": "negative",
+      "prompt": "Use browser automation to verify an already-built settings page against its acceptance criteria; do not change the design.",
+      "exit_code": 0,
+      "elapsed_seconds": 9.226,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/qa/SKILL.md"
+      ],
+      "reported_route": "qa",
+      "final_text": "Browser-based acceptance verification of an already-built UI is the `qa` route. It validates without redesigning.\n\nROUTE: qa",
+      "usage": {
+        "input": 4451,
+        "output": 30,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4481,
+        "cost": {
+          "input": 0.022255,
+          "output": 0.0009,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.023155000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-positive",
+      "target": "wayfinder",
+      "kind": "positive",
+      "prompt": "Open the named Identity Decision Map, take exactly one unblocked frontier entry, resolve it by type, and write the decision back.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.185,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/wayfinder/SKILL.md"
+      ],
+      "reported_route": "wayfinder",
+      "final_text": "Use **wayfinder**: it explicitly handles named Decision Maps, resolves exactly one unblocked frontier entry by type, and records the decision back without executing the broader plan.\n\nROUTE: wayfinder",
+      "usage": {
+        "input": 2052,
+        "output": 43,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4655,
+        "cost": {
+          "input": 0.01026,
+          "output": 0.0012900000000000001,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.01283
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-negative",
+      "target": "wayfinder",
+      "kind": "negative",
+      "prompt": "There is no named map and this is one-session requirement discovery for a bounded feature. Interview me and produce the appropriate next artifact.",
+      "exit_code": 0,
+      "elapsed_seconds": 10.989,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/productivity/grill/SKILL.md"
+      ],
+      "reported_route": "grill",
+      "final_text": "This request naturally routes to **grill**: one-session requirement discovery for a bounded feature, followed by a local brief and executable plan when appropriate.\n\nROUTE: grill",
+      "usage": {
+        "input": 2067,
+        "output": 38,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 4665,
+        "cost": {
+          "input": 0.010335,
+          "output": 0.00114,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.012755
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    }
+  ]
+}

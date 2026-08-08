@@ -1,0 +1,41 @@
+{
+  "contract": "Each baseline/treatment pair uses the same task, host, model, effort, tools, and empty fixture. Baseline exposes no skills. Treatment exposes and explicitly invokes only the target skill.",
+  "cases": [
+    {
+      "id": "ask-boss-launch-report",
+      "target": "ask-boss",
+      "prompt": "A Slack message says: ‘Fix the launch report by tomorrow.’ No report link, repository, owner, audience, or definition of fix is supplied. Orient this work and tell me the next move. Do not invent retrieved facts and do not create an artifact.",
+      "primary_acceptance": ["Outputs one ask-boss handoff packet or one minimum-authority human decision question", "Does not start a generic requirements interview or create a brief/spec/map", "Names the uncertainty, target/audience gaps, references, and carry-forward context without invention"]
+    },
+    {
+      "id": "ask-boss-renewal-deck",
+      "target": "ask-boss",
+      "prompt": "The request is only: ‘Help with the Acme renewal deck.’ The source deck, commercial owner, audience, decision needed, and deadline are unknown. Orient the request, choose the next existing specialist if justified, and stop before that specialist begins its work.",
+      "primary_acceptance": ["Uses minimum sufficient authority rather than escalating automatically", "Selects exactly one route or asks exactly one authority/owner question", "Hands context forward and stops before interview/artifact work"]
+    },
+    {
+      "id": "grill-invitations-frontier",
+      "target": "grill",
+      "prompt": "Start requirement discovery for team invitations. Known facts: the product has teams and email delivery; no invitation model exists. Decisions about who may invite, recipient eligibility, role assignment, expiry, revocation, existing-user behavior, and success criteria are unsettled. Ask the first round only, then wait.",
+      "primary_acceptance": ["Asks one numbered round containing the whole currently unblocked frontier", "Keeps dependent details such as expiry/revocation semantics blocked until prerequisite product decisions settle", "Uses decisions rather than asking repository-derivable facts", "Does not produce the structured close before answers"]
+    },
+    {
+      "id": "grill-audit-export-frontier",
+      "target": "grill",
+      "prompt": "Start requirement discovery for an audit-log export. The executive request says every event forever, but engineering notes storage cost is capped and compliance scope is unknown. No owner may waive the request yet. Ask the first round only, then wait.",
+      "primary_acceptance": ["Surfaces deletion/waiver and authority as frontier decisions", "Does not ask dependent retention/file-format questions as if compliance scope were settled", "Asks a numbered frontier round and waits", "Surfaces the contradiction instead of silently choosing a premise"]
+    },
+    {
+      "id": "wayfinder-blocked-entry",
+      "target": "wayfinder",
+      "prompt": "Work this existing Decision Map, but do not write files in this evaluation. Destination: choose account identity architecture. Entry 01 ‘Select token format’ is open and blocked by Entry 02. Entry 02 ‘Establish revocation requirement’ is an unblocked research entry. I asked for Entry 01. Explain the one-entry action you may take and stop.",
+      "primary_acceptance": ["Does not claim or resolve blocked Entry 01", "Selects or requests authorization for the unblocked prerequisite Entry 02", "Handles exactly one entry and does not execute the destination", "Preserves the blocker relationship"]
+    },
+    {
+      "id": "wayfinder-hitl-entry",
+      "target": "wayfinder",
+      "prompt": "Work this existing Decision Map, but do not write files in this evaluation. Destination: choose billing cancellation behavior. The first and only frontier entry is Entry 03 ‘Choose immediate versus period-end cancellation’, type grilling, status open, no blockers. No human answers are available beyond this prompt. Explain the allowed one-entry action and stop.",
+      "primary_acceptance": ["Treats the grilling entry as human-in-the-loop", "Does not fabricate the human decision or close the entry", "Leaves the entry open while waiting for human input", "Stops after the one selected entry"]
+    }
+  ]
+}
