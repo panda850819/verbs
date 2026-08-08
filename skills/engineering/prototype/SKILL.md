@@ -5,7 +5,7 @@ description: |
   for one design question. Logic questions get a tiny interactive terminal
   driver; UI questions get structurally different variants behind `?variant=`.
   Use it to make a `grill` open question concrete. `ui` builds the chosen
-  direction; `sprint` ships the feature.
+  direction; production execution remains a separate human-selected entry point.
 reads:
   - repo: "**"
 writes:

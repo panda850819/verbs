@@ -82,8 +82,8 @@ Do not skip or reorder these stages.
    public contract, schema or migration, or security boundary. Give it the log,
    gates, premise, and repo
    evidence. Do not write a competing repository brief, executable plan, PRD,
-   local Spec, or tracking Issue; stop after the Spec URL. `to-tickets` owns
-   decomposition.
+   local Spec, tracking Issue, or child-Issue graph; stop after the Spec URL.
+   Decomposition requires a separate explicit human invocation.
 3. **Smaller work -> local close.** Continue to Stage C and C+.
 
 ### Local close

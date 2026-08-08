@@ -72,9 +72,11 @@ selects one implementation Issue, and one Sprint owns that Issue through one
 independently reviewable and revertible PR.
 
 Use `handover` only when a plan already contains a bounded, mechanical build
-unit that benefits from fresh context. The worker returns evidence to the
-orchestrator; it does not replace `sprint` ownership of the final acceptance
-and delivery loop.
+unit that benefits from fresh context. It detects `HERDR_ENV=1` before choosing
+Herdr sibling-agent transport; outside a managed Herdr pane it keeps the
+Claude/Codex fresh-run or async path. Herdr owns pane lifecycle while Handover
+owns task scope and evidence. The worker does not replace human-selected
+execution ownership of final acceptance and delivery.
 
 Other skills are typed on-ramps or supporting gates:
 
@@ -138,7 +140,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
-| `/verbs:handover` | ext | Hand unfinished mechanical work to one fresh Claude or Codex worker, or run explicit native Agent Worker / parallel read-only research with at most two depth-one workers. |
+| `/verbs:handover` | ext | Hand one unfinished mechanical unit to an explicit fresh worker while the source agent keeps ownership. Detect a managed Herdr pane before choosing sibling-agent transport; otherwise use Claude/Codex fresh-run or an async payload. |
 | `/verbs:advisor` | ext | Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206. |
 | `/verbs:harness-slim` | ext | Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, available usage evidence, and human-attention load. Proposes reversible reductions; does not mutate the harness. |
 <!-- END GENERATED: skill-catalog -->
@@ -274,7 +276,7 @@ lane also needs a cold-start invocation on the author's machine.
 |---|---|---|---|
 | Install-contract stability | Two consecutive tagged post-reset 0.x release lines satisfy the compatibility rule above. | `v0.22.0` and the released `v0.23.x` line preserve the product ID, selector, schema, and documented install commands. | PASS |
 | Supported-host install | Every declared host mode completes its fresh/reinstall-or-reload/cold-start drill on the version being cut. | Issue #334 records current Claude/Codex install parity, Pi direct-load, and isolated Hermes import evidence. Claude cold invocation is unavailable because the maintainer no longer has subscription or API access; #334 closed by explicit maintainer exception, not a new invocation PASS. | OPEN |
-| Current-model fitness | A recorded audit names exact host, model, effort, and skill commit, and has no load-bearing regression after the latest host-semantics or load-bearing skill change. | [The current 19-skill audit](evals/2026-08-08-current-model-fitness.md) found an indirect Sprint explicit-only routing leak tracked by #340. | OPEN |
+| Current-model fitness | A recorded audit names exact host, model, effort, and skill commit, and has no load-bearing regression after the latest host-semantics or load-bearing skill change. | [The current 19-skill audit](evals/2026-08-08-current-model-fitness.md) records the passing #340 boundary rerun; the Grill frontier-round miss remains #341 and writable Wayfinder evidence is still open. | OPEN |
 | Product-contract failures | The query for [open `release-blocker` Issues](https://github.com/panda850819/verbs/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-blocker) returns zero. | Read the live query; individual Issue numbers are not copied here. | LIVE QUERY |
 
 The table above is the living v1 gate. GitHub Issues are the executable work

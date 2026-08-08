@@ -1,0 +1,76 @@
+{
+  "host": "Pi",
+  "cli_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "effort": "low",
+  "skill_commit": "3b8bf9931f103199f8816221e4091a8f1977ff72",
+  "tool_permissions": [
+    "read"
+  ],
+  "fresh_session_per_case": true,
+  "results": [
+    {
+      "id": "sprint-explicit-rerun",
+      "prompt": "/skill:sprint This is planning-only. Follow the skill boundary and do not act. End with ROUTE: sprint.",
+      "exit_code": 0,
+      "elapsed_seconds": 5.794,
+      "loaded_skill_paths": [],
+      "reported_route": "sprint",
+      "final_text": "Execution: NOT_RUN\n\nROUTE: sprint",
+      "usage": {
+        "input": 3622,
+        "output": 13,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 3635,
+        "cost": {
+          "input": 0.01811,
+          "output": 0.00039,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.018500000000000003
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "sprint-implicit-negative-rerun",
+      "prompt": "A clear bounded implementation is ready. Decide the natural route, but do not execute or mutate anything. If an implicitly available Verbs skill is warranted, read its SKILL.md. End with exactly ROUTE: <skill-name-or-none>.",
+      "exit_code": 0,
+      "elapsed_seconds": 12.074,
+      "loaded_skill_paths": [
+        "/Users/panda/site/skills/verbs/skills/engineering/handover/SKILL.md"
+      ],
+      "reported_route": "none",
+      "final_text": "The implementation is clear and bounded; ordinary sequential execution needs no specialized Verbs skill.\n\nROUTE: none",
+      "usage": {
+        "input": 1896,
+        "output": 131,
+        "cacheRead": 2560,
+        "cacheWrite": 0,
+        "reasoning": 104,
+        "totalTokens": 4587,
+        "cost": {
+          "input": 0.00948,
+          "output": 0.00393,
+          "cacheRead": 0.0012799999999999999,
+          "cacheWrite": 0,
+          "total": 0.014690000000000002
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    }
+  ]
+}

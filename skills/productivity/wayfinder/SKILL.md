@@ -9,7 +9,7 @@ description: |
   map, take ONE unblocked entry, resolve it by type (research / grilling /
   prototype / task), write the decision back, and graduate the fog. A request
   without a named map that only needs one-session requirement discovery goes to
-  `grill`. NOT executing a locked plan (sprint).
+  `grill`. NOT executing a locked plan; execution entry points remain human-selected.
 reads:
   - repo: docs/briefs/**
   - skill: lib/interview.md
@@ -83,8 +83,9 @@ closed.
 5. Graduate newly precise fog into typed entries, or move past-destination work
    to Out of scope. Stop after one entry.
 
-When the frontier and fog are empty, re-enter `grill` for the build brief or go
-to `sprint` when the plan is already executable.
+When the frontier and fog are empty, re-enter `grill` for the build brief. If
+the plan is already executable, report that state and stop; a human selects the
+execution entry point.
 
 ## Completion
 

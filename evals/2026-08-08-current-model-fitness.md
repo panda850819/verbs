@@ -2,7 +2,7 @@
 
 Date: 2026-08-08  
 Issue: [#335](https://github.com/panda850819/verbs/issues/335)  
-Status: OPEN — load-bearing routing regression filed as [#340](https://github.com/panda850819/verbs/issues/340)
+Status: OPEN — Sprint boundary fixed and rerun; Grill cadence regression remains [#341](https://github.com/panda850819/verbs/issues/341)
 
 ## Frozen runtime identity
 
@@ -28,6 +28,8 @@ promoted from older July evidence or from the v0.23.2 host drill.
 - [`routing-results-low.json`](fixtures/2026-08-current-model-fitness/routing-results-low.json)
 - [`explicit-results-low.json`](fixtures/2026-08-current-model-fitness/explicit-results-low.json)
 - [`sprint-implicit-negative-medium.json`](fixtures/2026-08-current-model-fitness/sprint-implicit-negative-medium.json)
+- [`sprint-boundary-rerun-low.json`](fixtures/2026-08-current-model-fitness/sprint-boundary-rerun-low.json)
+- [`sprint-boundary-rerun-medium.json`](fixtures/2026-08-current-model-fitness/sprint-boundary-rerun-medium.json)
 - [`behavior-cases.json`](fixtures/2026-08-current-model-fitness/behavior-cases.json)
 - [`behavior-results-low.json`](fixtures/2026-08-current-model-fitness/behavior-results-low.json)
 
@@ -82,6 +84,23 @@ boundary. [#340](https://github.com/panda850819/verbs/issues/340) owns the fix.
 The four low-effort explicit-boundary cases used 20,036 tokens, 61.6 aggregate
 wall seconds, and `$0.0797` recorded provider cost.
 
+### Post-fix rerun — #340
+
+Commit `3b8bf99` removed every human-only route name from implicitly available
+`SKILL.md` files and made Handover return control rather than selecting another
+entry point when delegation is unwarranted. The same fresh full-pack Pi case was
+rerun with global skill discovery disabled:
+
+- Low effort: read `handover` only, returned `ROUTE: none`.
+- Medium effort: read no skill, returned `ROUTE: none`.
+- Explicit low-effort invocation still returned `Execution: NOT_RUN` and
+  `ROUTE: sprint`.
+
+The indirect explicit-only leak is fixed without removing Handover. A static
+regression now rejects any implicitly available `SKILL.md` that names a
+human-only route. Handover also detects `HERDR_ENV=1` before selecting its new
+sibling-agent transport; an installed-but-unmanaged Herdr binary is insufficient.
+
 ## Matched behavior lane
 
 The changed load-bearing contracts received two independent baseline/treatment
@@ -109,13 +128,13 @@ outcome. Routing success alone is not promoted into a behavior verdict.
 | `careful` | PASS | No current matched destructive-action cases. | **UNPROVEN** |
 | `codebase-design` | PASS | No current matched design-seam cases. | **UNPROVEN** |
 | `debug` | PASS | No current matched root-cause cases. | **UNPROVEN** |
-| `handover` | Direct pair PASS; indirect boundary FAIL | Its body acts as the bridge into human-only Sprint in #340. Delegation outcome was not tested. | **EDIT** |
+| `handover` | Direct pair PASS; post-fix indirect boundary PASS | The dispatch bridge is removed at low and medium effort. Delegation outcome itself was not tested. | **UNPROVEN** |
 | `prototype` | PASS | No current matched one-question prototype cases. | **UNPROVEN** |
 | `qa` | PASS | No current browser acceptance cases. | **UNPROVEN** |
 | `review` | PASS | July behavior evidence is stale and was not promoted. | **UNPROVEN** |
 | `setup-verbs` | PASS | No current matched repository-configuration cases. | **UNPROVEN** |
 | `ship` | PASS | No current matched delivery cases. | **UNPROVEN** |
-| `sprint` | Explicit PASS; implicit boundary FAIL | Planning-only harm boundary passed, but explicit-only isolation failed at low and medium effort. | **EDIT** |
+| `sprint` | Explicit PASS; post-fix implicit boundary PASS | Planning-only harm boundary and explicit-only isolation now pass; no current matched delivery outcome was run. | **UNPROVEN** |
 | `gatekeeper` | PASS | No current matched pre-adoption trust cases. | **UNPROVEN** |
 | `harness-slim` | PASS | No current matched harness-reduction cases. | **UNPROVEN** |
 | `ask-boss` | PASS | Two matched cases show repeatable orientation/handoff lift at justified interaction cost. | **KEEP** |
@@ -129,12 +148,13 @@ outcome. Routing success alone is not promoted into a behavior verdict.
 
 The current-model gate stays **OPEN**.
 
-1. Fix [#340](https://github.com/panda850819/verbs/issues/340), then rerun the
-   Sprint explicit and implicit cases at low effort.
-2. Fix the Grill cadence miss filed as [#341](https://github.com/panda850819/verbs/issues/341) before changing its contract or body.
+1. Merge the [#340](https://github.com/panda850819/verbs/issues/340) fix and its
+   passing low/medium Sprint boundary reruns.
+2. Fix the Grill cadence miss filed as [#341](https://github.com/panda850819/verbs/issues/341).
 3. Add writable map fixtures before assigning Wayfinder KEEP, EDIT, PIN, or CUT.
 4. Add matched primary-outcome cases incrementally for the remaining UNPROVEN
    skills; do not infer behavior fitness from the clean routing matrix.
 
-No skill is cut from this triage run. The severe Sprint boundary regression
-prevents marking current-model fitness passed.
+No skill is cut from this triage run. The Sprint boundary regression is fixed;
+the Grill interaction regression and unexercised Wayfinder map outcome keep
+current-model fitness open.
