@@ -21,7 +21,9 @@ for text, label in ((GRILL, "Grill"), (INTERVIEW, "shared interview")):
 
 for fragment in (
     "never replace a multi-decision\n   frontier with one umbrella question",
-    "repository-derivable facts as lookups rather than human questions",
+    "Separate repository-derivable facts into a `Fact lookups` list",
+    "Never ask the human to supply a derivable value",
+    "`Blocked this round` with its prerequisite",
     "Do not recompute the frontier or begin the\n   structured close",
 ):
     assert fragment in GRILL, f"Grill lost direct-load rule: {fragment!r}"

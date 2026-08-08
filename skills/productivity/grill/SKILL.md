@@ -44,12 +44,17 @@ drilling, pushback, search space, stopping rule, and escape hatch; do not fork
 it here. Its load-bearing first-turn contract is mandatory even before the
 shared file is available:
 
-1. Build the active decision frontier; exclude every decision whose prerequisite
-   is unsettled.
-2. Ask **every** active frontier decision as one numbered `Q1`…`Qn` round. One
+1. Build a dependency graph before asking. If a decision's meaning, answer
+   options, or authority changes with another unsettled decision or fact, it is
+   blocked and cannot enter this round.
+2. Separate repository-derivable facts into a `Fact lookups` list. Look them up
+   when tools are available; otherwise mark each unresolved fact and block only
+   its dependents. Never ask the human to supply a derivable value merely because
+   lookup tools are unavailable.
+3. Ask **every** active decision frontier item as one numbered `Q1`…`Qn` round. One
    active decision is still labeled `Q1`; never replace a multi-decision
-   frontier with one umbrella question.
-3. Identify repository-derivable facts as lookups rather than human questions.
+   frontier with one umbrella question. When blocked work exists, list it under
+   `Blocked this round` with its prerequisite instead of asking it early.
 4. Stop after that round and wait. Do not recompute the frontier or begin the
    structured close before the answers arrive.
 
