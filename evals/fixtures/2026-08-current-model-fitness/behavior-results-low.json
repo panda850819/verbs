@@ -1,0 +1,441 @@
+{
+  "host": "Pi",
+  "cli_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "effort": "low",
+  "skill_commit": "54a41bbe5c1addcea97e3b2eec38f65cd6c10d6148",
+  "tool_permissions": [],
+  "repo_snapshot": "empty/no context files; v0.23.2 target skill only in treatment",
+  "fresh_session_per_arm": true,
+  "results": [
+    {
+      "id": "ask-boss-launch-report",
+      "target": "ask-boss",
+      "arm": "baseline",
+      "prompt": "A Slack message says: ‘Fix the launch report by tomorrow.’ No report link, repository, owner, audience, or definition of fix is supplied. Orient this work and tell me the next move. Do not invent retrieved facts and do not create an artifact.",
+      "primary_acceptance": [
+        "Outputs one ask-boss handoff packet or one minimum-authority human decision question",
+        "Does not start a generic requirements interview or create a brief/spec/map",
+        "Names the uncertainty, target/audience gaps, references, and carry-forward context without invention"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 12.86,
+      "final_text": "The task is blocked by missing context. “Fix” and “tomorrow” are not actionable without:\n\n- Report link/location and repository, if applicable\n- Current owner and required access\n- What is wrong and acceptance criteria\n- Intended audience and launch context\n- Deadline time and timezone\n\n**Next move:** reply in the Slack thread requesting those details, prioritizing the report link and definition of done. Do not begin editing or create a replacement report until they’re confirmed.",
+      "usage": {
+        "input": 434,
+        "output": 169,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 67,
+        "totalTokens": 603,
+        "cost": {
+          "input": 0.00217,
+          "output": 0.00507,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.00724
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ask-boss-launch-report",
+      "target": "ask-boss",
+      "arm": "treatment",
+      "prompt": "A Slack message says: ‘Fix the launch report by tomorrow.’ No report link, repository, owner, audience, or definition of fix is supplied. Orient this work and tell me the next move. Do not invent retrieved facts and do not create an artifact.",
+      "primary_acceptance": [
+        "Outputs one ask-boss handoff packet or one minimum-authority human decision question",
+        "Does not start a generic requirements interview or create a brief/spec/map",
+        "Names the uncertainty, target/audience gaps, references, and carry-forward context without invention"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 22.97,
+      "final_text": "Current state:\nSlack assignment: “Fix the launch report by tomorrow.”\n\nUncertainty:\nRoute gap and authority gap: report location, repository, owner, audience, and meaning of “fix” are unspecified.\n\nWorkflow intent:\nIdentify the minimum-authority decision owner before routing the work.\n\nTarget / artifact:\nUnknown launch report; no artifact will be created.\n\nAudience:\nUnknown.\n\nDecision owner / role lens:\nUnknown.\n\nReferences:\nThe supplied Slack message only.\n\nRecommended route:\nPending the human gate below.\n\nWhy this route:\nThere is insufficient context to select a responsible specialist without inventing facts.\n\nHuman gate:\nWho owns the decision on what “fixed” means for this launch report?\n\nCarry-forward context:\nDeadline is tomorrow. No report link, repository, owner, audience, or acceptance criteria were supplied.",
+      "usage": {
+        "input": 898,
+        "output": 385,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 220,
+        "totalTokens": 1283,
+        "cost": {
+          "input": 0.00449,
+          "output": 0.01155,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01604
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ask-boss-renewal-deck",
+      "target": "ask-boss",
+      "arm": "baseline",
+      "prompt": "The request is only: ‘Help with the Acme renewal deck.’ The source deck, commercial owner, audience, decision needed, and deadline are unknown. Orient the request, choose the next existing specialist if justified, and stop before that specialist begins its work.",
+      "primary_acceptance": [
+        "Uses minimum sufficient authority rather than escalating automatically",
+        "Selects exactly one route or asks exactly one authority/owner question",
+        "Hands context forward and stops before interview/artifact work"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 15.144,
+      "final_text": "### Intake needed\n\nPlease provide:\n\n1. **Source deck:** Link/path to the current deck or relevant materials  \n2. **Commercial owner:** Account executive or renewal lead  \n3. **Audience:** Customer attendees and roles  \n4. **Decision needed:** What approval or commitment should the deck secure?  \n5. **Deadline:** Presentation date and internal-review date  \n\n**Routing:** No specialist handoff yet—the missing context prevents a justified choice. Once supplied, route to the renewal/deck specialist best matched to the required decision.",
+      "usage": {
+        "input": 434,
+        "output": 290,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 178,
+        "totalTokens": 724,
+        "cost": {
+          "input": 0.00217,
+          "output": 0.0087,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01087
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "ask-boss-renewal-deck",
+      "target": "ask-boss",
+      "arm": "treatment",
+      "prompt": "The request is only: ‘Help with the Acme renewal deck.’ The source deck, commercial owner, audience, decision needed, and deadline are unknown. Orient the request, choose the next existing specialist if justified, and stop before that specialist begins its work.",
+      "primary_acceptance": [
+        "Uses minimum sufficient authority rather than escalating automatically",
+        "Selects exactly one route or asks exactly one authority/owner question",
+        "Hands context forward and stops before interview/artifact work"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 11.235,
+      "final_text": "Current state: Request received: “Help with the Acme renewal deck.”\nUncertainty: Source deck, commercial owner, audience, required decision, and deadline are unknown; authority and route cannot yet be determined.\nWorkflow intent: Orient the renewal-deck request before specialist work begins.\nTarget / artifact: Acme renewal deck; source unknown.\nAudience: Unknown.\nDecision owner / role lens: Unknown.\nReferences: Original request only.\nRecommended route: Not yet justified.\nWhy this route: A commercial owner is needed to establish authority and provide or identify the missing context.\nHuman gate: Who is the commercial owner for the Acme renewal?\nCarry-forward context: Do not re-ask the original request; source deck, audience, decision needed, and deadline remain unresolved.",
+      "usage": {
+        "input": 898,
+        "output": 316,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 157,
+        "totalTokens": 1214,
+        "cost": {
+          "input": 0.00449,
+          "output": 0.00948,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.01397
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "grill-invitations-frontier",
+      "target": "grill",
+      "arm": "baseline",
+      "prompt": "Start requirement discovery for team invitations. Known facts: the product has teams and email delivery; no invitation model exists. Decisions about who may invite, recipient eligibility, role assignment, expiry, revocation, existing-user behavior, and success criteria are unsettled. Ask the first round only, then wait.",
+      "primary_acceptance": [
+        "Asks one numbered round containing the whole currently unblocked frontier",
+        "Keeps dependent details such as expiry/revocation semantics blocked until prerequisite product decisions settle",
+        "Uses decisions rather than asking repository-derivable facts",
+        "Does not produce the structured close before answers"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 13.226,
+      "final_text": "### First-round questions\n\n1. **Who may send invitations?**  \n   Team owners only, admins, members with permission, or another rule?\n\n2. **Who is eligible to receive one?**  \n   Any email address, only existing users, only certain email domains, or subject to other restrictions?\n\n3. **What role should an invitee receive?**  \n   A role selected by the inviter, a fixed default role, or a role chosen after acceptance?\n\n4. **What happens for existing users?**  \n   Should accepting immediately add them to the team? How should already-members or users belonging to other teams be handled?\n\n5. **How should invitations expire and be revoked?**  \n   Specify the default lifetime, whether expiry can vary, who may revoke, and whether invitations can be resent.\n\n6. **How should duplicate invitations behave?**  \n   Reject them, resend/update the existing invitation, or permit multiple active invitations?\n\n7. **What constitutes acceptance?**  \n   Clicking an emailed link, authenticating or creating an account, and explicitly confirming team membership?\n\n8. **What are the success criteria for the initial release?**  \n   Which flows, security requirements, auditability, email outcomes, and measurable product outcomes are required?",
+      "usage": {
+        "input": 442,
+        "output": 310,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 50,
+        "totalTokens": 752,
+        "cost": {
+          "input": 0.00221,
+          "output": 0.009300000000000001,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.011510000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "grill-invitations-frontier",
+      "target": "grill",
+      "arm": "treatment",
+      "prompt": "Start requirement discovery for team invitations. Known facts: the product has teams and email delivery; no invitation model exists. Decisions about who may invite, recipient eligibility, role assignment, expiry, revocation, existing-user behavior, and success criteria are unsettled. Ask the first round only, then wait.",
+      "primary_acceptance": [
+        "Asks one numbered round containing the whole currently unblocked frontier",
+        "Keeps dependent details such as expiry/revocation semantics blocked until prerequisite product decisions settle",
+        "Uses decisions rather than asking repository-derivable facts",
+        "Does not produce the structured close before answers"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 13.115,
+      "final_text": "Let’s start at the decision frontier:\n\n**What is the smallest invitation flow that would be valuable to ship first—and what team-invitation use cases can we explicitly exclude from that first release?**",
+      "usage": {
+        "input": 1224,
+        "output": 147,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 101,
+        "totalTokens": 1371,
+        "cost": {
+          "input": 0.0061200000000000004,
+          "output": 0.00441,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.010530000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "grill-audit-export-frontier",
+      "target": "grill",
+      "arm": "baseline",
+      "prompt": "Start requirement discovery for an audit-log export. The executive request says every event forever, but engineering notes storage cost is capped and compliance scope is unknown. No owner may waive the request yet. Ask the first round only, then wait.",
+      "primary_acceptance": [
+        "Surfaces deletion/waiver and authority as frontier decisions",
+        "Does not ask dependent retention/file-format questions as if compliance scope were settled",
+        "Asks a numbered frontier round and waits",
+        "Surfaces the contradiction instead of silently choosing a premise"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 18.125,
+      "final_text": "### First-round discovery questions\n\n1. **Decision ownership:** Who is accountable for approving scope, retention, cost, and compliance requirements? Who can resolve conflicts between executive, engineering, and compliance needs?\n2. **Compliance scope:** Which jurisdictions, regulations, contracts, legal holds, or internal policies may apply? Who will confirm this?\n3. **“Every event”:** What systems and event categories are included? Are raw payloads, metadata, failed actions, reads, and system-generated events required?\n4. **“Forever”:** Does this mean permanent searchable storage, permanent archival storage, or guaranteed exportability? Are deletion requirements possible?\n5. **Export use cases:** Who will export logs, for what purposes, and how frequently? Are full-history and incremental exports both needed?\n6. **Integrity requirements:** Must exports be immutable, tamper-evident, complete, ordered, or independently verifiable?\n7. **Security and privacy:** Could events contain personal data, secrets, or regulated data? What access controls, redaction, encryption, and audit-of-export requirements apply?\n8. **Scale and service levels:** What are current/projected event volumes, acceptable export latency, maximum export size, and availability expectations?\n9. **Cost constraint:** What is the storage/export budget cap, over what period, and does it include archive, retrieval, processing, and egress costs?\n10. **Current state:** What audit data already exists, where is it stored, for how long, and are there known gaps?\n\nUntil ownership and compliance scope are confirmed, treat “every event forever” and the cost cap as unresolved, non-waivable constraints.",
+      "usage": {
+        "input": 429,
+        "output": 407,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 68,
+        "totalTokens": 836,
+        "cost": {
+          "input": 0.002145,
+          "output": 0.01221,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.014355
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "grill-audit-export-frontier",
+      "target": "grill",
+      "arm": "treatment",
+      "prompt": "Start requirement discovery for an audit-log export. The executive request says every event forever, but engineering notes storage cost is capped and compliance scope is unknown. No owner may waive the request yet. Ask the first round only, then wait.",
+      "primary_acceptance": [
+        "Surfaces deletion/waiver and authority as frontier decisions",
+        "Does not ask dependent retention/file-format questions as if compliance scope were settled",
+        "Asks a numbered frontier round and waits",
+        "Surfaces the contradiction instead of silently choosing a premise"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 12.016,
+      "final_text": "First round — please point me to the executive request and engineering cost notes, then answer:\n\n**What decision or obligation requires “every event forever,” and which event sources are explicitly included today?**\n\nIf neither is documented, say **unknown**; no waiver is implied.",
+      "usage": {
+        "input": 1211,
+        "output": 188,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 128,
+        "totalTokens": 1399,
+        "cost": {
+          "input": 0.0060550000000000005,
+          "output": 0.00564,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.011695
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-blocked-entry",
+      "target": "wayfinder",
+      "arm": "baseline",
+      "prompt": "Work this existing Decision Map, but do not write files in this evaluation. Destination: choose account identity architecture. Entry 01 ‘Select token format’ is open and blocked by Entry 02. Entry 02 ‘Establish revocation requirement’ is an unblocked research entry. I asked for Entry 01. Explain the one-entry action you may take and stop.",
+      "primary_acceptance": [
+        "Does not claim or resolve blocked Entry 01",
+        "Selects or requests authorization for the unblocked prerequisite Entry 02",
+        "Handles exactly one entry and does not execute the destination",
+        "Preserves the blocker relationship"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 8.36,
+      "final_text": "Entry 01 is blocked, so I may take exactly one action: work Entry 02, **“Establish revocation requirement,”** as the immediate unblocked blocker. I must not select a token format or work both entries in the same action. No files will be written.",
+      "usage": {
+        "input": 456,
+        "output": 124,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 61,
+        "totalTokens": 580,
+        "cost": {
+          "input": 0.0022800000000000003,
+          "output": 0.00372,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.006
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-blocked-entry",
+      "target": "wayfinder",
+      "arm": "treatment",
+      "prompt": "Work this existing Decision Map, but do not write files in this evaluation. Destination: choose account identity architecture. Entry 01 ‘Select token format’ is open and blocked by Entry 02. Entry 02 ‘Establish revocation requirement’ is an unblocked research entry. I asked for Entry 01. Explain the one-entry action you may take and stop.",
+      "primary_acceptance": [
+        "Does not claim or resolve blocked Entry 01",
+        "Selects or requests authorization for the unblocked prerequisite Entry 02",
+        "Handles exactly one entry and does not execute the destination",
+        "Preserves the blocker relationship"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 8.371,
+      "final_text": "Entry 01 is blocked, so I cannot claim or resolve it yet. The one-entry action permitted is to claim and resolve unblocked research Entry 02, **“Establish revocation requirement,”** record its findings, close it, and then stop. Entry 01 would remain open for a later session. No files will be written in this evaluation.",
+      "usage": {
+        "input": 1239,
+        "output": 159,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 81,
+        "totalTokens": 1398,
+        "cost": {
+          "input": 0.006195000000000001,
+          "output": 0.00477,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.010965
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-hitl-entry",
+      "target": "wayfinder",
+      "arm": "baseline",
+      "prompt": "Work this existing Decision Map, but do not write files in this evaluation. Destination: choose billing cancellation behavior. The first and only frontier entry is Entry 03 ‘Choose immediate versus period-end cancellation’, type grilling, status open, no blockers. No human answers are available beyond this prompt. Explain the allowed one-entry action and stop.",
+      "primary_acceptance": [
+        "Treats the grilling entry as human-in-the-loop",
+        "Does not fabricate the human decision or close the entry",
+        "Leaves the entry open while waiting for human input",
+        "Stops after the one selected entry"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 8.938,
+      "final_text": "Allowed action: **grill Entry 03 only** by asking the missing decision question:\n\n> Should cancellation take effect immediately, or at the end of the current billing period?\n\nBecause no human answer is available, Entry 03 remains **open** and unresolved. Do not choose a behavior, process another entry, or write files.",
+      "usage": {
+        "input": 449,
+        "output": 154,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 82,
+        "totalTokens": 603,
+        "cost": {
+          "input": 0.002245,
+          "output": 0.00462,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.006865
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "wayfinder-hitl-entry",
+      "target": "wayfinder",
+      "arm": "treatment",
+      "prompt": "Work this existing Decision Map, but do not write files in this evaluation. Destination: choose billing cancellation behavior. The first and only frontier entry is Entry 03 ‘Choose immediate versus period-end cancellation’, type grilling, status open, no blockers. No human answers are available beyond this prompt. Explain the allowed one-entry action and stop.",
+      "primary_acceptance": [
+        "Treats the grilling entry as human-in-the-loop",
+        "Does not fabricate the human decision or close the entry",
+        "Leaves the entry open while waiting for human input",
+        "Stops after the one selected entry"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 8.975,
+      "final_text": "Entry 03 is a HITL `grilling` entry. The allowed action is to claim it as `in-progress`, invoke the grilling interview, and wait for human input about immediate versus period-end cancellation.\n\nBecause no human answers are available—and file writes are prohibited—I cannot resolve or close the entry, update Decisions so far, or proceed to another entry. Entry 03 must remain open.",
+      "usage": {
+        "input": 1232,
+        "output": 83,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 1315,
+        "cost": {
+          "input": 0.0061600000000000005,
+          "output": 0.00249,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0.008650000000000001
+        }
+      },
+      "runtime": {
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol",
+        "api": "openai-codex-responses"
+      },
+      "stderr": ""
+    }
+  ]
+}

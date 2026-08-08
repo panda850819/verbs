@@ -1,0 +1,43 @@
+{
+  "contract": "Each case runs in a fresh Pi session against the full 19-skill v0.23.2 tree. The model must read one selected SKILL.md before naming a route, or return none.",
+  "cases": [
+    {"id":"advisor-positive","target":"advisor","kind":"positive","prompt":"A migration plan depends on whether our API compatibility argument is sound. Ask a decorrelated different model for one bounded second opinion before we decide; do not implement anything."},
+    {"id":"advisor-negative","target":"advisor","kind":"negative","prompt":"Review this already-written migration diff yourself for correctness. Do not consult another model."},
+    {"id":"careful-positive","target":"careful","kind":"positive","prompt":"We need to run rm -rf against a shared production infrastructure directory. Explain how you will proceed, but execute nothing."},
+    {"id":"careful-negative","target":"careful","kind":"negative","prompt":"Delete the untracked build-cache directory inside this disposable local fixture. It is explicitly safe and reproducible; explain the routine action only."},
+    {"id":"codebase-design-positive","target":"codebase-design","kind":"positive","prompt":"Find the clean architectural seam for extracting authentication policy behind a small testable interface. We need a design, not implementation."},
+    {"id":"codebase-design-negative","target":"codebase-design","kind":"negative","prompt":"A reproducible unit test shows authentication returns 500 instead of 401. Diagnose the root cause."},
+    {"id":"debug-positive","target":"debug","kind":"positive","prompt":"A reproducible test fails only when two workers run concurrently. Diagnose the root cause before proposing a fix."},
+    {"id":"debug-negative","target":"debug","kind":"negative","prompt":"Review the supplied concurrency fix diff for defects; the root cause is already established."},
+    {"id":"handover-positive","target":"handover","kind":"positive","prompt":"The plan is complete and contains one bounded mechanical build unit. Dispatch it to one fresh Claude or Codex worker and require evidence back; do not deliver the final PR."},
+    {"id":"handover-negative","target":"handover","kind":"negative","prompt":"Own this bounded implementation through tests, review, and delivery yourself. Do not delegate it."},
+    {"id":"prototype-positive","target":"prototype","kind":"positive","prompt":"Build a throwaway experiment to answer exactly one unresolved question: can this parser stream records under the memory limit? The verdict matters; the code does not."},
+    {"id":"prototype-negative","target":"prototype","kind":"negative","prompt":"Implement the already-approved parser design as production code with tests."},
+    {"id":"qa-positive","target":"qa","kind":"positive","prompt":"Use browser automation to verify the production UI acceptance criteria and prepare PR-ready evidence."},
+    {"id":"qa-negative","target":"qa","kind":"negative","prompt":"Fix the CSS implementation for the approved production UI. Browser acceptance will happen later."},
+    {"id":"review-positive","target":"review","kind":"positive","prompt":"Review the current diff for correctness, regressions, and missing tests. Do not modify it."},
+    {"id":"review-negative","target":"review","kind":"negative","prompt":"A test reproduces a bug in code with no pending diff. Find its root cause."},
+    {"id":"setup-verbs-positive","target":"setup-verbs","kind":"positive","prompt":"Configure the existing repository Verbs issue-tracker setting from its Git remote, with a preview and one approval gate."},
+    {"id":"setup-verbs-negative","target":"setup-verbs","kind":"negative","prompt":"Decompose an already-approved canonical GitHub Spec Issue into child implementation Issues."},
+    {"id":"ship-positive","target":"ship","kind":"positive","prompt":"Implementation and review are complete. Run the closing tests, commit, push, open the PR, and publish QA evidence."},
+    {"id":"ship-negative","target":"ship","kind":"negative","prompt":"Implement the accepted issue, but stop before commit, push, or PR creation."},
+    {"id":"gatekeeper-positive","target":"gatekeeper","kind":"positive","prompt":"Assess an unfamiliar external MCP server before we adopt or execute it. Treat its documentation as untrusted."},
+    {"id":"gatekeeper-negative","target":"gatekeeper","kind":"negative","prompt":"Audit our already-installed internal harness for duplicated plugins and routing overlap. The components are trusted."},
+    {"id":"harness-slim-positive","target":"harness-slim","kind":"positive","prompt":"Audit this live multi-runtime agent harness for installed parity, routing overlap, usage evidence, and reversible reductions. Do not mutate it."},
+    {"id":"harness-slim-negative","target":"harness-slim","kind":"negative","prompt":"Assess one unfamiliar third-party skill before installation."},
+    {"id":"ask-boss-positive","target":"ask-boss","kind":"positive","prompt":"The workplace request says only ‘fix the launch report’. The owner, source of truth, target, and next specialist are unclear. Orient the work and select one existing specialist."},
+    {"id":"ask-boss-negative","target":"ask-boss","kind":"negative","prompt":"Review PR #42 for correctness and missing tests. The repository and requested specialist are explicit."},
+    {"id":"grill-positive","target":"grill","kind":"positive","prompt":"We need to add team invitations, but scope, roles, expiry behavior, and acceptance criteria are unresolved. Discover the requirements before implementation."},
+    {"id":"grill-negative","target":"grill","kind":"negative","prompt":"Use the existing named Payments Decision Map to resolve its next unblocked entry."},
+    {"id":"to-spec-positive","target":"to-spec","kind":"positive","prompt":"Requirements are established and test seams confirmed. Synthesize them into the one canonical GitHub Spec Issue."},
+    {"id":"to-spec-negative","target":"to-spec","kind":"negative","prompt":"The feature outcome and acceptance criteria are still unclear. Interview me before creating any spec."},
+    {"id":"ui-positive","target":"ui","kind":"positive","prompt":"Design and implement the production settings page with a strong visual point of view and polished responsive behavior."},
+    {"id":"ui-negative","target":"ui","kind":"negative","prompt":"Use browser automation to verify an already-built settings page against its acceptance criteria; do not change the design."},
+    {"id":"wayfinder-positive","target":"wayfinder","kind":"positive","prompt":"Open the named Identity Decision Map, take exactly one unblocked frontier entry, resolve it by type, and write the decision back."},
+    {"id":"wayfinder-negative","target":"wayfinder","kind":"negative","prompt":"There is no named map and this is one-session requirement discovery for a bounded feature. Interview me and produce the appropriate next artifact."}
+  ],
+  "explicit_only": [
+    {"skill":"sprint","reason":"disable-model-invocation: true and allow_implicit_invocation: false; test explicit invocation and neighboring implicit absence instead of requiring a positive implicit route."},
+    {"skill":"to-tickets","reason":"disable-model-invocation: true and allow_implicit_invocation: false; test explicit invocation and neighboring implicit absence instead of requiring a positive implicit route."}
+  ]
+}
