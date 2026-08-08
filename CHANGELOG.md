@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.23.3 — Handover preserves explicit routing and detects Herdr
+
+### Fixed
+
+- Implicit skills no longer name the human-only `sprint` or `to-tickets`
+  routes. A clear sequential implementation can pass through Handover's
+  boundary without Handover dispatching into Sprint; low- and medium-effort Pi
+  reruns preserve explicit Sprint invocation while the implicit route stays
+  absent. (#340)
+
+### Added
+
+- Handover now detects a managed Herdr source only from `HERDR_ENV=1`, uses the
+  sibling-agent transport contract when available, and keeps Claude/Codex
+  fresh-run or async behavior outside Herdr. Binary presence alone never grants
+  control of a Herdr session. (#343)
+
 ## v0.23.2 — Codex smoke tolerates bounded skill loading
 
 ### Fixed
