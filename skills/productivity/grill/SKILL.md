@@ -40,8 +40,18 @@ an idea. Skip bugs, documented scope, clear acceptance criteria, and P0 work.
 ## Protocol
 
 Run **`@lib/interview.md`**. It owns cadence, facts-first lookup, delete-first
-drilling, pushback, search space, stopping rule, and escape hatch; do not restate
-or fork it here.
+drilling, pushback, search space, stopping rule, and escape hatch; do not fork
+it here. Its load-bearing first-turn contract is mandatory even before the
+shared file is available:
+
+1. Build the active decision frontier; exclude every decision whose prerequisite
+   is unsettled.
+2. Ask **every** active frontier decision as one numbered `Q1`…`Qn` round. One
+   active decision is still labeled `Q1`; never replace a multi-decision
+   frontier with one umbrella question.
+3. Identify repository-derivable facts as lookups rather than human questions.
+4. Stop after that round and wait. Do not recompute the frontier or begin the
+   structured close before the answers arrive.
 
 **If the interview already ran this session, do not run it again.** Carry its
 answers into the close. **If an interview is still unfinished when the user
