@@ -41,10 +41,13 @@ for fragment in (
     assert fragment in README, f"README roadmap contract missing {fragment!r}"
 
 assert "no P0/P1 product-contract failure" not in README
-assert "| Supported-host install " in README
-assert "| Supported-host install " in README and "| OPEN |" not in next(
-    line for line in README.splitlines() if line.startswith("| Supported-host install ")
-)
+supported_host_rows = [
+    line
+    for line in README.splitlines()
+    if line.startswith("| Supported-host install ")
+]
+assert len(supported_host_rows) == 1
+assert supported_host_rows[0].rstrip().endswith("| ACCEPTED LIMITATION |")
 assert "individual Issue numbers are not copied here" in README
 
 for fragment in (

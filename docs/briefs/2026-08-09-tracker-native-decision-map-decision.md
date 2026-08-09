@@ -14,10 +14,10 @@ copy would test presentation preference without an observed problem. Keep
 canonical artifact. Keep GitHub Issues canonical for Specs and implementation
 ticket graphs.
 
-This is a defer decision. Reopen after a real Markdown-map collaboration failure
-or when two actors must concurrently advance the same map. At that point, use
-the failing real map as the prototype input and keep Markdown canonical until
-the comparison is complete.
+This is a defer decision. Reopen only after a real Markdown-map collaboration
+failure. Concurrent advancement alone is insufficient; it must first produce
+one of the named failures below. Then use that failing real map as the prototype
+input and keep Markdown canonical until the comparison is complete.
 
 ## Evidence used instead of a new disposable graph
 

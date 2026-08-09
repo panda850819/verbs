@@ -20,16 +20,20 @@ independent cases:
    withheld oracle for the event-classification boundary.
 
 For each case, run a fresh baseline without `debug` and a treatment with only
-`debug` exposed and explicitly invoked. Keep the repository at the pre-fix
-snapshot, user report, tools, host, exact model, effort, and acceptance rubric
-matched. Do not reveal the fixing commit or Issue diagnosis until judging is
-complete.
+`debug` exposed and explicitly invoked. Start at the lowest supported effort. If
+either arm misses the acceptance gate, rerun only that failing arm one effort
+level higher. Keep the repository at the pre-fix snapshot, user report, tools,
+host, exact model, and acceptance rubric matched. Do not reveal the fixing
+commit or Issue diagnosis until judging is complete.
 
 The primary outcome is a correct root-cause statement at the responsible
 `file:function:line`, backed by an already-run red-capable command, plus a
-search for sibling instances before proposing edits. Judge diagnosis accuracy,
-time to the first falsifiable hypothesis, commands and tokens, and invented or
-premature edits. Implementation quality is outside this audit.
+search for sibling instances before proposing edits. Judge outcome, harm
+prevention, interaction, and cost separately, including diagnosis accuracy,
+time to the first falsifiable hypothesis, commands, tokens, and invented or
+premature edits. A severe harm regression fails the skill regardless of the
+other gates. These controls govern the final `KEEP`, `EDIT`, `PIN`, or `CUT`
+verdict. Implementation quality is outside this audit.
 
 This is the cheapest credible next audit because both cases are local,
 deterministic, write-free, and already have independent historical oracles.

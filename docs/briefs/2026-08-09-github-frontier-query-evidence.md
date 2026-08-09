@@ -21,8 +21,10 @@ representative graph reduced one observed read from five GraphQL requests and
 2.649 seconds to one request and 0.539 seconds. This is useful but does not yet
 show a product defect or material operator cost in a personal-first workflow:
 four API points and about 2.1 seconds were saved once, with no incorrect
-frontier result and 4,875 of 5,000 GraphQL points still available after the
-experiment. No skill-contract change is justified by this one small graph.
+frontier result. The measured comparison consumed five points for the per-child
+run and one for the batch; the account-level quota snapshot also included
+unrelated discovery and introspection calls, so it is not attributed to these
+six points. No skill-contract change is justified by this one small graph.
 
 Do not add assignee-as-claim. No duplicate-claim incident exists in the current
 solo-author workflow, and assignment would add coordination semantics to a
@@ -53,9 +55,10 @@ parent-issue:panda850819/verbs#265
 blocked-by:panda850819/verbs#266
 ```
 
-The first returned #266, #267, #268, and #269. The second returned #267 and
-#268. Bare `parent-issue:265` and `blocked-by:266` returned no results rather
-than an error, so an implementation must not silently use the short form.
+The first returned `#266`, `#267`, `#268`, and `#269`. The second returned
+`#267` and `#268`. Bare `parent-issue:265` and `blocked-by:266` returned no
+results rather than an error, so an implementation must not silently use the
+short form.
 
 `is:blocked` returned no result for this repository because the known native
 dependencies are already closed. Even when populated, it is only a current
