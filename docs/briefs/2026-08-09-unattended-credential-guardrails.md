@@ -116,18 +116,19 @@ current branch-protection JSON and confirmed rollback access. Then:
    `required_approving_review_count: 0`; `enforce_admins: true`;
    `required_status_checks.checks` contains `test` with `app_id: 15368`;
    `allow_force_pushes: false`; and `allow_deletions: false`.
-2. Push a separate disposable topic branch and open a PR. Prove only GitHub
-   Actions app ID `15368` can satisfy `test`, zero human approvals are required,
-   and the owner can merge through the normal solo path.
-3. Against the disposable protected branch, explicitly test owner direct push,
-   force push, and deletion. A direct push must be rejected unless the exact
-   commit SHA already has the required successful `test`; a result attached to
-   another SHA is insufficient. Keep every destructive probe scoped to that
-   disposable branch and pre-authorize its cleanup.
-4. Present the observed evidence and exact `main` payload diff for explicit
+2. Against that disposable protected branch, explicitly test owner direct
+   push, force push, and deletion. All three must be rejected regardless of
+   check state because the pull-request requirement remains enabled. Keep every
+   destructive probe scoped to that disposable branch and pre-authorize its
+   cleanup.
+3. Present the observed evidence and exact `main` payload diff for explicit
    approval before changing `main`.
-5. Apply the proven classic payload to `main`, read it back, and verify the next
-   real PR.
+4. Apply the proven classic payload to `main` and read it back.
+5. Verify through the next real PR targeting `main`, which the existing workflow
+   supports: the latest exact commit SHA receives `test` from GitHub Actions app
+   ID `15368`, zero human approvals are required, and the owner can merge through
+   the normal solo path. A successful result attached to another SHA is
+   insufficient.
 6. Roll back immediately if normal solo PR merge becomes impossible, another
    actor can satisfy `test`, or any force-push/deletion flag changes.
 
