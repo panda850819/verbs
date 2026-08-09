@@ -30,12 +30,21 @@ for fragment in (
     "direct-load setup plus reload\nfor Pi",
     "import plus re-import of a reviewed selected skill for Hermes",
     "exact host, model, effort, and skill commit",
+    "`ACCEPTED LIMITATION` is a host-specific release qualification, not a PASS",
+    "prior passing\nbehavioral evidence",
+    "expires as\nsoon as access resumes",
+    "`OPEN` still means the gate\nblocks v1",
+    "| ACCEPTED LIMITATION |",
     "open `release-blocker` Issues",
     "GitHub Issues are the executable work\nqueue",
 ):
     assert fragment in README, f"README roadmap contract missing {fragment!r}"
 
 assert "no P0/P1 product-contract failure" not in README
+assert "| Supported-host install " in README
+assert "| Supported-host install " in README and "| OPEN |" not in next(
+    line for line in README.splitlines() if line.startswith("| Supported-host install ")
+)
 assert "individual Issue numbers are not copied here" in README
 
 for fragment in (
