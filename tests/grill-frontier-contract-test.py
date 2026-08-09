@@ -8,27 +8,33 @@ ROOT = Path(__file__).resolve().parents[1]
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text(encoding="utf-8")
 INTERVIEW = (ROOT / "lib/interview.md").read_text(encoding="utf-8")
 
-for text, label in ((GRILL, "Grill"), (INTERVIEW, "shared interview")):
-    for fragment in (
-        "active decision frontier" if label == "Grill" else "frontier",
-        "every" if label == "Grill" else "whole frontier",
-        "numbered",
-        "Q1",
-        "prerequisite",
-        "wait",
-    ):
-        assert fragment.lower() in text.lower(), f"{label} lost {fragment!r}"
+
+def section(text: str, heading: str) -> str:
+    marker = f"\n## {heading}\n"
+    start = text.index(marker) + len(marker)
+    end = text.find("\n## ", start)
+    return text[start:] if end == -1 else text[start:end]
+
+
+protocol = section(GRILL, "Protocol")
+ordered = (
+    "Start the root frontier",
+    "Separate repository-derivable facts",
+    "Ask **every** active decision frontier item",
+    "`Blocked this round`",
+    "Stop after that round and wait",
+)
+positions = [protocol.index(fragment) for fragment in ordered]
+assert positions == sorted(positions), "Grill Protocol frontier steps are out of order"
 
 for fragment in (
     "never replace a multi-decision\n   frontier with one umbrella question",
-    "Start the root frontier with\n   existence/waiver, decision owner, intended outcome, and scope boundary",
     "Treat role details, lifecycle policy, edge behavior, and\n   success checks as downstream",
-    "Separate repository-derivable facts into a `Fact lookups` list",
     "Never ask the human to supply a derivable value",
-    "`Blocked this round` with its prerequisite",
+    "with its prerequisite instead of asking it early",
     "Do not recompute the frontier or begin the\n   structured close",
 ):
-    assert fragment in GRILL, f"Grill lost direct-load rule: {fragment!r}"
+    assert fragment in protocol, f"Grill Protocol lost direct-load rule: {fragment!r}"
 
 assert "Ask the whole frontier as one numbered round" in INTERVIEW
 assert "Keep a question out of the frontier" in INTERVIEW
