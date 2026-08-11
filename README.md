@@ -19,7 +19,7 @@ turns those recurring failure modes into explicit routes:
 | The request lacks a clear owner, reference, or next route | `ask-boss` orients the work and selects one existing specialist. |
 | The request sounds clear but hides product choices | `grill` discovers requirements before implementation. |
 | The topic is too large for one plan or session | `grill` charts the map; `wayfinder` resolves one frontier at a time. |
-| The cause, design seam, or UI direction is unknown | `debug`, `codebase-design`, `prototype`, or `ui` answers the right kind of question. |
+| The cause, architecture target, design seam, or UI direction is unknown | `debug`, `improve-codebase-architecture`, `codebase-design`, `prototype`, or `ui` answers the right kind of question. |
 | A change could be unsafe or an external artifact is untrusted | `careful` and `gatekeeper` add the appropriate trust boundary. |
 | Code exists but proof or delivery is missing | `sprint` drives verification, review, and delivery; `qa`, `review`, and `ship` own their specialist stages. |
 
@@ -86,8 +86,9 @@ Other skills are typed on-ramps or supporting gates:
 - A clear bounded implementation enters through `sprint`.
 - A production UI change enters through `ui`; browser acceptance enters
   through `qa`.
-- An architecture seam enters through `codebase-design`; a single unresolved
-  design question may justify a throwaway `prototype`.
+- An unknown architecture target enters through `improve-codebase-architecture`;
+  a chosen seam enters through `codebase-design`; a single unresolved design
+  question may justify a throwaway `prototype`.
 - An external repo, package, MCP, skill, or document enters through
   `gatekeeper`.
 - Production or destructive work adds `careful`.
@@ -135,6 +136,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:ui` | core | Build/fix UI with a committed point of view. Four override reflexes + craft lore in references (reflex-font blocklist, CJK+Latin type, OKLCH, CSS bans+rewrites, strategic omissions). NOT browser-test (qa) or render-bug debugging (debug). |
 | `/verbs:qa` | core | Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability. |
 | `/verbs:codebase-design` | core | Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms. |
+| `/verbs:improve-codebase-architecture` | core | Produce a read-only visual survey of codebase architecture opportunities. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
 | `/verbs:wayfinder` | core | Chart or work cross-session decision maps when the request itself names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |

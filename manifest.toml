@@ -44,14 +44,14 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.23.4"
+version = "0.24.0"
 schema  = "skill-tier-v1"
-updated = "2026-08-08"
+updated = "2026-08-11"
 
 # History from before pandastack was renamed to Verbs is retained in CHANGELOG.md.
 
 # ============================================================================
-# CORE (13) — markdown-first, fresh-clone available
+# CORE (14) — markdown-first, fresh-clone available
 # Buckets on disk: engineering / productivity / writing / meta
 #
 # Git is the baseline software-work CLI, so review / debug stay core with a
@@ -128,6 +128,13 @@ tier = "core"
 resources = []
 composes = []
 description = "Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms."
+
+[skill.improve-codebase-architecture]
+tier = "core"
+requires = ["cli:git"]
+resources = []
+composes = ["codebase-design", "grill"]
+description = "Produce a read-only visual survey of codebase architecture opportunities."
 
 [skill.prototype]
 tier = "core"

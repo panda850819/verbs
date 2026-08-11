@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.24.0 — Visual architecture surveys
+
+### Added
+
+- `improve-codebase-architecture` runs a human-initiated, read-only survey of
+  recent hot spots or a user-named scope, filters candidates through concrete
+  friction and the deletion test, and ranks them in an offline HTML report.
+- Architecture reports use inline CSS and accessible inline SVG without CDN or
+  JavaScript dependencies. The survey stops after presenting candidates; a
+  selected candidate enters a later `grill` and `codebase-design` session.
+
 ## v0.23.4 — Frontier interviews and maps pass current-model canaries
 
 ### Fixed
