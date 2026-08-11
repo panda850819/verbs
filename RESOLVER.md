@@ -87,6 +87,7 @@ route:
 | Reproducible error, regression, crash, or failing test, including fixes expected to touch 3+ files | `debug` | Root cause is evidenced; fix execution can enter `sprint`. |
 | Production UI needs to be built or corrected | `ui` | The direction and implementation are ready for live `qa`. |
 | One design question can be answered by building | `prototype` | Record the verdict; discard the prototype or turn the result into a production plan. |
+| The repository area worth architectural improvement is unknown | `improve-codebase-architecture` | A visual report ranks evidence-backed deepening candidates; the user selects one for a later session. |
 | A module boundary or abstraction seam is the problem | `codebase-design` | The interface and seam are concrete enough for implementation. |
 | An external artifact may be installed or adopted | `gatekeeper` | Trust evidence supports an adopt, restrict, or reject decision. |
 | Production, shared infrastructure, or destructive actions are involved | `careful` | Required confirmation and recovery evidence are present. |
@@ -113,10 +114,12 @@ the next frontier, or use `wayfinder` as a task scheduler.
 ### Invocation and guidance
 
 Each host routes from the descriptions in `SKILL.md`; Verbs injects no separate
-routing table. Most skills allow native model invocation. `sprint` and
-`to-tickets` are human-initiated-only entry points because they begin execution
-or publish an Issue graph; Claude Code and Pi honor their frontmatter flag,
-while Codex honors the matching `agents/openai.yaml` policy. Skills carry safety
+routing table. Most skills allow native model invocation.
+`improve-codebase-architecture` is human-initiated-only so periodic surveys do
+not start opportunistically; `sprint` and `to-tickets` are human-initiated-only
+because they begin execution or publish an Issue graph. Claude Code and Pi honor
+their frontmatter flag, while Codex honors the matching `agents/openai.yaml`
+policy. Skills carry safety
 and verification guidance, not host-level enforcement.
 
 ## Skill catalog
@@ -134,6 +137,7 @@ and verification guidance, not host-level enforcement.
 | `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
 | `verbs:debug` | Establish root cause through hypotheses, instrumentation, bisecting, and scope analysis before changing code. | error, crash, regression, failing test, used to work |
 | `verbs:codebase-design` | Design a deep module behind a small interface at a clean, testable seam. | module design, abstraction boundary, interface too wide |
+| `verbs:improve-codebase-architecture` | Produce a read-only visual survey that ranks evidence-backed deepening candidates before one is selected for design. | periodic architecture survey, find refactoring opportunities, prepare for a large build |
 | `verbs:prototype` | Build a throwaway artifact that answers exactly one logic or UI design question. | prototype this, compare variants, test this state model |
 | `verbs:ui` | Build or fix a production UI with an explicit visual direction and rendered verification. | design, layout, typography, janky interaction |
 | `verbs:qa` | Verify a changed UI in a browser and capture acceptance evidence. | test this UI, QA, check the page |
@@ -168,7 +172,8 @@ post-adoption system load.
 
 ### Architecture, prototype, and UI
 
-- Use `codebase-design` when the answer is an interface or seam.
+- Use `improve-codebase-architecture` when the repository area or module worth deepening is unknown; it surveys and ranks without designing the final interface.
+- Use `codebase-design` when the module is already chosen and the answer is an interface or seam.
 - Use `prototype` when one design uncertainty can be answered cheaply by a
   disposable build.
 - Use `ui` when the artifact is intended to become production UI.
