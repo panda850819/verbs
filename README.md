@@ -270,12 +270,25 @@ compatible. Patch releases within one minor line do not restart the count.
 Each supported host passes through its declared install mode: fresh plugin
 install plus reinstall for Claude Code and Codex, direct-load setup plus reload
 for Pi, and import plus re-import of a reviewed selected skill for Hermes. Every
-lane also needs a cold-start invocation on the author's machine.
+lane also needs a cold-start invocation on the author's machine. The gate claims
+both installability and a current behavioral invocation; installation evidence
+alone never becomes an invocation PASS.
+
+`ACCEPTED LIMITATION` is a host-specific release qualification, not a PASS. It
+requires passing evidence for every accessible part of the lane, prior passing
+behavioral evidence for the unavailable part, an explicit maintainer decision,
+and no known product defect or open `release-blocker` hidden by the exception.
+It does not block v1 while those conditions hold. The qualification expires as
+soon as access resumes or the affected host mode, invocation semantics, or
+load-bearing contract materially changes. A newly observed regression always
+gets a product Issue and cannot be qualified away. `OPEN` still means the gate
+blocks v1; `WAIVED` is not used because it would hide which claim lacks current
+evidence.
 
 | v1 gate | Observable pass condition | Current evidence (2026-08-08) | Status |
 |---|---|---|---|
 | Install-contract stability | Two consecutive tagged post-reset 0.x release lines satisfy the compatibility rule above. | `v0.22.0` and the released `v0.23.x` line preserve the product ID, selector, schema, and documented install commands. | PASS |
-| Supported-host install | Every declared host mode completes its fresh/reinstall-or-reload/cold-start drill on the version being cut. | Issue #334 records current Claude/Codex install parity, Pi direct-load, and isolated Hermes import evidence. Claude cold invocation is unavailable because the maintainer no longer has subscription or API access; #334 closed by explicit maintainer exception, not a new invocation PASS. | OPEN |
+| Supported-host install | Every declared host mode completes its fresh/reinstall-or-reload/cold-start drill on the version being cut, unless one inaccessible host-specific invocation qualifies under the `ACCEPTED LIMITATION` policy above. | Issue #334 records current Claude/Codex install parity, Pi direct-load, and isolated Hermes import evidence. Claude cold invocation is unavailable because the maintainer no longer has subscription or API access; prior Claude behavior is recorded, and #334 closed by explicit maintainer exception, not a new invocation PASS. The limitation expires when Claude access resumes or its affected contract changes; any observed regression gets a new product Issue. | ACCEPTED LIMITATION |
 | Current-model fitness | A recorded audit names exact host, model, effort, and skill commit, and has no load-bearing regression after the latest host-semantics or load-bearing skill change. | [The current 19-skill audit](evals/2026-08-08-current-model-fitness.md) records passing #340 Sprint-boundary, #341 Grill-frontier, and #345 writable-Wayfinder reruns. Remaining primary outcomes stay explicitly UNPROVEN rather than inferred from routing. | PASS |
 | Product-contract failures | The query for [open `release-blocker` Issues](https://github.com/panda850819/verbs/issues?q=is%3Aissue+is%3Aopen+label%3Arelease-blocker) returns zero. | Read the live query; individual Issue numbers are not copied here. | LIVE QUERY |
 
