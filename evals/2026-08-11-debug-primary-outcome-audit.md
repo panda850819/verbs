@@ -37,7 +37,7 @@ The fixture contains no credentials, hidden reasoning, or raw session logs.
 
 The fixing commits and diagnoses were not supplied to either arm and were used
 only after the outputs were frozen. After judging, the evaluator also replayed
-#336's paired started/completed bounded `cat …/SKILL.md` event stream through the
+issue `#336`'s paired started/completed bounded `cat …/SKILL.md` event stream through the
 actual pre-fix `check_invocation` function: it exited 1 with `namespaced careful
 invocation lacks dispatch proof`. The same fixture passed the post-fix
 `scripts/conformance_events.py codex` entry point with exit 0. The exact events,
