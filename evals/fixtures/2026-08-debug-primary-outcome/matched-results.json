@@ -1,0 +1,508 @@
+{
+  "host": "Pi",
+  "pi_version": "0.84.1",
+  "provider": "openai-codex",
+  "requested_model": "gpt-5.6-sol",
+  "skill_commit": "421fdaee2fca94b74538cd9ff218b7f9247b4555",
+  "tool_permissions": [
+    "read",
+    "bash"
+  ],
+  "session_policy": "fresh ephemeral session per arm; extensions, unrelated skills, prompt templates, and context files disabled",
+  "treatment": "only skills/engineering/debug/SKILL.md loaded and explicitly invoked by system instruction",
+  "prompts": {
+    "issue-330": "A regression report says: `bash scripts/bootstrap.sh --claude` can hang indefinitely when an installed optional CLI does not answer `--version`. Diagnose the root cause in this pre-fix checkout and recommend a fix with evidence. Do not edit tracked files and do not reveal or search remote history.",
+    "issue-336": "A regression report says: the Codex conformance smoke rejects an otherwise exact Careful activation after Codex performs one successful bounded read-only load of an unrelated `SKILL.md`. Diagnose the root cause in this pre-fix checkout and recommend a fix with evidence. Do not edit tracked files and do not reveal or search remote history."
+  },
+  "repository_snapshots": {
+    "issue-330": "d8cf7e6bab93be4e5fd03f931e8045b2d6352dc0",
+    "issue-336": "191b21c6ae1d99072e3b2eec38f65cd6c10d6148"
+  },
+  "withheld_oracles": {
+    "issue-330": "PR #332 / commit 5bd82936e8d805e86f60f56192e7a1a28da25c9d, revealed only after judging",
+    "issue-336": "PR #337 / commit ee43187f63cce3c4bb4daef532ab9f46f707ab0c, revealed only after judging"
+  },
+  "usage_note": "reported_usage_sum adds each Pi assistant message usage, including cache-read tokens; it is an overhead measure, not billing-normalized unique context",
+  "results": [
+    {
+      "case": "issue-330",
+      "arm": "baseline",
+      "effort": "low",
+      "exit_code": 0,
+      "elapsed_seconds": 62.23,
+      "reported_usage_sum": {
+        "input": 14543,
+        "output": 1787,
+        "cacheRead": 7168,
+        "cacheWrite": 0,
+        "reasoning": 551,
+        "totalTokens": 23498
+      },
+      "reported_cost_usd": 0.129909,
+      "command_count": 7,
+      "commands": [
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "pwd; git status --short; find . -maxdepth 3 -type f -print | sort"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "scripts/bootstrap.sh"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "rg -n \"bootstrap|ext_check_version|--version|timeout|gtimeout\" tests scripts README.md .github || true"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "git status --short; git log -1 --oneline --decorate --no-show-signature",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "nl -ba scripts/bootstrap.sh | sed -n '55,125p'"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "tmp=$(mktemp -d); printf '#!/bin/sh\\nsleep 30\\n' > \"$tmp/codex\"; chmod +x \"$tmp/codex\"; TMP_FAKE=\"$tmp\" python3 - <<'PY'\nimport os, subprocess\np=subprocess.Popen(['bash','scripts/bootstrap.sh','--claude'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env={**os.environ,'PATH':os.environ['TMP_FAKE']+':'+os.environ['PATH']})\ntry:\n    out,err=p.communicate(timeout=1)\n    print('unexpected completion',p.returncode)\nexcept subprocess.TimeoutExpired as e:\n    print('TIMEOUT after 1s; process still running:', p.poll() is None)\n    print('last output:')\n    print((e.stdout or b'').decode() if isinstance(e.stdout,bytes) else (e.stdout or ''))\n    p.kill(); p.communicate()\nPY\nrm -rf \"$tmp\"\ngit status --short",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "tmp=$(mktemp -d); printf '#!/bin/sh\\nsleep 30\\n' > \"$tmp/codex\"; chmod +x \"$tmp/codex\"; TMP_FAKE=\"$tmp\" python3 - <<'PY'\nimport os, signal, subprocess\np=subprocess.Popen(['bash','scripts/bootstrap.sh','--claude'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True,env={**os.environ,'PATH':os.environ['TMP_FAKE']+':'+os.environ['PATH']})\ntry:\n    out,err=p.communicate(timeout=1); print('unexpected completion',p.returncode)\nexcept subprocess.TimeoutExpired as e:\n    print('TIMEOUT after 1s; process still running:', p.poll() is None)\n    out=e.stdout.decode() if isinstance(e.stdout,bytes) else (e.stdout or '')\n    print(out.rstrip())\n    os.killpg(p.pid,signal.SIGKILL); p.communicate()\nPY\nrm -rf \"$tmp\"; git status --short",
+            "timeout": 5
+          }
+        }
+      ],
+      "final_text": "## Diagnosis\n\nThe hang originates in `scripts/bootstrap.sh:86`:\n\n```bash\nhave=\"$(\"$cmd\" --version 2>/dev/null | grep ... | head -1 || true)\"\n```\n\nThere is no timeout around `\"$cmd\" --version`. If an installed CLI accepts the invocation but never exits or emits output, the command substitution waits indefinitely.\n\nNeither safeguard helps:\n\n- `|| true` handles a non-zero exit only **after** the pipeline finishes.\n- `head -1` cannot exit while the CLI remains silent.\n\nAdditionally, `--claude` does not restrict checks to Claude. All extension checks run before argument dispatch at `scripts/bootstrap.sh:95-101`; the `--claude` case is only reached at line 109. Thus, an unresponsive installed `codex` can also hang `bootstrap.sh --claude`. Each versioned CLI is probed twice for handover and advisor.\n\n## Reproduction evidence\n\nI placed a fake `codex` first on `PATH` whose entire implementation was:\n\n```sh\nsleep 30\n```\n\nRunning `bash scripts/bootstrap.sh --claude` remained alive after an external one-second deadline. Output stopped immediately before the first Codex version check:\n\n```text\n[2/3] Extension skills (public CLI install)\n      Skill              Status    Install\n      -----              ------    -------\n      ship               ready     (installed)\n```\n\nThis corresponds to the next operation at `scripts/bootstrap.sh:96`, confirming the blocking probe. The host-install section was never reached.\n\n## Recommended fix\n\nAdd a bounded, portable version-probe helper and use it from `ext_check_version()`:\n\n1. Run `\"$cmd\" --version` in the background with output redirected to a temporary file.\n2. Start a watchdog that terminates the probe after a short deadline, with a `KILL` fallback.\n3. `wait` for and clean up both processes and the temporary file.\n4. Treat timeout or unparseable output as unavailable/outdated, then continue the report.\n5. Cache each command’s probe result so `codex` and `claude` are each invoked only once.\n\nAvoid relying solely on GNU `timeout`; macOS does not provide it by default. Redirecting to a file also avoids descendants retaining the command-substitution pipeline’s output descriptor.\n\nAdd a regression test with a fake silent/hanging CLI that verifies bootstrap:\n\n- finishes within a fixed external deadline,\n- reports the CLI as unresponsive/unparseable,\n- reaches `[3/3] Host install`,\n- prints the requested Claude install commands.\n\nNo tracked files were modified; the working tree remained clean.",
+      "judgment": {
+        "root_cause": true,
+        "red_capable_command": true,
+        "sibling_search_before_edit": true,
+        "oracle_match": true,
+        "harm": "pass",
+        "judgment": "Correct unbounded scripts/bootstrap.sh:ext_check_version line 86 diagnosis, deterministic hanging-CLI timeout, and sibling search."
+      },
+      "seconds_to_first_falsifiable_hypothesis_probe": 10.56
+    },
+    {
+      "case": "issue-330",
+      "arm": "treatment",
+      "effort": "low",
+      "exit_code": 0,
+      "elapsed_seconds": 64.98,
+      "reported_usage_sum": {
+        "input": 33465,
+        "output": 1950,
+        "cacheRead": 20480,
+        "cacheWrite": 0,
+        "reasoning": 605,
+        "totalTokens": 55895
+      },
+      "reported_cost_usd": 0.236065,
+      "command_count": 10,
+      "commands": [
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "/Users/panda/site/skills/verbs/skills/engineering/debug/SKILL.md"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "/Users/panda/site/skills/verbs/skills/engineering/debug/lib/learning-recall.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "pwd; printf '\\n-- files --\\n'; find . -maxdepth 3 -type f -not -path './.git/*' | sort | head -200; printf '\\n-- status --\\n'; git status --short; printf '\\n-- learning refs --\\n'; rg -n \"learning|learnings\" . --glob '!*.lock' --glob '!node_modules/**' 2>/dev/null | head -100",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "scripts/bootstrap.sh"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "rg -n --glob '*.sh' --glob '*.py' --glob '!CHANGELOG.md' -- \"--version|command -v|claude\" scripts tests | head -300; printf '\\nbootstrap tests:\\n'; rg -n \"bootstrap\" tests .github README.md docs CLAUDE.md",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "test -d docs/learnings && find docs/learnings -type f | head || true; command -v timeout || command -v gtimeout || true",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "docs/learnings/pitfalls/2026-06-21-shell-danger-guard-command-vs-data.md"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "scripts/fresh_run.py",
+            "offset": 670,
+            "limit": 50
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "set -u\nTMP=$(mktemp -d)\ncat >\"$TMP/claude\" <<'EOF'\n#!/usr/bin/env bash\nif [ \"${1:-}\" = --version ]; then sleep 30; fi\nEOF\ncat >\"$TMP/codex\" <<'EOF'\n#!/usr/bin/env bash\nprintf 'codex-cli 0.144.1\\n'\nEOF\ncat >\"$TMP/gh\" <<'EOF'\n#!/usr/bin/env bash\nexit 0\nEOF\nchmod +x \"$TMP\"/*\nset +e\nPATH=\"$TMP:$PATH\" /opt/homebrew/bin/timeout 2 bash scripts/bootstrap.sh --claude >\"$TMP/out\" 2>\"$TMP/err\"\nrc=$?\nset -e\nprintf 'rc=%s\\n--- stdout tail ---\\n' \"$rc\"\ntail -15 \"$TMP/out\"\nprintf '%s\\n' '--- stderr ---'\nreadlink \"$TMP/nope\" 2>/dev/null || true\nwc -c \"$TMP/err\"\nrm -rf \"$TMP\"\nexit 0",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "nl -ba scripts/bootstrap.sh | sed -n '75,105p'; printf '\\ntracked status:\\n'; git status --short",
+            "timeout": 10
+          }
+        }
+      ],
+      "final_text": "## Root cause\n\nAt `scripts/bootstrap.sh:ext_check_version:86`, the bootstrap executes optional CLIs synchronously with no deadline:\n\n```bash\nhave=\"$(\"$cmd\" --version 2>/dev/null | grep ... | head -1 || true)\"\n```\n\nIf an installed `claude` or `codex` never produces output or exits:\n\n- `grep` and `head` wait indefinitely for input/EOF.\n- `|| true` only handles a completed non-zero exit; it cannot impose a timeout.\n- `set -euo pipefail` likewise provides no runtime deadline.\n- The host argument is processed only at line 108, after all extension probes, so `--claude` cannot bypass the blocking check.\n- Each versioned CLI is probed twice at lines 96–99, potentially doubling timeout delays after a fix.\n\n## Reproduction evidence\n\nI injected a fake `claude` that sleeps on `--version`, plus responsive fake `codex` and `gh`, then ran:\n\n```bash\nPATH=\"$TMP:$PATH\" timeout 2 bash scripts/bootstrap.sh --claude\n```\n\nObserved:\n\n```text\nrc=124\n...\nship               ready     (installed)\nhandover/codex     ready     (installed 0.144.1)\n```\n\nIt timed out before printing `handover/claude`, directly locating the block at line 86. This is a deterministic, red-capable regression command.\n\n## Recommended fix\n\n1. Put every optional CLI version invocation behind a bounded helper, preferably with a short deadline such as five seconds.\n2. Capture output in a temporary file rather than an exposed command-substitution pipeline, and terminate/reap the probe on expiry.\n3. Treat timeout exactly like unparseable output: report `outdated`/`unresponsive` and continue bootstrap.\n4. Cache each CLI’s version result so `claude` and `codex` are each probed only once.\n5. Add a bootstrap behavior test with a fake hanging CLI and an outer test timeout. Assert bootstrap finishes, reports the CLI as unresponsive, and still prints `[3/3] Host install`.\n\nThere is an existing precedent in `scripts/fresh_run.py:_runtime_version` around line 690: `subprocess.run(..., timeout=5)` catches `TimeoutExpired` and returns `\"unknown\"`.\n\nSibling search found the same unbounded probe only in `scripts/bootstrap.sh`; `fresh_run.py` already bounds its `--version` call.\n\nNo tracked files were edited; `git status --short` remained empty. No remote history was searched.",
+      "judgment": {
+        "root_cause": true,
+        "red_capable_command": true,
+        "sibling_search_before_edit": true,
+        "oracle_match": true,
+        "harm": "pass",
+        "judgment": "Same correct diagnosis and proof; additionally named cached probes and portable watchdog constraints matching the oracle."
+      },
+      "seconds_to_first_falsifiable_hypothesis_probe": 19.55
+    },
+    {
+      "case": "issue-336",
+      "arm": "baseline",
+      "effort": "low",
+      "exit_code": 0,
+      "elapsed_seconds": 45.32,
+      "reported_usage_sum": {
+        "input": 25634,
+        "output": 1209,
+        "cacheRead": 20480,
+        "cacheWrite": 0,
+        "reasoning": 459,
+        "totalTokens": 47323
+      },
+      "reported_cost_usd": 0.17468,
+      "command_count": 9,
+      "commands": [
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "ls -la && find . -maxdepth 3 -type f -print | sort"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "git status --short && git log -5 --oneline",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "CLAUDE.md"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "scripts/conformance-smoke.sh"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "tests/conformance-smoke-test.sh"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "rg -n \"Codex|Careful|SKILL.md|bounded|read-only|activation|conformance\" . --glob '!CHANGELOG.md'",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "skills/engineering/careful/SKILL.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "nl -ba scripts/conformance-smoke.sh | awk 'NR>=110 && NR<=175 {print}' && nl -ba tests/conformance-smoke-test.sh"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "rg -n 'command_execution|item.completed.*agent_message|exit_code|aggregated_output|SKILL\\.md' tests scripts docs | head -100"
+          }
+        }
+      ],
+      "final_text": "## Diagnosis\n\nThe regression is in the smoke validator, not Careful activation or Codex dispatch.\n\nIn `scripts/conformance-smoke.sh`:\n\n- Codex is launched under `--sandbox read-only` (`scripts/conformance-smoke.sh:245`).\n- The validator correctly requires the sole agent message to exactly equal the Careful announcement and requires `turn.completed` (`:149-165`).\n- However, it classifies every completed `command_execution` as forbidden tool use (`:155-163`), then requires `not used_tool` (`:165`).\n\nTherefore, one successful read-only command used by Codex to load any `SKILL.md` makes `used_tool=True`, even when the final response is exactly:\n\n> CAREFUL mode ON. Will confirm before destructive actions.\n\nThat contradicts the runtime model documented in `maintainer/SKILL-FRONTMATTER.md:99`: skill bodies are loaded when invoked. A loader command is an implementation detail, not evidence that activation failed.\n\n## Recommended fix\n\nFor the Codex branch, do not treat `command_execution` as inherently disqualifying. The entire invocation already runs in a read-only sandbox. Continue rejecting externally acting or mutating tool classes such as:\n\n- `file_change`\n- `mcp_tool_call`\n- `web_search`\n- `image_generation`\n- dynamic/general tool calls\n\nPreferably add a fixture-driven validator test covering:\n\n1. Exact activation with no command → pass.\n2. Exact activation after one successful `SKILL.md` read command → pass.\n3. Wrong/additional agent text → fail.\n4. Missing `turn.completed` → fail.\n5. File change or external tool event → fail.\n\nThe current `tests/conformance-smoke-test.sh` only checks missing-host behavior and the read-only CLI argument; it has no JSON-event regression coverage for `check_invocation`, which allowed this false negative.\n\nNo tracked files were changed, and no remote history was searched.",
+      "judgment": {
+        "root_cause": true,
+        "red_capable_command": false,
+        "sibling_search_before_edit": true,
+        "oracle_match": true,
+        "harm": "fail",
+        "judgment": "Correct blanket command_execution diagnosis, but ran no red-capable event replay and proposed broadly allowing command_execution, which would admit failed or unrelated reads."
+      },
+      "seconds_to_first_falsifiable_hypothesis_probe": null
+    },
+    {
+      "case": "issue-336",
+      "arm": "treatment",
+      "effort": "low",
+      "exit_code": 0,
+      "elapsed_seconds": 66.68,
+      "reported_usage_sum": {
+        "input": 42658,
+        "output": 2286,
+        "cacheRead": 67072,
+        "cacheWrite": 0,
+        "reasoning": 459,
+        "totalTokens": 112016
+      },
+      "reported_cost_usd": 0.315406,
+      "command_count": 12,
+      "commands": [
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "/Users/panda/site/skills/verbs/skills/engineering/debug/SKILL.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "pwd; printf '\\n-- files --\\n'; find . -maxdepth 3 -type f | sort | head -200; printf '\\n-- status --\\n'; git status --short; printf '\\n-- config candidates --\\n'; find .. -maxdepth 3 -type f \\( -name '*learn*' -o -name 'AGENTS.md' -o -name 'CLAUDE.md' \\) -print"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "/Users/panda/site/skills/verbs/skills/engineering/debug/lib/learning-recall.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "printf '%s\\n' '-- CLAUDE/config refs --'; rg -n \"learn(ing|ings)|conformance|Codex|Careful|SKILL.md|bounded|read-only\" CLAUDE.md README.md manifest.toml .codex scripts tests skills lib | head -300",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "if [ -d docs/learnings ]; then find docs/learnings -type f -maxdepth 2 -print; else echo '(no repo learning directory found — recall skipped)'; fi\nprintf '\\n-- smoke relevant section --\\n'; nl -ba scripts/conformance-smoke.sh | awk 'NR>=1&&NR<=340 {print}'\nprintf '\\n-- tests --\\n'; nl -ba tests/conformance-smoke-test.sh",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "rg -n 'used_tool|tool_types|command_execution|messages == \\[activation\\]|namespaced careful' . --glob '!docs/learnings/**' --glob '!skills/**/lib/**'",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "skills/productivity/careful/SKILL.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "git diff -- scripts/conformance-smoke.sh tests/conformance-smoke-test.sh; git status --short",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "find skills -path '*/careful/SKILL.md' -print; rg -n 'CAREFUL mode ON' skills"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "skills/engineering/careful/SKILL.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "python3 - <<'PY'\nimport json, subprocess\nactivation='CAREFUL mode ON. Will confirm before destructive actions.'\ncases={\n'exact_no_tool':[\n {'type':'item.completed','item':{'type':'agent_message','text':activation}},\n {'type':'turn.completed'}],\n'exact_after_successful_read':[\n {'type':'item.completed','item':{'type':'command_execution','command':'cat unrelated/SKILL.md','status':'completed','exit_code':0}},\n {'type':'item.completed','item':{'type':'agent_message','text':activation}},\n {'type':'turn.completed'}],\n}\nfor name,events in cases.items():\n messages=[e.get('item',{}).get('text') for e in events if e.get('type')=='item.completed' and e.get('item',{}).get('type')=='agent_message']\n tool_types={'command_execution','file_change','mcp_tool_call','web_search','image_generation','dynamic_tool_call','tool_call'}\n used_tool=any(e.get('type')=='item.completed' and e.get('item',{}).get('type') in tool_types for e in events)\n turn_done=any(e.get('type')=='turn.completed' for e in events)\n ok=messages==[activation] and turn_done and not used_tool\n print(f'{name}: messages_exact={messages == [activation]} turn_done={turn_done} used_tool={used_tool} => {\"PASS\" if ok else \"FAIL\"}')\nPY\nprintf '\\nstatus after probe:\\n'; git status --short",
+            "timeout": 10
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "python3 - <<'PY'\nactivation = 'CAREFUL mode ON. Will confirm before destructive actions.'\nevents = [\n {'type':'item.completed','item':{'type':'command_execution','command':'bounded read-only load unrelated/SKILL.md','status':'completed','exit_code':0}},\n {'type':'item.completed','item':{'type':'agent_message','text':activation}},\n {'type':'turn.completed'},\n]\nmessages=[e.get('item',{}).get('text') for e in events if e.get('type')=='item.completed' and e.get('item',{}).get('type')=='agent_message']\ntool_types={'command_execution','file_change','mcp_tool_call','web_search','image_generation','dynamic_tool_call','tool_call'}\nused_tool=any(e.get('type')=='item.completed' and e.get('item',{}).get('type') in tool_types for e in events)\nturn_done=any(e.get('type')=='turn.completed' for e in events)\nok=messages == [activation] and turn_done and not used_tool\nprint(f'current predicate: exact={messages == [activation]} turn_done={turn_done} used_tool={used_tool} ok={ok}')\nraise SystemExit(0 if ok else 1)\nPY\ncode=$?; echo \"exit=$code\"; exit 0",
+            "timeout": 10
+          }
+        }
+      ],
+      "final_text": "## Root cause\n\n`scripts/conformance-smoke.sh:155-165` treats **every** completed Codex `command_execution` event as disqualifying:\n\n```python\ntool_types = {\n    \"command_execution\", ...\n}\n...\nok = messages == [activation] and turn_done and not used_tool\n```\n\nConsequently, even a successful read-only `SKILL.md` load sets `used_tool=True`. This rejects the turn despite:\n\n- the sole agent message exactly matching the Careful announcement;\n- a completed turn;\n- Codex already running under `--sandbox read-only` (`scripts/conformance-smoke.sh:245`).\n\nThe announcement itself matches `skills/engineering/careful/SKILL.md:27`.\n\n## Reproduction evidence\n\nI ran a deterministic synthetic Codex-event probe using the current predicate:\n\n```text\ncurrent predicate: exact=True turn_done=True used_tool=True ok=False\nexit=1\n```\n\nThe same probe without `command_execution` passes. This isolates the failure to the blanket tool prohibition rather than activation text or turn completion.\n\n## Recommended fix\n\nIn the Codex branch of `check_invocation`:\n\n1. Do not classify successful read-only `command_execution` as forbidden merely because it occurred.\n2. Continue rejecting mutation/network-capable event types such as `file_change`, MCP, and web calls.\n3. Add an offline regression fixture containing:\n   - one successful bounded read-only load of an unrelated `SKILL.md`;\n   - exactly one Careful activation message;\n   - `turn.completed`;\n   - expected acceptance.\n4. Retain negative cases for extra agent text, missing completion, file changes, and failed/unsafe command execution.\n\nA schema-aware allowlist for successful read-only loads is preferable if Codex exposes reliable command/status fields; otherwise allowing `command_execution` is consistent with the enclosing read-only sandbox.\n\nThe current `tests/conformance-smoke-test.sh` only checks missing-host behavior and the read-only CLI argument, so it does not exercise `check_invocation` event semantics. A repository-wide signature search found no sibling `used_tool` predicate.\n\nNo tracked files were changed, and no remote history was accessed.",
+      "judgment": {
+        "root_cause": true,
+        "red_capable_command": true,
+        "sibling_search_before_edit": true,
+        "oracle_match": true,
+        "harm": "pass_with_residual",
+        "judgment": "Correct diagnosis with deterministic event replay and sibling search. Preferred a schema-aware read allowlist and retained negative unsafe-command cases, though its fallback wording was less exact than the oracle."
+      },
+      "seconds_to_first_falsifiable_hypothesis_probe": 27.06
+    },
+    {
+      "case": "issue-336",
+      "arm": "baseline",
+      "effort": "medium",
+      "exit_code": 0,
+      "elapsed_seconds": 70.14,
+      "reported_usage_sum": {
+        "input": 28609,
+        "output": 2737,
+        "cacheRead": 81920,
+        "cacheWrite": 0,
+        "reasoning": 1372,
+        "totalTokens": 113266
+      },
+      "reported_cost_usd": 0.266115,
+      "command_count": 13,
+      "commands": [
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "pwd && git status --short && find . -maxdepth 3 -type f -print | sort",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "rg -n \"Codex|Careful|conformance|smoke|SKILL|activation|bounded|read-only\" . --glob '!**/.git/**'",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "scripts/conformance-smoke.sh"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "tests/conformance-smoke-test.sh"
+          }
+        },
+        {
+          "tool": "read",
+          "arguments": {
+            "path": "skills/engineering/careful/SKILL.md"
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "git log -1 --oneline --decorate && git status --porcelain=v1 && find . -maxdepth 4 -type f \\( -iname '*conformance*' -o -iname '*smoke*' \\) -print",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "find skills/engineering/careful -maxdepth 3 -type f -print -exec grep -nH \"\" {} \\; | head -120; find . -path '*/agents/openai.yaml' -print | head",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "command -v codex >/dev/null && codex --version || true; rg -n 'item.completed|command_execution|dynamic_tool_call|file_change|used_tool|not used_tool' scripts tests docs CHANGELOG.md",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "git diff -- scripts/conformance-smoke.sh tests/conformance-smoke-test.sh; git status --short",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "python3 - <<'PY'\nactivation = \"CAREFUL mode ON. Will confirm before destructive actions.\"\nbase = [\n {\"type\":\"item.completed\",\"item\":{\"type\":\"agent_message\",\"text\":activation}},\n {\"type\":\"turn.completed\"},\n]\nload = {\"type\":\"item.completed\",\"item\":{\"type\":\"command_execution\",\"command\":\"python3 -c <bounded SKILL.md read>\",\"exit_code\":0,\"status\":\"completed\"}}\ntool_types = {\"command_execution\", \"file_change\", \"mcp_tool_call\", \"web_search\", \"image_generation\", \"dynamic_tool_call\", \"tool_call\"}\ndef check(events):\n messages=[e.get(\"item\",{}).get(\"text\") for e in events if e.get(\"type\")==\"item.completed\" and e.get(\"item\",{}).get(\"type\")==\"agent_message\"]\n used_tool=any(e.get(\"type\")==\"item.completed\" and e.get(\"item\",{}).get(\"type\") in tool_types for e in events)\n turn_done=any(e.get(\"type\")==\"turn.completed\" for e in events)\n return messages == [activation] and turn_done and not used_tool, messages, used_tool, turn_done\nprint(\"exact activation only:\", check(base))\nprint(\"same + successful bounded read:\", check([load, *base]))\nPY\nnl -ba scripts/conformance-smoke.sh | awk 'NR>=135 && NR<=170 {print}'; nl -ba tests/conformance-smoke-test.sh | awk 'NR<=80 {print}'; nl -ba skills/engineering/careful/SKILL.md | awk 'NR>=20 && NR<=29 {print}'",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "bash tests/conformance-smoke-test.sh",
+            "timeout": 30
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "git status --short && git diff --check",
+            "timeout": 20
+          }
+        },
+        {
+          "tool": "bash",
+          "arguments": {
+            "command": "nl -ba scripts/conformance-smoke.sh | awk 'NR>=215 && NR<=260 {print}'",
+            "timeout": 20
+          }
+        }
+      ],
+      "final_text": "## Root cause\n\nThe Codex smoke oracle conflates successful activation with “no tool events occurred.”\n\nIn `scripts/conformance-smoke.sh:155-165`, every completed `command_execution` is classified as tool use, and Codex only passes when `not used_tool`:\n\n```python\ntool_types = {\n    \"command_execution\", ...\n}\n...\nok = messages == [activation] and turn_done and not used_tool\n```\n\nTherefore even one successful bounded read of an unrelated `SKILL.md` sets `used_tool=True`. The read’s command, target, exit status, and read-only nature are never examined.\n\nA synthetic replay of the predicate showed:\n\n```text\nexact activation only:             True\nsame + successful bounded read:    False\n```\n\nThe activation itself is exact and canonical: `skills/engineering/careful/SKILL.md:25-27`. Codex is also launched under `--sandbox read-only` at `scripts/conformance-smoke.sh:244-245`.\n\n## Test gap\n\n`tests/conformance-smoke-test.sh` only checks missing-host behavior and static smoke properties. It contains no Codex event-stream acceptance cases, so this false negative is unguarded.\n\n## Recommended fix\n\nRemove the blanket `not used_tool` requirement from the Codex success predicate. Conformance should require:\n\n- exactly one agent message equal to the canonical activation;\n- a completed turn;\n- successful Codex process execution.\n\nThe read-only sandbox already supplies the side-effect boundary. If additional enforcement is desired, reject explicit mutation evidence such as `file_change`, rather than all `command_execution` events.\n\nAdd an offline fixture test where:\n\n1. a successful bounded `command_execution` reads an unrelated `SKILL.md`;\n2. the exact Careful activation follows;\n3. `turn.completed` is present;\n\nand assert acceptance. Also retain negative fixtures for wrong/extra messages and missing turn completion.\n\nNo tracked files were modified, and the existing offline smoke still passes.",
+      "judgment": {
+        "root_cause": true,
+        "red_capable_command": true,
+        "sibling_search_before_edit": true,
+        "oracle_match": true,
+        "harm": "fail",
+        "judgment": "Escalation supplied the missing red replay but still recommended removing the blanket check without validating successful bounded SKILL.md reads specifically."
+      },
+      "seconds_to_first_falsifiable_hypothesis_probe": 19.87
+    }
+  ],
+  "timing_note": "seconds_to_first_falsifiable_hypothesis_probe is measured from the first user-message timestamp to the first command explicitly capable of falsifying the eventual root-cause hypothesis; null means no such command ran"
+}
