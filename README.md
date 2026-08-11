@@ -10,25 +10,30 @@ also supported.
 
 ## Why Verbs exists
 
-Coding agents can write code without knowing when the goal is still ambiguous,
-when evidence is too weak, or when “done” has stopped short of delivery. Verbs
-turns those recurring failure modes into explicit routes:
+Coding agents can write code, but product engineering also needs decisions about
+why work matters, whether it is ready, what enters an iteration, whether the
+result solved the problem, and what the team should improve. Verbs gives each of
+those situations one named procedure, one record, and a clear stopping point.
 
-| Failure mode | Verbs route |
-|---|---|
-| The request lacks a clear owner, reference, or next route | `ask-boss` orients the work and selects one existing specialist. |
-| The request sounds clear but hides product choices | `grill` discovers requirements before implementation. |
-| The topic is too large for one plan or session | `grill` charts the map; `wayfinder` resolves one frontier at a time. |
-| The cause, architecture target, design seam, or UI direction is unknown | `debug`, `improve-codebase-architecture`, `codebase-design`, `prototype`, or `ui` answers the right kind of question. |
-| A change could be unsafe or an external artifact is untrusted | `careful` and `gatekeeper` add the appropriate trust boundary. |
-| Code exists but proof or delivery is missing | `sprint` drives verification, review, and delivery; `qa`, `review`, and `ship` own their specialist stages. |
+Verbs does not replace model judgment or project truth. It prevents an agent
+from turning an unclear idea into implementation, a passing test into product
+acceptance, or a completed diff into delivered work without the missing human
+decision and evidence.
 
-Verbs does not replace model judgment. It gives that judgment a route,
-acceptance conditions, and evidence requirements.
+## Choose the route from the situation
 
-## How work flows
+Start with the work situation, not with a memorized skill name:
 
-The primary product-engineering record uses six familiar stages:
+| Situation | Use | Done when |
+|---|---|---|
+| You are deciding which product problem or outcome matters next | `product-planning` | One Product Goal and priority are supported by evidence, or the missing evidence/owner decision is explicit |
+| You have an idea or Issue but do not know whether engineering can take it | `backlog-refinement` | The item is `READY` or `NOT_READY`, with scope, acceptance, dependencies, and open decisions |
+| You have an ordered ready backlog and need to choose this iteration's work | `sprint-planning` | A human approves or rejects one Sprint Goal and selection |
+| A human has selected one concrete finish line | `sprint` | That finish line has acceptance, review, and delivery evidence |
+| A delivered result needs product acceptance | `sprint-review` | The outcome is `ACCEPTED`, `NEEDS_CHANGES`, or `UNPROVEN` |
+| A completed iteration has evidence worth learning from | `retro` | Keep, Change, and at most one evidence-backed Action are recorded |
+
+The primary product-engineering record is therefore:
 
 ```text
 Product Planning
@@ -39,55 +44,119 @@ Product Planning
 → Retro
 ```
 
-| Stage | Question | Record |
-|---|---|---|
-| `product-planning` | Why does this matter, and what outcome comes first? | Product Goal, priority, candidate backlog outcomes |
-| `backlog-refinement` | Is one backlog item clear and ready? | `READY` / `NOT_READY`, scope, acceptance, dependencies |
-| `sprint-planning` | What will this Sprint deliver? | Human-approved Sprint Goal and selected ready work |
-| `sprint` | How will one selected finish line be completed? | Acceptance, review, and delivery evidence |
-| `sprint-review` | Did the delivered product achieve the Goal? | `ACCEPTED`, `NEEDS_CHANGES`, or `UNPROVEN` |
-| `retro` | What should change in the next Sprint? | Keep, Change, and at most one evidenced Action |
+This is a map, not an automatic pipeline. Each stage stops after its record. A
+human decides whether and when the next stage starts; no stage claims the next
+Issue, schedules work, creates a branch for its successor, or silently continues.
 
-The stages are not an automatic pipeline. Each stage stops after its record; a
-human chooses when to invoke the explicit planning, execution, review, and Retro
-entry points. No stage claims the next Issue, schedules work, or starts its
-successor.
+## Bypass the lifecycle for a known specialist task
 
-Clear typed work bypasses the stage layer. A reproducible failure enters through
-`debug`; a production UI change through `ui`; code-diff review through `review`;
-browser acceptance through `qa`; and completed Git delivery through `ship`.
-`codebase-design`, `prototype`, `handover`, and the trust or safety skills keep
-their established specialist contracts.
+Do not invoke a planning stage when the problem type is already clear:
 
-The supporting planning routes also remain available. `ask-boss` resolves an
-unclear owner, source, target, or route. `grill` supplies dependency-aware
-requirements discovery for Backlog Refinement. `wayfinder` owns multi-session
-Decision Maps. Spec-sized work still follows `to-spec --> canonical GitHub Spec
-Issue --> to-tickets --> child Issue graph`; decomposition reports a frontier
-but never selects it.
+| Known task | Go directly to |
+|---|---|
+| A regression, crash, failing test, or unexplained error | `debug` |
+| A module interface, abstraction boundary, or design seam | `codebase-design` |
+| One uncertain design question needs a cheap disposable build | `prototype` |
+| A production UI needs to be built or visually corrected | `ui` |
+| A code diff or PR needs correctness review | `review` |
+| A changed UI needs browser acceptance evidence | `qa` |
+| Completed Git work needs test, commit, push, and PR delivery | `ship` |
+| One locked mechanical unit benefits from fresh context | `handover` |
+
+Examples:
+
+```text
+"This test used to pass; find the root cause."  → debug
+"Review PR #42 before I merge it."              → review
+"Test the checkout page in the browser."        → qa
+"The work is complete; create the PR."          → ship
+```
+
+These routes do not need Product Planning or Backlog Refinement first unless the
+request itself still contains a product decision.
+
+## Supporting procedures
+
+Most users should begin with the six stages or a typed specialist. The remaining
+procedures exist for narrower situations:
+
+| Situation | Supporting procedure |
+|---|---|
+| The owner, source of truth, target, or next specialist is unclear | `ask-boss` |
+| You explicitly want an adversarial stress test of hidden requirements | `grill` |
+| Several dependent decisions must remain visible across sessions | `wayfinder` |
+| Settled requirements need one canonical GitHub Spec Issue | `to-spec` |
+| A canonical Spec needs vertical-slice child Issues and dependency edges | `to-tickets` |
+| The repository's Verbs tracker setting is missing or conflicting | `setup-verbs` |
+| Production or destructive work needs confirmation gates | `careful` |
+| An external repo, package, MCP, skill, URL, or service needs a trust check | `gatekeeper` |
+| A load-bearing judgment needs a different model's opinion | `advisor` |
+
+Normal Backlog Refinement already uses the dependency-aware interview protocol;
+you do not need to invoke `grill` merely to make an ordinary Issue ready.
 
 Work is spec-sized when it is expected to require at least two implementation
 Issues, or when even one PR changes a public contract, schema or migration, or
-security boundary. A human selects one ready implementation Issue, and one
-Sprint owns that finish line through one independently reviewable and
-revertible PR.
+security boundary. That branch is:
 
-[`RESOLVER.md`](RESOLVER.md) is the complete human-facing operating model.
+```text
+to-spec --> canonical GitHub Spec Issue
+to-tickets --> child Issue graph
+human selects one ready Issue
+sprint --> one independently reviewable and revertible PR
+```
+
+`to-tickets` reports the unblocked frontier but never chooses or starts work.
+
+## Worked example
+
+Suppose users abandon onboarding because account verification is confusing.
+
+1. **Product Planning** — “Should onboarding verification be our next product
+   priority?” The record names the user problem, Product Goal, evidence, and
+   success signal.
+2. **Backlog Refinement** — “Make the verification guidance Issue ready.” The
+   record returns `NOT_READY` until scope, error states, acceptance criteria,
+   and dependencies are settled.
+3. **Spec and tickets, when needed** — a public workflow change goes through
+   `to-spec`, then a separate approved `to-tickets` run.
+4. **Sprint Planning** — a human invokes it with the ready backlog and capacity,
+   then approves one Sprint Goal and selection. Nothing starts automatically.
+5. **Sprint** — a human selects one Issue. The build may call `ui`, `debug`,
+   `review`, and `qa`; `ship` creates the delivery evidence and PR.
+6. **Sprint Review** — stakeholders inspect the delivered artifact against the
+   Goal. Missing or stale evidence produces `UNPROVEN`, not acceptance.
+7. **Retro** — evidence from the completed iteration supports at most one
+   process Action. No evidence means `NO_SUPPORTED_ACTION`.
+
+## How invocation works
+
+`product-planning`, `backlog-refinement`, and most specialists may be selected
+from natural language:
+
+```text
+"What product outcome should we prioritize next?"
+"Refine Issue #42 until it is ready for engineering."
+"Why did this regression happen?"
+```
+
+Authority-bearing stages require an explicit human command:
+
+| Stage | Claude Code plugin | Codex plugin | Pi direct load |
+|---|---|---|---|
+| Sprint Planning | `/verbs:sprint-planning` | `$verbs:sprint-planning` | `/skill:sprint-planning` |
+| Sprint | `/verbs:sprint` | `$verbs:sprint` | `/skill:sprint` |
+| Sprint Review | `/verbs:sprint-review` | `$verbs:sprint-review` | `/skill:sprint-review` |
+| Retro | `/verbs:retro` | `$verbs:retro` | `/skill:retro` |
+
+The explicit boundary keeps selection, execution, product acceptance, and
+process change under human authority. Verbs relies on host-native invocation
+controls: it registers no lifecycle hooks, routing injector, scheduler, or Stop
+interceptor. Claude Code and Pi use `disable-model-invocation: true`; Codex uses
+matching `allow_implicit_invocation: false` policy.
+
+[`RESOLVER.md`](RESOLVER.md) contains the complete disambiguation model.
 Each `SKILL.md` description is the machine-routing surface.
-
-## Invocation boundaries
-
-Verbs relies on each host's native skill discovery and invocation controls. It
-registers no lifecycle hooks, injects no routing context, and intercepts no tool
-or stop events.
-
-`product-planning` and `backlog-refinement` remain available to both people and
-models. `sprint-planning`, `sprint`, `sprint-review`, and `retro` require an
-explicit human invocation, as do other authority-bearing entry points documented
-in the resolver. Human-only skills declare `disable-model-invocation: true` for
-Claude Code and Pi plus matching `allow_implicit_invocation: false` Codex policy.
-Skill prose owns safety and verification discipline; Verbs does not claim
-host-level enforcement.
 
 ## Product boundary
 
