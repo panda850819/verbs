@@ -504,5 +504,45 @@
       "seconds_to_first_falsifiable_hypothesis_probe": 19.87
     }
   ],
-  "timing_note": "seconds_to_first_falsifiable_hypothesis_probe is measured from the first user-message timestamp to the first command explicitly capable of falsifying the eventual root-cause hypothesis; null means no such command ran"
+  "timing_note": "seconds_to_first_falsifiable_hypothesis_probe is measured from the first user-message timestamp to the first command explicitly capable of falsifying the eventual root-cause hypothesis; null means no such command ran",
+  "post_judgment_validator_verification": {
+    "case": "issue-336",
+    "purpose": "Verify the treatment arm copied-predicate replay against the actual pre-fix snapshot validator after arm outputs were frozen; this verifier did not alter either arm.",
+    "events": [
+      {
+        "type": "item.started",
+        "item": {
+          "id": "skill-read",
+          "type": "command_execution",
+          "command": "/bin/zsh -lc 'cat /tmp/plugins/cache/style/style/1.0.0/skills/style/SKILL.md'"
+        }
+      },
+      {
+        "type": "item.completed",
+        "item": {
+          "id": "skill-read",
+          "type": "command_execution",
+          "command": "/bin/zsh -lc 'cat /tmp/plugins/cache/style/style/1.0.0/skills/style/SKILL.md'",
+          "status": "completed",
+          "exit_code": 0
+        }
+      },
+      {
+        "type": "item.completed",
+        "item": {
+          "type": "agent_message",
+          "text": "CAREFUL mode ON. Will confirm before destructive actions."
+        }
+      },
+      {
+        "type": "turn.completed"
+      }
+    ],
+    "pre_fix_snapshot": "191b21c6ae1d99072e3b2eec38f65cd6c10d6148",
+    "pre_fix_command": "fail=0; source <(sed -n '/^check_invocation()/,/^}/p' scripts/conformance-smoke.sh); check_invocation codex \"$(cat /tmp/debug-336-actual-events.jsonl)\"; test \"$fail\" -eq 0",
+    "pre_fix_exit_code": 1,
+    "pre_fix_observed_stderr": "FAIL [codex]: namespaced careful invocation lacks dispatch proof",
+    "post_fix_command": "python3 scripts/conformance_events.py codex < /tmp/debug-336-actual-events.jsonl",
+    "post_fix_exit_code": 0
+  }
 }

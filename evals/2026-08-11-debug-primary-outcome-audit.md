@@ -36,7 +36,13 @@ The fixture contains no credentials, hidden reasoning, or raw session logs.
 | #336 bounded Codex skill read rejected | `191b21c6ae1d99072e3b2eec38f65cd6c10d6148` | PR #337 / `ee43187`: allow only successful bounded read-only `SKILL.md` command events and reject failed, arbitrary, mutating, or incomplete activity |
 
 The fixing commits and diagnoses were not supplied to either arm and were used
-only after the outputs were frozen.
+only after the outputs were frozen. After judging, the evaluator also replayed
+#336's paired started/completed bounded `cat …/SKILL.md` event stream through the
+actual pre-fix `check_invocation` function: it exited 1 with `namespaced careful
+invocation lacks dispatch proof`. The same fixture passed the post-fix
+`scripts/conformance_events.py codex` entry point with exit 0. The exact events,
+commands, exits, and output are stored in the fixture JSON; this independent
+verification did not replace or alter either arm's recorded commands.
 
 ## Results
 
@@ -45,7 +51,7 @@ only after the outputs were frozen.
 | #330 | baseline | low | PASS | PASS | PASS | 10.56 s | 23,498 | 62.23 s | Correct unbounded `ext_check_version` diagnosis and hanging-CLI proof. |
 | #330 | Debug | low | PASS | PASS | PASS | 19.55 s | 55,895 | 64.98 s | Same outcome; added portable watchdog and cache constraints matching the oracle. |
 | #336 | baseline | low | PASS | **FAIL** | PASS | — | 47,323 | 45.32 s | Correct predicate diagnosis, but no event replay; proposed broadly allowing command execution. |
-| #336 | Debug | low | PASS | PASS | PASS | 27.06 s | 112,016 | 66.68 s | Ran the event replay, preferred a schema-aware read allowlist, and retained unsafe-command negatives. |
+| #336 | Debug | low | PASS | PASS | PASS | 27.06 s | 112,016 | 66.68 s | Ran an exact-predicate replay; the evaluator then confirmed its result through the actual pre-fix validator. |
 | #336 | baseline rerun | medium | PASS | PASS | PASS | 19.87 s | 113,266 | 70.14 s | Effort recovered the missing proof but still proposed a broader exception than the oracle. |
 
 The first-falsifiable-probe clock starts at the user message and stops at the
@@ -59,9 +65,12 @@ interaction overhead rather than billing-normalized unique context.
 
 Debug passed the complete primary diagnosis gate in both low-effort cases. The
 native low-effort baseline passed #330 but missed #336's required already-run
-red-capable command. Medium effort recovered that baseline miss. Debug therefore
-shows a real low-effort outcome lift on one independent regression and parity on
-the other; routing evidence is not used here.
+red-capable command. Medium effort recovered that baseline miss. The evaluator's
+actual-validator replay independently confirmed that the #336 treatment's
+copied-predicate probe represented the pre-fix failure rather than a drifted
+local model. Debug therefore shows a real low-effort outcome lift on one
+independent regression and parity on the other; routing evidence is not used
+here.
 
 ### Harm prevention
 
