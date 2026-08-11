@@ -17,64 +17,49 @@ boundaries.
 
 ## Operating model
 
-Verbs is a set of composable procedures, not a fixed pipeline. The default
-development route is:
+Verbs is a set of composable procedures, not an autonomous pipeline. Its primary
+product-engineering record has six stages:
 
 ```text
-request
-  |
-  +-- clear typed request ------------------------------> existing specialist
-  |
-  +-- owner / route / reference unclear ---------------> ask-boss
-  |                                                       |
-  |                                                       +--> one specialist
-  |
-  +-- outcome / scope / acceptance unclear ------------> grill
-  |                                                       |
-  |                                                       +--> local brief / plan
-  |                                                       +--> to-spec
-  |                                                       +--> wayfinder
-  |
-  +-- several unresolved decisions ---------------------> decision map
-                                                          |
-                                                          +--> wayfinder resolves one frontier
-                                                               until work becomes sprint-sized
-
-selected implementation
-  -> sprint -> review / qa -> ship
+Product Planning
+→ Backlog Refinement
+→ Sprint Planning
+→ Sprint
+→ Sprint Review
+→ Retro
 ```
 
-This route answers six common selection questions:
+1. `product-planning` binds the product problem, Product Goal, priority, and
+   candidate backlog outcomes. It stops before readiness or implementation.
+2. `backlog-refinement` makes one item `READY` or `NOT_READY` from scope,
+   acceptance, dependencies, edge states, and an evidence seam. Readiness does
+   not select the item.
+3. `sprint-planning` proposes one Sprint Goal and ready, unblocked work that
+   fits stated capacity. A human approves or rejects the exact selection; no
+   tracker or branch mutation occurs.
+4. `sprint` owns one human-selected finish line through implementation,
+   verification, bounded review, and delivery evidence.
+5. `sprint-review` inspects the delivered product outcome against its Goal and
+   acceptance evidence. It returns `ACCEPTED`, `NEEDS_CHANGES`, or `UNPROVEN`;
+   code review and browser QA are evidence sources, not substitutes.
+6. `retro` inspects one completed Sprint and proposes at most one
+   evidence-backed process Action. It is not personal reflection or scheduling.
 
-1. Use `ask-boss` when the request's owner, source of truth, target, or next
-   route is unclear. It retrieves facts, chooses one existing specialist, and
-   passes a context packet. It does not start generic grilling or intercept a
-   clear typed request.
-2. Use `grill` when intent, scope, constraints, or acceptance are still
-   unknown. It asks dependency-aware frontier rounds, then chooses a close
-   based on the resulting work shape.
-3. Use `wayfinder` when the request itself names a map, resumes an existing
-   one, or an `ask-boss` handoff identifies multi-session decision fog. With no
-   map, `wayfinder` runs the interview, writes the map, and stops. With a map,
-   it takes one unblocked frontier entry, records the decision, and updates the
-   map. `wayfinder` is the only skill that writes a map.
-4. Use `to-spec` when the work is expected to need at least two implementation
-   Issues, or when even one PR changes a public contract, schema or migration,
-   or security boundary. Its GitHub Spec Issue becomes the only requirements
-   source of truth.
-5. Use `to-tickets` to decompose that complete Spec into vertical-slice child
-   Issues and blocking edges. It reports the frontier but does not choose work.
-6. A human selects one unblocked implementation Issue. `sprint` owns only that
-   finish line through verification, review, and one independently reviewable
-   and revertible PR.
+Each stage stops after its own record. No stage invokes its successor, claims a
+frontier Issue, schedules work, or starts implementation without a new human
+choice. Clear typed specialist requests bypass the stage layer.
+
+Supporting planning procedures retain their narrower contracts. `ask-boss`
+orients unclear authority or sources, `grill` supplies dependency-aware
+requirements discovery, and `wayfinder` owns cross-session Decision Maps when
+the request names a map. Spec-sized work follows `to-spec` into one canonical GitHub Spec Issue and
+`to-tickets` into vertical-slice child Issues. `to-tickets` reports the frontier
+but does not choose work. A human selects one unblocked implementation Issue.
 
 Work below the Spec threshold retains Grill's local brief and executable-plan
 close. A small reversible fix may use the repository's direct branch/PR path.
-
-`handover` is not an alternative planning path. It is allowed only after a
-plan contains one bounded, mechanical build unit with a locked specification
-that benefits from fresh context. The original orchestrator waits, verifies
-the returned evidence, and retains responsibility for acceptance and Git.
+`handover` remains one bounded mechanical execution unit; its caller retains
+acceptance and Git ownership.
 
 ### Typed on-ramps
 
@@ -114,13 +99,15 @@ the next frontier, or use `wayfinder` as a task scheduler.
 ### Invocation and guidance
 
 Each host routes from the descriptions in `SKILL.md`; Verbs injects no separate
-routing table. Most skills allow native model invocation.
-`improve-codebase-architecture` is human-initiated-only so periodic surveys do
-not start opportunistically; `sprint` and `to-tickets` are human-initiated-only
-because they begin execution or publish an Issue graph. Claude Code and Pi honor
-their frontmatter flag, while Codex honors the matching `agents/openai.yaml`
-policy. Skills carry safety
-and verification guidance, not host-level enforcement.
+routing table. `product-planning` and `backlog-refinement` allow native model
+invocation. `sprint-planning`, `sprint`, `sprint-review`, and `retro` are
+human-initiated-only because selection, execution, product acceptance, and
+process changes require human authority. `improve-codebase-architecture` stays
+human-only so periodic surveys do
+not start opportunistically; `to-tickets` retains its human-only publication
+boundary. Claude Code and Pi
+honor frontmatter; Codex uses matching `agents/openai.yaml` policy. Skills carry
+safety and verification guidance, not host-level enforcement.
 
 ## Skill catalog
 
@@ -128,6 +115,9 @@ and verification guidance, not host-level enforcement.
 
 | Skill | Purpose | Trigger |
 |---|---|---|
+| `verbs:product-planning` | Clarify the product problem, Product Goal, priority, and candidate backlog outcomes. | what product work should happen next, why does this matter, prioritize this opportunity |
+| `verbs:backlog-refinement` | Make one backlog item `READY` or `NOT_READY` from scope, acceptance, dependencies, edge states, and evidence. | refine this Issue, is this ready, clarify this backlog item |
+| `verbs:sprint-planning` | Propose one Sprint Goal and ready work for a human approval decision; never execute the selection. | explicit request to plan the next Sprint |
 | `verbs:grill` | Adversarial requirement discovery through dependency-aware frontier rounds. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
 | `verbs:ask-boss` | Route unclear owner, target, reference, or next route to one existing specialist; facts first, no generic grilling. | where do I start, who decides, which reference, what route, unclear next step |
 | `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
@@ -135,6 +125,8 @@ and verification guidance, not host-level enforcement.
 | `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
 | `verbs:wayfinder` | Chart or work cross-session decision maps named by the request or handed off by `ask-boss`; resolve one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map, several dependent decisions |
 | `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
+| `verbs:sprint-review` | Inspect the delivered product outcome against its Sprint Goal and current acceptance evidence. | explicit request to review or accept the Sprint outcome |
+| `verbs:retro` | Choose at most one evidence-backed product-engineering process improvement from a completed Sprint. | explicit request to run a Sprint Retro |
 | `verbs:debug` | Establish root cause through hypotheses, instrumentation, bisecting, and scope analysis before changing code. | error, crash, regression, failing test, used to work |
 | `verbs:codebase-design` | Design a deep module behind a small interface at a clean, testable seam. | module design, abstraction boundary, interface too wide |
 | `verbs:improve-codebase-architecture` | Produce a read-only visual survey that ranks evidence-backed deepening candidates before one is selected for design. | periodic architecture survey, find refactoring opportunities, prepare for a large build |
@@ -163,12 +155,13 @@ and verification guidance, not host-level enforcement.
 | Built-in `/review` | A generic PR or diff review. |
 | Built-in `/security-review` | Branch code for security issues. |
 | `verbs:review` | Your code through scoped, risk-adaptive passes and grounded findings. |
+| `verbs:sprint-review` | The delivered product outcome against its Sprint Goal and acceptance evidence. |
 | `verbs:gatekeeper` | Someone else’s artifact before it enters your system. |
 | `verbs:harness-slim` | Your live multi-runtime harness after adoption. |
 
-Use `review` for a diff, `qa` for rendered behavior, `debug` for an unexplained
-failure, `gatekeeper` for pre-adoption trust, and `harness-slim` for
-post-adoption system load.
+Use `review` for a diff, `qa` for rendered behavior, `sprint-review` for the
+product outcome, `debug` for an unexplained failure, `gatekeeper` for
+pre-adoption trust, and `harness-slim` for post-adoption system load.
 
 ### Architecture, prototype, and UI
 
@@ -179,13 +172,18 @@ post-adoption system load.
 - Use `ui` when the artifact is intended to become production UI.
 - Use `qa` after the UI exists and browser evidence is the remaining need.
 
-### Grill, wayfinder, sprint, and handover
+### Product stages and supporting procedures
 
-- `grill` discovers what the work must become.
-- `wayfinder` maintains progress across a decision map when one plan would
-  falsely imply certainty.
-- `sprint` executes a concrete outcome and owns final acceptance.
-- `handover` supplies fresh execution context for one locked plan unit; it
+- `product-planning` chooses an outcome and priority; `backlog-refinement`
+  determines whether one candidate item is ready.
+- `grill` supplies the dependency-aware interview discipline;
+  `wayfinder` maintains a cross-session Decision Map.
+- `sprint-planning` selects ready work after a human approval gate; `sprint`
+  executes one selected finish line.
+- `review` inspects code and `qa` proves browser behavior; `sprint-review`
+  decides whether the product outcome achieved the Goal.
+- `retro` proposes one process improvement after completion.
+- `handover` supplies fresh execution context for one locked plan unit and
   never owns the broader outcome.
 
 ## Aliases

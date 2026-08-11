@@ -18,11 +18,14 @@
     "skills/engineering/sprint/lib/learning-format.md",
     "skills/engineering/sprint/lib/model-anchors.md",
     "skills/engineering/sprint/lib/verify-the-test-loop.md",
+    "skills/productivity/backlog-refinement/lib/interview.md",
+    "skills/productivity/backlog-refinement/lib/push-once.md",
     "skills/productivity/grill/lib/interview.md",
     "skills/productivity/grill/lib/output-templates.md",
     "skills/productivity/grill/lib/push-once.md",
     "skills/productivity/grill/lib/skill-decision-tree.md",
     "skills/productivity/grill/lib/stop-rule.md",
+    "skills/productivity/sprint-review/lib/qa-evidence-format.md",
     "skills/productivity/wayfinder/lib/interview.md"
   ]
 }

@@ -6,10 +6,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ASK_BOSS = (ROOT / "skills/productivity/ask-boss/SKILL.md").read_text()
+PRODUCT_PLANNING = (ROOT / "skills/productivity/product-planning/SKILL.md").read_text()
+BACKLOG_REFINEMENT = (ROOT / "skills/productivity/backlog-refinement/SKILL.md").read_text()
+SPRINT_PLANNING = (ROOT / "skills/productivity/sprint-planning/SKILL.md").read_text()
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
 INTERVIEW = (ROOT / "lib/interview.md").read_text()
 WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
 SPRINT = (ROOT / "skills/engineering/sprint/SKILL.md").read_text()
+SPRINT_REVIEW = (ROOT / "skills/productivity/sprint-review/SKILL.md").read_text()
+RETRO = (ROOT / "skills/productivity/retro/SKILL.md").read_text()
 README = (ROOT / "README.md").read_text()
 RESOLVER = (ROOT / "RESOLVER.md").read_text()
 MANIFEST = (ROOT / "manifest.toml").read_text()
@@ -185,14 +190,27 @@ require_words(
 for direction in ("`/grill` typed three questions into a `wayfinder`", "`/wayfinder` typed during a `grill`"):
     require_words(INTERVIEW, direction, "mid-interview switch covers both directions")
 
-require(README, "to-spec --> canonical GitHub Spec Issue", "public lifecycle")
-require(README, "to-tickets --> child Issue graph", "public lifecycle")
-require(README, "manually selected", "manual frontier")
-require_words(README, "grill -> to-spec -> to-tickets -> manually selected frontier Issue -> sprint -> review -> ship", "public lifecycle")
+require_words(
+    README,
+    "Product Planning → Backlog Refinement → Sprint Planning → Sprint → Sprint Review → Retro",
+    "six-stage public lifecycle",
+)
+require(README, "to-spec --> canonical GitHub Spec", "canonical spec branch")
+require(README, "to-tickets --> child Issue graph", "canonical ticket branch")
 require_words(README, "one independently reviewable and revertible PR", "one issue one PR")
+require_words(
+    README,
+    "Each stage stops after its record",
+    "stages do not auto-chain",
+)
 
 require(RESOLVER, "A human selects one unblocked implementation Issue.", "ownership")
-require(RESOLVER, "reports the frontier but does not choose work", "ownership")
+require_words(RESOLVER, "reports the frontier but does not choose work", "ownership")
+require_words(
+    RESOLVER,
+    "No stage invokes its successor, claims a frontier Issue, schedules work, or starts implementation",
+    "resolver no-auto-chain boundary",
+)
 # The boundary must live in the sprint body itself.
 require_words(
     SPRINT,
@@ -207,11 +225,40 @@ require_words(
     "failed sprint salvages what it validated",
 )
 require_words(SPRINT, "Nothing validated → print no extra line.", "silent when nothing validated")
-# skills/retro/ was absorbed into a pandastack skill that never came over (#295).
-for path in sorted(ROOT.glob("lib/*.md")) + sorted(ROOT.glob("skills/*/*/**/*.md")):
-    assert "during retro" not in path.read_text(), (
-        f"{path.relative_to(ROOT)} points at a retro surface Verbs does not have"
-    )
+# The stage layer owns familiar records without absorbing specialist contracts.
+require_words(
+    PRODUCT_PLANNING,
+    "Stop after the record. Do not mark backlog items ready, select iteration work",
+    "product planning stops before readiness and selection",
+)
+require(BACKLOG_REFINEMENT, "Status: READY | NOT_READY", "readiness outcome")
+require_words(
+    BACKLOG_REFINEMENT,
+    "Stop after the readiness record. Do not publish or decompose tickets, choose iteration work",
+    "refinement stops before selection and execution",
+)
+require(SPRINT_PLANNING, "Ask once: `[approve / reject]`.", "human selection gate")
+require_words(
+    SPRINT_PLANNING,
+    "Do not assign Issues, create or switch branches, invoke another skill, mutate the tracker, or start work.",
+    "planning does not execute",
+)
+require(SPRINT_REVIEW, "Result: ACCEPTED | NEEDS_CHANGES | UNPROVEN", "product review outcome")
+require_words(
+    SPRINT_REVIEW,
+    "Code review proves properties of a diff and QA can prove browser-visible criteria; neither alone proves",
+    "product review differs from code review and QA",
+)
+require(RETRO, "Status: ACTION_PROPOSED | NO_SUPPORTED_ACTION", "retro outcome")
+require_words(RETRO, "Emit at most one Action.", "retro action limit")
+require_words(
+    RETRO,
+    "Do not create calendar events, personal reflection files, brain or memory entries",
+    "retro stays product-engineering only",
+)
+for stage in ("product-planning", "backlog-refinement", "sprint-planning", "sprint", "sprint-review", "retro"):
+    require(MANIFEST, f"[skill.{stage}]", f"manifest exposes {stage}")
+
 require_words(GRILL, "routes to `to-spec`", "spec skill composition")
 assert "[skill.implement]" not in MANIFEST, "must not add implement"
 assert "[skill.to-prd]" not in MANIFEST, "must not add to-prd"

@@ -6,7 +6,8 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_HUMAN_ONLY = {
-    "improve-codebase-architecture", "sprint", "to-tickets",
+    "improve-codebase-architecture", "retro", "sprint", "sprint-planning",
+    "sprint-review", "to-tickets",
 }
 claude_human_only = set()
 codex_human_only = set()

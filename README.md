@@ -28,73 +28,49 @@ acceptance conditions, and evidence requirements.
 
 ## How work flows
 
-The normal development route is conditional, not a mandatory chain:
+The primary product-engineering record uses six familiar stages:
 
 ```text
-request
-  |
-  +-- clear typed -------------------------------> existing specialist
-  |
-  +-- owner / route / reference unclear ---------> ask-boss -> one specialist
-  |
-  +-- outcome / scope / acceptance unclear -----> grill
-  |                                                  |
-  |                                                  +--> local brief / plan
-  |                                                  +--> to-spec
-  |                                                  +--> wayfinder
-  |
-  +-- several dependent decisions --------------> wayfinder
-
-selected implementation
-  -> sprint -> review / qa -> ship
+Product Planning
+→ Backlog Refinement
+→ Sprint Planning
+→ Sprint
+→ Sprint Review
+→ Retro
 ```
 
-The canonical branches remain `to-spec --> canonical GitHub Spec Issue` and
-`to-tickets --> child Issue graph`; a human selects the implementation frontier
-before `sprint`.
+| Stage | Question | Record |
+|---|---|---|
+| `product-planning` | Why does this matter, and what outcome comes first? | Product Goal, priority, candidate backlog outcomes |
+| `backlog-refinement` | Is one backlog item clear and ready? | `READY` / `NOT_READY`, scope, acceptance, dependencies |
+| `sprint-planning` | What will this Sprint deliver? | Human-approved Sprint Goal and selected ready work |
+| `sprint` | How will one selected finish line be completed? | Acceptance, review, and delivery evidence |
+| `sprint-review` | Did the delivered product achieve the Goal? | `ACCEPTED`, `NEEDS_CHANGES`, or `UNPROVEN` |
+| `retro` | What should change in the next Sprint? | Keep, Change, and at most one evidenced Action |
 
-`ask-boss` is optional orientation, not a mandatory front door. It retrieves
-facts and selects one existing specialist when the owner, target, source of
-truth, or next route is unclear. Clear typed requests and named maps bypass it.
-The selected caller owns its interview, artifact, and close.
+The stages are not an automatic pipeline. Each stage stops after its record; a
+human chooses when to invoke the explicit planning, execution, review, and Retro
+entry points. No stage claims the next Issue, schedules work, or starts its
+successor.
+
+Clear typed work bypasses the stage layer. A reproducible failure enters through
+`debug`; a production UI change through `ui`; code-diff review through `review`;
+browser acceptance through `qa`; and completed Git delivery through `ship`.
+`codebase-design`, `prototype`, `handover`, and the trust or safety skills keep
+their established specialist contracts.
+
+The supporting planning routes also remain available. `ask-boss` resolves an
+unclear owner, source, target, or route. `grill` supplies dependency-aware
+requirements discovery for Backlog Refinement. `wayfinder` owns multi-session
+Decision Maps. Spec-sized work still follows `to-spec --> canonical GitHub Spec
+Issue --> to-tickets --> child Issue graph`; decomposition reports a frontier
+but never selects it.
 
 Work is spec-sized when it is expected to require at least two implementation
 Issues, or when even one PR changes a public contract, schema or migration, or
-security boundary. The GitHub Spec Issue is then the only requirements source
-of truth. Smaller work keeps the local brief/plan path; a trivial reversible
-fix may still go directly through its repository's branch and PR contract.
-
-The tracker-native path is `grill -> to-spec -> to-tickets -> manually selected
-frontier Issue -> sprint -> review -> ship`.
-
-`to-tickets` reports the unblocked frontier but never schedules it. A human
-selects one implementation Issue, and one Sprint owns that Issue through one
-independently reviewable and revertible PR.
-
-Use `handover` only when a plan already contains a bounded, mechanical build
-unit that benefits from fresh context. It detects `HERDR_ENV=1` before choosing
-Herdr sibling-agent transport; outside a managed Herdr pane it keeps the
-Claude/Codex fresh-run or async path. Herdr owns pane lifecycle while Handover
-owns task scope and evidence. The worker does not replace human-selected
-execution ownership of final acceptance and delivery.
-
-Other skills are typed on-ramps or supporting gates:
-
-- A reproducible failure enters through `debug`.
-- A named Decision Map or multi-session decision handoff enters through
-  `wayfinder`.
-- A clear bounded implementation enters through `sprint`.
-- A production UI change enters through `ui`; browser acceptance enters
-  through `qa`.
-- An unknown architecture target enters through `improve-codebase-architecture`;
-  a chosen seam enters through `codebase-design`; a single unresolved design
-  question may justify a throwaway `prototype`.
-- An external repo, package, MCP, skill, or document enters through
-  `gatekeeper`.
-- Production or destructive work adds `careful`.
-- A load-bearing judgment may call `advisor` for a decorrelated model opinion.
-- A multi-runtime harness that has already accumulated complexity enters
-  through `harness-slim`.
+security boundary. A human selects one ready implementation Issue, and one
+Sprint owns that finish line through one independently reviewable and
+revertible PR.
 
 [`RESOLVER.md`](RESOLVER.md) is the complete human-facing operating model.
 Each `SKILL.md` description is the machine-routing surface.
@@ -105,10 +81,13 @@ Verbs relies on each host's native skill discovery and invocation controls. It
 registers no lifecycle hooks, injects no routing context, and intercepts no tool
 or stop events.
 
-Most skills remain available to both people and models. Human-initiated-only
-entry points declare `disable-model-invocation: true` for Claude Code and Pi,
-plus the matching `allow_implicit_invocation: false` policy for Codex. Skill prose owns
-safety and verification discipline; Verbs does not claim host-level enforcement.
+`product-planning` and `backlog-refinement` remain available to both people and
+models. `sprint-planning`, `sprint`, `sprint-review`, and `retro` require an
+explicit human invocation, as do other authority-bearing entry points documented
+in the resolver. Human-only skills declare `disable-model-invocation: true` for
+Claude Code and Pi plus matching `allow_implicit_invocation: false` Codex policy.
+Skill prose owns safety and verification discipline; Verbs does not claim
+host-level enforcement.
 
 ## Product boundary
 
@@ -128,6 +107,11 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:careful` | core | Confirmation gate for production, shared infrastructure, live harness paths, and destructive commands. |
 | `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
 | `/verbs:ask-boss` | core | Route unclear workplace requests to one existing specialist by retrieving facts and resolving intent, target, audience, and minimum sufficient authority. Use for an unclear starting point, owner, reference, or next route; clear typed requests, named maps, bugs, UI work, and code review go directly to their specialist. |
+| `/verbs:product-planning` | core | Clarify the product problem, Product Goal, priority, and candidate backlog outcomes before readiness or implementation work. |
+| `/verbs:backlog-refinement` | core | Make one backlog item READY or NOT_READY by clarifying outcome, scope, acceptance criteria, dependencies, and unresolved decisions. |
+| `/verbs:sprint-planning` | core | Plan one Sprint Goal and select ready work after a human approval gate. |
+| `/verbs:sprint-review` | core | Review one Sprint outcome against its Goal and product acceptance evidence. |
+| `/verbs:retro` | core | Review one completed Sprint and choose one evidence-backed process improvement. |
 | `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
 | `/verbs:setup-verbs` | core | Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate. |
 | `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |

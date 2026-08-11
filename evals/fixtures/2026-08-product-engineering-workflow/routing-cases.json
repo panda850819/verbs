@@ -1,0 +1,74 @@
+[
+  {
+    "id": "product-planning-positive",
+    "invocation": "implicit",
+    "prompt": "Which product outcome should we prioritize next, and why?",
+    "expected_route": "product-planning"
+  },
+  {
+    "id": "product-planning-negative-ready-item",
+    "invocation": "implicit",
+    "prompt": "Refine issue #42 until its acceptance criteria and dependencies are ready.",
+    "expected_route": "backlog-refinement"
+  },
+  {
+    "id": "backlog-refinement-positive",
+    "invocation": "implicit",
+    "prompt": "Is this backlog item ready for engineering? List whatever is missing.",
+    "expected_route": "backlog-refinement"
+  },
+  {
+    "id": "backlog-refinement-negative-bug",
+    "invocation": "implicit",
+    "prompt": "This test used to pass and now fails. Find the root cause.",
+    "expected_route": "debug"
+  },
+  {
+    "id": "sprint-planning-explicit",
+    "invocation": "explicit",
+    "prompt": "Plan the next Sprint from the ready backlog and ask me to approve it.",
+    "expected_route": "sprint-planning"
+  },
+  {
+    "id": "sprint-planning-implicit-negative",
+    "invocation": "implicit",
+    "prompt": "We should probably decide what goes into the next Sprint.",
+    "expected_route": null
+  },
+  {
+    "id": "sprint-review-explicit",
+    "invocation": "explicit",
+    "prompt": "Review the delivered Sprint outcome against its Goal.",
+    "expected_route": "sprint-review"
+  },
+  {
+    "id": "sprint-review-implicit-negative",
+    "invocation": "implicit",
+    "prompt": "The Sprint ended; perhaps someone should inspect the product outcome.",
+    "expected_route": null
+  },
+  {
+    "id": "sprint-review-negative-code-diff",
+    "invocation": "implicit",
+    "prompt": "Review this PR diff for correctness before I commit.",
+    "expected_route": "review"
+  },
+  {
+    "id": "sprint-review-negative-browser-qa",
+    "invocation": "implicit",
+    "prompt": "QA this changed page in the browser and capture evidence.",
+    "expected_route": "qa"
+  },
+  {
+    "id": "retro-explicit",
+    "invocation": "explicit",
+    "prompt": "Run a Retro for the completed Sprint and propose one process action.",
+    "expected_route": "retro"
+  },
+  {
+    "id": "retro-implicit-negative",
+    "invocation": "implicit",
+    "prompt": "We finished the Sprint; perhaps we should reflect on it.",
+    "expected_route": null
+  }
+]
