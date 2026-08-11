@@ -21,6 +21,9 @@
   `to-spec` / `to-tickets` branch. (#359)
 - Claude/Pi and Codex invocation metadata now agree that Sprint Planning,
   Sprint, Sprint Review, and Retro require explicit human invocation. (#359)
+- Renamed `wayfinder` to the literal `decision-map`; it remains the single owner
+  of cross-session map creation, one-frontier progress, and map persistence
+  instead of duplicating that state machine across product stages. (#359)
 
 ### Migration
 
@@ -28,6 +31,9 @@
   `prototype`, and `ship`; clear typed requests continue to bypass the stage
   layer. Use the new stage names for product planning, readiness, iteration
   selection, product acceptance, and process improvement records.
+- Replace `/verbs:wayfinder`, `$verbs:wayfinder`, or `/skill:wayfinder` with the
+  corresponding `decision-map` invocation. Existing map files keep their format
+  and can be resumed by the renamed skill.
 
 ## v0.24.0 — Visual architecture surveys
 

@@ -18,7 +18,7 @@ CATALOG_ROWS = re.findall(r"^\| `verbs:([a-z0-9-]+)` \|", CATALOG_SECTION, re.M)
 CATALOG = set(CATALOG_ROWS)
 RETIRED = {
     "boardroom", "checkpoint", "deepwiki", "dojo", "freeze", "init",
-    "office-hours", "team-orchestrate",
+    "office-hours", "team-orchestrate", "wayfinder",
 }
 OWNERSHIP_CLAIMS = {
     "README.md": "first-visit",
@@ -79,12 +79,12 @@ def main():
     if not retired_routes("Run /office-hours now."):
         failures.append("seeded retired-route mutation was not detected")
 
-    wayfinder_surfaces = (
-        ("wayfinder SKILL.md", frontmatter("wayfinder")),
-        ("manifest wayfinder entry", manifest_entry("wayfinder")),
+    decision_map_surfaces = (
+        ("decision-map SKILL.md", frontmatter("decision-map")),
+        ("manifest decision-map entry", manifest_entry("decision-map")),
         ("resolver", ACTIVE_RESOLVER),
     )
-    for label, text in wayfinder_surfaces:
+    for label, text in decision_map_surfaces:
         if "names a map" not in text:
             failures.append(f"{label} must key on the request naming a map")
         for size_trigger in ("large, fuzzy topic", "multi-session effort"):

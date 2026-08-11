@@ -75,13 +75,13 @@ description = "Pre-adoption trust check for external skills / MCPs / repos."
 [skill.ask-boss]
 tier = "core"
 resources = []
-composes = ["grill", "wayfinder"]
+composes = ["decision-map", "grill"]
 description = "Route unclear workplace requests to one existing specialist by retrieving facts and resolving intent, target, audience, and minimum sufficient authority. Use for an unclear starting point, owner, reference, or next route; clear typed requests, named maps, bugs, UI work, and code review go directly to their specialist."
 
 [skill.product-planning]
 tier = "core"
 resources = []
-composes = ["ask-boss", "prototype", "to-spec", "wayfinder"]
+composes = ["ask-boss", "decision-map", "prototype", "to-spec"]
 description = "Clarify the product problem, Product Goal, priority, and candidate backlog outcomes before readiness or implementation work."
 
 [skill.backlog-refinement]
@@ -111,8 +111,8 @@ description = "Review one completed Sprint and choose one evidence-backed proces
 [skill.grill]
 tier = "core"
 resources = ["lib/interview.md", "lib/push-once.md", "lib/stop-rule.md", "lib/output-templates.md", "lib/skill-decision-tree.md"]
-composes = ["to-spec", "wayfinder"]
-description = "Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan."
+composes = ["decision-map", "to-spec"]
+description = "Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan."
 
 [skill.setup-verbs]
 tier = "core"
@@ -172,11 +172,11 @@ resources = []
 composes = []
 description = "Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui)."
 
-[skill.wayfinder]
+[skill.decision-map]
 tier = "core"
 resources = ["lib/interview.md"]
 composes = ["grill", "prototype"]
-description = "Chart or work cross-session decision maps when the request itself names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill."
+description = "Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill."
 
 # ============================================================================
 # EXT (6) — public CLI dependencies

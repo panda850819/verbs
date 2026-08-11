@@ -22,6 +22,7 @@
     "./skills/engineering/careful",
     "./skills/engineering/codebase-design",
     "./skills/engineering/debug",
+    "./skills/productivity/decision-map",
     "./skills/meta/gatekeeper",
     "./skills/productivity/grill",
     "./skills/engineering/handover",
@@ -39,7 +40,6 @@
     "./skills/productivity/sprint-review",
     "./skills/productivity/to-spec",
     "./skills/productivity/to-tickets",
-    "./skills/productivity/ui",
-    "./skills/productivity/wayfinder"
+    "./skills/productivity/ui"
   ]
 }

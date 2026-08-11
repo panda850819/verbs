@@ -11,7 +11,7 @@ BACKLOG_REFINEMENT = (ROOT / "skills/productivity/backlog-refinement/SKILL.md").
 SPRINT_PLANNING = (ROOT / "skills/productivity/sprint-planning/SKILL.md").read_text()
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
 INTERVIEW = (ROOT / "lib/interview.md").read_text()
-WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
+DECISION_MAP = (ROOT / "skills/productivity/decision-map/SKILL.md").read_text()
 SPRINT = (ROOT / "skills/engineering/sprint/SKILL.md").read_text()
 SPRINT_REVIEW = (ROOT / "skills/productivity/sprint-review/SKILL.md").read_text()
 RETRO = (ROOT / "skills/productivity/retro/SKILL.md").read_text()
@@ -53,8 +53,8 @@ require_words(
 )
 require_words(
     ASK_BOSS,
-    "`wayfinder` owns the Decision Map",
-    "ask-boss wayfinder handoff",
+    "`decision-map` owns the map",
+    "ask-boss decision-map handoff",
 )
 
 # The interview protocol lives in lib/interview.md, not inlined in grill (#284).
@@ -102,7 +102,7 @@ require_words(
 )
 assert "**ONE question at a time.**" not in INTERVIEW, "rigid interview cadence must be retired"
 assert "recommended answer" not in INTERVIEW.lower(), "frontier rounds must not import recommendations"
-for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder"), (RESOLVER, "resolver")):
+for skill_text, scenario in ((GRILL, "grill"), (DECISION_MAP, "decision-map"), (RESOLVER, "resolver")):
     assert "one question at a time" not in skill_text.lower(), (
         f"{scenario} must not promise the retired rigid cadence"
     )
@@ -122,25 +122,24 @@ require(GRILL, "require two or more implementation Issues", "spec threshold")
 require(GRILL, "even one PR changes a\n   public contract, schema or migration, or security boundary", "spec threshold")
 require(GRILL, "Do not write a competing repository brief, executable plan", "single source")
 require(GRILL, "**Smaller work -> local close.** Continue to Stage C", "small-work branch")
-require(GRILL, "**Large and foggy -> `wayfinder`.**", "wayfinder branch")
+require(GRILL, "**Large and foggy -> `decision-map`.**", "decision-map branch")
 
-# wayfinder owns charting: it interviews and writes the map, grill or ask-boss
-# hands off (#285).
+# decision-map owns charting: it interviews and writes the map; callers hand off.
 require(GRILL, "Do not write a map here", "grill does not chart")
-require(WAYFINDER, "@lib/interview.md", "wayfinder runs the interview itself")
-require(WAYFINDER, "Handoff from `ask-boss`", "wayfinder receives orientation packet")
+require(DECISION_MAP, "@lib/interview.md", "decision-map runs the interview itself")
+require(DECISION_MAP, "Handoff from `ask-boss`", "decision-map receives orientation packet")
 require_words(
-    WAYFINDER,
+    DECISION_MAP,
     "Do not re-run orientation or ask for facts already present in the packet",
-    "wayfinder does not repeat ask-boss orientation",
+    "decision-map does not repeat ask-boss orientation",
 )
-require(WAYFINDER, "docs/briefs/{YYYY-MM-DD}-{slug}-map.md", "wayfinder writes the map")
-require(WAYFINDER, "This skill owns that format", "wayfinder owns the map format")
-assert "Delegate charting to `grill`" not in WAYFINDER, (
-    "wayfinder must not delegate charting back to grill"
+require(DECISION_MAP, "docs/briefs/{YYYY-MM-DD}-{slug}-map.md", "decision-map writes the map")
+require(DECISION_MAP, "This skill owns that format", "decision-map owns the map format")
+assert "Delegate charting to `grill`" not in DECISION_MAP, (
+    "decision-map must not delegate charting back to grill"
 )
 # Both hand-off directions skip an interview that already ran (#288).
-for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder")):
+for skill_text, scenario in ((GRILL, "grill"), (DECISION_MAP, "decision-map")):
     require_words(
         skill_text,
         "**If the interview already ran this session, do not run it again.**",
@@ -187,7 +186,7 @@ require_words(
     "{original caller}'s {artifact} will not be written.",
     "mid-interview switch is announced, not silent",
 )
-for direction in ("`/grill` typed three questions into a `wayfinder`", "`/wayfinder` typed during a `grill`"):
+for direction in ("`/grill` typed three questions into a `decision-map`", "`/decision-map` typed during a `grill`"):
     require_words(INTERVIEW, direction, "mid-interview switch covers both directions")
 
 require_words(

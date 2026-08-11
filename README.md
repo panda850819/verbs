@@ -84,7 +84,7 @@ procedures exist for narrower situations:
 |---|---|
 | The owner, source of truth, target, or next specialist is unclear | `ask-boss` |
 | You explicitly want an adversarial stress test of hidden requirements | `grill` |
-| Several dependent decisions must remain visible across sessions | `wayfinder` |
+| Several dependent decisions must remain visible across sessions | `decision-map` |
 | Settled requirements need one canonical GitHub Spec Issue | `to-spec` |
 | A canonical Spec needs vertical-slice child Issues and dependency edges | `to-tickets` |
 | The repository's Verbs tracker setting is missing or conflicting | `setup-verbs` |
@@ -181,7 +181,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:sprint-planning` | core | Plan one Sprint Goal and select ready work after a human approval gate. |
 | `/verbs:sprint-review` | core | Review one Sprint outcome against its Goal and product acceptance evidence. |
 | `/verbs:retro` | core | Review one completed Sprint and choose one evidence-backed process improvement. |
-| `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
+| `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
 | `/verbs:setup-verbs` | core | Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate. |
 | `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |
 | `/verbs:debug` | core | Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui). |
@@ -191,7 +191,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:codebase-design` | core | Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms. |
 | `/verbs:improve-codebase-architecture` | core | Produce a read-only visual survey of codebase architecture opportunities. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
-| `/verbs:wayfinder` | core | Chart or work cross-session decision maps when the request itself names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
+| `/verbs:decision-map` | core | Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |

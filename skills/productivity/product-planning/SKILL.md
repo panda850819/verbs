@@ -4,14 +4,14 @@ description: |
   Clarify the product problem, Product Goal, priority, and candidate backlog
   outcomes. Use when deciding what product work should happen next, why an
   opportunity matters, or which outcome deserves priority. May use ask-boss,
-  wayfinder, prototype, or to-spec when their narrower contract applies. NOT
+  decision-map, prototype, or to-spec when their narrower contract applies. NOT
   backlog-item readiness, iteration selection, or implementation.
 reads:
   - repo: "**"
   - repo: AGENTS.md
   - repo: CLAUDE.md
   - skill: ask-boss
-  - skill: wayfinder
+  - skill: decision-map
   - skill: prototype
   - skill: to-spec
 writes:
@@ -31,7 +31,7 @@ Read the repository contract and the available product evidence: stated user
 problem, current behavior, prior decisions, active goals, and relevant tracker
 references. Separate observed facts from assumptions. If the owner, source of
 truth, target, or authority is unclear, use `ask-boss`; if several dependent
-decisions require work across sessions, use `wayfinder`.
+decisions require work across sessions, use `decision-map`.
 
 Completion: the decision owner, evidence sources, and decision horizon are
 named; missing sources remain visible.

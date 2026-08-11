@@ -1,10 +1,10 @@
 ---
-name: wayfinder
+name: decision-map
 type: skill
 description: |
-  Chart or work a decision map across sessions until the route to its
-  destination is clear. Use when the request itself names a map, resumes one,
-  or an `ask-boss` handoff identifies multi-session decision fog. With no map
+  Create or work a Decision Map across sessions until the route to its
+  destination is clear. Use when the request names a map, resumes one, or an
+  `ask-boss` handoff identifies multi-session decision fog. With no map
   yet, run the interview and write the map here, then stop. With an existing
   map, take ONE unblocked entry, resolve it by type (research / grilling /
   prototype / task), write the decision back, and graduate the fog. A request
@@ -26,17 +26,17 @@ capability_required:
   - skill: prototype
 user-invocable: true
 ---
-# Wayfinder
+# Decision Map
 
-Wayfinder has two modes: chart a new Decision Map, or resolve one existing
-frontier entry per session. It does not execute a locked plan.
+Decision Map has two modes: chart a new map, or resolve one existing frontier
+entry per session. It does not execute a locked plan.
 
 ## Handoff from `ask-boss`
 
 Carry the destination, known context, source references, authority, and
 contradictions from `ask-boss`. **Do not re-run orientation or ask for facts
-already present in the packet.** `wayfinder` owns the map, one-entry close, and
-map artifact; it may interview only for decisions the map still needs.
+already present in the packet.** `decision-map` owns the map, one-entry close,
+and map artifact; it may interview only for decisions the map still needs.
 
 If a caller already started an unfinished interview, follow the shared switch
 rule and carry answers forward rather than restarting.

@@ -51,8 +51,8 @@ choice. Clear typed specialist requests bypass the stage layer.
 
 Supporting planning procedures retain their narrower contracts. `ask-boss`
 orients unclear authority or sources, `grill` supplies dependency-aware
-requirements discovery, and `wayfinder` owns cross-session Decision Maps when
-the request names a map. Spec-sized work follows `to-spec` into one canonical GitHub Spec Issue and
+requirements discovery, and `decision-map` owns cross-session Decision Maps
+when the request names a map. Spec-sized work follows `to-spec` into one canonical GitHub Spec Issue and
 `to-tickets` into vertical-slice child Issues. `to-tickets` reports the frontier
 but does not choose work. A human selects one unblocked implementation Issue.
 
@@ -94,7 +94,7 @@ stages remain independently callable because each has a distinct contract:
 
 For several independent outcomes, run several bounded sprints. Selection stays
 manual: do not turn `sprint` into a permanent autonomous driver, let it claim
-the next frontier, or use `wayfinder` as a task scheduler.
+the next frontier, or use `decision-map` as a task scheduler.
 
 ### Invocation and guidance
 
@@ -118,12 +118,12 @@ safety and verification guidance, not host-level enforcement.
 | `verbs:product-planning` | Clarify the product problem, Product Goal, priority, and candidate backlog outcomes. | what product work should happen next, why does this matter, prioritize this opportunity |
 | `verbs:backlog-refinement` | Make one backlog item `READY` or `NOT_READY` from scope, acceptance, dependencies, edge states, and evidence. | refine this Issue, is this ready, clarify this backlog item |
 | `verbs:sprint-planning` | Propose one Sprint Goal and ready work for a human approval decision; never execute the selection. | explicit request to plan the next Sprint |
-| `verbs:grill` | Adversarial requirement discovery through dependency-aware frontier rounds. Routes large foggy work to Wayfinder, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
+| `verbs:grill` | Adversarial requirement discovery through dependency-aware frontier rounds. Routes large foggy work to Decision Map, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
 | `verbs:ask-boss` | Route unclear owner, target, reference, or next route to one existing specialist; facts first, no generic grilling. | where do I start, who decides, which reference, what route, unclear next step |
 | `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
 | `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |
 | `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
-| `verbs:wayfinder` | Chart or work cross-session decision maps named by the request or handed off by `ask-boss`; resolve one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map, several dependent decisions |
+| `verbs:decision-map` | Create or work cross-session Decision Maps named by the request or handed off by `ask-boss`; resolve one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map, several dependent decisions |
 | `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
 | `verbs:sprint-review` | Inspect the delivered product outcome against its Sprint Goal and current acceptance evidence. | explicit request to review or accept the Sprint outcome |
 | `verbs:retro` | Choose at most one evidence-backed product-engineering process improvement from a completed Sprint. | explicit request to run a Sprint Retro |
@@ -177,7 +177,7 @@ pre-adoption trust, and `harness-slim` for post-adoption system load.
 - `product-planning` chooses an outcome and priority; `backlog-refinement`
   determines whether one candidate item is ready.
 - `grill` supplies the dependency-aware interview discipline;
-  `wayfinder` maintains a cross-session Decision Map.
+  `decision-map` maintains a cross-session Decision Map.
 - `sprint-planning` selects ready work after a human approval gate; `sprint`
   executes one selected finish line.
 - `review` inspects code and `qa` proves browser behavior; `sprint-review`

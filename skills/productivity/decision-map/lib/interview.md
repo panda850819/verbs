@@ -7,14 +7,14 @@
 >
 > Origin: extracted from `grill` (2026-07-31, issue #284). `grill` bundled the
 > interview with its own close, so a skill wanting only the interview had to
-> invoke all of `grill` and stop at its routing gate. `wayfinder` was the
-> casualty; see the entry 4 decision note in the v1 direction map. The
+> invoke all of `grill` and stop at its routing gate. The former `wayfinder`
+> (now `decision-map`) was the casualty; see the entry 4 decision note in the v1 direction map. The
 > frontier-round cadence was adapted from `mattpocock/skills` v1.2 in #328.
 
 ## When to load
 
 Skills that interview a human to discover requirements, scope, or intent:
-`grill` before its structured close, `wayfinder` while charting a map.
+`grill` before its structured close, `decision-map` while charting a map.
 
 Skip when scope is already concrete. An interview run against a locked scope is
 theatre.
@@ -133,8 +133,8 @@ to ask again.
 ## Switching callers mid-interview
 
 The user names a different interviewing skill while this interview is still
-unfinished — `/grill` typed three questions into a `wayfinder` charting session,
-`/wayfinder` typed during a `grill` drilling session. Nothing is running that can
+unfinished — `/grill` typed three questions into a `decision-map` charting
+session, `/decision-map` typed during a `grill` drilling session. Nothing is running that can
 be interrupted, so the switch happens whatever the combined prose implies; state
 it instead of letting it resolve silently.
 
