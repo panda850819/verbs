@@ -36,6 +36,18 @@
     "expected_route": null
   },
   {
+    "id": "sprint-explicit",
+    "invocation": "explicit",
+    "prompt": "Execute the selected Issue through acceptance, review, and delivery evidence.",
+    "expected_route": "sprint"
+  },
+  {
+    "id": "sprint-implicit-negative",
+    "invocation": "implicit",
+    "prompt": "The item is ready and someone could begin implementing it.",
+    "expected_route": null
+  },
+  {
     "id": "sprint-review-explicit",
     "invocation": "explicit",
     "prompt": "Review the delivered Sprint outcome against its Goal.",

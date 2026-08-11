@@ -13,13 +13,16 @@ CASES = json.loads(
 by_id = {case["id"]: case for case in CASES}
 assert len(by_id) == len(CASES), "routing case ids must be unique"
 
-for stage in ("product-planning", "backlog-refinement", "sprint-planning", "sprint-review", "retro"):
+for stage in (
+    "product-planning", "backlog-refinement", "sprint-planning", "sprint",
+    "sprint-review", "retro",
+):
     assert any(case["expected_route"] == stage for case in CASES), f"missing {stage} positive"
 
 for neighbor in ("debug", "review", "qa"):
     assert any(case["expected_route"] == neighbor for case in CASES), f"missing {neighbor} negative"
 
-for stage in ("sprint-planning", "sprint-review", "retro"):
+for stage in ("sprint-planning", "sprint", "sprint-review", "retro"):
     positive = next(case for case in CASES if case["expected_route"] == stage)
     assert positive["invocation"] == "explicit"
     assert any(
