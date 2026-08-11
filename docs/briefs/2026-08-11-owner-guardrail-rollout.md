@@ -2,7 +2,7 @@
 
 Date: 2026-08-11  
 Issue: [#354](https://github.com/panda850819/verbs/issues/354)  
-Status: disposable proof passed; `main` change awaits explicit approval
+Status: `main` payload applied and read back; real-PR verification pending
 
 ## Fresh `main` snapshot before writes
 
@@ -80,15 +80,19 @@ Every other field in the starting snapshot remains unchanged. In particular,
 
 ## Apply and verify
 
-After explicit approval:
+Explicit approval was granted after the disposable evidence and exact diff were
+presented. Immediately before apply, a fresh `main` read-back matched the saved
+starting snapshot. The complete payload was then applied, and every captured
+field matched the approved result: administrator enforcement enabled, zero-
+approval pull request required, `test` still bound to app ID `15368`, and all
+other booleans unchanged.
 
-1. read `main` again and stop if it differs from the starting snapshot;
-2. apply the complete payload, not partial endpoint edits;
-3. read the result back and compare every captured field;
-4. push this evidence document through a real PR targeting `main`;
-5. verify the latest exact PR commit receives `test` from app ID `15368`, zero
+The remaining verification is to:
+
+1. push this evidence document through a real PR targeting `main`;
+2. verify the latest exact PR commit receives `test` from app ID `15368`, zero
    approvals are required, and the owner can merge through the normal path;
-6. read `main` protection once more after merge.
+3. read `main` protection once more after merge.
 
 The real PR is part of the verification: it must not be merged through an admin
 bypass. If GitHub reports the PR unmergeable despite a green exact-SHA check,
