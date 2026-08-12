@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.27.0 — Explicit loading and review boundaries
+
+### Changed
+
+- README now documents Agent Skills progressive disclosure, reference loading,
+  security ownership, and the distinction between isolated code review and
+  cross-model Advisor judgment.
+- Escalated Review now requires any isolated read-only context with a bound diff
+  and intent. It no longer consumes Advisor-only model anchors or treats model
+  family and transport as Review semantics; unavailable isolation stays an
+  explicit evidence gap. (#365)
+- Gatekeeper loads social-engineering and supply-chain references only when the
+  active evidence branch calls for them. Its unused runtime-local README and
+  historical pilot artifacts were removed without deleting security procedures,
+  templates, or pattern knowledge.
+- Careful now stops only at destructive, production, and shared-state gates;
+  general task-continuation policy no longer belongs to that skill.
+- The skill authoring checklist now requires semantic capabilities, explicit
+  stop and terminal-state contracts, and fail-closed behavior without assuming
+  one host's tool names.
+
+### Fixed
+
+- `lib/verify-the-test-loop.md` now names its actual generated consumers:
+  Sprint, Careful, and Debug.
+
 ## v0.26.1 — Advisor Luna anchor
 
 ### Changed

@@ -161,7 +161,10 @@ safety and verification guidance, not host-level enforcement.
 
 Use `review` for a diff, `qa` for rendered behavior, `sprint-review` for the
 product outcome, `debug` for an unexplained failure, `gatekeeper` for
-pre-adoption trust, and `harness-slim` for post-adoption system load.
+pre-adoption trust, and `harness-slim` for post-adoption system load. An
+escalated Review needs an isolated read-only context, not a particular model or
+transport; `advisor` alone requires a different model family through pinned
+model anchors.
 
 ### Architecture, prototype, and UI
 

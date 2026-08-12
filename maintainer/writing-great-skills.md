@@ -77,6 +77,22 @@ This reference applies the same test to itself: generic model guidance can draft
 a skill, while Verbs adds a checkable nine-axis scorecard plus its local
 hot/cold, routing, and conformance rules.
 
+## New skill contract checklist
+
+Before registering a new skill:
+
+1. Name the existing surface it extends or replaces.
+2. Check `.out-of-scope/` and cite the matching precedent, or state that none
+   applies.
+3. Make every required input visible in each output record that depends on it.
+4. Give every terminal state one unambiguous result and completion condition.
+5. State the stop boundary. Explicitly prohibit claiming, assigning, scheduling,
+   tracker mutation, successor invocation, and execution unless the skill owns
+   that side effect.
+6. Define a required capability by semantics, not by one host's tool name. Name
+   a host-specific transport only when that transport is the product capability,
+   and state the fail-closed result when the semantic capability is unavailable.
+
 ## The scorecard
 
 Score a skill on these axes — each **pass / weak / fail** with one cited line. The criterion for each lives in the section it names above; this is the index, not a second copy.

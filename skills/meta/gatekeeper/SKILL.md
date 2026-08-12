@@ -90,9 +90,16 @@ the gate.
 
 ## Pattern libraries
 
-Apply the shared [red flags](patterns/red-flags.md),
-[social-engineering](patterns/social-engineering.md), and
-[supply-chain](patterns/supply-chain.md) libraries to every review.
+Load references only for the active evidence branch:
+
+- Apply [red flags](patterns/red-flags.md) to executable or capability-bearing
+  artifacts.
+- Load [social engineering](patterns/social-engineering.md) only when content
+  asks the agent or human to trust, disclose, bypass, download, or execute.
+- Load [supply chain](patterns/supply-chain.md) only for install, package,
+  dependency, update, build, or release paths.
+
+Do not load an unrelated pattern library merely because it is bundled.
 
 ## Report templates
 

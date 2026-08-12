@@ -20,7 +20,7 @@ for row in "${expected_rows[@]}"; do
   }
 done
 
-for skill in skills/engineering/advisor/SKILL.md skills/engineering/review/SKILL.md; do
+for skill in skills/engineering/advisor/SKILL.md; do
   grep -Fq -- '- skill: lib/model-anchors.md' "$skill" || {
     echo "FAIL: $skill does not declare the model anchor read"
     exit 1
@@ -35,6 +35,12 @@ for skill in skills/engineering/advisor/SKILL.md skills/engineering/review/SKILL
     exit 1
   }
 done
+
+if find skills -path '*/lib/model-anchors.md' ! -path 'skills/engineering/advisor/lib/model-anchors.md' | grep -q .; then
+  echo "FAIL: Advisor model anchors are vendored to another skill"
+  find skills -path '*/lib/model-anchors.md' ! -path 'skills/engineering/advisor/lib/model-anchors.md'
+  exit 1
+fi
 
 if rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/ >/dev/null; then
   echo "FAIL: runtime model selectors must stay in lib/model-anchors.md"

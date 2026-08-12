@@ -39,7 +39,6 @@ README_CATALOG_END = "<!-- END GENERATED: skill-catalog -->"
 # of vendored from a canonical manifest resource.
 SKILL_LOCAL_LIB_ALLOWLIST = frozenset({
     Path("skills/engineering/careful/lib/rationalizations.md"),
-    Path("skills/engineering/careful/lib/stopping-discipline.md"),
     Path("skills/engineering/debug/lib/diagnosis.md"),
     Path("skills/engineering/ship/lib/quote-gate.md"),
     Path("skills/engineering/ship/lib/rationalizations.md"),

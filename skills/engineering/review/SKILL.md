@@ -9,7 +9,6 @@ reads:
   - repo: AGENTS.md
   - repo: CLAUDE.md
   - skill: lib/learning-recall.md
-  - skill: lib/model-anchors.md
   - cli: git
 writes:
   - cli: stdout
@@ -50,7 +49,7 @@ risk trigger, candidate finding, coverage gap, or scope drift.
 Only in the low lane with explicit scope and intent: trace the changed path,
 match acceptance and branches to tests, and self-refute the likeliest defect. An
 `INTENT GAP` promotes rather than entering this fast path. If no finding, gap, or
-drift remains: Do not load review learnings or model anchors; enumerate no lenses,
+drift remains: Do not load review learnings; enumerate no lenses,
 print no empty scope-drift or cold-review fields, and return:
 
 ```markdown
@@ -73,10 +72,14 @@ range, a trigger, mechanism and user-visible consequence, and a correction
 direction. Exclude style,
 unreachable speculation, and pre-existing defects; review does not edit code.
 
-Use a cold-context reviewer when the lane is high, the diff exceeds roughly 5K
-tokens, or a load-bearing conclusion remains disputed. Give it only the bound
-diff and intent; merge findings by mechanism; disagreement becomes `NEEDS TRACE`,
-not a vote. Read `lib/model-anchors.md` only at this point and select its role.
+Use an isolated read-only reviewer when the lane is high, the diff exceeds
+roughly 5K tokens, or a load-bearing conclusion remains disputed. Give it only
+the bound diff, intent, and applicable repository contract, without the author's
+analysis or proposed verdict. Any fresh context that satisfies those semantics is
+valid; the transport and model family do not define the review. If no isolated
+context is available, record `Cold review: unavailable — no isolation capability`.
+A second pass in this same context is not a cold review. Merge findings by
+mechanism; disagreement becomes `NEEDS TRACE`, not a vote.
 
 Match acceptance and branches to tests, run the narrowest available checks, and
 self-refute the highest-risk assumption. Report `COVERAGE GAP` only for unproved

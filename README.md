@@ -157,6 +157,48 @@ matching `allow_implicit_invocation: false` policy.
 [`RESOLVER.md`](RESOLVER.md) contains the complete disambiguation model.
 Each `SKILL.md` description is the machine-routing surface.
 
+### Progressive disclosure
+
+Verbs follows the Agent Skills loading model. A session starts with each
+available skill's name and description. The full `SKILL.md` loads only when the
+skill is invoked; bundled references load only when the active procedure points
+to the applicable branch and the agent reads that file. `manifest.toml`
+`resources[]` controls packaging and generated copies, not context injection.
+An unused branch reference therefore carries install size but no invocation
+context cost.
+
+Keep references one level from `SKILL.md`, and state when each one applies. A
+skill must not load every bundled reference merely because it is present.
+Gatekeeper, for example, loads social-engineering patterns only for persuasion,
+disclosure, bypass, download, or execution signals, and supply-chain patterns
+only for install, package, dependency, update, build, or release paths.
+
+### Trust, review, and authority boundaries
+
+Security checks are divided by the object and decision rather than collected in
+one generic security flow:
+
+| Procedure | Owns |
+|---|---|
+| `gatekeeper` | Trust evidence before adopting an external artifact. |
+| `review` | Correctness, security, data-integrity, concurrency, and operations findings in the bound repository diff. |
+| `careful` | Confirmation immediately before destructive, production, or shared-state actions. |
+| `sprint` | Acceptance, review, Git, and delivery ownership for one finish line. |
+| `qa` | Browser-visible acceptance evidence bound to the current artifact. |
+| `ship` | Commit, push, PR, and QA-evidence publication. |
+| `sprint-review` | Product-outcome acceptance by a named human authority. |
+
+An escalated `review` may use any isolated read-only context. It receives only
+the bound diff, intent, and applicable repository contract, without the author's
+analysis or proposed verdict. Transport and model family do not define a cold
+review; a second pass in the same context is not one. If isolation is
+unavailable, Review records the gap.
+
+`advisor` has a different contract: it introduces a decorrelated opinion from a
+different model family for a load-bearing judgment. Advisor alone consumes the
+pinned model, effort, transport, and guard rows in `lib/model-anchors.md`. Those
+rows describe invocation and do not grant host or filesystem permissions.
+
 ## Product boundary
 
 Verbs ships **skills, shared procedural primitives, install manifests, evals,
