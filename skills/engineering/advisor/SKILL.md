@@ -1,7 +1,7 @@
 ---
 name: advisor
 description: |
-  Pull a decorrelated second opinion from a DIFFERENT model on a LOAD-BEARING judgment: a design fork, a pre-commit plan, an irreversible or outward-facing call. Reversible calls just decide. `--panel` = blind critics on a prepared plan. NOT code-diff review (review), NOT mechanical work for Codex (handover), NOT sharpening a fuzzy idea (grill).
+  Pull a decorrelated second opinion from a DIFFERENT model on a LOAD-BEARING judgment: a design fork, a pre-commit plan, an irreversible or outward-facing call. Reversible calls just decide. `--panel` = blind critics on a prepared plan. NOT code-diff review (review), delegated execution (Herdr or host-native workers), or sharpening a fuzzy idea (grill).
 reads:
   - skill: lib/gate-contract.md
   - skill: lib/model-anchors.md
@@ -23,12 +23,12 @@ user-invocable: true
 
 ## Routing Boundary
 
-advisor pulls JUDGMENT in from a different model. It is the inbound half of the cross-runtime pair; `handover` is the outbound half (it sends mechanical build work OUT to Codex). Keep them distinct:
+advisor pulls JUDGMENT in from a different model:
 
 - Second opinion on a judgment / design fork / decision → advisor (default).
 - Adversarial critique of a PREPARED plan → advisor `--panel`.
 - Review a code diff → `review`.
-- Hand unfinished mechanical build work to Codex to DO → `handover`.
+- Delegate execution → Herdr when explicitly requested in a managed pane, or the host's native worker surface.
 - Sharpen a fuzzy idea by self-interview → `grill`.
 
 advisor never writes code, never commits, never touches git. It asks another model and returns the outside view; the caller decides. Never auto-incorporate a finding.

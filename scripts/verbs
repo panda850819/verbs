@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verbs CLI: install checks, manifest sync, and bounded fresh runs. Stdlib only."""
+"""Verbs CLI: install checks and manifest sync. Stdlib only."""
 import argparse
 import json
 import os
@@ -9,8 +9,6 @@ import stat
 import subprocess
 import sys
 from pathlib import Path
-
-import fresh_run
 
 
 def _env_value(canonical, legacy, default=None):
@@ -1327,7 +1325,7 @@ def run_sync(args):
 def main():
     parser = argparse.ArgumentParser(
         prog="verbs",
-        description="Verbs CLI: install checks, manifest sync, and fresh runs",
+        description="Verbs CLI: install checks and manifest sync",
     )
     sub = parser.add_subparsers(dest="command")
 
@@ -1363,8 +1361,6 @@ def main():
         action="store_true",
         help="Exit nonzero if derived files drift from manifest.toml (no writes)",
     )
-
-    fresh_run.add_parser(sub)
 
     sub.add_parser("help", help="Show this help message")
 

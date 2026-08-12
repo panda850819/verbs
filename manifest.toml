@@ -44,20 +44,20 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.25.0"
+version = "0.26.0"
 schema  = "skill-tier-v1"
-updated = "2026-08-11"
+updated = "2026-08-12"
 
 # History from before pandastack was renamed to Verbs is retained in CHANGELOG.md.
 
 # ============================================================================
 # CORE (19) — markdown-first, fresh-clone available
-# Buckets on disk: engineering / productivity / writing / meta
+# Buckets on disk: engineering / productivity / meta
 #
 # Git is the baseline software-work CLI, so review / debug stay core with a
 # cli:git requirement. A host-native capability such as browser automation does
 # not make the pack own a CLI dependency. Skills that directly invoke optional
-# external CLIs are ext — see /ship and /handover below.
+# external CLIs are ext — see /ship and /advisor below.
 # ============================================================================
 
 [skill.careful]
@@ -137,8 +137,8 @@ description = "Systematic root-cause debugging: hypothesis gate, instrument-firs
 
 [skill.sprint]
 tier = "core"
-resources = ["lib/learning-format.md", "lib/model-anchors.md", "lib/verify-the-test-loop.md"]
-composes = ["debug", "grill", "handover", "review", "ship", "ui"]
+resources = ["lib/learning-format.md", "lib/verify-the-test-loop.md"]
+composes = ["debug", "grill", "review", "ship", "ui"]
 description = "Acceptance-driven execution with bounded review and delivery evidence."
 
 [skill.ui]
@@ -179,7 +179,7 @@ composes = ["grill", "prototype"]
 description = "Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill."
 
 # ============================================================================
-# EXT (6) — public CLI dependencies
+# EXT (5) — public CLI dependencies
 # ============================================================================
 
 [skill.to-tickets]
@@ -202,13 +202,6 @@ requires = ["cli:git", "cli:gh"]
 resources = ["lib/learning-format.md", "lib/qa-evidence-format.md", "lib/trigger-first-skill-evolution.md"]
 composes = []
 description = "Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext."
-
-[skill.handover]
-tier = "ext"
-requires = ["cli:git", "cli:codex", "cli:claude"]
-resources = ["lib/model-anchors.md"]
-composes = []
-description = "Hand one unfinished mechanical unit to an explicit fresh worker while the source agent keeps ownership. Detect a managed Herdr pane before choosing sibling-agent transport; otherwise use Claude/Codex fresh-run or an async payload."
 
 [skill.advisor]
 tier = "ext"

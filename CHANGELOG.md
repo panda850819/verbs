@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.26.0 — Native delegation ownership
+
+### Removed
+
+- Retired the public `handover` skill, `scripts/verbs fresh-run`, async payload
+  support, Handover-only model anchors, optional-CLI probes, and transport tests.
+  Herdr and host-native workers now own delegated-execution transport. (#361)
+
+### Changed
+
+- Sprint retains acceptance, review, Git, and delivery ownership when a human
+  explicitly delegates a bounded unit through Herdr or a host-native worker.
+  Worker output is evidence, not completion. (#361)
+- Grill briefs now recommend one owning Sprint and name Herdr or a host-native
+  worker only as an explicit delegation surface. Advisor remains the route for
+  cross-model judgment, not execution. (#361)
+
+### Migration
+
+- Replace `/verbs:handover` and `scripts/verbs fresh-run` with the installed
+  Herdr skill inside a managed Herdr pane, or with the current host's native
+  worker surface. Keep the active Sprint responsible for acceptance, review,
+  Git, and delivery.
+
 ## v0.25.0 — Product engineering stages
 
 ### Added

@@ -58,11 +58,11 @@ Apply `lib/skill-decision-tree.md` 2-question test against the chosen approach:
 
 ```
 Shape: {single-target-iterative / delegated-mechanical-batch / pure-decision}
-Reasoning: {one line — which route fits and why}
+Reasoning: {one line — which execution surface fits and why}
 
-Recommended skill:
-  → /sprint {topic-slug}                          # if active judgment and review stay in the foreground session
-  → /handover {topic-slug}                        # if the next work is a bounded mechanical batch for Codex
+Recommended execution:
+  → /sprint {topic-slug}                          # foreground execution with acceptance, review, Git, and delivery ownership
+  → Herdr or a host-native worker                 # only when the human explicitly requests delegated execution
 ```
 
 ## Gotchas surfaced

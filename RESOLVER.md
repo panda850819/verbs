@@ -58,8 +58,8 @@ but does not choose work. A human selects one unblocked implementation Issue.
 
 Work below the Spec threshold retains Grill's local brief and executable-plan
 close. A small reversible fix may use the repository's direct branch/PR path.
-`handover` remains one bounded mechanical execution unit; its caller retains
-acceptance and Git ownership.
+Explicit delegation uses Herdr inside a managed pane or the host's native worker
+surface. The active Sprint retains acceptance, review, Git, and delivery ownership.
 
 ### Typed on-ramps
 
@@ -90,7 +90,8 @@ stages remain independently callable because each has a distinct contract:
 - `qa` proves browser-visible acceptance after a UI change.
 - `review` inspects a diff for grounded correctness and risk findings.
 - `ship` tests, commits, pushes, and creates the PR for completed work.
-- `handover` executes one unfinished mechanical unit in fresh context.
+- Herdr or a host-native worker may execute one explicitly delegated unit; the
+  active Sprint still owns completion.
 
 For several independent outcomes, run several bounded sprints. Selection stays
 manual: do not turn `sprint` into a permanent autonomous driver, let it claim
@@ -135,7 +136,6 @@ safety and verification guidance, not host-level enforcement.
 | `verbs:qa` | Verify a changed UI in a browser and capture acceptance evidence. | test this UI, QA, check the page |
 | `verbs:review` | Review a code diff with risk-adaptive evidence and earned cold-context escalation. | review this diff or PR, about to commit |
 | `verbs:ship` | Close completed Git work through test, commit, push, PR, and QA evidence publication when present. | code is done, ship it, create a PR |
-| `verbs:handover` | Give one locked mechanical unit to a fresh Claude or Codex worker, or run bounded native read-only Agent Worker fan-out. | fresh context, parallel read-only research, agent workers |
 | `verbs:advisor` | Pull a decorrelated opinion from a different model; `--panel` critiques a prepared plan blindly from multiple angles. | second opinion, design fork, red-team this plan |
 | `verbs:careful` | Add confirmation and recovery gates around production, shared infrastructure, or destructive work. | production, shared infra, destructive command |
 
@@ -183,8 +183,8 @@ pre-adoption trust, and `harness-slim` for post-adoption system load.
 - `review` inspects code and `qa` proves browser behavior; `sprint-review`
   decides whether the product outcome achieved the Goal.
 - `retro` proposes one process improvement after completion.
-- `handover` supplies fresh execution context for one locked plan unit and
-  never owns the broader outcome.
+- Herdr and host-native workers may supply delegated execution context, but the
+  active Sprint owns the broader outcome.
 
 ## Aliases
 
