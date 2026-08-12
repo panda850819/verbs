@@ -37,7 +37,9 @@ which system change could prevent the most important recurrence. Prefer a
 specific reversible change over a broad aspiration.
 
 Self-refute the proposed explanation against one competing cause. Drop the
-change when the evidence does not survive that check.
+change when the evidence does not survive that check. If no change survives,
+return `NO_SUPPORTED_ACTION`; never emit `ACTION_PROPOSED` without a supported
+Action.
 
 Completion: the chosen change traces from evidence through mechanism to an
 observable next-use check.

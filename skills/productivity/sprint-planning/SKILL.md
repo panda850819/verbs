@@ -34,8 +34,10 @@ contributes to that goal and fits the stated capacity. Account for dependencies
 and uncertainty; do not use nominal capacity as evidence that an unknown item
 fits. List excluded candidates with reasons.
 
-Completion: every selected item traces to the goal, has readiness evidence, and
-fits without relying on an unwritten future item.
+Completion: every selected item traces to the goal, names its readiness-record
+reference, records `blocker status: clear` with the blocker-check evidence, and
+fits without relying on an unwritten future item. Any item with an active blocker
+belongs under Excluded.
 
 ## 3. Preview and approve
 
@@ -46,7 +48,7 @@ Sprint Planning: <period or label>
 Status: PROPOSED
 Sprint Goal: <one outcome>
 Selected:
-- <Issue/reference> — <goal contribution> — <capacity basis>
+- <Issue/reference> — goal: <contribution> — readiness: <record reference> — blocker status: clear — blocker check: <evidence reference and time> — capacity: <basis>
 Excluded:
 - <Issue/reference> — <reason>
 Dependencies / risks:
@@ -57,7 +59,9 @@ Decision owner: <human>
 
 Ask once: `[approve / reject]`.
 
-- `approve`: return the same record with `Status: APPROVED`.
+- `approve`: return the same record with `Status: APPROVED` only when every
+  selected item preserves its readiness reference, `blocker status: clear`, and
+  blocker-check evidence.
 - `reject`: return `Status: REJECTED` and stop without replacing the proposal.
 
 Approval records the human selection only. Do not assign Issues, create or
@@ -65,5 +69,6 @@ switch branches, invoke another skill, mutate the tracker, or start work.
 
 ## Completion
 
-Done when the proposal is `APPROVED`, `REJECTED`, or `BLOCKED`, and no selected
-item has been claimed or executed.
+Done when the proposal is `APPROVED`, `REJECTED`, or `BLOCKED`; every item in an
+`APPROVED` record includes its readiness reference, clear blocker status, and
+blocker-check evidence; and no selected item has been claimed or executed.

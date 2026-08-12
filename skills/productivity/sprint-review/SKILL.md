@@ -25,12 +25,16 @@ Sprint Goal was achieved.
 
 Read the Sprint Goal, completed-item references, acceptance criteria, delivered
 artifact identity, QA evidence when applicable, and stakeholder feedback. Name
-who has authority to accept the product outcome.
+who has authority to accept the product outcome. Bind the artifact as a full
+commit SHA or `patch-sha256:<digest>`; patch evidence also requires the full base
+SHA. A generic PR number, URL, build label, or abbreviated SHA is not an artifact
+identity.
 
-Return `UNPROVEN` immediately when the Sprint Goal is missing or the delivered
-artifact cannot be identified.
+Return `UNPROVEN` immediately when the Sprint Goal is missing or the exact
+delivered artifact identity cannot be established.
 
-Completion: goal, artifact, acceptance set, and acceptance authority are bound.
+Completion: goal, exact artifact and base when required, acceptance set, and
+acceptance authority are bound.
 
 ## 2. Inspect outcome evidence
 
@@ -47,12 +51,13 @@ the delivered artifact.
 
 ## 3. Decide the result
 
-- `ACCEPTED`: every criterion and Goal claim passes on current evidence, and any
-  required human acceptance is present.
-- `NEEDS_CHANGES`: current evidence demonstrates at least one failed criterion
-  or the outcome does not achieve the Goal.
-- `UNPROVEN`: evidence is missing, incomplete, stale, indirect, or awaiting a
-  required human decision.
+- `ACCEPTED`: every criterion and Goal claim passes on current evidence, and the
+  named acceptance authority explicitly records `Stakeholder decision: accepted`.
+- `NEEDS_CHANGES`: current evidence demonstrates at least one failed criterion,
+  the outcome does not achieve the Goal, or the named authority records
+  `Stakeholder decision: changes requested`.
+- `UNPROVEN`: evidence is missing, incomplete, stale, indirect, or the stakeholder
+  decision is pending, absent, or marked not required.
 
 Never convert missing evidence into `ACCEPTED`.
 
@@ -62,11 +67,13 @@ Never convert missing evidence into `ACCEPTED`.
 Sprint Review: <label>
 Result: ACCEPTED | NEEDS_CHANGES | UNPROVEN
 Sprint Goal: <goal>
-Artifact: <commit / PR / build identity>
+Artifact: <full commit SHA | patch-sha256:digest>
+Base: <full base SHA | n/a for committed-head identity>
 Acceptance:
 - AC-1: PASS | FAIL | UNPROVEN — <evidence>
 Goal assessment: PASS | FAIL | UNPROVEN — <evidence>
-Stakeholder decision: <accepted / changes requested / pending / not required>
+Acceptance authority: <named human>
+Stakeholder decision: <accepted / changes requested / pending>
 Feedback:
 - <observation or none>
 Candidate backlog outcomes:

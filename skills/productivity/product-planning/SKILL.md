@@ -64,6 +64,8 @@ reverse it, or the exact evidence or owner decision still required.
 ```markdown
 Product Planning: <topic>
 Status: PRIORITIZED | DECISION_REQUIRED | INSUFFICIENT_EVIDENCE
+Decision owner: <named human>
+Decision horizon: <time boundary>
 Product Goal: <one outcome>
 User problem: <observed problem and consequence>
 Success signal: <observable measure>
