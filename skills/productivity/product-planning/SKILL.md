@@ -25,6 +25,14 @@ user-invocable: true
 Product Planning turns product evidence into one prioritized outcome. It does
 not make an implementation commitment or become a product-truth store.
 
+## Surface boundary
+
+Extends Verbs routing with product-direction prioritization; replaces no host
+role, built-in planning system, or product-truth store. The applicable
+`.out-of-scope/persona-layer.md` precedent is preserved: this remains a
+skill-as-markdown procedure, not a Product Manager persona. No other matching
+out-of-scope precedent exists.
+
 ## 1. Bind evidence and authority
 
 Read the repository contract and the available product evidence: stated user

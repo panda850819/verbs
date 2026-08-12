@@ -17,6 +17,14 @@ disable-model-invocation: true
 Retro improves the product-engineering system after one completed Sprint. It is
 not a personal reflection, scheduled journal, or general learning generator.
 
+## Surface boundary
+
+Extends Verbs routing with one evidence-backed engineering process proposal;
+replaces no personal reflection, scheduler, learning store, or Scrum role. The
+applicable `.out-of-scope/persona-layer.md` precedent is preserved: this remains
+a skill-as-markdown procedure, not a Scrum Master persona. No other matching
+out-of-scope precedent exists.
+
 ## 1. Bind evidence
 
 Read the Sprint Goal and result, selected versus completed work, blockers,

@@ -25,6 +25,12 @@ def require(name: str, fragment: str) -> None:
     assert expected in text, f"{name}: missing {fragment!r}"
 
 
+# Every new stage declares the existing surface and out-of-scope precedent.
+for name in SKILLS:
+    require(name, "## Surface boundary")
+    require(name, ".out-of-scope/persona-layer.md")
+    require(name, "No other matching out-of-scope precedent exists")
+
 # Product planning and refinement are natural-language routes.
 for name in ("product-planning", "backlog-refinement"):
     frontmatter = SKILLS[name].split("\n---\n", 1)[0]
@@ -70,11 +76,13 @@ for name in ("sprint-planning", "sprint-review", "retro"):
 require("product-planning", "Decision owner: <named human>")
 require("product-planning", "Decision horizon: <time boundary>")
 require("sprint-planning", "Selection authority stays with the human")
+require("sprint-planning", "Decision horizon: <period or time boundary>")
+require("sprint-planning", "an `APPROVED` record includes an explicit decision horizon")
 require("sprint-planning", "readiness: <record reference>")
 require("sprint-planning", "blocker status: clear")
 require("sprint-planning", "blocker check: <evidence reference and time>")
 require("sprint-planning", "Any item with an active blocker belongs under Excluded")
-require("sprint-planning", "every item in an `APPROVED` record includes its readiness reference, clear blocker status")
+require("sprint-planning", "every item includes its readiness reference, clear blocker status")
 require("sprint-planning", "Do not assign Issues, create or switch branches")
 
 # Product acceptance fails closed on every material evidence gap.

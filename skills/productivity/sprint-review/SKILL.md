@@ -21,6 +21,14 @@ Sprint Review inspects the product outcome. Code review proves properties of a
 diff and QA can prove browser-visible criteria; neither alone proves that the
 Sprint Goal was achieved.
 
+## Surface boundary
+
+Extends Verbs routing with product-outcome acceptance; replaces neither code
+diff review, browser QA, nor a host release gate. The applicable
+`.out-of-scope/persona-layer.md` precedent is preserved: acceptance authority is
+a named human, not a stakeholder or Product Owner persona. No other matching
+out-of-scope precedent exists.
+
 ## 1. Bind goal and delivered artifact
 
 Read the Sprint Goal, completed-item references, acceptance criteria, delivered

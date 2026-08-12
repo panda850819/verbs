@@ -18,6 +18,14 @@ Sprint Planning proposes one Sprint Goal and a feasible selection from already
 ready work. Selection authority stays with the human; this skill never executes
 the result.
 
+## Surface boundary
+
+Extends Verbs routing with a human-approved Sprint selection record; replaces no
+host scheduler, tracker planning view, or Scrum role. The applicable
+`.out-of-scope/persona-layer.md` precedent is preserved: this remains a
+skill-as-markdown procedure, not a Scrum Master or Product Owner persona. No
+other matching out-of-scope precedent exists.
+
 ## 1. Bind planning inputs
 
 Read the Product Goal, ordered backlog, readiness records, open blockers,
@@ -46,6 +54,7 @@ Show the complete proposal once:
 ```markdown
 Sprint Planning: <period or label>
 Status: PROPOSED
+Decision horizon: <period or time boundary>
 Sprint Goal: <one outcome>
 Selected:
 - <Issue/reference> — goal: <contribution> — readiness: <record reference> — blocker status: clear — blocker check: <evidence reference and time> — capacity: <basis>
@@ -69,6 +78,7 @@ switch branches, invoke another skill, mutate the tracker, or start work.
 
 ## Completion
 
-Done when the proposal is `APPROVED`, `REJECTED`, or `BLOCKED`; every item in an
-`APPROVED` record includes its readiness reference, clear blocker status, and
-blocker-check evidence; and no selected item has been claimed or executed.
+Done when the proposal is `APPROVED`, `REJECTED`, or `BLOCKED`; an `APPROVED`
+record includes an explicit decision horizon and usable planning inputs; every
+item includes its readiness reference, clear blocker status, and blocker-check
+evidence; and no selected item has been claimed or executed.

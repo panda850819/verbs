@@ -24,6 +24,14 @@ user-invocable: true
 Backlog Refinement owns readiness for one backlog item. `READY` means the item
 is understandable and verifiable, not that it will be selected or executed.
 
+## Surface boundary
+
+Extends Verbs routing with backlog-item readiness; replaces no tracker, host
+backlog system, or product role. The applicable
+`.out-of-scope/persona-layer.md` precedent is preserved: this remains a
+skill-as-markdown procedure, not a Product Owner persona. No other matching
+out-of-scope precedent exists.
+
 ## 1. Bind the item
 
 Read the source Issue, request, product outcome, repository evidence, and known
