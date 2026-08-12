@@ -73,8 +73,9 @@ Ask once: `[approve / reject]`.
   blocker-check evidence.
 - `reject`: return `Status: REJECTED` and stop without replacing the proposal.
 
-Approval records the human selection only. Do not assign Issues, create or
-switch branches, invoke another skill, mutate the tracker, or start work.
+Approval records the human selection only. Do not claim or assign Issues,
+schedule work, create child Issues, create or switch branches, invoke another
+skill, mutate the tracker, or start work.
 
 ## Completion
 

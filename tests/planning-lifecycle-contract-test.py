@@ -239,7 +239,7 @@ require_words(
 require(SPRINT_PLANNING, "Ask once: `[approve / reject]`.", "human selection gate")
 require_words(
     SPRINT_PLANNING,
-    "Do not assign Issues, create or switch branches, invoke another skill, mutate the tracker, or start work.",
+    "Do not claim or assign Issues, schedule work, create child Issues, create or switch branches, invoke another skill, mutate the tracker, or start work.",
     "planning does not execute",
 )
 require(SPRINT_REVIEW, "Result: ACCEPTED | NEEDS_CHANGES | UNPROVEN", "product review outcome")
