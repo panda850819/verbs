@@ -18,7 +18,7 @@ def require(text, fragment, label):
 
 
 require(SKILL, "disable-model-invocation: true", "human-only invocation")
-require(SKILL, "Read `codebase-design` first", "shared architecture vocabulary")
+require(SKILL, "Read `lib/codebase-design.md` first", "shared architecture vocabulary")
 require(SKILL, "latest 100 commits", "bounded hot-spot scan")
 require(SKILL, "do not edit repository files", "read-only repository boundary")
 require(SKILL, "deletion-test result", "candidate deletion-test evidence")
@@ -56,7 +56,7 @@ require(
 require(
     RESOLVER,
     "module is already chosen",
-    "codebase-design disambiguation",
+    "canonical resource disambiguation",
 )
 
 print("OK: architecture survey is bounded, read-only, evidence-ranked, and offline.")

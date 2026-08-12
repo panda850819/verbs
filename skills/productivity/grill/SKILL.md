@@ -15,6 +15,7 @@ reads:
   - skill: lib/stop-rule.md
   - skill: lib/output-templates.md
   - skill: lib/skill-decision-tree.md
+  - skill: lib/codebase-design.md
   - skill: to-spec
   - repo: knowledge/**
 writes:
@@ -109,8 +110,11 @@ Do not skip or reorder these stages.
 
 - **Stage C.** Write `docs/briefs/{YYYY-MM-DD}-{slug}.md` using
   `lib/output-templates.md`: problem, premises, alternatives, chosen approach,
-  scope, seams, next skill, gotchas, and OPEN_QUESTIONS. Name the next skill;
-  offer once to mint a tracking Issue when the repo has GitHub.
+  scope, seams, next skill, gotchas, and OPEN_QUESTIONS. When the chosen work
+  adds or changes a module interface or abstraction seam, read
+  `lib/codebase-design.md` and make its interface, seam, depth tradeoff,
+  deletion test, adapter evidence, and test surface explicit. Name the next
+  skill; offer once to mint a tracking Issue when the repo has GitHub.
 - **Stage C+.** If execution follows, also write `docs/plans/{slug}.md` with
   concrete acceptance per task, WHY/WHAT separation, and one granularity gate.
 

@@ -44,14 +44,14 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.28.0"
+version = "0.29.0"
 schema  = "skill-tier-v1"
 updated = "2026-08-12"
 
 # History from before pandastack was renamed to Verbs is retained in CHANGELOG.md.
 
 # ============================================================================
-# CORE (19) — markdown-first, fresh-clone available
+# CORE (18) — markdown-first, fresh-clone available
 # Buckets on disk: engineering / productivity / meta
 #
 # Git is the baseline software-work CLI, so review / debug stay core with a
@@ -110,7 +110,7 @@ description = "Review one completed Sprint and choose one evidence-backed proces
 
 [skill.grill]
 tier = "core"
-resources = ["lib/interview.md", "lib/push-once.md", "lib/stop-rule.md", "lib/output-templates.md", "lib/skill-decision-tree.md"]
+resources = ["lib/interview.md", "lib/push-once.md", "lib/stop-rule.md", "lib/output-templates.md", "lib/skill-decision-tree.md", "lib/codebase-design.md"]
 composes = ["decision-map", "to-spec"]
 description = "Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan."
 
@@ -153,17 +153,11 @@ resources = ["lib/learning-format.md", "lib/qa-evidence-format.md"]
 composes = []
 description = "Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability."
 
-[skill.codebase-design]
-tier = "core"
-resources = []
-composes = []
-description = "Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms."
-
 [skill.improve-codebase-architecture]
 tier = "core"
 requires = ["cli:git"]
-resources = []
-composes = ["codebase-design", "grill"]
+resources = ["lib/codebase-design.md"]
+composes = ["grill"]
 description = "Produce a read-only visual survey of codebase architecture opportunities."
 
 [skill.prototype]
