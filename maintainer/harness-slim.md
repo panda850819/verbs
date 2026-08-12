@@ -1,28 +1,13 @@
----
-name: harness-slim
-description: |
-  Audit and reduce a live multi-runtime agent harness after adoption. Use for
-  installed skill/plugin parity, cold-start context, routing overlap, available
-  usage evidence, or human-attention load. Produces a reversible proposal; it does not mutate
-  the harness.
-reads:
-  - repo: AGENTS.md
-  - repo: CLAUDE.md
-  - cli: git
-  - cli: codex
-  - cli: claude
-writes:
-  - cli: stdout
-domain: shared
-classification: hybrid
-user-invocable: true
----
-# Harness Slim
+# Harness Slim maintainer audit
 
-This is the **post-adoption harness evaluator**. `gatekeeper` decides whether
-an external artifact is safe to adopt; `review` checks a code diff;
-`harness-slim` compares the live source, installation, runtime, context, and
-attention surfaces after adoption.
+This is a maintainer-only, post-adoption audit procedure. It is not registered
+as an Agent Skill, public route, or installable runtime surface. Maintainers
+invoke it by explicitly asking an agent to read `maintainer/harness-slim.md`
+and audit the live harness.
+
+`gatekeeper` decides whether an external artifact is safe to adopt; `review`
+checks a code diff. This procedure compares the live source, installation,
+runtime, context, and attention surfaces after adoption.
 
 ## Contract
 

@@ -385,8 +385,7 @@ fi
 old_bad_probe="$(PATH="$probe_root/old-and-bad:/usr/bin:/bin" \
   VERBS_VERSION_PROBE_TIMEOUT=10 bash "$repo_root/scripts/bootstrap.sh" --claude 2>&1)"
 if echo "$old_bad_probe" | grep -qE 'advisor/claude +.*outdated.*found 1\.0\.0' \
-   && echo "$old_bad_probe" | grep -qE 'advisor/codex +.*outdated.*found unparseable' \
-   && echo "$old_bad_probe" | grep -qE 'harness-slim/codex +.*unavailable.*version probe failed'; then
+   && echo "$old_bad_probe" | grep -qE 'advisor/codex +.*outdated.*found unparseable'; then
   pass "outdated and unparseable CLI versions remain distinct evidence"
 else
   fail_t "outdated or unparseable CLI version reporting regressed"
@@ -397,8 +396,7 @@ hanging_probe="$(PATH="$probe_root/hanging:/usr/bin:/bin" \
   VERBS_VERSION_PROBE_TIMEOUT=5 bash "$repo_root/scripts/bootstrap.sh" --claude 2>&1)"
 probe_elapsed=$(( $(date +%s) - probe_started ))
 if [ "$probe_elapsed" -lt 20 ] \
-   && echo "$hanging_probe" | grep -qE 'advisor/claude +.*unresponsive.*probe exceeded 5s' \
-   && echo "$hanging_probe" | grep -qE 'harness-slim/claude +.*unresponsive.*probe exceeded 5s'; then
+   && echo "$hanging_probe" | grep -qE 'advisor/claude +.*unresponsive.*probe exceeded 5s'; then
   pass "hanging optional CLI is bounded across every dependent skill"
 else
   fail_t "hanging optional CLI probe was not bounded (${probe_elapsed}s)"

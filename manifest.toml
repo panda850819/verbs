@@ -44,7 +44,7 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.27.0"
+version = "0.28.0"
 schema  = "skill-tier-v1"
 updated = "2026-08-12"
 
@@ -179,7 +179,7 @@ composes = ["grill", "prototype"]
 description = "Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill."
 
 # ============================================================================
-# EXT (5) — public CLI dependencies
+# EXT (4) — public CLI dependencies
 # ============================================================================
 
 [skill.to-tickets]
@@ -209,13 +209,6 @@ requires = ["cli:codex", "cli:claude"]
 resources = ["lib/gate-contract.md", "lib/model-anchors.md"]
 composes = []
 description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206."
-
-[skill.harness-slim]
-tier = "ext"
-requires = ["cli:git", "cli:codex", "cli:claude"]
-resources = []
-composes = ["careful"]
-description = "Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, available usage evidence, and human-attention load. Proposes reversible reductions; does not mutate the harness."
 
 # ============================================================================
 # Notes

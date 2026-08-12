@@ -238,7 +238,6 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
 | `/verbs:advisor` | ext | Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206. |
-| `/verbs:harness-slim` | ext | Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, available usage evidence, and human-attention load. Proposes reversible reductions; does not mutate the harness. |
 <!-- END GENERATED: skill-catalog -->
 
 ## Install
@@ -331,9 +330,10 @@ claude plugin validate .
 bash tests/run-all.sh
 ```
 
-Skill-writing lore for maintainers lives in
-`maintainer/writing-great-skills.md`. It is not exposed in normal runtime
-sessions.
+Maintainer procedures live under `maintainer/`. Skill-writing lore is in
+`maintainer/writing-great-skills.md`; post-adoption harness auditing is in
+`maintainer/harness-slim.md`. Neither is registered or exposed as a normal
+runtime route.
 
 ## Release
 
