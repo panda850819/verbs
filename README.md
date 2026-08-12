@@ -86,7 +86,7 @@ procedures exist for narrower situations:
 | Several dependent decisions must remain visible across sessions | `decision-map` |
 | Settled requirements need one canonical GitHub Spec Issue | `to-spec` |
 | A canonical Spec needs vertical-slice child Issues and dependency edges | `to-tickets` |
-| The repository's Verbs tracker setting is missing or conflicting | `setup-verbs` |
+| The repository's Verbs tracker setting is ambiguous or needs approval | `setup-verbs`; deterministic work uses `scripts/verbs setup` |
 | Production or destructive work needs confirmation gates | `careful` |
 | An external repo, package, MCP, skill, URL, or service needs a trust check | `gatekeeper` |
 | A load-bearing judgment needs a different model's opinion | `advisor` |
@@ -224,7 +224,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:sprint-review` | core | Review one Sprint outcome against its Goal and product acceptance evidence. |
 | `/verbs:retro` | core | Review one completed Sprint and choose one evidence-backed process improvement. |
 | `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
-| `/verbs:setup-verbs` | core | Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate. |
+| `/verbs:setup-verbs` | core | Resolve tracker setup ambiguity and approval around deterministic scripts/verbs setup checks, previews, applies, and read-back verification. |
 | `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |
 | `/verbs:debug` | core | Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui). |
 | `/verbs:sprint` | core | Acceptance-driven execution with bounded review and delivery evidence. |
@@ -257,9 +257,11 @@ codex plugin marketplace add panda850819/verbs --json
 codex plugin add verbs@verbs --json
 ```
 
-Inside a repository, invoke `verbs:setup-verbs` once to configure the issue
-tracker in its existing `## verbs` block. Repository identity stays derived
-from the Git remote.
+Inside a repository, run `scripts/verbs setup --check` to validate the existing
+`## verbs` tracker setting. Use `--preview`, then `--apply --approve`, for an
+unambiguous change. Invoke `verbs:setup-verbs` only when document choice,
+tracker conflict, Git identity, or human approval needs judgment. Repository
+identity stays derived from the Git remote.
 
 The Marketplace Plugins distribute the same skill directories and register no
 lifecycle hooks.
