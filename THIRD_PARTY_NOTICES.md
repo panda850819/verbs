@@ -23,7 +23,7 @@ Affected files:
 - `skills/engineering/prototype/SKILL.md`
 - `skills/engineering/prototype/LOGIC.md`
 - `skills/engineering/prototype/UI.md`
-- `skills/productivity/wayfinder/SKILL.md`
+- `skills/productivity/decision-map/SKILL.md`
 
 ### garrytan/gstack
 

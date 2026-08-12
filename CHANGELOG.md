@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.25.0 — Product engineering stages
+
+### Added
+
+- Added a six-stage product-engineering operating model: `product-planning`,
+  `backlog-refinement`, `sprint-planning`, existing `sprint`, `sprint-review`,
+  and `retro`. Each stage owns one familiar work record and stops before its
+  successor. (#359)
+- `product-planning` prioritizes one outcome; `backlog-refinement` returns
+  `READY` or `NOT_READY` without selecting work. (#359)
+- Human-only `sprint-planning` records an approved Sprint Goal and selection;
+  `sprint-review` distinguishes product acceptance from code review and QA; and
+  `retro` proposes at most one evidence-backed process Action. (#359)
+
+### Changed
+
+- README and Resolver now lead with the six-stage product-engineering model
+  while preserving direct specialist routes and the canonical
+  `to-spec` / `to-tickets` branch. (#359)
+- Claude/Pi and Codex invocation metadata now agree that Sprint Planning,
+  Sprint, Sprint Review, and Retro require explicit human invocation. (#359)
+- Renamed `wayfinder` to the literal `decision-map`; it remains the single owner
+  of cross-session map creation, one-frontier progress, and map persistence
+  instead of duplicating that state machine across product stages. (#359)
+
+### Migration
+
+- Keep using established specialist names such as `debug`, `review`, `qa`,
+  `prototype`, and `ship`; clear typed requests continue to bypass the stage
+  layer. Use the new stage names for product planning, readiness, iteration
+  selection, product acceptance, and process improvement records.
+- Replace `/verbs:wayfinder`, `$verbs:wayfinder`, or `/skill:wayfinder` with the
+  corresponding `decision-map` invocation. Existing map files keep their format
+  and can be resumed by the renamed skill.
+
 ## v0.24.0 — Visual architecture surveys
 
 ### Added

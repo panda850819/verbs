@@ -10,105 +10,153 @@ also supported.
 
 ## Why Verbs exists
 
-Coding agents can write code without knowing when the goal is still ambiguous,
-when evidence is too weak, or when “done” has stopped short of delivery. Verbs
-turns those recurring failure modes into explicit routes:
+Coding agents can write code, but product engineering also needs decisions about
+why work matters, whether it is ready, what enters an iteration, whether the
+result solved the problem, and what the team should improve. Verbs gives each of
+those situations one named procedure, one record, and a clear stopping point.
 
-| Failure mode | Verbs route |
-|---|---|
-| The request lacks a clear owner, reference, or next route | `ask-boss` orients the work and selects one existing specialist. |
-| The request sounds clear but hides product choices | `grill` discovers requirements before implementation. |
-| The topic is too large for one plan or session | `grill` charts the map; `wayfinder` resolves one frontier at a time. |
-| The cause, architecture target, design seam, or UI direction is unknown | `debug`, `improve-codebase-architecture`, `codebase-design`, `prototype`, or `ui` answers the right kind of question. |
-| A change could be unsafe or an external artifact is untrusted | `careful` and `gatekeeper` add the appropriate trust boundary. |
-| Code exists but proof or delivery is missing | `sprint` drives verification, review, and delivery; `qa`, `review`, and `ship` own their specialist stages. |
+Verbs does not replace model judgment or project truth. It prevents an agent
+from turning an unclear idea into implementation, a passing test into product
+acceptance, or a completed diff into delivered work without the missing human
+decision and evidence.
 
-Verbs does not replace model judgment. It gives that judgment a route,
-acceptance conditions, and evidence requirements.
+## Choose the route from the situation
 
-## How work flows
+Start with the work situation, not with a memorized skill name:
 
-The normal development route is conditional, not a mandatory chain:
+| Situation | Use | Done when |
+|---|---|---|
+| You are deciding which product problem or outcome matters next | `product-planning` | One Product Goal and priority are supported by evidence, or the missing evidence/owner decision is explicit |
+| You have an idea or Issue but do not know whether engineering can take it | `backlog-refinement` | The item is `READY` or `NOT_READY`, with scope, acceptance, dependencies, and open decisions |
+| You have an ordered ready backlog and need to choose this iteration's work | `sprint-planning` | A human approves or rejects one Sprint Goal and selection |
+| A human has selected one concrete finish line | `sprint` | That finish line has acceptance, review, and delivery evidence |
+| A delivered result needs product acceptance | `sprint-review` | The outcome is `ACCEPTED`, `NEEDS_CHANGES`, or `UNPROVEN` |
+| A completed iteration has evidence worth learning from | `retro` | Keep, Change, and at most one evidence-backed Action are recorded |
+
+The primary product-engineering record is therefore:
 
 ```text
-request
-  |
-  +-- clear typed -------------------------------> existing specialist
-  |
-  +-- owner / route / reference unclear ---------> ask-boss -> one specialist
-  |
-  +-- outcome / scope / acceptance unclear -----> grill
-  |                                                  |
-  |                                                  +--> local brief / plan
-  |                                                  +--> to-spec
-  |                                                  +--> wayfinder
-  |
-  +-- several dependent decisions --------------> wayfinder
-
-selected implementation
-  -> sprint -> review / qa -> ship
+Product Planning
+→ Backlog Refinement
+→ Sprint Planning
+→ Sprint
+→ Sprint Review
+→ Retro
 ```
 
-The canonical branches remain `to-spec --> canonical GitHub Spec Issue` and
-`to-tickets --> child Issue graph`; a human selects the implementation frontier
-before `sprint`.
+This is a map, not an automatic pipeline. Each stage stops after its record. A
+human decides whether and when the next stage starts; no stage claims the next
+Issue, schedules work, creates a branch for its successor, or silently continues.
 
-`ask-boss` is optional orientation, not a mandatory front door. It retrieves
-facts and selects one existing specialist when the owner, target, source of
-truth, or next route is unclear. Clear typed requests and named maps bypass it.
-The selected caller owns its interview, artifact, and close.
+## Bypass the lifecycle for a known specialist task
+
+Do not invoke a planning stage when the problem type is already clear:
+
+| Known task | Go directly to |
+|---|---|
+| A regression, crash, failing test, or unexplained error | `debug` |
+| A module interface, abstraction boundary, or design seam | `codebase-design` |
+| One uncertain design question needs a cheap disposable build | `prototype` |
+| A production UI needs to be built or visually corrected | `ui` |
+| A code diff or PR needs correctness review | `review` |
+| A changed UI needs browser acceptance evidence | `qa` |
+| Completed Git work needs test, commit, push, and PR delivery | `ship` |
+| One locked mechanical unit benefits from fresh context | `handover` |
+
+Examples:
+
+```text
+"This test used to pass; find the root cause."  → debug
+"Review PR #42 before I merge it."              → review
+"Test the checkout page in the browser."        → qa
+"The work is complete; create the PR."          → ship
+```
+
+These routes do not need Product Planning or Backlog Refinement first unless the
+request itself still contains a product decision.
+
+## Supporting procedures
+
+Most users should begin with the six stages or a typed specialist. The remaining
+procedures exist for narrower situations:
+
+| Situation | Supporting procedure |
+|---|---|
+| The owner, source of truth, target, or next specialist is unclear | `ask-boss` |
+| You explicitly want an adversarial stress test of hidden requirements | `grill` |
+| Several dependent decisions must remain visible across sessions | `decision-map` |
+| Settled requirements need one canonical GitHub Spec Issue | `to-spec` |
+| A canonical Spec needs vertical-slice child Issues and dependency edges | `to-tickets` |
+| The repository's Verbs tracker setting is missing or conflicting | `setup-verbs` |
+| Production or destructive work needs confirmation gates | `careful` |
+| An external repo, package, MCP, skill, URL, or service needs a trust check | `gatekeeper` |
+| A load-bearing judgment needs a different model's opinion | `advisor` |
+
+Normal Backlog Refinement already uses the dependency-aware interview protocol;
+you do not need to invoke `grill` merely to make an ordinary Issue ready.
 
 Work is spec-sized when it is expected to require at least two implementation
 Issues, or when even one PR changes a public contract, schema or migration, or
-security boundary. The GitHub Spec Issue is then the only requirements source
-of truth. Smaller work keeps the local brief/plan path; a trivial reversible
-fix may still go directly through its repository's branch and PR contract.
+security boundary. That branch is:
 
-The tracker-native path is `grill -> to-spec -> to-tickets -> manually selected
-frontier Issue -> sprint -> review -> ship`.
+```text
+to-spec --> canonical GitHub Spec Issue
+to-tickets --> child Issue graph
+human selects one ready Issue
+sprint --> one independently reviewable and revertible PR
+```
 
-`to-tickets` reports the unblocked frontier but never schedules it. A human
-selects one implementation Issue, and one Sprint owns that Issue through one
-independently reviewable and revertible PR.
+`to-tickets` reports the unblocked frontier but never chooses or starts work.
 
-Use `handover` only when a plan already contains a bounded, mechanical build
-unit that benefits from fresh context. It detects `HERDR_ENV=1` before choosing
-Herdr sibling-agent transport; outside a managed Herdr pane it keeps the
-Claude/Codex fresh-run or async path. Herdr owns pane lifecycle while Handover
-owns task scope and evidence. The worker does not replace human-selected
-execution ownership of final acceptance and delivery.
+## Worked example
 
-Other skills are typed on-ramps or supporting gates:
+Suppose users abandon onboarding because account verification is confusing.
 
-- A reproducible failure enters through `debug`.
-- A named Decision Map or multi-session decision handoff enters through
-  `wayfinder`.
-- A clear bounded implementation enters through `sprint`.
-- A production UI change enters through `ui`; browser acceptance enters
-  through `qa`.
-- An unknown architecture target enters through `improve-codebase-architecture`;
-  a chosen seam enters through `codebase-design`; a single unresolved design
-  question may justify a throwaway `prototype`.
-- An external repo, package, MCP, skill, or document enters through
-  `gatekeeper`.
-- Production or destructive work adds `careful`.
-- A load-bearing judgment may call `advisor` for a decorrelated model opinion.
-- A multi-runtime harness that has already accumulated complexity enters
-  through `harness-slim`.
+1. **Product Planning** — “Should onboarding verification be our next product
+   priority?” The record names the user problem, Product Goal, evidence, and
+   success signal.
+2. **Backlog Refinement** — “Make the verification guidance Issue ready.” The
+   record returns `NOT_READY` until scope, error states, acceptance criteria,
+   and dependencies are settled.
+3. **Spec and tickets, when needed** — a public workflow change goes through
+   `to-spec`, then a separate approved `to-tickets` run.
+4. **Sprint Planning** — a human invokes it with the ready backlog and capacity,
+   then approves one Sprint Goal and selection. Nothing starts automatically.
+5. **Sprint** — a human selects one Issue. The build may call `ui`, `debug`,
+   `review`, and `qa`; `ship` creates the delivery evidence and PR.
+6. **Sprint Review** — stakeholders inspect the delivered artifact against the
+   Goal. Missing or stale evidence produces `UNPROVEN`, not acceptance.
+7. **Retro** — evidence from the completed iteration supports at most one
+   process Action. No evidence means `NO_SUPPORTED_ACTION`.
 
-[`RESOLVER.md`](RESOLVER.md) is the complete human-facing operating model.
+## How invocation works
+
+`product-planning`, `backlog-refinement`, and most specialists may be selected
+from natural language:
+
+```text
+"What product outcome should we prioritize next?"
+"Refine Issue #42 until it is ready for engineering."
+"Why did this regression happen?"
+```
+
+Authority-bearing stages require an explicit human command:
+
+| Stage | Claude Code plugin | Codex plugin | Pi direct load |
+|---|---|---|---|
+| Sprint Planning | `/verbs:sprint-planning` | `$verbs:sprint-planning` | `/skill:sprint-planning` |
+| Sprint | `/verbs:sprint` | `$verbs:sprint` | `/skill:sprint` |
+| Sprint Review | `/verbs:sprint-review` | `$verbs:sprint-review` | `/skill:sprint-review` |
+| Retro | `/verbs:retro` | `$verbs:retro` | `/skill:retro` |
+
+The explicit boundary keeps selection, execution, product acceptance, and
+process change under human authority. Verbs relies on host-native invocation
+controls: it registers no lifecycle hooks, routing injector, scheduler, or Stop
+interceptor. Claude Code and Pi use `disable-model-invocation: true`; Codex uses
+matching `allow_implicit_invocation: false` policy.
+
+[`RESOLVER.md`](RESOLVER.md) contains the complete disambiguation model.
 Each `SKILL.md` description is the machine-routing surface.
-
-## Invocation boundaries
-
-Verbs relies on each host's native skill discovery and invocation controls. It
-registers no lifecycle hooks, injects no routing context, and intercepts no tool
-or stop events.
-
-Most skills remain available to both people and models. Human-initiated-only
-entry points declare `disable-model-invocation: true` for Claude Code and Pi,
-plus the matching `allow_implicit_invocation: false` policy for Codex. Skill prose owns
-safety and verification discipline; Verbs does not claim host-level enforcement.
 
 ## Product boundary
 
@@ -128,7 +176,12 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:careful` | core | Confirmation gate for production, shared infrastructure, live harness paths, and destructive commands. |
 | `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills / MCPs / repos. |
 | `/verbs:ask-boss` | core | Route unclear workplace requests to one existing specialist by retrieving facts and resolving intent, target, audience, and minimum sufficient authority. Use for an unclear starting point, owner, reference, or next route; clear typed requests, named maps, bugs, UI work, and code review go directly to their specialist. |
-| `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Wayfinder, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
+| `/verbs:product-planning` | core | Clarify the product problem, Product Goal, priority, and candidate backlog outcomes before readiness or implementation work. |
+| `/verbs:backlog-refinement` | core | Make one backlog item READY or NOT_READY by clarifying outcome, scope, acceptance criteria, dependencies, and unresolved decisions. |
+| `/verbs:sprint-planning` | core | Plan one Sprint Goal and select ready work after a human approval gate. |
+| `/verbs:sprint-review` | core | Review one Sprint outcome against its Goal and product acceptance evidence. |
+| `/verbs:retro` | core | Review one completed Sprint and choose one evidence-backed process improvement. |
+| `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
 | `/verbs:setup-verbs` | core | Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate. |
 | `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |
 | `/verbs:debug` | core | Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui). |
@@ -138,7 +191,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:codebase-design` | core | Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms. |
 | `/verbs:improve-codebase-architecture` | core | Produce a read-only visual survey of codebase architecture opportunities. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
-| `/verbs:wayfinder` | core | Chart or work cross-session decision maps when the request itself names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
+| `/verbs:decision-map` | core | Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |

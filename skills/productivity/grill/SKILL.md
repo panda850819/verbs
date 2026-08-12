@@ -4,7 +4,7 @@ description: |
   Adversarial requirement discovery. Ask dependency-aware frontier rounds,
   hunting for hidden requirements / unknown unknowns. Its structured close routes
   spec-sized work to
-  `to-spec`, large foggy work to `wayfinder`, and smaller work to a local brief plus
+  `to-spec`, large foggy work to `decision-map`, and smaller work to a local brief plus
   executable plan. Say "quick" or "don't write files" for a chat-only log. Use for
   "grill me", "stress test this scope", "what am I missing", "draft a brief",
   structured intake, or a feature/refactor expected to touch 3+ files or add an
@@ -29,7 +29,7 @@ user-invocable: true
 
 Grill surfaces unknowns by questioning only the current decision frontier; it
 is not a questionnaire. By default its structured close routes to `to-spec`,
-`wayfinder`, or a local brief and executable plan. Say `quick`, `just talk`, or
+`decision-map`, or a local brief and executable plan. Say `quick`, `just talk`, or
 `don't write files` to keep only the chat log.
 
 ## Use / skip
@@ -94,8 +94,8 @@ Do not skip or reorder these stages.
 
 ### Route after premise refresh
 
-1. **Large and foggy -> `wayfinder`.** If the effort is too large for one
-   session and the route is unclear, pass the drilling to `wayfinder` and stop.
+1. **Large and foggy -> `decision-map`.** If the effort is too large for one
+   session and the route is unclear, pass the drilling to `decision-map` and stop.
    Do not write a map here.
 2. **Spec-sized -> `to-spec`.** Route when the chosen work can require two or more implementation Issues, or even one PR changes a
    public contract, schema or migration, or security boundary. Give it the log,

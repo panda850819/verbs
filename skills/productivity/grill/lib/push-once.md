@@ -21,7 +21,7 @@ When a reply is shallow, the model selects one pattern using the priority below,
 prints its label, and asks that exact prompt. Do not spend another turn asking
 the user to choose a pattern.
 
-```
+```text
 [1] 具體一點    — "給我名字、數字、case 編號。沒有具體例子等於沒講。"
 [2] 證據檢查    — "你看過嗎？哪個 case？什麼時候？讀的還是聽的？"
 [3] 反命題      — "拿掉這個假設會怎樣？這個前提成立的根據是什麼？"
@@ -50,12 +50,14 @@ When loading this lib in a skill:
 1. When a reply matches a symptom in the table, select the highest-leverage
    matching pattern and print:
 
-   ```
+   ```text
    Push [N] {pattern-name}: {the exact pattern prompt}
    ```
 
-2. Wait for the answer. If the user says `skip`, accept the original reply and
-   record `axis-N: accepted without push` in the emitted grill log.
+2. Wait for the answer. If the user says `skip`, do not silently treat the
+   unsupported claim as settled. Record `axis-N: accepted without push` in the
+   caller's output. A readiness gate keeps that decision unresolved and returns
+   `NOT_READY`; another caller may proceed only with the caveat visible.
 
 3. For `[5]`, write a context-specific variant in the same shape.
 

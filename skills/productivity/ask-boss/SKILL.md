@@ -9,7 +9,7 @@ description: |
   specialist.
 reads:
   - skill: grill
-  - skill: wayfinder
+  - skill: decision-map
 writes:
   - cli: stdout
 domain: shared
@@ -32,8 +32,8 @@ mandatory front door; direct typed requests bypass it.
 3. **Choose the caller.** Select one existing specialist before opening any
    Grilling Session: use the specialist whose description owns the remaining
    decision axis. Do not intercept a clear typed request just because it may
-   touch another role. For multi-session decision fog, choose `wayfinder`;
-   `wayfinder` owns the Decision Map. Use minimum sufficient authority, not the highest
+   touch another role. For multi-session decision fog, choose `decision-map`;
+   `decision-map` owns the map. Use minimum sufficient authority, not the highest
    title; if authority is unknown, make that the one human question.
 4. **Handoff.** Give the caller the packet below. The caller owns its interview,
    artifact, and close. `ask-boss` does not start a generic Grilling Session,

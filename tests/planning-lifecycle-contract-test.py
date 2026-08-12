@@ -6,10 +6,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ASK_BOSS = (ROOT / "skills/productivity/ask-boss/SKILL.md").read_text()
+PRODUCT_PLANNING = (ROOT / "skills/productivity/product-planning/SKILL.md").read_text()
+BACKLOG_REFINEMENT = (ROOT / "skills/productivity/backlog-refinement/SKILL.md").read_text()
+SPRINT_PLANNING = (ROOT / "skills/productivity/sprint-planning/SKILL.md").read_text()
 GRILL = (ROOT / "skills/productivity/grill/SKILL.md").read_text()
 INTERVIEW = (ROOT / "lib/interview.md").read_text()
-WAYFINDER = (ROOT / "skills/productivity/wayfinder/SKILL.md").read_text()
+DECISION_MAP = (ROOT / "skills/productivity/decision-map/SKILL.md").read_text()
 SPRINT = (ROOT / "skills/engineering/sprint/SKILL.md").read_text()
+SPRINT_REVIEW = (ROOT / "skills/productivity/sprint-review/SKILL.md").read_text()
+RETRO = (ROOT / "skills/productivity/retro/SKILL.md").read_text()
 README = (ROOT / "README.md").read_text()
 RESOLVER = (ROOT / "RESOLVER.md").read_text()
 MANIFEST = (ROOT / "manifest.toml").read_text()
@@ -48,8 +53,8 @@ require_words(
 )
 require_words(
     ASK_BOSS,
-    "`wayfinder` owns the Decision Map",
-    "ask-boss wayfinder handoff",
+    "`decision-map` owns the map",
+    "ask-boss decision-map handoff",
 )
 
 # The interview protocol lives in lib/interview.md, not inlined in grill (#284).
@@ -97,7 +102,7 @@ require_words(
 )
 assert "**ONE question at a time.**" not in INTERVIEW, "rigid interview cadence must be retired"
 assert "recommended answer" not in INTERVIEW.lower(), "frontier rounds must not import recommendations"
-for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder"), (RESOLVER, "resolver")):
+for skill_text, scenario in ((GRILL, "grill"), (DECISION_MAP, "decision-map"), (RESOLVER, "resolver")):
     assert "one question at a time" not in skill_text.lower(), (
         f"{scenario} must not promise the retired rigid cadence"
     )
@@ -117,25 +122,24 @@ require(GRILL, "require two or more implementation Issues", "spec threshold")
 require(GRILL, "even one PR changes a\n   public contract, schema or migration, or security boundary", "spec threshold")
 require(GRILL, "Do not write a competing repository brief, executable plan", "single source")
 require(GRILL, "**Smaller work -> local close.** Continue to Stage C", "small-work branch")
-require(GRILL, "**Large and foggy -> `wayfinder`.**", "wayfinder branch")
+require(GRILL, "**Large and foggy -> `decision-map`.**", "decision-map branch")
 
-# wayfinder owns charting: it interviews and writes the map, grill or ask-boss
-# hands off (#285).
+# decision-map owns charting: it interviews and writes the map; callers hand off.
 require(GRILL, "Do not write a map here", "grill does not chart")
-require(WAYFINDER, "@lib/interview.md", "wayfinder runs the interview itself")
-require(WAYFINDER, "Handoff from `ask-boss`", "wayfinder receives orientation packet")
+require(DECISION_MAP, "@lib/interview.md", "decision-map runs the interview itself")
+require(DECISION_MAP, "Handoff from `ask-boss`", "decision-map receives orientation packet")
 require_words(
-    WAYFINDER,
+    DECISION_MAP,
     "Do not re-run orientation or ask for facts already present in the packet",
-    "wayfinder does not repeat ask-boss orientation",
+    "decision-map does not repeat ask-boss orientation",
 )
-require(WAYFINDER, "docs/briefs/{YYYY-MM-DD}-{slug}-map.md", "wayfinder writes the map")
-require(WAYFINDER, "This skill owns that format", "wayfinder owns the map format")
-assert "Delegate charting to `grill`" not in WAYFINDER, (
-    "wayfinder must not delegate charting back to grill"
+require(DECISION_MAP, "docs/briefs/{YYYY-MM-DD}-{slug}-map.md", "decision-map writes the map")
+require(DECISION_MAP, "This skill owns that format", "decision-map owns the map format")
+assert "Delegate charting to `grill`" not in DECISION_MAP, (
+    "decision-map must not delegate charting back to grill"
 )
 # Both hand-off directions skip an interview that already ran (#288).
-for skill_text, scenario in ((GRILL, "grill"), (WAYFINDER, "wayfinder")):
+for skill_text, scenario in ((GRILL, "grill"), (DECISION_MAP, "decision-map")):
     require_words(
         skill_text,
         "**If the interview already ran this session, do not run it again.**",
@@ -182,17 +186,30 @@ require_words(
     "{original caller}'s {artifact} will not be written.",
     "mid-interview switch is announced, not silent",
 )
-for direction in ("`/grill` typed three questions into a `wayfinder`", "`/wayfinder` typed during a `grill`"):
+for direction in ("`/grill` typed three questions into a `decision-map`", "`/decision-map` typed during a `grill`"):
     require_words(INTERVIEW, direction, "mid-interview switch covers both directions")
 
-require(README, "to-spec --> canonical GitHub Spec Issue", "public lifecycle")
-require(README, "to-tickets --> child Issue graph", "public lifecycle")
-require(README, "manually selected", "manual frontier")
-require_words(README, "grill -> to-spec -> to-tickets -> manually selected frontier Issue -> sprint -> review -> ship", "public lifecycle")
+require_words(
+    README,
+    "Product Planning → Backlog Refinement → Sprint Planning → Sprint → Sprint Review → Retro",
+    "six-stage public lifecycle",
+)
+require(README, "to-spec --> canonical GitHub Spec", "canonical spec branch")
+require(README, "to-tickets --> child Issue graph", "canonical ticket branch")
 require_words(README, "one independently reviewable and revertible PR", "one issue one PR")
+require_words(
+    README,
+    "Each stage stops after its record",
+    "stages do not auto-chain",
+)
 
 require(RESOLVER, "A human selects one unblocked implementation Issue.", "ownership")
-require(RESOLVER, "reports the frontier but does not choose work", "ownership")
+require_words(RESOLVER, "reports the frontier but does not choose work", "ownership")
+require_words(
+    RESOLVER,
+    "No stage invokes its successor, claims a frontier Issue, schedules work, or starts implementation",
+    "resolver no-auto-chain boundary",
+)
 # The boundary must live in the sprint body itself.
 require_words(
     SPRINT,
@@ -207,11 +224,40 @@ require_words(
     "failed sprint salvages what it validated",
 )
 require_words(SPRINT, "Nothing validated → print no extra line.", "silent when nothing validated")
-# skills/retro/ was absorbed into a pandastack skill that never came over (#295).
-for path in sorted(ROOT.glob("lib/*.md")) + sorted(ROOT.glob("skills/*/*/**/*.md")):
-    assert "during retro" not in path.read_text(), (
-        f"{path.relative_to(ROOT)} points at a retro surface Verbs does not have"
-    )
+# The stage layer owns familiar records without absorbing specialist contracts.
+require_words(
+    PRODUCT_PLANNING,
+    "Stop after the record. Do not mark backlog items ready, select iteration work",
+    "product planning stops before readiness and selection",
+)
+require(BACKLOG_REFINEMENT, "Status: READY | NOT_READY", "readiness outcome")
+require_words(
+    BACKLOG_REFINEMENT,
+    "Stop after the readiness record. Do not publish or decompose tickets, choose iteration work",
+    "refinement stops before selection and execution",
+)
+require(SPRINT_PLANNING, "Ask once: `[approve / reject]`.", "human selection gate")
+require_words(
+    SPRINT_PLANNING,
+    "Do not claim or assign Issues, schedule work, create child Issues, create or switch branches, invoke another skill, mutate the tracker, or start work.",
+    "planning does not execute",
+)
+require(SPRINT_REVIEW, "Result: ACCEPTED | NEEDS_CHANGES | UNPROVEN", "product review outcome")
+require_words(
+    SPRINT_REVIEW,
+    "Code review proves properties of a diff and QA can prove browser-visible criteria; neither alone proves",
+    "product review differs from code review and QA",
+)
+require(RETRO, "Status: ACTION_PROPOSED | NO_SUPPORTED_ACTION", "retro outcome")
+require_words(RETRO, "Emit at most one Action.", "retro action limit")
+require_words(
+    RETRO,
+    "Do not create calendar events, personal reflection files, brain or memory entries",
+    "retro stays product-engineering only",
+)
+for stage in ("product-planning", "backlog-refinement", "sprint-planning", "sprint", "sprint-review", "retro"):
+    require(MANIFEST, f"[skill.{stage}]", f"manifest exposes {stage}")
+
 require_words(GRILL, "routes to `to-spec`", "spec skill composition")
 assert "[skill.implement]" not in MANIFEST, "must not add implement"
 assert "[skill.to-prd]" not in MANIFEST, "must not add to-prd"
