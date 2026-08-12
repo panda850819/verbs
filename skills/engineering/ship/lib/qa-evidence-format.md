@@ -64,19 +64,32 @@ Status rules:
 
 `ship` owns the GitHub write. After a PR exists:
 
-1. Read its number and head SHA.
-2. Validate the evidence markers, status rules, and artifact identity.
-3. Find every comment containing `<!-- verbs-qa-evidence:v1 -->` and resolve
+1. Read its repository identity, number, and head SHA.
+2. Acquire an atomic per-repository, per-PR lock before the first marker lookup.
+   Use `mkdir` on a lock directory under
+   `$(git rev-parse --git-common-dir)/verbs/qa-comment-locks/`, keyed by the
+   repository identity and PR number, so concurrent worktrees in the same clone
+   serialize the complete lookup-and-write sequence. Record holder metadata.
+   If acquisition fails, wait for a bounded interval and retry; if the lock
+   remains held or its ownership cannot be established, report
+   `QA COMMENT LOCKED` and do not write. Never delete an unverified lock.
+3. While holding the lock, validate the evidence markers, status rules, and
+   artifact identity.
+4. Find every comment containing `<!-- verbs-qa-evidence:v1 -->` and resolve
    the authenticated viewer.
-4. Zero matches: create one comment from the evidence file. One match owned by
+5. Zero matches: create one comment from the evidence file. One match owned by
    the viewer: update that comment by id. One foreign-owned match or more than
    one total match: report `QA COMMENT CONFLICT` and do not create or update a
    comment. Never turn an ownership conflict into another duplicate.
-5. Read the comment back and verify its marker, artifact identity, acceptance
-   status, and URL before claiming publication.
+6. Read the comment back and verify its marker, artifact identity, acceptance
+   status, and URL before claiming publication. Release only the lock acquired
+   by this run, including on failure.
 
 Use `gh pr comment --body-file` for creation and `gh api` for marker-based
 lookup and update. Never use `--edit-last`: the last comment may be unrelated.
+The local lock serializes writers sharing a Git common directory; marker
+conflict detection and read-back remain the fail-closed guard for external
+writers.
 
 ## Screenshot on failure
 

@@ -7,6 +7,7 @@ qa_skill="skills/engineering/qa/SKILL.md"
 ship_skill="skills/engineering/ship/SKILL.md"
 qa_copy="skills/engineering/qa/lib/qa-evidence-format.md"
 ship_copy="skills/engineering/ship/lib/qa-evidence-format.md"
+sprint_review_copy="skills/productivity/sprint-review/lib/qa-evidence-format.md"
 
 grep -Fq '<!-- verbs-qa-evidence:v1 -->' "$canonical"
 grep -Fq 'patch-sha256:<digest>' "$canonical"
@@ -16,6 +17,11 @@ grep -Fq 'UNPROVEN' "$canonical"
 grep -Fq 'Acceptance: VERIFIED | NOT VERIFIED' "$canonical"
 grep -Fq 'QA COMMENT CONFLICT' "$canonical"
 grep -Fq 'Never turn an ownership conflict into another duplicate' "$canonical"
+grep -Fq 'atomic per-repository, per-PR lock' "$canonical"
+grep -Fq 'git rev-parse --git-common-dir' "$canonical"
+grep -Fq 'QA COMMENT LOCKED' "$canonical"
+grep -Fq 'Never delete an unverified lock' "$canonical"
+grep -Fq 'Release only the lock acquired' "$canonical"
 grep -Fq 'git rev-parse --git-path verbs/qa-evidence.md' "$qa_skill"
 grep -Fq 'QA does not write to GitHub' "$qa_skill"
 grep -Fq '**QA evidence upsert**' "$ship_skill"
@@ -24,6 +30,7 @@ grep -Fq 'blocks a ready/done claim' "$ship_skill"
 
 cmp -s "$canonical" "$qa_copy"
 cmp -s "$canonical" "$ship_copy"
+cmp -s "$canonical" "$sprint_review_copy"
 
 qa_resources=$(sed -n '/^\[skill\.qa\]/,/^\[skill\./p' manifest.toml | grep '^resources = ' | head -1)
 ship_resources=$(sed -n '/^\[skill\.ship\]/,/^\[skill\./p' manifest.toml | grep '^resources = ' | head -1)
