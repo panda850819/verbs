@@ -1,5 +1,63 @@
 # Changelog
 
+## v0.27.0 — Explicit loading and review boundaries
+
+### Changed
+
+- README now documents Agent Skills progressive disclosure, reference loading,
+  security ownership, and the distinction between isolated code review and
+  cross-model Advisor judgment.
+- Escalated Review now requires any isolated read-only context with a bound diff
+  and intent. It no longer consumes Advisor-only model anchors or treats model
+  family and transport as Review semantics; unavailable isolation stays an
+  explicit evidence gap. (#365)
+- Gatekeeper loads social-engineering and supply-chain references only when the
+  active evidence branch calls for them. Its unused runtime-local README and
+  historical pilot artifacts were removed without deleting security procedures,
+  templates, or pattern knowledge.
+- Careful now stops only at destructive, production, and shared-state gates;
+  general task-continuation policy no longer belongs to that skill.
+- The skill authoring checklist now requires semantic capabilities, explicit
+  stop and terminal-state contracts, and fail-closed behavior without assuming
+  one host's tool names.
+
+### Fixed
+
+- `lib/verify-the-test-loop.md` now names its actual generated consumers:
+  Sprint, Careful, and Debug.
+
+## v0.26.1 — Advisor Luna anchor
+
+### Changed
+
+- Changed the fast OpenAI panel role from `gpt-5.6-terra/medium` to the verified
+  `gpt-5.6-luna/max` pairing. The read-only fixed-token probe passed with Codex
+  CLI 0.144.4. (#361)
+
+## v0.26.0 — Native delegation ownership
+
+### Removed
+
+- Retired the public `handover` skill, `scripts/verbs fresh-run`, async payload
+  support, Handover-only model anchors, optional-CLI probes, and transport tests.
+  Herdr and host-native workers now own delegated-execution transport. (#361)
+
+### Changed
+
+- Sprint retains acceptance, review, Git, and delivery ownership when a human
+  explicitly delegates a bounded unit through Herdr or a host-native worker.
+  Worker output is evidence, not completion. (#361)
+- Grill briefs now recommend one owning Sprint and name Herdr or a host-native
+  worker only as an explicit delegation surface. Advisor remains the route for
+  cross-model judgment, not execution. (#361)
+
+### Migration
+
+- Replace `/verbs:handover` and `scripts/verbs fresh-run` with the installed
+  Herdr skill inside a managed Herdr pane, or with the current host's native
+  worker surface. Keep the active Sprint responsible for acceptance, review,
+  Git, and delivery.
+
 ## v0.25.0 — Product engineering stages
 
 ### Added

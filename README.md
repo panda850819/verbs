@@ -61,7 +61,6 @@ Do not invoke a planning stage when the problem type is already clear:
 | A code diff or PR needs correctness review | `review` |
 | A changed UI needs browser acceptance evidence | `qa` |
 | Completed Git work needs test, commit, push, and PR delivery | `ship` |
-| One locked mechanical unit benefits from fresh context | `handover` |
 
 Examples:
 
@@ -158,6 +157,49 @@ matching `allow_implicit_invocation: false` policy.
 [`RESOLVER.md`](RESOLVER.md) contains the complete disambiguation model.
 Each `SKILL.md` description is the machine-routing surface.
 
+### Progressive disclosure
+
+Verbs follows the Agent Skills loading model. A session starts with each
+available skill's name and description. The full `SKILL.md` loads only when the
+skill is invoked; bundled references load only when the active procedure points
+to the applicable branch and the agent reads that file. `manifest.toml`
+`resources[]` controls packaging and generated copies, not context injection.
+An unused branch reference therefore carries install size but no invocation
+context cost.
+
+Keep references one level from `SKILL.md`, and state when each one applies. A
+skill must not load every bundled reference merely because it is present.
+Gatekeeper, for example, loads social-engineering patterns only for persuasion,
+disclosure, bypass, download, or execution signals, and supply-chain patterns
+only for install, package, dependency, update, build, or release paths.
+
+### Trust, review, and authority boundaries
+
+Security checks are divided by the object and decision rather than collected in
+one generic security flow:
+
+| Procedure | Owns |
+|---|---|
+| `gatekeeper` | Trust evidence before adopting an external artifact. |
+| `review` | Correctness, security, data-integrity, concurrency, and operations findings in the bound repository diff. |
+| `careful` | Confirmation immediately before destructive, production, or shared-state actions. |
+| `sprint` | Acceptance, review, Git, and delivery ownership for one finish line. |
+| `qa` | Browser-visible acceptance evidence bound to the current artifact. |
+| `ship` | Commit, push, PR, and QA-evidence publication. |
+| `sprint-review` | Product-outcome acceptance by a named human authority. |
+
+An escalated `review` must use an isolated read-only context; any available
+isolation transport is acceptable. It receives only the bound diff, intent, and
+applicable repository contract, without the author's analysis or proposed
+verdict. Transport and model family do not define a cold review; a second pass
+in the same context is not one. If isolation is unavailable, Review records the
+evidence gap and does not present the result as a normal cold review.
+
+`advisor` has a different contract: it introduces a decorrelated opinion from a
+different model family for a load-bearing judgment. Advisor alone consumes the
+pinned model, effort, transport, and guard rows in `lib/model-anchors.md`. Those
+rows describe invocation and do not grant host or filesystem permissions.
+
 ## Product boundary
 
 Verbs ships **skills, shared procedural primitives, install manifests, evals,
@@ -195,7 +237,6 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
 | `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
-| `/verbs:handover` | ext | Hand one unfinished mechanical unit to an explicit fresh worker while the source agent keeps ownership. Detect a managed Herdr pane before choosing sibling-agent transport; otherwise use Claude/Codex fresh-run or an async payload. |
 | `/verbs:advisor` | ext | Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206. |
 | `/verbs:harness-slim` | ext | Audit a live multi-runtime agent harness after adoption: installed parity, cold context, routing overlap, available usage evidence, and human-attention load. Proposes reversible reductions; does not mutate the harness. |
 <!-- END GENERATED: skill-catalog -->

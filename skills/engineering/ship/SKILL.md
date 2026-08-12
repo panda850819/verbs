@@ -2,8 +2,8 @@
 name: ship
 description: |
   Close completed code work through test, commit, push, and PR. Use when asked
-  to "ship", "create PR", or publish the current branch. To hand unfinished
-  work to Codex, use handover.
+  to "ship", "create PR", or publish the current branch. Unfinished work stays
+  with its execution owner.
 reads:
   - repo: "**"
   - repo: CLAUDE.md

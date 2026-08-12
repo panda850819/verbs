@@ -106,7 +106,6 @@ def main():
     preserved_signals = {
         "careful": ("~/.agents", "~/.claude", "~/.codex"),
         "grill": ("3+ files", "refactor"),
-        "handover": ("parallel read-only research", "Agent Worker"),
         "review": ("before committing",),
     }
     for name, fragments in preserved_signals.items():

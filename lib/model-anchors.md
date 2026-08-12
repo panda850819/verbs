@@ -1,20 +1,18 @@
 # Model anchors
 
 This file is the single source for role-specific model and effort defaults used by
-`advisor` and `handover`. It is an execution contract, not a catalog of every
-available model. Broad workflow fan-out economics stay at the harness layer.
+`advisor`. It is an execution contract, not a catalog of every available model.
+Broad workflow fan-out economics stay at the harness layer.
 
-Last verified: 2026-07-10 with Codex CLI 0.144.1 and Claude Code 2.1.206.
+Last verified: 2026-08-12 with Codex CLI 0.144.4 and Claude Code 2.1.206.
 
 | Role key | Transport | Model | Effort | Minimum CLI | Guard | Status |
 |---|---|---|---|---|---|---|
 | `advisor.openai` | direct `codex exec` | `gpt-5.6-sol` | `high` | `codex >= 0.144.1` | read-only sandbox | verified |
 | `advisor.anthropic` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |
-| `advisor.panel.openai.fast` | direct `codex exec` | `gpt-5.6-terra` | `medium` | `codex >= 0.144.1` | read-only sandbox | verified |
+| `advisor.panel.openai.fast` | direct `codex exec` | `gpt-5.6-luna` | `max` | `codex >= 0.144.1` | read-only sandbox | verified |
 | `advisor.panel.fast` | direct `claude -p` | `sonnet` | `medium` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |
 | `advisor.panel.deep` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |
-| `handover.mechanical` | direct `codex exec` | `gpt-5.6-luna` | `medium` | `codex >= 0.144.1` | workspace-write sandbox | verified |
-| `handover.risky` | direct `codex exec` | `gpt-5.6-sol` | `high` | `codex >= 0.144.1` | workspace-write sandbox | verified |
 
 ## Selection contract
 
@@ -26,9 +24,6 @@ Last verified: 2026-07-10 with Codex CLI 0.144.1 and Claude Code 2.1.206.
    call.
 4. If the named model or effort is rejected, fail loud. Do not retry without the
    flags and do not silently substitute another model.
-5. `handover.risky` is for auth, payments, migrations, destructive data paths,
-   and other acceptance criteria where a wrong implementation is expensive.
-
 Command shapes:
 
 ```bash
@@ -39,16 +34,12 @@ codex exec --sandbox read-only -m "{Model}" \
 # advisor.anthropic | advisor.panel.fast | advisor.panel.deep
 env -u CLAUDECODE claude -p --model "{Model}" --effort "{Effort}" \
   --tools "" --no-session-persistence ...
-
-# handover.mechanical | handover.risky
-codex exec -m "{Model}" -c 'model_reasoning_effort="{Effort}"' \
-  -s workspace-write ...
 ```
 
 ## Transport evidence
 
 - Direct `codex exec` selected and completed fixed-token probes on
-  `gpt-5.6-sol/high`, `gpt-5.6-terra/medium`, and `gpt-5.6-luna/medium`.
+  `gpt-5.6-sol/high` and `gpt-5.6-luna/max`.
 - Direct `claude -p --model opus --effort high` selected
   `claude-opus-4-8` and completed its fixed-token probe with tools disabled and
   session persistence off.
@@ -57,20 +48,9 @@ codex exec -m "{Model}" -c 'model_reasoning_effort="{Effort}"' \
   persistence off.
 - Claude `/codex:rescue` selected and completed `gpt-5.6-sol/high`, but that
   companion path has a different output contract and is not the current
-  `advisor` or `handover` transport.
-- The companion app-server path rejected `gpt-5.6-luna/medium` on Codex CLI
-  0.144.1. Do not route Luna through that path until a fresh probe passes.
+  `advisor` transport.
 - The companion app-server path also rejected Sol at `xhigh` and `ultra`; `high`
   is the verified advisor effort on that path.
-
-## Fresh-run selection
-
-`scripts/verbs fresh-run` is a caller-neutral execution transport rather than a
-role key. The original orchestrator passes the worker runtime, model, and effort
-explicitly for every dispatch; same-runtime handoff does not require the same
-model. The command never inherits or silently substitutes a model and fails
-loud when the selected runtime rejects it. Existing handover role rows remain
-the compatibility defaults for Codex-targeted mechanical and risky work.
 
 ## Update gate
 

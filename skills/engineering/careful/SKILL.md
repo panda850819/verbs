@@ -67,9 +67,10 @@ CAREFUL: About to {action}.
   Proceed? [y/n]
 ```
 
-## Stopping discipline
+## Stop boundary
 
-The destructive-action gates above are the *only* automatic pauses. Before any other stop, run the self-check in `lib/stopping-discipline.md`. Ask only when credentials, a preference, or a judgment unavailable from project evidence changes the outcome.
+Pause only for the destructive or high-risk gates listed above. Ordinary
+reversible work continues under the active task's own completion contract.
 
 ## Deactivate
 

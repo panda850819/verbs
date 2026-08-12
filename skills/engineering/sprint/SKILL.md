@@ -4,13 +4,11 @@ type: skill
 description: |
   Focused execution from a concrete outcome to SHIPPED, PAUSED, FAILED, or ABORTED_BY_USER. Adds acceptance-driven loops, bounded review, and delivery evidence beyond native coding behavior. Routes unclear requirements to grill, bugs to debug, UI work to ui, and completed delivery to ship. NOT for hypothetical or planning-only responses.
 reads:
-  - skill: lib/model-anchors.md
   - skill: grill
   - skill: ui
   - skill: debug
   - skill: review
   - skill: ship
-  - skill: handover
   - skill: lib/verify-the-test-loop.md
   - skill: lib/learning-format.md
 writes:
@@ -52,9 +50,9 @@ Completion: the finish line can be proven by commands or named human evidence.
 
 For each smallest coherent unit: inspect the seam, make the minimum change, run
 the narrowest relevant check, and inspect the diff. Execute in the main session
-by default; delegate only file-disjoint or mechanical work requested by the user
-or repository contract through `handover`. Consult `lib/model-anchors.md` for
-the model seat; never select a model ad hoc. Stop immediately before destructive
+by default. When the user explicitly delegates through Herdr or a host-native
+worker, treat the returned output as evidence, not completion: this Sprint still
+owns acceptance, review, Git, and delivery. Stop immediately before destructive
 or public actions that need authorization. Never weaken or skip a test.
 
 Completion: every changed line maps to the finish line and its check passes.

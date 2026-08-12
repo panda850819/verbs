@@ -174,8 +174,6 @@ claude_probe_state="$PROBE_STATE"
 claude_probe_version="$PROBE_VERSION"
 
 ext_check "ship"           "gh"            "brew install gh"
-ext_check_version "handover/codex" "$codex_probe_state" "$codex_probe_version" "0.144.1" "codex update"
-ext_check_version "handover/claude" "$claude_probe_state" "$claude_probe_version" "2.1.206" "claude update"
 ext_check_version "advisor/codex" "$codex_probe_state" "$codex_probe_version" "0.144.1" "codex update"
 ext_check_version "advisor/claude" "$claude_probe_state" "$claude_probe_version" "2.1.206" "claude update"
 ext_check_probe "harness-slim/codex" "$codex_probe_state" "install Codex CLI"
