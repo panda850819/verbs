@@ -37,8 +37,10 @@
   proposal-only, trust-boundary, telemetry-semantics, and usage-denominator
   contracts without adding an installed runtime route. (#362)
 - Removed Harness Slim from public routing, generated plugin metadata, and
-  optional CLI dependency reporting. The migration is reversible by restoring
-  its manifest entry and skill frontmatter, then running sync. (#362)
+  optional CLI dependency reporting. Rollback requires restoring the
+  `skills/meta/harness-slim` source and frontmatter, manifest entry, README and
+  Resolver routes, bootstrap probes, and runtime test expectations, then
+  running sync and the relevant tests. (#362)
 
 ## v0.27.0 — Explicit loading and review boundaries
 
