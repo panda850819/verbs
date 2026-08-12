@@ -1,0 +1,1 @@
+Do not read or apply any custom Review skill, skill resource, or agent instruction file. Use native review behavior only.

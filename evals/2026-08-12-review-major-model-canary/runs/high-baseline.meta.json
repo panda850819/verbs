@@ -1,0 +1,19 @@
+{
+  "arm": "baseline",
+  "arm_instruction_sha256": "bb1d955ced203ec42f2c9e8cedd86b4b41cb546d799973ffaa7205b63b1e7e0d",
+  "base": "31b055bfac7664760205000eb57a6fd92984ad3d",
+  "base_tree": "0f1c54a2e52b192f510e90bd8064f310412a0ae1",
+  "case": "high",
+  "effort": "high",
+  "exit": 0,
+  "head": "14f4cd5fc5ad52e7125fcfc1dd99dfaa93d50fbc",
+  "head_tree": "627e0b3ecd1ea4c64096de73a88cbadcbf1675ee",
+  "model": "gpt-5.6-sol",
+  "prompt_sha256": "a561ca6bdecf253da6703d71c2229282c8255d4fff0b34bfda5b8e61cee5a58c",
+  "recall_sha256": "93c8620ec6ab1f3b42ee29d2a139c9598dbf817d12c60a5c74a6340e673d4dde",
+  "report_sha256": "a432f8d6b4317dd2e0ec7c0f181bdb8ebc57de8bd73dd4df1ca62ebf14448b09",
+  "skill_sha256": "1190d26df99ea2cff623e80b7e9bf1bc13ec4ba4a2ac61d31834434e804e8d5d",
+  "snapshot": "ee631904192de738547529f7c820ac703301ddeb",
+  "tokens_used": 80391,
+  "wall_seconds": 322.219
+}
