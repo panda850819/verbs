@@ -34,10 +34,23 @@ for forbidden in \
   'scripts/bootstrap.sh|harness-slim/claude'; do
   file="${forbidden%%|*}"
   token="${forbidden#*|}"
-  if grep -Fq "$token" "$file"; then
-    echo "FAIL: retired runtime reference $token remains in $file" >&2
+  if [ ! -f "$file" ]; then
+    echo "FAIL: cannot inspect missing expected file $file" >&2
     exit 1
   fi
+  grep_status=0
+  grep -Fq "$token" "$file" || grep_status=$?
+  case "$grep_status" in
+    0)
+      echo "FAIL: retired runtime reference $token remains in $file" >&2
+      exit 1
+      ;;
+    1) ;;
+    *)
+      echo "FAIL: could not inspect $file for $token (grep $grep_status)" >&2
+      exit 1
+      ;;
+  esac
 done
 
 if rg -n '/Users/|~/.agents/skills/harness-slim|brain\.pdzeng\.com' "$procedure"; then
