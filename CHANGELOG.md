@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.30.1 — Review major-model canary
+
+### Verified
+
+- Re-ran matched low-risk and trust-boundary Review canaries on Codex CLI
+  0.144.4 with `gpt-5.6-sol/high`. The low-risk fast path preserved native
+  no-finding parity and compact output. On the real guard diff, Review retained
+  the baseline's principal defects and added two independently oracle-backed
+  mechanism classes: repository-target confusion and command/data
+  misclassification. Verdict: `KEEP`; no Skill-body change. (#365)
+- Recorded exact prompts, frozen Review/resource artifacts, final reports,
+  token and wall-time costs, discarded-fixture reason, rubric, and withheld
+  historical oracles under `evals/2026-08-12-review-major-model-canary/`. (#365)
+
 ## v0.30.0 — Deterministic tracker setup
 
 ### Added
