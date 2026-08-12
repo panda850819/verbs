@@ -28,7 +28,7 @@ Changed: `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `CHANGELOG.m
   Consequence: Operators are not told that ticket-gate enforcement is active.
   Direction: Update the public hook inventories to include both PreToolUse guards.
 
-Coverage: `bash -n` passed for both guards and changed shell tests; `hooks.json` parsed; `git diff --check HEAD^..HEAD` passed; versions agree on `0.7.1`; targeted guard probes verified normal blocking, fail-open envelopes, and the triggers above. The fixture suites could not run validly because the read-only sandbox denied temporary-repository creation; their resulting failures are environmental, not test evidence. Worktree remained clean.
+Coverage: `bash -n` passed for both guards and changed shell tests; `hooks.json` parsed; `git diff --check 31b055bfac7664760205000eb57a6fd92984ad3d..14f4cd5fc5ad52e7125fcfc1dd99dfaa93d50fbc` passed; versions agree on `0.7.1`; targeted guard probes verified normal blocking, fail-open envelopes, and the triggers above. The fixture suites could not run validly because the read-only sandbox denied temporary-repository creation; their resulting failures are environmental, not test evidence. Worktree remained clean.
 
 Scope drift: none.
 

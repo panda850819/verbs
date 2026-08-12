@@ -15,10 +15,14 @@ Status: **KEEP** — the low-risk fast path preserves native outcome parity whil
 | Review artifact | SHA-256 `1190d26df99ea2cff623e80b7e9bf1bc13ec4ba4a2ac61d31834434e804e8d5d` |
 | Session policy | Fresh `codex exec --ephemeral` session per arm; user config and repository rules ignored |
 | Tools | Same read-only sandbox and local shell/repository access in every arm; no network |
-| Treatment | The frozen `review-skill.md` and its declared `learning-recall.md` resource supplied directly |
+| Baseline instruction | Frozen in `baseline-instruction.txt` |
+| Treatment instruction | Frozen in `treatment-instruction.txt`; placeholders denote the byte-exact frozen artifacts |
+| Treatment | The frozen `review-skill.md` and its declared `learning-recall.txt` resource supplied directly |
 
-The four valid runs used the same prompt, historical repository content, commit
-intent, model, effort, tools, and rubric. Baselines were explicitly denied the
+The four valid runs used the same common prompt, historical repository content,
+commit intent, model, effort, tools, and rubric. Each arm also used its frozen
+arm instruction; the treatment instruction names its two byte-exact injected
+artifacts. Baselines were explicitly denied the
 custom Review contract. Treatments received no other custom Skill. The
 historical fixing commits were withheld until all outputs were frozen.
 
@@ -31,8 +35,8 @@ appears below.
 
 | Case | Historical diff | Why it qualifies | Withheld oracle |
 |---|---|---|---|
-| Low-risk | `8831798^..8831798` | One reversible README attribution cleanup | No later defect or corrective commit found; repository notice and stale-name searches remain consistent |
-| Trust boundary | `5bdee55^..5bdee55` | A Git commit/push enforcement hook and destructive-guard parser change | `391ca9d` fixed stale four-hook smoke truth; `fc11669` added argv-aware command/refspec classification and tests; `7e922fb` fixed `cd`/`-C` repo resolution; `56f68b0` fixed data-as-command heredoc false positives |
+| Low-risk | `8831798^..8831798`; fixture commits `4e2574b65d29b8cf0fa7b071e45746838c9c07f5..32a2dc13b636eeb72cdd21bff01f4314a583592c`; trees `0590a77f9b70a89c913d6a685811f6a60632ebf2..930eca27f0360edd139e3f621a91e743dbc5d864` | One reversible README attribution cleanup | No later defect or corrective commit found; repository notice and stale-name searches remain consistent |
+| Trust boundary | `5bdee55^..5bdee55`; fixture commits `31b055bfac7664760205000eb57a6fd92984ad3d..14f4cd5fc5ad52e7125fcfc1dd99dfaa93d50fbc`; trees `0f1c54a2e52b192f510e90bd8064f310412a0ae1..627e0b3ecd1ea4c64096de73a88cbadcbf1675ee` | A Git commit/push enforcement hook and destructive-guard parser change | `391ca9d` fixed stale four-hook smoke truth; `fc11669` added argv-aware command/refspec classification and tests; `7e922fb` fixed `cd`/`-C` repo resolution; `56f68b0` fixed data-as-command heredoc false positives |
 
 ## Rubric
 

@@ -1,0 +1,9 @@
+Apply the Review contract below exactly. Its declared learning resource follows. Do not load any other custom skill. For the high-risk case, if an isolated cold reviewer cannot be spawned under this evaluation transport, record the gap rather than simulating one.
+
+<review-skill>
+{review-skill.md}
+</review-skill>
+
+<learning-resource>
+{learning-recall.txt}
+</learning-resource>

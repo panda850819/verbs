@@ -23,7 +23,7 @@ Panda，發現 3 個可執行問題。
 
 驗證範圍：
 
-- 檢查完整 `HEAD^..HEAD` intent 與全部 13 個變更檔。
+- 檢查完整 `31b055bfac7664760205000eb57a6fd92984ad3d..14f4cd5fc5ad52e7125fcfc1dd99dfaa93d50fbc` intent 與全部 13 個變更檔。
 - 檢查新 guard 的 29 個測試案例、hook manifest、單次解析重構及版本同步。
 - `bash -n`、JSON parse、`git diff --check` 通過。
 - `python3 scripts/verbs sync --check` 通過：v0.7.1、11 skills、derived files 同步。
