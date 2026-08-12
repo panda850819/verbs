@@ -8,7 +8,7 @@ anchor="lib/model-anchors.md"
 expected_rows=(
   '| `advisor.openai` | direct `codex exec` | `gpt-5.6-sol` | `high` | `codex >= 0.144.1` | read-only sandbox | verified |'
   '| `advisor.anthropic` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |'
-  '| `advisor.panel.openai.fast` | direct `codex exec` | `gpt-5.6-terra` | `medium` | `codex >= 0.144.1` | read-only sandbox | verified |'
+  '| `advisor.panel.openai.fast` | direct `codex exec` | `gpt-5.6-luna` | `max` | `codex >= 0.144.1` | read-only sandbox | verified |'
   '| `advisor.panel.fast` | direct `claude -p` | `sonnet` | `medium` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |'
   '| `advisor.panel.deep` | direct `claude -p` | `opus` | `high` | `claude >= 2.1.206` | clear `CLAUDECODE`, tools disabled, no session persistence | verified |'
 )
@@ -36,9 +36,9 @@ for skill in skills/engineering/advisor/SKILL.md skills/engineering/review/SKILL
   }
 done
 
-if rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|terra)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/ >/dev/null; then
+if rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/ >/dev/null; then
   echo "FAIL: runtime model selectors must stay in lib/model-anchors.md"
-  rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|terra)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/
+  rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/
   exit 1
 fi
 

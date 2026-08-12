@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.26.1 — Advisor Luna anchor
+
+### Changed
+
+- Changed the fast OpenAI panel role from `gpt-5.6-terra/medium` to the verified
+  `gpt-5.6-luna/max` pairing. The read-only fixed-token probe passed with Codex
+  CLI 0.144.4. (#361)
+
 ## v0.26.0 — Native delegation ownership
 
 ### Removed
