@@ -26,11 +26,19 @@ grep -Fq 'maintainer/harness-slim.md' RESOLVER.md
 
 test ! -e skills/meta/harness-slim
 test -z "$(find skills -type f -path '*/harness-slim/*' -print -quit)"
-! grep -Fq '[skill.harness-slim]' manifest.toml
-! grep -Fq '`verbs:harness-slim`' RESOLVER.md
-! grep -Fq '/verbs:harness-slim' README.md
-! grep -Fq 'harness-slim/codex' scripts/bootstrap.sh
-! grep -Fq 'harness-slim/claude' scripts/bootstrap.sh
+for forbidden in \
+  'manifest.toml|[skill.harness-slim]' \
+  'RESOLVER.md|`verbs:harness-slim`' \
+  'README.md|/verbs:harness-slim' \
+  'scripts/bootstrap.sh|harness-slim/codex' \
+  'scripts/bootstrap.sh|harness-slim/claude'; do
+  file="${forbidden%%|*}"
+  token="${forbidden#*|}"
+  if grep -Fq "$token" "$file"; then
+    echo "FAIL: retired runtime reference $token remains in $file" >&2
+    exit 1
+  fi
+done
 
 if rg -n '/Users/|~/.agents/skills/harness-slim|brain\.pdzeng\.com' "$procedure"; then
   echo "FAIL: maintainer procedure contains a personal machine path" >&2
