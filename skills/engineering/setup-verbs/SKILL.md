@@ -1,11 +1,14 @@
 ---
 name: setup-verbs
 description: |
-  Configure or repair a repository's Verbs issue-tracker setting. Use when setting up Verbs in a repo, when a tracker-dependent workflow cannot find its tracker, or when the existing `## verbs` block and Git remote may disagree.
+  Resolve ambiguity and approval for a repository's Verbs issue-tracker
+  setting. Use when setup is requested or `scripts/verbs setup` reports a
+  document, tracker, or Git-identity conflict.
 reads:
   - repo: AGENTS.md
   - repo: CLAUDE.md
   - repo: .git/config
+  - cli: scripts/verbs setup
 writes:
   - repo: AGENTS.md
   - repo: CLAUDE.md
@@ -18,74 +21,30 @@ user-invocable: true
 
 # Setup Verbs
 
-Configure the existing per-repository `## verbs` block for tracker-dependent
-Verbs workflows. This initial contract supports GitHub only. Preview one
-idempotent edit, ask once, and write only after approval.
+The deterministic setup contract belongs to `scripts/verbs setup`. This skill
+owns only ambiguity resolution and the human approval boundary. GitHub is the
+only supported tracker; repository identity always comes from Git remotes.
 
-## 1. Inspect
+## Procedure
 
-Read the Git remotes and any root `AGENTS.md` and `CLAUDE.md`. Select the
-configuration surface with these rules:
+1. Run `scripts/verbs setup --check` in the target repository.
+2. If it reports a document ambiguity, ask the human to choose `AGENTS.md` or
+   `CLAUDE.md` as canonical. Do not create a parallel config surface or guess.
+   If neither exists, ask which canonical document to create, create only that
+   empty document after approval, then rerun the check.
+3. If it reports no or conflicting GitHub repository identities, surface the
+   exact remotes and stop until the human repairs Git configuration. If it
+   reports a tracker other than `github`, surface the conflict and stop; do not
+   overwrite or translate it.
+4. Run `scripts/verbs setup --preview` and show its exact target and diff. Ask
+   once: `[approve / reject / skip]`.
+5. On `approve`, run `scripts/verbs setup --apply --approve`. On `reject` or
+   `skip`, make no change and stop. Never edit the document independently of the
+   CLI preview.
+6. Run `scripts/verbs setup --check` again and report the selected file,
+   `tracker: github`, and Git-derived repository identity.
 
-1. If exactly one document contains `## verbs`, update that document.
-2. If only one document exists, use it and add the block if needed.
-3. If both documents contain a block, stop and ask which is canonical, even
-   when their current blocks match.
-4. If both documents exist without a block, stop and ask which is canonical.
-5. If neither document exists, stop and ask which one to create.
-
-Determine the tracker from current evidence:
-
-- An existing tracker other than `github`: surface the conflict and stop. Do
-  not overwrite it.
-- Exactly one GitHub repository identity across the remotes: propose
-  `tracker: github`.
-- No GitHub remote, or conflicting GitHub repository identities: state the
-  ambiguity and stop. Do not guess or silently configure another tracker.
-
-Derive repository identity from the Git remote whenever a later workflow needs
-it. Never copy owner or repository fields into the config block.
-
-## 2. Preview and gate
-
-Show the target file and exact proposed diff. Preserve every existing key and
-all surrounding content. Add or replace exactly one line:
-
-```yaml
-tracker: github
-```
-
-Ask once: `[approve / reject / skip]`.
-
-- `approve`: apply only the previewed edit.
-- `reject` or `skip`: make no changes and stop.
-
-## 3. Write and verify
-
-After approval, update the selected document in place. Do not create a second
-`## verbs` heading, a duplicate `tracker:` line, `.verbs.toml`, or a parallel
-agent-configuration document tree.
-
-Re-read the result and prove:
-
-- the selected document has one canonical `## verbs` block and one
-  `tracker: github` line;
-- all pre-existing keys and surrounding content remain;
-- the current Git remote still resolves to one GitHub repository identity.
-
-Report the file path and resulting tracker setting. A second run with the same
-state is a no-op: show that no diff is needed and do not ask for confirmation.
-
-## Scenario contract
-
-| Scenario | Required result |
-|---|---|
-| First setup, one root agent document, one GitHub identity | Preview adding one block or setting; write only after approval |
-| Existing block without tracker | Preview adding one setting while preserving every existing key |
-| Existing `tracker: github` | No-op; no duplicate and no approval prompt |
-| Existing different tracker | Surface the conflict; do not overwrite or guess |
-| Ambiguous document or remote identity | Ask for the missing canonical choice; make no change |
-
-Native agent tools can already inspect Git and edit Markdown. This skill's
-delta is the shared surface-selection rule, Git-derived identity, idempotence,
-ambiguity stop, and preview gate across supported hosts.
+A configured repository is a no-op: the check succeeds, no preview is needed,
+and no approval prompt appears. The CLI preserves surrounding content and
+existing keys, rejects duplicate blocks or settings, and never writes
+`.verbs.toml`.

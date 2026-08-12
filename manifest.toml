@@ -44,7 +44,7 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.29.0"
+version = "0.30.0"
 schema  = "skill-tier-v1"
 updated = "2026-08-12"
 
@@ -119,7 +119,7 @@ tier = "core"
 requires = ["cli:git"]
 resources = []
 composes = []
-description = "Configure or repair the existing per-repository Verbs issue-tracker setting with Git-derived identity, an idempotent preview, and one approval gate."
+description = "Resolve tracker setup ambiguity and approval around deterministic scripts/verbs setup checks, previews, applies, and read-back verification."
 
 [skill.review]
 tier = "core"

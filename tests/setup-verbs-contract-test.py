@@ -1,46 +1,77 @@
 #!/usr/bin/env python3
-"""Contract checks for the prose-only setup-verbs workflow."""
+"""Integration and prose contracts for scripts/verbs setup."""
 
+import subprocess
+import tempfile
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = ROOT / "skills/engineering/setup-verbs/SKILL.md"
-text = SKILL.read_text()
+CLI = ROOT / "scripts/verbs"
+SKILL = (ROOT / "skills/engineering/setup-verbs/SKILL.md").read_text()
 
 
-def require(fragment: str, scenario: str) -> None:
-    assert fragment in text, f"{scenario}: missing contract fragment {fragment!r}"
+def run(repo, *args):
+    return subprocess.run(
+        [str(CLI), "setup", *args, "--repo", str(repo)],
+        text=True, capture_output=True,
+    )
 
 
-# First setup: select the only available agent document, derive GitHub from Git,
-# preview the exact edit, and gate the write.
-require("If only one document exists, use it and add the block if needed.", "first setup")
-require("Exactly one GitHub repository identity across the remotes", "first setup")
-require("Show the target file and exact proposed diff.", "first setup")
-require("Ask once: `[approve / reject / skip]`.", "first setup")
+def fixture(agent_text="# Agent\n", remote="git@github.com:Acme/Widget.git"):
+    root = Path(tempfile.mkdtemp())
+    subprocess.run(["git", "init", "-q", str(root)], check=True)
+    if remote:
+        subprocess.run(["git", "-C", str(root), "remote", "add", "origin", remote], check=True)
+    (root / "AGENTS.md").write_text(agent_text)
+    return root
 
-# Update: preserve the current block and replace or add one setting.
-require("Preserve every existing key and\nall surrounding content.", "update")
-require("Add or replace exactly one line:", "update")
 
-# Idempotence: a configured repo does not get another heading, setting, or gate.
-require("A second run with the same\nstate is a no-op", "idempotence")
-require("do not ask for confirmation", "idempotence")
-require("Do not create a second\n`## verbs` heading, a duplicate `tracker:` line", "idempotence")
+# Missing config: check fails, preview is exact and read-only, apply is gated.
+repo = fixture("# Agent\n\nKeep me.\n")
+check = run(repo, "--check")
+assert check.returncode == 1 and "NOT CONFIGURED" in check.stdout
+preview = run(repo, "--preview")
+assert preview.returncode == 0 and "+## verbs" in preview.stdout
+assert "tracker: github" not in (repo / "AGENTS.md").read_text()
+blocked = run(repo, "--apply")
+assert blocked.returncode == 2 and "requires --approve" in blocked.stderr
+applied = run(repo, "--apply", "--approve")
+assert applied.returncode == 0 and "APPLIED" in applied.stdout
+text = (repo / "AGENTS.md").read_text()
+assert text.count("## verbs") == 1 and text.count("tracker: github") == 1
+assert "Keep me." in text
 
-# Ambiguity: do not choose a document, repository identity, or unsupported
-# tracker without evidence.
-require("If both documents contain a block, stop and ask which is canonical", "ambiguous document")
-require("If both documents exist without a block", "ambiguous document")
-require("No GitHub remote, or conflicting GitHub repository identities", "ambiguous remote")
-require("Do not guess or silently configure another tracker.", "unsupported tracker")
-require("An existing tracker other than `github`: surface the conflict and stop.", "tracker conflict")
-require("Existing different tracker | Surface the conflict; do not overwrite or guess", "tracker conflict")
+# Idempotence: no diff and no approval required.
+assert run(repo, "--check").returncode == 0
+noop = run(repo, "--apply", "--approve")
+assert noop.returncode == 0 and "NO-OP" in noop.stdout
 
-# The existing agent document is the sole config surface.
-require("`.verbs.toml`", "single config surface")
-assert not (ROOT / ".verbs.toml").exists(), "must not introduce .verbs.toml"
-assert not (ROOT / "docs/agents").exists(), "must not introduce docs/agents"
+# Existing block preserves keys and inserts one tracker.
+repo = fixture("# Agent\n\n## verbs\ntest: bash tests/run-all.sh\n\n## Notes\nkeep\n")
+assert run(repo, "--apply", "--approve").returncode == 0
+text = (repo / "AGENTS.md").read_text()
+assert "test: bash tests/run-all.sh\ntracker: github\n\n## Notes" in text
 
+# Conflicting tracker, document ambiguity, and remote ambiguity fail closed.
+repo = fixture("## verbs\ntracker: linear\n")
+assert "existing tracker" in run(repo, "--check").stderr
+repo = fixture()
+(repo / "CLAUDE.md").write_text("# Claude\n")
+assert "both exist without" in run(repo, "--check").stderr
+repo = fixture()
+subprocess.run(["git", "-C", str(repo), "remote", "add", "upstream", "https://github.com/Other/Repo.git"], check=True)
+assert "expected one GitHub repository identity" in run(repo, "--check").stderr
+
+for fragment in (
+    "deterministic setup contract belongs to `scripts/verbs setup`",
+    "ask the human to choose `AGENTS.md` or\n   `CLAUDE.md`",
+    "`scripts/verbs setup --preview`",
+    "`scripts/verbs setup --apply --approve`",
+    "Never edit the document independently of the\n   CLI preview",
+    "`.verbs.toml`",
+):
+    assert fragment in SKILL, fragment
+
+assert not (ROOT / ".verbs.toml").exists()
 print("setup-verbs contract: ok")

@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.30.0 — Deterministic tracker setup
+
+### Added
+
+- Added `scripts/verbs setup --check`, `--preview`, and gated
+  `--apply --approve` modes for Git-derived, fail-closed, idempotent repository
+  tracker configuration. Integration fixtures cover missing, existing,
+  conflicting, ambiguous, preview, apply, and no-op paths. (#364)
+
+### Changed
+
+- Reduced `setup-verbs` to canonical-document ambiguity, tracker conflict, Git
+  identity, and human approval judgment. The skill delegates all deterministic
+  edits and read-back verification to the CLI. (#364)
+
 ## v0.29.0 — Canonical codebase design resource
 
 ### Changed

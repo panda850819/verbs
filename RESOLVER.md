@@ -77,7 +77,7 @@ route:
 | An external artifact may be installed or adopted | `gatekeeper` | Trust evidence supports an adopt, restrict, or reject decision. |
 | Production, shared infrastructure, or destructive actions are involved | `careful` | Required confirmation and recovery evidence are present. |
 | A load-bearing judgment needs independent challenge | `advisor` | The executor evaluates the second opinion; agreement is not a mandate. |
-| A repository lacks an unambiguous Verbs issue-tracker setting | `setup-verbs` | The existing `## verbs` block names the tracker; repository identity remains derived from Git. |
+| `scripts/verbs setup` reports tracker ambiguity or needs write approval | `setup-verbs` | The canonical document and approval are explicit; the CLI verifies `tracker: github` and Git-derived identity. |
 | Established requirements need one durable source of truth | `to-spec` | One canonical GitHub Spec Issue is published after test-seam confirmation. |
 | A complete canonical Spec needs implementation units | `to-tickets` | Approved vertical-slice child Issues and blocking edges are published; the frontier is reported but not claimed. |
 
@@ -120,7 +120,7 @@ safety and verification guidance, not host-level enforcement.
 | `verbs:sprint-planning` | Propose one Sprint Goal and ready work for a human approval decision; never execute the selection. | explicit request to plan the next Sprint |
 | `verbs:grill` | Adversarial requirement discovery through dependency-aware frontier rounds. Routes large foggy work to Decision Map, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
 | `verbs:ask-boss` | Route unclear owner, target, reference, or next route to one existing specialist; facts first, no generic grilling. | where do I start, who decides, which reference, what route, unclear next step |
-| `verbs:setup-verbs` | Configure or repair the existing repository-level issue-tracker setting with an idempotent preview and approval gate. | set up Verbs, configure tracker, missing tracker config |
+| `verbs:setup-verbs` | Resolve canonical-document, tracker, Git-identity, or approval ambiguity around deterministic `scripts/verbs setup` operations. | setup reports ambiguity, approve tracker configuration |
 | `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |
 | `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
 | `verbs:decision-map` | Create or work cross-session Decision Maps named by the request or handed off by `ask-boss`; resolve one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map, several dependent decisions |

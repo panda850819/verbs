@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Verbs CLI: install checks and manifest sync. Stdlib only."""
 import argparse
+import difflib
 import json
 import os
 import re
@@ -1318,6 +1319,162 @@ def run_sync(args):
 
 
 # ---------------------------------------------------------------------------
+# Repository tracker setup
+# ---------------------------------------------------------------------------
+
+_AGENT_DOCUMENTS = ("AGENTS.md", "CLAUDE.md")
+_VERBS_HEADING = re.compile(r"^##[ \t]+verbs[ \t]*$", re.IGNORECASE)
+_HEADING = re.compile(r"^(#{1,2})[ \t]+")
+_TRACKER = re.compile(r"^(?P<indent>[ \t]*)tracker[ \t]*:[ \t]*(?P<value>[^#\n]*?)[ \t]*$")
+_GITHUB_REMOTE = re.compile(
+    r"(?:github\.com[/:])(?P<owner>[^/\s:]+)/(?P<repo>[^/\s]+?)(?:\.git)?/?$",
+    re.IGNORECASE,
+)
+
+
+def _verbs_blocks(text):
+    lines = text.splitlines(keepends=True)
+    blocks = []
+    for index, line in enumerate(lines):
+        if not _VERBS_HEADING.match(line.rstrip("\r\n")):
+            continue
+        end = index + 1
+        while end < len(lines) and not _HEADING.match(lines[end]):
+            end += 1
+        blocks.append((index, end))
+    return lines, blocks
+
+
+def _document_state(path):
+    text = path.read_text(encoding="utf-8")
+    lines, blocks = _verbs_blocks(text)
+    trackers = []
+    for start, end in blocks:
+        for index in range(start + 1, end):
+            match = _TRACKER.match(lines[index].rstrip("\r\n"))
+            if match:
+                trackers.append((index, match.group("value").strip()))
+    return {"path": path, "text": text, "lines": lines,
+            "blocks": blocks, "trackers": trackers}
+
+
+def _github_identities(repo):
+    result = subprocess.run(
+        ["git", "-C", str(repo), "remote", "-v"],
+        text=True, capture_output=True,
+    )
+    if result.returncode != 0:
+        return set(), result.stderr.strip() or "not a Git repository"
+    identities = set()
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) < 2:
+            continue
+        match = _GITHUB_REMOTE.search(fields[1])
+        if match:
+            identities.add((match.group("owner").lower(), match.group("repo").lower()))
+    return identities, None
+
+
+def _setup_plan(repo):
+    identities, git_error = _github_identities(repo)
+    if git_error:
+        return None, f"BLOCKED: cannot derive repository identity: {git_error}"
+    if len(identities) != 1:
+        observed = ", ".join(f"{owner}/{name}" for owner, name in sorted(identities))
+        detail = observed or "none"
+        return None, f"BLOCKED: expected one GitHub repository identity; found {detail}"
+
+    existing = [repo / name for name in _AGENT_DOCUMENTS if (repo / name).is_file()]
+    states = [_document_state(path) for path in existing]
+    with_blocks = [state for state in states if state["blocks"]]
+    if len(with_blocks) == 1:
+        target = with_blocks[0]
+    elif len(with_blocks) > 1:
+        return None, "BLOCKED: AGENTS.md and CLAUDE.md both contain ## verbs; choose the canonical document"
+    elif len(states) == 1:
+        target = states[0]
+    elif len(states) > 1:
+        return None, "BLOCKED: AGENTS.md and CLAUDE.md both exist without ## verbs; choose the canonical document"
+    else:
+        return None, "BLOCKED: no AGENTS.md or CLAUDE.md exists; choose which canonical document to create"
+
+    if len(target["blocks"]) > 1:
+        return None, f"BLOCKED: {target['path'].name} contains multiple ## verbs blocks"
+    if len(target["trackers"]) > 1:
+        return None, f"BLOCKED: {target['path'].name} contains multiple tracker settings"
+    if target["trackers"] and target["trackers"][0][1].lower() != "github":
+        value = target["trackers"][0][1]
+        return None, f"BLOCKED: existing tracker {value!r} conflicts with supported tracker 'github'"
+
+    old = target["text"]
+    lines = list(target["lines"])
+    if target["trackers"]:
+        new = old
+    elif target["blocks"]:
+        start, end = target["blocks"][0]
+        insert_at = end
+        while insert_at > start + 1 and not lines[insert_at - 1].strip():
+            insert_at -= 1
+        lines.insert(insert_at, "tracker: github\n")
+        new = "".join(lines)
+    else:
+        separator = "" if not old or old.endswith("\n\n") else ("\n" if old.endswith("\n") else "\n\n")
+        new = old + separator + "## verbs\ntracker: github\n"
+
+    return {
+        "path": target["path"], "old": old, "new": new,
+        "identity": "/".join(next(iter(identities))),
+    }, None
+
+
+def _setup_diff(plan):
+    name = plan["path"].name
+    return "".join(difflib.unified_diff(
+        plan["old"].splitlines(keepends=True),
+        plan["new"].splitlines(keepends=True),
+        fromfile=f"a/{name}", tofile=f"b/{name}",
+    ))
+
+
+def run_setup(args):
+    repo = Path(args.repo).resolve()
+    plan, error = _setup_plan(repo)
+    if error:
+        print(error, file=sys.stderr)
+        return 2
+
+    changed = plan["old"] != plan["new"]
+    if args.check:
+        if changed:
+            print(f"NOT CONFIGURED: {plan['path'].name} needs tracker: github")
+            return 1
+        print(f"OK: {plan['path'].name} has one tracker: github; Git remote is {plan['identity']}")
+        return 0
+
+    if not changed:
+        print(f"NO-OP: {plan['path'].name} already has tracker: github; Git remote is {plan['identity']}")
+        return 0
+
+    print(f"Target: {plan['path']}")
+    print(f"GitHub identity: {plan['identity']}")
+    print(_setup_diff(plan), end="")
+    if args.preview:
+        return 0
+    if not args.approve:
+        print("BLOCKED: --apply requires --approve after reviewing the preview", file=sys.stderr)
+        return 2
+
+    plan["path"].write_text(plan["new"], encoding="utf-8")
+    verified, verify_error = _setup_plan(repo)
+    if verify_error or verified["old"] != verified["new"]:
+        print(f"ERROR: write verification failed: {verify_error or 'result is not idempotent'}", file=sys.stderr)
+        return 1
+    print(f"APPLIED: {plan['path'].name} now has one tracker: github")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -1361,6 +1518,17 @@ def main():
         help="Exit nonzero if derived files drift from manifest.toml (no writes)",
     )
 
+    setup = sub.add_parser(
+        "setup",
+        help="Check, preview, or apply repository tracker configuration",
+    )
+    setup_mode = setup.add_mutually_exclusive_group(required=True)
+    setup_mode.add_argument("--check", action="store_true", help="Validate without writing")
+    setup_mode.add_argument("--preview", action="store_true", help="Print the exact idempotent diff")
+    setup_mode.add_argument("--apply", action="store_true", help="Apply the previewed edit")
+    setup.add_argument("--approve", action="store_true", help="Explicitly approve --apply")
+    setup.add_argument("--repo", default=".", help="Repository path (default: current directory)")
+
     sub.add_parser("help", help="Show this help message")
 
     args = parser.parse_args()
@@ -1371,6 +1539,10 @@ def main():
         run_init(args)
     elif args.command == "sync":
         run_sync(args)
+    elif args.command == "setup":
+        if args.approve and not args.apply:
+            parser.error("--approve requires --apply")
+        sys.exit(run_setup(args))
     elif hasattr(args, "handler"):
         sys.exit(args.handler(args))
     elif args.command == "help":
