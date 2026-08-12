@@ -77,7 +77,6 @@ route:
 | An external artifact may be installed or adopted | `gatekeeper` | Trust evidence supports an adopt, restrict, or reject decision. |
 | Production, shared infrastructure, or destructive actions are involved | `careful` | Required confirmation and recovery evidence are present. |
 | A load-bearing judgment needs independent challenge | `advisor` | The executor evaluates the second opinion; agreement is not a mandate. |
-| A live multi-runtime harness has accumulated complexity | `harness-slim` | A verified, reversible reduction proposal exists. |
 | A repository lacks an unambiguous Verbs issue-tracker setting | `setup-verbs` | The existing `## verbs` block names the tracker; repository identity remains derived from Git. |
 | Established requirements need one durable source of truth | `to-spec` | One canonical GitHub Spec Issue is published after test-seam confirmation. |
 | A complete canonical Spec needs implementation units | `to-tickets` | Approved vertical-slice child Issues and blocking edges are published; the frontier is reported but not claimed. |
@@ -144,7 +143,6 @@ safety and verification guidance, not host-level enforcement.
 | Skill | Purpose | Trigger |
 |---|---|---|
 | `verbs:gatekeeper` | Evaluate an external skill, MCP, repo, package, service, URL, or document before adoption. | should I install, clone, trust, or adopt this |
-| `verbs:harness-slim` | Audit an already-adopted multi-runtime harness for parity, cold context, routing overlap, available usage evidence, and attention cost. | audit or reduce the live agent harness |
 
 ## Disambiguation
 
@@ -157,11 +155,11 @@ safety and verification guidance, not host-level enforcement.
 | `verbs:review` | Your code through scoped, risk-adaptive passes and grounded findings. |
 | `verbs:sprint-review` | The delivered product outcome against its Sprint Goal and acceptance evidence. |
 | `verbs:gatekeeper` | Someone else’s artifact before it enters your system. |
-| `verbs:harness-slim` | Your live multi-runtime harness after adoption. |
 
 Use `review` for a diff, `qa` for rendered behavior, `sprint-review` for the
 product outcome, `debug` for an unexplained failure, `gatekeeper` for
-pre-adoption trust, and `harness-slim` for post-adoption system load. An
+pre-adoption trust. Maintainers auditing post-adoption system load explicitly
+use `maintainer/harness-slim.md`; it is not a public runtime route. An
 escalated Review needs an isolated read-only context, not a particular model or
 transport; `advisor` alone requires a different model family through pinned
 model anchors.

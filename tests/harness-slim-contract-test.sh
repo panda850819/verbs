@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-skill="skills/meta/harness-slim/SKILL.md"
+procedure="maintainer/harness-slim.md"
 
 check_contract() {
   local target="$1"
@@ -18,28 +18,31 @@ check_contract() {
   done
 }
 
-check_contract "$skill"
-grep -Fq 'name: harness-slim' "$skill"
-grep -Fq 'user-invocable: true' "$skill"
-grep -Fq '[skill.harness-slim]' manifest.toml
-grep -Fq 'tier = "ext"' <(sed -n '/^\[skill.harness-slim\]/,/^\[skill\./p' manifest.toml)
-grep -Fq 'requires = ["cli:git", "cli:codex", "cli:claude"]' manifest.toml
-grep -Fq 'harness-slim/codex' scripts/bootstrap.sh
-grep -Fq 'harness-slim/claude' scripts/bootstrap.sh
-grep -Fq '`verbs:harness-slim`' RESOLVER.md
-grep -Fq '/verbs:harness-slim' README.md
+check_contract "$procedure"
+grep -Fq 'maintainer-only' "$procedure"
+grep -Fq 'not registered' "$procedure"
+grep -Fq 'maintainer/harness-slim.md' README.md
+grep -Fq 'maintainer/harness-slim.md' RESOLVER.md
 
-if rg -n '/Users/|~/.agents/skills/harness-slim|brain\.pdzeng\.com' "$skill"; then
-  echo "FAIL: public harness-slim contains a personal machine path" >&2
+test ! -e skills/meta/harness-slim
+test -z "$(find skills -type f -path '*/harness-slim/*' -print -quit)"
+! grep -Fq '[skill.harness-slim]' manifest.toml
+! grep -Fq '`verbs:harness-slim`' RESOLVER.md
+! grep -Fq '/verbs:harness-slim' README.md
+! grep -Fq 'harness-slim/codex' scripts/bootstrap.sh
+! grep -Fq 'harness-slim/claude' scripts/bootstrap.sh
+
+if rg -n '/Users/|~/.agents/skills/harness-slim|brain\.pdzeng\.com' "$procedure"; then
+  echo "FAIL: maintainer procedure contains a personal machine path" >&2
   exit 1
 fi
 
 mutant="$(mktemp)"
 trap 'rm -f "$mutant"' EXIT
-sed 's/load_proxy/load-proxy/' "$skill" >"$mutant"
+sed 's/load_proxy/load-proxy/' "$procedure" >"$mutant"
 if check_contract "$mutant" 2>/dev/null; then
   echo "FAIL: contract accepted a missing telemetry event kind" >&2
   exit 1
 fi
 
-echo "OK: harness-slim remains a read-only post-adoption evaluator."
+echo "OK: harness-slim is a read-only maintainer procedure outside runtime registration."

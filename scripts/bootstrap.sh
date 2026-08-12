@@ -146,26 +146,6 @@ ext_check_version() {
   printf "      %-18s \033[32m%-9s\033[0m %s\n" "$skill" "ready" "(installed $have)"
 }
 
-ext_check_probe() {
-  local skill="$1" state="$2" install="$3"
-  case "$state" in
-    missing)
-      printf "      %-18s \033[33m%-9s\033[0m %s\n" "$skill" "missing" "$install"
-      ;;
-    unresponsive)
-      printf "      %-18s \033[33m%-9s\033[0m probe exceeded %ss; %s\n" \
-        "$skill" "unresponsive" "$VERSION_PROBE_TIMEOUT" "$install"
-      ;;
-    available)
-      printf "      %-18s \033[32m%-9s\033[0m %s\n" "$skill" "ready" "(installed)"
-      ;;
-    *)
-      printf "      %-18s \033[33m%-9s\033[0m version probe failed; %s\n" \
-        "$skill" "unavailable" "$install"
-      ;;
-  esac
-}
-
 probe_cli_version "codex"
 codex_probe_state="$PROBE_STATE"
 codex_probe_version="$PROBE_VERSION"
@@ -176,8 +156,6 @@ claude_probe_version="$PROBE_VERSION"
 ext_check "ship"           "gh"            "brew install gh"
 ext_check_version "advisor/codex" "$codex_probe_state" "$codex_probe_version" "0.144.1" "codex update"
 ext_check_version "advisor/claude" "$claude_probe_state" "$claude_probe_version" "2.1.206" "claude update"
-ext_check_probe "harness-slim/codex" "$codex_probe_state" "install Codex CLI"
-ext_check_probe "harness-slim/claude" "$claude_probe_state" "install Claude Code"
 
 echo
 
