@@ -15,6 +15,7 @@ ACTIVE = [
     ROOT / ".claude-plugin",
     ROOT / ".codex-plugin",
     ROOT / ".agents",
+    ROOT / "maintainer",
 ]
 TERMS = ("handover", "fresh-run", "fresh_run", "agent worker", "codex-delegation")
 
@@ -29,7 +30,10 @@ for surface in ACTIVE:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore").lower()
         for term in TERMS:
-            assert term not in text, f"retired term {term!r} remains in {path.relative_to(ROOT)}"
+            if term in text:
+                raise AssertionError(
+                    f"retired term {term!r} remains in {path.relative_to(ROOT)}"
+                )
 
 sprint = (ROOT / "skills/engineering/sprint/SKILL.md").read_text(encoding="utf-8")
 for fragment in (
@@ -37,8 +41,14 @@ for fragment in (
     "returned output as evidence, not completion",
     "owns acceptance, review, Git, and delivery",
 ):
-    assert fragment in sprint, fragment
+    if fragment not in sprint:
+        raise AssertionError(fragment)
 
-assert not (ROOT / "skills/engineering/handover").exists()
-assert not (ROOT / "scripts/fresh_run.py").exists()
+for retired_path in (
+    ROOT / "skills/engineering/handover",
+    ROOT / "scripts/fresh_run.py",
+):
+    if retired_path.exists():
+        raise AssertionError(f"retired path remains: {retired_path.relative_to(ROOT)}")
+
 print("handover retirement contract: ok")

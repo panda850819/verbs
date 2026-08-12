@@ -82,8 +82,8 @@ hot/cold, routing, and conformance rules.
 Before registering a new skill:
 
 1. Name the existing surface it extends or replaces.
-2. Check `.out-of-scope/` and cite the matching precedent, or state that none
-   applies.
+2. Cite the matching `.out-of-scope/` precedent. If none exists, add a clear
+   precedent before registration.
 3. Make every required input visible in each output record that depends on it.
 4. Give every terminal state one unambiguous result and completion condition.
 5. State the stop boundary. Explicitly prohibit claiming, assigning, scheduling,
@@ -92,6 +92,8 @@ Before registering a new skill:
 6. Define a required capability by semantics, not by one host's tool name. Name
    a host-specific transport only when that transport is the product capability,
    and state the fail-closed result when the semantic capability is unavailable.
+7. Add the `RESOLVER.md` catalog row with concrete routing details and update
+   the skill description.
 
 ## The scorecard
 

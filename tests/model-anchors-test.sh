@@ -42,9 +42,9 @@ if find skills -path '*/lib/model-anchors.md' ! -path 'skills/engineering/adviso
   exit 1
 fi
 
-if rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/ >/dev/null; then
+if rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|terra|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/ >/dev/null; then
   echo "FAIL: runtime model selectors must stay in lib/model-anchors.md"
-  rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/
+  rg -n -g '!**/lib/model-anchors.md' 'gpt-5\.6-(sol|terra|luna)|[0-9]+ (sonnet|opus|fable)|--model[[:space:]].*(sonnet|opus|fable)' skills/
   exit 1
 fi
 

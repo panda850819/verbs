@@ -69,8 +69,8 @@ CAREFUL: About to {action}.
 
 ## Stop boundary
 
-Pause only for the destructive-action gates above. Ordinary reversible work
-continues under the active task's own completion contract.
+Pause only for the destructive or high-risk gates listed above. Ordinary
+reversible work continues under the active task's own completion contract.
 
 ## Deactivate
 

@@ -188,11 +188,12 @@ one generic security flow:
 | `ship` | Commit, push, PR, and QA-evidence publication. |
 | `sprint-review` | Product-outcome acceptance by a named human authority. |
 
-An escalated `review` may use any isolated read-only context. It receives only
-the bound diff, intent, and applicable repository contract, without the author's
-analysis or proposed verdict. Transport and model family do not define a cold
-review; a second pass in the same context is not one. If isolation is
-unavailable, Review records the gap.
+An escalated `review` must use an isolated read-only context; any available
+isolation transport is acceptable. It receives only the bound diff, intent, and
+applicable repository contract, without the author's analysis or proposed
+verdict. Transport and model family do not define a cold review; a second pass
+in the same context is not one. If isolation is unavailable, Review records the
+evidence gap and does not present the result as a normal cold review.
 
 `advisor` has a different contract: it introduces a decorrelated opinion from a
 different model family for a load-bearing judgment. Advisor alone consumes the

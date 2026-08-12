@@ -62,7 +62,8 @@ Reasoning: {one line — which execution surface fits and why}
 
 Recommended execution:
   → /sprint {topic-slug}                          # foreground execution with acceptance, review, Git, and delivery ownership
-  → Herdr or a host-native worker                 # only when the human explicitly requests delegated execution
+  → /sprint → Herdr in a managed pane or a host-native worker
+    # one bounded unit after an explicit human request; worker output returns as evidence and Sprint retains acceptance, review, Git, and delivery
 ```
 
 ## Gotchas surfaced

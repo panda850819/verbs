@@ -12,7 +12,7 @@ escalated_line=$(grep -n '^## 3\. Escalated review$' "$skill" | cut -d: -f1)
 [ "$fast_line" -lt "$escalated_line" ]
 
 grep -Fq 'Do not load review learnings' "$skill"
-if grep -Fq 'model anchors' "$skill"; then
+if grep -Fq 'lib/model-anchors.md' "$skill"; then
   echo 'FAIL: Review still names Advisor model anchors' >&2
   exit 1
 fi

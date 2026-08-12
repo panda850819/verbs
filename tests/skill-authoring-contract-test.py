@@ -11,7 +11,8 @@ NORMALIZED = " ".join(SECTION.split())
 
 for fragment in (
     "existing surface it extends or replaces",
-    "Check `.out-of-scope/`",
+    "matching `.out-of-scope/` precedent",
+    "If none exists, add a clear precedent before registration",
     "required input visible in each output record",
     "every terminal state one unambiguous result and completion condition",
     "State the stop boundary",
@@ -21,6 +22,8 @@ for fragment in (
     "required capability by semantics, not by one host's tool name",
     "host-specific transport only when that transport is the product capability",
     "fail-closed result when the semantic capability is unavailable",
+    "`RESOLVER.md` catalog row with concrete routing details",
+    "update the skill description",
 ):
     assert " ".join(fragment.split()) in NORMALIZED, fragment
 
