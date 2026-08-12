@@ -73,6 +73,12 @@ Status rules:
    If acquisition fails, wait for a bounded interval and retry; if the lock
    remains held or its ownership cannot be established, report
    `QA COMMENT LOCKED` and do not write. Never delete an unverified lock.
+   Crash recovery is a manual fail-closed operation: inspect the holder metadata,
+   exact lock path, and repository/PR identity; confirm the recorded process is
+   no longer running and no `ship` process for that repository/PR is active in
+   any linked worktree; then remove only that exact stale lock directory. Missing
+   or contradictory metadata cannot prove staleness, so leave the lock in place
+   and report the manual blocker.
 3. While holding the lock, validate the evidence markers, status rules, and
    artifact identity.
 4. Find every comment containing `<!-- verbs-qa-evidence:v1 -->` and resolve
@@ -81,9 +87,12 @@ Status rules:
    the viewer: update that comment by id. One foreign-owned match or more than
    one total match: report `QA COMMENT CONFLICT` and do not create or update a
    comment. Never turn an ownership conflict into another duplicate.
-6. Read the comment back and verify its marker, artifact identity, acceptance
-   status, and URL before claiming publication. Release only the lock acquired
-   by this run, including on failure.
+6. After creation or update, re-list every marker comment on the PR. Claim
+   publication only when exactly one marker comment exists and that comment has
+   the expected owner, artifact identity, acceptance status, and URL. Zero or
+   multiple matches report `QA COMMENT CONFLICT`; do not claim success. This
+   post-write invariant detects a create race from a separate clone.
+7. Release only the lock acquired by this run, including on failure.
 
 Use `gh pr comment --body-file` for creation and `gh api` for marker-based
 lookup and update. Never use `--edit-last`: the last comment may be unrelated.
