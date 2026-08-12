@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.29.0 — Canonical codebase design resource
+
+### Changed
+
+- Replaced the public `codebase-design` route with canonical
+  `lib/codebase-design.md` guidance consumed by Grill and Improve Codebase
+  Architecture. Direct module-interface requests now route through Grill's
+  requirement close instead of a second overlapping public route. (#363)
+- Two matched seam-design cases found that the current model already produced
+  concrete interfaces and test seams natively; the skill's repeatable delta was
+  concise deletion-test, depth, locality, and adapter-evidence vocabulary. The
+  retained resource owns that vocabulary as one SSOT. (#363)
+
 ## v0.28.0 — Maintainer-only harness audit
 
 ### Changed

@@ -7,7 +7,7 @@ reads:
   - repo: "**"
   - repo: CONTEXT.md
   - cli: git
-  - skill: codebase-design
+  - skill: lib/codebase-design.md
   - skill: HTML-REPORT.md
 writes:
   - fs: os-temp/architecture-review-*.html
@@ -21,7 +21,7 @@ user-invocable: true
 Survey a repository for modules worth deepening. Produce one visual report;
 do not edit repository files or design the chosen interface in this run.
 
-Read `codebase-design` first and use its module, interface, depth, seam,
+Read `lib/codebase-design.md` first and use its module, interface, depth, seam,
 adapter, leverage, locality, deletion-test, and test-surface definitions.
 
 ## 1. Bind the scan
@@ -84,8 +84,8 @@ diagram. End with one top recommendation only when a non-Speculative candidate
 exists.
 
 Report the absolute path and stop. Ask the user to select one candidate; the
-selected candidate belongs in a later `grill` session, with `codebase-design`
-used there to choose the interface and seam.
+selected candidate belongs in a later `grill` session. That session reads
+`lib/codebase-design.md` to choose the interface and seam.
 
 ## Native delta
 

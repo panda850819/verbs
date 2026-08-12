@@ -1,18 +1,3 @@
----
-name: codebase-design
-description: |
-  Deep-module design for choosing a small, testable interface at a clean seam.
-  Use when the design question is a module's interface, seam, depth, or test
-  surface, or when another skill needs these terms. NOT diff review (`review`) or
-  requirement discovery (`grill`).
-reads:
-  - repo: "**"
-writes:
-  - cli: stdout
-domain: shared
-classification: tool
-user-invocable: true
----
 # Codebase Design
 
 Design **deep modules**: a lot of behaviour behind a small interface, placed at

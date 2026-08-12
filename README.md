@@ -55,7 +55,7 @@ Do not invoke a planning stage when the problem type is already clear:
 | Known task | Go directly to |
 |---|---|
 | A regression, crash, failing test, or unexplained error | `debug` |
-| A module interface, abstraction boundary, or design seam | `codebase-design` |
+| A module interface, abstraction boundary, or design seam | `grill`, using the canonical codebase-design resource |
 | One uncertain design question needs a cheap disposable build | `prototype` |
 | A production UI needs to be built or visually corrected | `ui` |
 | A code diff or PR needs correctness review | `review` |
@@ -230,7 +230,6 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:sprint` | core | Acceptance-driven execution with bounded review and delivery evidence. |
 | `/verbs:ui` | core | Build/fix UI with a committed point of view. Four override reflexes + craft lore in references (reflex-font blocklist, CJK+Latin type, OKLCH, CSS bans+rewrites, strategic omissions). NOT browser-test (qa) or render-bug debugging (debug). |
 | `/verbs:qa` | core | Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability. |
-| `/verbs:codebase-design` | core | Deep-module design vocabulary: small interface at a clean seam, depth-as-leverage, deletion test, testable through the interface. Reference core reached by design asks or by other skills needing the terms. |
 | `/verbs:improve-codebase-architecture` | core | Produce a read-only visual survey of codebase architecture opportunities. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
 | `/verbs:decision-map` | core | Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
