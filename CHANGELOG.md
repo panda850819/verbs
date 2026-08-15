@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.31.0 — Sprint Planning input repair
+
+### Changed
+
+- Sprint Planning now treats missing or unsupported planning inputs as a
+  Grilling Session trigger, routes the resulting gap through Product Planning,
+  Backlog Refinement, Grill, or To Spec, and resumes selection with the returned
+  evidence and Issues.
+- Removed capacity and redundant decision-owner fields from Sprint Planning.
+  The person running the planning session remains the implicit decision owner.
+- To Spec can now continue into To Tickets in the same planning invocation after
+  verified Spec publication. To Tickets now permits invocation by that planning
+  flow; each tracker mutation retains its existing preview and human approval
+  gate.
+
 ## v0.30.1 — Review major-model canary
 
 ### Verified

@@ -18,7 +18,6 @@ writes:
 domain: shared
 classification: exec
 user-invocable: true
-disable-model-invocation: true
 ---
 
 # To Tickets
@@ -48,7 +47,7 @@ Each proposed Issue must:
 
 - deliver one observable behavior through every required layer;
 - have independently runnable acceptance evidence;
-- fit one fresh-context Sprint;
+- fit one fresh-context implementation session;
 - map to one independently reviewable and revertible PR;
 - name its parent, outcome, scope, acceptance, blockers, and exclusions.
 

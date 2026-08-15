@@ -7,7 +7,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_HUMAN_ONLY = {
     "improve-codebase-architecture", "retro", "sprint", "sprint-planning",
-    "sprint-review", "to-tickets",
+    "sprint-review",
 }
 claude_human_only = set()
 codex_human_only = set()
@@ -52,7 +52,7 @@ for skill_file in sorted(ROOT.glob("skills/*/*/SKILL.md")):
     )
 
 assert indirect_human_only_refs("Use `sprint` for this task.") == {"sprint"}
-assert indirect_human_only_refs("Run /to-tickets next.") == {"to-tickets"}
+assert indirect_human_only_refs("Run /to-tickets next.") == set()
 
 for manifest in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
     text = (ROOT / manifest).read_text(encoding="utf-8")

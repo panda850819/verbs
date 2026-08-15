@@ -83,9 +83,11 @@ require("sprint-planning", "blocker status: clear")
 require("sprint-planning", "blocker check: <evidence reference and time>")
 require("sprint-planning", "Any item with an active blocker belongs under Excluded")
 require("sprint-planning", "every item includes its readiness reference, clear blocker status")
-require("sprint-planning", "Do not claim or assign Issues")
-require("sprint-planning", "schedule work, create child Issues")
+require("sprint-planning", "Start a Grilling Session instead of guessing")
+require("sprint-planning", "durable requirements -> `to-spec`")
+require("sprint-planning", "Do not claim\nor assign Issues")
 require("sprint-planning", "create or switch branches")
+assert "Capacity basis:" not in SKILLS["sprint-planning"], "sprint-planning: capacity must not be required"
 
 # Product acceptance fails closed on every material evidence gap.
 review = SKILLS["sprint-review"]
