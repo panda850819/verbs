@@ -1,6 +1,6 @@
 # lib/verify-the-test-loop.md — The test loop must be trustworthy before the bug is
 
-> Shared module. Loaded by `careful` and `debug`.
+> Shared module. Loaded by `careful`, `debug`, and `ship`.
 > An untrustworthy build/test loop manufactures phantom bugs: you debug
 > code that never ran, on an environment that keeps changing under you.
 > This module makes "is what I'm testing actually what I built, in a
@@ -26,18 +26,20 @@ verified by someone re-running something.
 the artifact embeds this change.** No proof → do not ask them to test;
 the bug to fix is the pipeline, not the code.
 
-> **Enforce in code, not prose** (Nisi: enforce, don't instruct). Use the
-> strongest automated proof your stack exposes: a marker check against the
-> deployed artifact, a source-not-newer-than-artifact check, a pinned deploy
-> path, or a stable artifact identity check. Non-zero / missing proof → STOP,
-> do not ask a human to test. A grep-by-eye that gets skipped is exactly the
-> lie this prevents.
+> **Enforce in code, not prose** (Nisi: enforce, don't instruct). Required
+> proof compares a commit identifier embedded in the deployed artifact, or an
+> equivalent commit-bound build manifest, with the current commit. A mismatch,
+> missing identifier, or failed comparison means STOP: do not ask a human to
+> test and do not use that artifact as completion evidence. A grep-by-eye that
+> gets skipped is exactly the lie this prevents.
 
-Minimum proof (pick what the stack allows, strongest first):
+The checks below are supplementary. They strengthen commit-bound proof but
+cannot replace it:
 
 - **Content marker**: grep the *deployed* binary/bundle/image for a
-  string/symbol/constant unique to this change (add a temporary one if
-  needed). Absent ⇒ stale, stop.
+  string/symbol/constant that identifies the current commit or build manifest.
+  A marker that identifies only the feature is insufficient. Absent ⇒ stale,
+  stop.
 - **Source-not-newer-than-artifact**: no source file is newer than the
   built artifact (`find <src> -newer <artifact>`). Any hit ⇒ stale build.
 - **Deterministic path**: build to and deploy from a *pinned* path, never
