@@ -1365,10 +1365,12 @@ def _github_remote_match(url):
     ssh_remote = _SSH_REMOTE.match(url)
     if not ssh_remote:
         return None
-    resolved = subprocess.run(
-        ["ssh", "-G", ssh_remote.group("host")],
-        text=True, capture_output=True,
-    )
+    ssh_args = ["ssh", "-G"]
+    user_config = Path.home() / ".ssh" / "config"
+    if user_config.is_file():
+        ssh_args.extend(["-F", str(user_config)])
+    ssh_args.append(ssh_remote.group("host"))
+    resolved = subprocess.run(ssh_args, text=True, capture_output=True)
     if resolved.returncode != 0:
         return None
     hostname = next((
