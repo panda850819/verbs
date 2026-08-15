@@ -19,7 +19,7 @@ require("body contract and approved outcome match", "retry safety")
 require("stop on a publication conflict", "retry safety")
 require("one independently reviewable and revertible PR", "one issue one PR")
 require("deliver one observable behavior through every required layer", "vertical slice")
-require("fit one fresh-context Sprint", "vertical slice")
+require("fit one fresh-context implementation session", "vertical slice")
 
 require("expand (add the compatible seam)", "wide refactor")
 require("migrate batch 1..N", "wide refactor")

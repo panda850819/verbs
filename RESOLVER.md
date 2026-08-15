@@ -34,9 +34,12 @@ Product Planning
 2. `backlog-refinement` makes one item `READY` or `NOT_READY` from scope,
    acceptance, dependencies, edge states, and an evidence seam. Readiness does
    not select the item.
-3. `sprint-planning` proposes one Sprint Goal and ready, unblocked work that
-   fits stated capacity. A human approves or rejects the exact selection; no
-   tracker or branch mutation occurs.
+3. `sprint-planning` proposes one Sprint Goal and ready, unblocked work. Missing
+   or unreliable planning inputs first enter a Grilling Session, then route to
+   the relevant planning skill. Durable requirements may publish a Spec and
+   child Issues behind their own approval gates before selection resumes. A
+   human approves or rejects the exact selection; no branch or implementation
+   work starts.
 4. `sprint` owns one human-selected finish line through implementation,
    verification, bounded review, and delivery evidence.
 5. `sprint-review` inspects the delivered product outcome against its Goal and
@@ -45,7 +48,9 @@ Product Planning
 6. `retro` inspects one completed Sprint and proposes at most one
    evidence-backed process Action. It is not personal reflection or scheduling.
 
-Each stage stops after its own record. No stage invokes its successor, claims a
+Each stage stops after its own record. Sprint Planning may invoke supporting
+planning procedures to repair unreliable inputs, including approved Spec and
+child-Issue publication; it still does not invoke Sprint. No stage claims a
 frontier Issue, schedules work, or starts implementation without a new human
 choice. Clear typed specialist requests bypass the stage layer.
 
@@ -104,8 +109,9 @@ invocation. `sprint-planning`, `sprint`, `sprint-review`, and `retro` are
 human-initiated-only because selection, execution, product acceptance, and
 process changes require human authority. `improve-codebase-architecture` stays
 human-only so periodic surveys do
-not start opportunistically; `to-tickets` retains its human-only publication
-boundary. Claude Code and Pi
+not start opportunistically. `to-tickets` may
+be reached by an approved planning flow, while its own publication gate remains
+mandatory. Claude Code and Pi
 honor frontmatter; Codex uses matching `agents/openai.yaml` policy. Skills carry
 safety and verification guidance, not host-level enforcement.
 
@@ -117,12 +123,12 @@ safety and verification guidance, not host-level enforcement.
 |---|---|---|
 | `verbs:product-planning` | Clarify the product problem, Product Goal, priority, and candidate backlog outcomes. | what product work should happen next, why does this matter, prioritize this opportunity |
 | `verbs:backlog-refinement` | Make one backlog item `READY` or `NOT_READY` from scope, acceptance, dependencies, edge states, and evidence. | refine this Issue, is this ready, clarify this backlog item |
-| `verbs:sprint-planning` | Propose one Sprint Goal and ready work for a human approval decision; never execute the selection. | explicit request to plan the next Sprint |
+| `verbs:sprint-planning` | Repair unreliable inputs through a Grilling Session and relevant planning skills, then propose one Sprint Goal and ready work for human approval; never execute the selection. | explicit request to plan the next Sprint |
 | `verbs:grill` | Adversarial requirement discovery through dependency-aware frontier rounds. Routes large foggy work to Decision Map, spec-sized work to `to-spec`, and smaller work to a local brief/plan. | grill me, stress test, draft a brief, scope this, 3+ file feature/refactor |
 | `verbs:ask-boss` | Route unclear owner, target, reference, or next route to one existing specialist; facts first, no generic grilling. | where do I start, who decides, which reference, what route, unclear next step |
 | `verbs:setup-verbs` | Resolve canonical-document, tracker, Git-identity, or approval ambiguity around deterministic `scripts/verbs setup` operations. | setup reports ambiguity, approve tracker configuration |
-| `verbs:to-spec` | Synthesize established intent and repository evidence into one canonical GitHub Spec Issue; no new interview or ticket creation. | turn this discussion into a spec, publish the requirements |
-| `verbs:to-tickets` | Decompose a complete canonical Spec into approved vertical-slice child Issues, native dependencies, body fallbacks, and a current frontier. | create implementation tickets, decompose this Spec |
+| `verbs:to-spec` | Synthesize established intent into one canonical GitHub Spec Issue; when planning requests implementation Issues, continue into `to-tickets` after Spec verification. | turn this discussion into a spec, publish the requirements |
+| `verbs:to-tickets` | Decompose a complete canonical Spec into approval-gated vertical-slice child Issues, including when reached through an approved planning flow; report native dependencies, fallbacks, and the current frontier. | create implementation tickets, decompose this Spec |
 | `verbs:decision-map` | Create or work cross-session Decision Maps named by the request or handed off by `ask-boss`; resolve one unblocked frontier entry at a time. | establish a map, resume the map, continue a named map, several dependent decisions |
 | `verbs:sprint` | Execute a concrete outcome through acceptance, bounded review, and delivery evidence. | focused build-to-ship session, execute this plan |
 | `verbs:sprint-review` | Inspect the delivered product outcome against its Sprint Goal and current acceptance evidence. | explicit request to review or accept the Sprint outcome |
@@ -178,7 +184,8 @@ model anchors.
   determines whether one candidate item is ready.
 - `grill` supplies the dependency-aware interview discipline;
   `decision-map` maintains a cross-session Decision Map.
-- `sprint-planning` selects ready work after a human approval gate; `sprint`
+- `sprint-planning` repairs unreliable inputs through Grill and the relevant
+  planning skill, then selects ready work after a human approval gate; `sprint`
   executes one selected finish line.
 - `review` inspects code and `qa` proves browser behavior; `sprint-review`
   decides whether the product outcome achieved the Goal.

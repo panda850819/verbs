@@ -15,7 +15,7 @@ def require(fragment: str, scenario: str) -> None:
 
 require("require one unambiguous\n`tracker: github`", "missing tracker")
 require("invoke\n`setup-verbs` and stop", "missing tracker")
-require("Do not restart a\nrequirements interview.", "synthesis")
+require("Do not\nrestart a requirements interview.", "synthesis")
 require("Search open Issues for the same outcome", "duplicate prevention")
 
 for heading in (
@@ -34,7 +34,9 @@ require("a new lower-level harness only when higher seams cannot prove", "test s
 require("Ask once:\n`[publish / reject]`.", "seam confirmation")
 require("This GitHub Spec Issue is the only requirements source of truth.", "canonical ownership")
 require("create or maintain a canonical repository spec copy.", "canonical ownership")
-require("Do not create child Issues, branches, commits, or PRs.", "ownership boundary")
+require("Do not write a body file inside the\nrepository or create branches, commits, or PRs.", "ownership boundary")
+require("invoke `to-tickets` in the same planning\ninvocation", "planning child-Issue continuation")
+require("`to-tickets` owns its graph\npreview, publication approval", "child-Issue approval ownership")
 
 assert not (ROOT / "docs/specs").exists(), "must not introduce docs/specs"
 

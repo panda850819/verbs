@@ -207,8 +207,13 @@ require(RESOLVER, "A human selects one unblocked implementation Issue.", "owners
 require_words(RESOLVER, "reports the frontier but does not choose work", "ownership")
 require_words(
     RESOLVER,
-    "No stage invokes its successor, claims a frontier Issue, schedules work, or starts implementation",
-    "resolver no-auto-chain boundary",
+    "Sprint Planning may invoke supporting planning procedures to repair unreliable inputs",
+    "resolver planning-repair exception",
+)
+require_words(
+    RESOLVER,
+    "No stage claims a frontier Issue, schedules work, or starts implementation without a new human choice",
+    "resolver no-auto-execution boundary",
 )
 # The boundary must live in the sprint body itself.
 require_words(
@@ -239,9 +244,20 @@ require_words(
 require(SPRINT_PLANNING, "Ask once: `[approve / reject]`.", "human selection gate")
 require_words(
     SPRINT_PLANNING,
-    "Do not claim or assign Issues, schedule work, create child Issues, create or switch branches, invoke another skill, mutate the tracker, or start work.",
+    "Do not claim or assign Issues, schedule selected work, create or switch branches, or start implementation.",
     "planning does not execute",
 )
+require_words(
+    SPRINT_PLANNING,
+    "Treat a missing input, unsupported claim, incomplete Issue, or absent source reference as unreliable. Start a Grilling Session",
+    "planning grills unreliable inputs",
+)
+require_words(
+    SPRINT_PLANNING,
+    "durable requirements -> `to-spec`, which publishes the Spec and invokes its child-Issue flow",
+    "planning publishes spec and children",
+)
+assert "Capacity basis:" not in SPRINT_PLANNING, "planning must not require capacity"
 require(SPRINT_REVIEW, "Result: ACCEPTED | NEEDS_CHANGES | UNPROVEN", "product review outcome")
 require_words(
     SPRINT_REVIEW,

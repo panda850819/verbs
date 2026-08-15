@@ -220,7 +220,7 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:ask-boss` | core | Route unclear workplace requests to one existing specialist by retrieving facts and resolving intent, target, audience, and minimum sufficient authority. Use for an unclear starting point, owner, reference, or next route; clear typed requests, named maps, bugs, UI work, and code review go directly to their specialist. |
 | `/verbs:product-planning` | core | Clarify the product problem, Product Goal, priority, and candidate backlog outcomes before readiness or implementation work. |
 | `/verbs:backlog-refinement` | core | Make one backlog item READY or NOT_READY by clarifying outcome, scope, acceptance criteria, dependencies, and unresolved decisions. |
-| `/verbs:sprint-planning` | core | Plan one Sprint Goal and select ready work after a human approval gate. |
+| `/verbs:sprint-planning` | core | Repair unreliable planning inputs through Grill and relevant planning skills, then propose one Sprint Goal and ready work for human approval. |
 | `/verbs:sprint-review` | core | Review one Sprint outcome against its Goal and product acceptance evidence. |
 | `/verbs:retro` | core | Review one completed Sprint and choose one evidence-backed process improvement. |
 | `/verbs:grill` | core | Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan. |
@@ -233,8 +233,8 @@ needs an additional public CLI. Full spec in `manifest.toml`.
 | `/verbs:improve-codebase-architecture` | core | Produce a read-only visual survey of codebase architecture opportunities. |
 | `/verbs:prototype` | core | Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui). |
 | `/verbs:decision-map` | core | Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill. |
-| `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting. |
-| `/verbs:to-spec` | ext | Synthesize established requirements and repository evidence into one canonical GitHub Spec Issue after confirming the highest practical test seams. |
+| `/verbs:to-tickets` | ext | Decompose one canonical GitHub Spec Issue into an approval-gated vertical-slice child Issue graph, including when reached through an approved planning flow. |
+| `/verbs:to-spec` | ext | Synthesize established requirements into one canonical GitHub Spec Issue, then continue into approved child-Issue decomposition when planning requests it. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext. |
 | `/verbs:advisor` | ext | Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206. |
 <!-- END GENERATED: skill-catalog -->

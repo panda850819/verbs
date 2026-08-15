@@ -2,13 +2,15 @@
 name: to-spec
 description: |
   Publish established discussion and repository evidence as one canonical GitHub
-  Spec Issue. Use when settled requirements need a durable specification or
-  `grill` routes a spec-sized effort here. NOT discovery or ticket decomposition.
+  Spec Issue, then continue into approved child-Issue decomposition when called
+  from planning. Use when settled requirements need a durable specification or
+  `grill` routes a spec-sized effort here. NOT discovery.
 reads:
   - repo: "**"
   - repo: AGENTS.md
   - repo: CLAUDE.md
   - skill: setup-verbs
+  - skill: to-tickets
   - cli: git
   - cli: gh
 writes:
@@ -21,10 +23,11 @@ user-invocable: true
 
 # To Spec
 
-Synthesize established intent into one canonical GitHub Spec Issue.
-Do not restart a
-requirements interview. The Issue is the only requirements source of truth; this
-skill creates no implementation tickets or repository Spec copy.
+Synthesize established intent into one canonical GitHub Spec Issue. Do not
+restart a requirements interview. The Issue is the only requirements source of
+truth; this skill creates no repository Spec copy. When the
+planning caller requests implementation Issues, continue into `to-tickets` after the Spec
+is verified.
 
 ## 1. Bind the tracker and evidence
 
@@ -69,7 +72,8 @@ ownership sentence in Further Notes:
 > create or maintain a canonical repository spec copy.
 
 Completion: all required headings, substantive stories, evidenced decisions,
-explicit exclusions, and no implementation tickets are present.
+and explicit exclusions are present; implementation breakdown remains outside
+the Spec body.
 
 ## 3. Confirm the test seams once
 
@@ -86,8 +90,17 @@ Further Notes.
 
 Create exactly one Issue in the GitHub repository derived from Git, using the
 host capability or authenticated `gh`. Do not write a body file inside the
-repository. Do not create child Issues, branches, commits, or PRs.
+repository or create branches, commits, or PRs.
 
 Read the Issue back and verify its URL, title, all seven headings, and ownership
-sentence. Report the URL and unresolved Further Notes. Missing or unreadable
-evidence means publication is not verified.
+sentence. Missing or unreadable evidence means publication is not verified.
+
+## 5. Continue to child Issues when requested
+
+After verified Spec publication, invoke `to-tickets` in the same planning
+invocation when the caller requested implementation Issues.
+Pass the verified Spec URL and established context; `to-tickets` owns its graph
+preview, publication approval, native relations, and frontier verification.
+Return the Spec URL, child Issue URLs, dependency status, and verified frontier
+to the caller. Otherwise report the Spec URL and unresolved Further Notes and
+stop.
