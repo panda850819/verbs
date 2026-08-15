@@ -25,6 +25,19 @@ Affected files:
 - `skills/engineering/prototype/UI.md`
 - `skills/productivity/decision-map/SKILL.md`
 
+### deepseek-ai/deepseek-harness
+
+Copyright (c) 2026 DeepSeek
+
+MIT license: https://github.com/deepseek-ai/deepseek-harness/blob/master/LICENSE
+
+Affected files:
+
+- `lib/durable-records.md`
+- `lib/qa-evidence-format.md`
+- `skills/engineering/improve-codebase-architecture/SKILL.md`
+- `maintainer/writing-great-skills.md`
+
 ### garrytan/gstack
 
 Copyright (c) 2026 Garry Tan

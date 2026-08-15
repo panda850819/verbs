@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DECISION_MAP = (
     ROOT / "skills/productivity/decision-map/SKILL.md"
 ).read_text(encoding="utf-8")
+DURABLE = (ROOT / "lib/durable-records.md").read_text(encoding="utf-8")
 
 
 def section(text: str, heading: str) -> str:
@@ -35,5 +36,15 @@ status_rules = (
 )
 positions = [work_map.index(fragment) for fragment in status_rules]
 assert positions == sorted(positions), "Decision Map status-date rules are out of order"
+
+for fragment in (
+    "Read `lib/durable-records.md`",
+    "session-only citations",
+    "future\ndecision value",
+):
+    assert fragment in DECISION_MAP, f"Decision Map lost durable-record rule: {fragment!r}"
+
+for state in ("Active", "Consolidate", "Historical", "Guardrail", "Delete"):
+    assert f"**{state}:**" in DURABLE, f"durable-record lifecycle lost {state}"
 
 print("decision map contract: ok")

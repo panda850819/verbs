@@ -53,6 +53,11 @@ Verbs note: the **hot/cold dispatch rule** is progressive disclosure with teeth 
 
 Keep each meaning in a **single source of truth**. Check every line for **relevance**. Then hunt **no-ops** sentence by sentence: does it change behaviour versus the default? Be aggressive — most prose that fails the no-op test should be deleted, not reworded. Verbs discipline: a skill body runs ~under 80 lines unless the extra length clearly earns itself.
 
+For Specs, briefs, Decision Maps, rejected-direction records, and other durable
+prose, apply [`lib/durable-records.md`](../lib/durable-records.md). Enumerate the
+proposition before trimming so actors, obligations, conditions, exceptions,
+ownership, failures, and consequences survive without session narration.
+
 Hunt **negation** the same way: state target behaviour positively wherever a positive form exists; keep a prohibition only as a hard guardrail (safety, data-loss, permission boundaries), and pair it with the replacement behaviour.
 
 ## Leading words
@@ -68,6 +73,22 @@ Diagnose a struggling skill against these:
 - **Sediment** — stale instructions from earlier edits; verify referenced paths, features, and branches still exist.
 - **Sprawl** — scope creep into another skill's territory; cure with the ladder or a split.
 - **No-op** — a sentence whose deletion changes no behaviour. A weak leading word (_be thorough_) is a no-op; fix with a stronger word, not a new technique.
+
+## Project overlays
+
+Keep project truth in repository-owned instructions such as `AGENTS.md` and the
+review references those instructions explicitly link. Review already reads that
+surface; a repository may use it to supply known bug classes, real entry paths,
+invariants, and relevant commands. Current code and tests remain authoritative.
+Do not add a Verbs overlay registry, hidden discovery convention, router, or
+project-memory layer. Rebase, retarget, and head rewrites invalidate checks or
+comments bound to the old commits.
+
+This contract adapts the repository-local overlay pattern from DeepSeek
+Harness's MIT-licensed
+[`dsh-code-review`](https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/skills/dsh-code-review/SKILL.md)
+and evidence freshness from
+[`dsh-pre-push-checks`](https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/skills/dsh-pre-push-checks/SKILL.md).
 
 ## Native parity
 

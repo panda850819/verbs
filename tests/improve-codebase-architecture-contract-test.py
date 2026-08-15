@@ -22,6 +22,10 @@ require(SKILL, "Read `lib/codebase-design.md` first", "shared architecture vocab
 require(SKILL, "latest 100 commits", "bounded hot-spot scan")
 require(SKILL, "do not edit repository files", "read-only repository boundary")
 require(SKILL, "deletion-test result", "candidate deletion-test evidence")
+require(SKILL, "unused production surface", "deletion-first candidate lane")
+require(SKILL, "tests/docs are the only users", "consumer classification")
+require(SKILL, "net deletion including remaining glue", "dependency net deletion")
+require(SKILL, "intentional seam or defensive guarantee", "decision guard")
 require(SKILL, "Merge candidates with the same seam", "candidate deduplication")
 require(SKILL, "If every result is Speculative", "honest empty recommendation")
 require(SKILL, "Use no CDN, remote asset,\nor executable script", "offline report")
@@ -31,8 +35,9 @@ require(SKILL, "later `grill` session", "selected-candidate route")
 for field in (
     "repository-relative files",
     "observed friction",
-    "proposed deepening",
-    "locality, leverage, and test-surface effects",
+    "proposed deepening or simplification",
+    "production-consumer or tests/docs-only evidence",
+    "locality, leverage, net-deletion, and test-surface effects",
     "explicit deletion-test result",
     "side-by-side Before / After diagram",
 ):

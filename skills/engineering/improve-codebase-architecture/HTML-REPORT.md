@@ -12,16 +12,17 @@ shape.
    dark thick box = deep module.
 3. **Candidate cards:** ordered by strength and payoff evidence.
 4. **Top recommendation:** one non-Speculative candidate and one sentence naming
-   its strongest locality or leverage evidence. Omit when none qualifies.
+   its strongest locality, leverage, or net-deletion evidence. Omit when none qualifies.
 
 Each candidate card contains:
 
 - title and `Strong`, `Worth exploring`, or `Speculative` badge;
 - repository-relative files;
 - observed friction with file-backed evidence;
-- proposed deepening without a final method or type design;
-- locality, leverage, and test-surface effects;
-- explicit deletion-test result;
+- proposed deepening or simplification without a final method or type design;
+- production-consumer or tests/docs-only evidence;
+- locality, leverage, net-deletion, and test-surface effects as applicable;
+- explicit deletion-test result and current-decision check;
 - ADR warning when applicable;
 - side-by-side Before / After diagram.
 

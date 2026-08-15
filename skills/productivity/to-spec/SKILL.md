@@ -9,6 +9,7 @@ reads:
   - repo: AGENTS.md
   - repo: CLAUDE.md
   - skill: setup-verbs
+  - skill: lib/durable-records.md
   - cli: git
   - cli: gh
 writes:
@@ -42,7 +43,10 @@ conversation or inspected repository; unresolved facts go in Further Notes.
 
 ## 2. Draft the complete Issue
 
-Use `[Spec] <outcome>` and exactly these top-level sections:
+Read `lib/durable-records.md`. Write current, repository-resolvable decisions;
+preserve obligations, exceptions, ownership, failures, and consequences while
+removing interview order, session-only citations, derivation narration, and
+review choreography. Use `[Spec] <outcome>` and exactly these top-level sections:
 
 1. `## Problem`
 2. `## Solution`

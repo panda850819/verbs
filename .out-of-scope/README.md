@@ -5,7 +5,11 @@ skill and abstraction proposals. It is a lookup surface for agents, not an
 enforcement surface.
 
 Consult these entries before proposing a new skill or abstraction. If a
-proposal matches an entry, surface that precedent first.
+proposal matches an entry, surface that precedent first. Retain an entry while
+it still prevents a tempting, plausible mistake and its reopen condition can
+guide a future decision. Age, length, and quotas do not decide retention. When
+a direction is obsolete or fully superseded, consolidate any unique rationale
+into the current owner before removing it under normal repository review.
 
 ## Entry Format
 

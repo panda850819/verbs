@@ -13,6 +13,7 @@ description: |
 reads:
   - repo: docs/briefs/**
   - skill: lib/interview.md
+  - skill: lib/durable-records.md
   - skill: grill
   - skill: prototype
 writes:
@@ -61,6 +62,12 @@ If the interview shows the work fits one session, write no map; route to `grill`
 for its structured close.
 
 ## Map contract
+
+Read `lib/durable-records.md` before writing or graduating the map. Preserve
+current decisions, obligations, exceptions, ownership, failures, and
+consequences; omit interview choreography, hidden numbering, review narration,
+and session-only citations. Classify superseded or rejected material by future
+decision value without creating an archive or deleting tracker history.
 
 The map carries Destination, Notes, Decisions so far, typed entries with blockers,
 Not yet specified, and Out of scope. **This skill owns that format.** The map is

@@ -84,9 +84,11 @@ to write a commit; this skill is the gate sequence, not the coaching.
    body. Resolve an existing PR instead of creating a duplicate.
 10. **QA evidence upsert** — when `qa` ran, read the handoff from the Git
     metadata path defined in `lib/qa-evidence-format.md`. Recompute its artifact
-    identity against the PR head, then create or update the authenticated
-    viewer's single marker comment. Read the comment back before reporting its
-    URL. A stale artifact, malformed block, `FAIL`, or `UNPROVEN` row still gets
+    identity against the PR head and verify every material origin, runtime, and
+    transport field is present before creating or updating the authenticated
+    viewer's single marker comment. A head rewrite or provenance change makes
+    affected evidence stale. Read the comment back before reporting its URL. A
+    stale artifact, malformed block, `FAIL`, or `UNPROVEN` row still gets
     published as `Acceptance: NOT VERIFIED`, but blocks a ready/done claim. For
     a UI diff that required `qa`, missing evidence also blocks completion. For
     non-UI work, state `QA evidence: not applicable`; never fabricate a report.

@@ -17,6 +17,8 @@ require("require one unambiguous\n`tracker: github`", "missing tracker")
 require("invoke\n`setup-verbs` and stop", "missing tracker")
 require("Do not restart a\nrequirements interview.", "synthesis")
 require("Search open Issues for the same outcome", "duplicate prevention")
+require("Read `lib/durable-records.md`", "durable record guidance")
+require("session-only citations", "session-vantage exclusion")
 
 for heading in (
     "## Problem",

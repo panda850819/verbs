@@ -27,4 +27,13 @@ for fragment in (
 ):
     assert " ".join(fragment.split()) in NORMALIZED, fragment
 
+for fragment in (
+    "Keep project truth in repository-owned instructions",
+    "known bug classes, real entry paths",
+    "Do not add a Verbs overlay registry",
+    "head rewrites invalidate checks",
+    "lib/durable-records.md",
+):
+    assert fragment in GUIDE, fragment
+
 print("skill authoring contract: ok")

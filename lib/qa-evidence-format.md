@@ -6,9 +6,12 @@ existing pull-request comment without creating duplicates.
 
 ## Artifact identity
 
-Evidence is valid only for the exact content tested. Prefer a committed HEAD
-SHA when QA runs after commit. When QA runs before commit, use a stable patch
-identity:
+Evidence is valid only for the exact content and material execution provenance
+tested. Prefer a committed HEAD SHA when QA runs after commit. Record the served
+origin or artifact source, runtime/build mode, and transport (`real`, `fixture`,
+`mock`, or a precise equivalent); use `n/a` only when a field cannot affect the
+claim. These fields bound what the evidence proves and do not imply stronger
+environment coverage. When QA runs before commit, use a stable patch identity:
 
 1. Resolve the comparison base from the tracking PR, upstream default branch,
    or merge-base.
@@ -16,8 +19,9 @@ identity:
    `patch-sha256:<digest>` plus the full base SHA.
 3. List relevant untracked files as a gap. A patch hash does not cover them.
 
-`ship` recomputes the base-to-PR-head patch hash before publishing. A mismatch
-means the evidence is stale; rerun QA. Never relabel stale evidence as current.
+`ship` recomputes the base-to-PR-head patch hash before publishing. A changed
+or rewritten head, hash mismatch, or material provenance change makes affected
+evidence stale; rerun those checks. Never relabel stale evidence as current.
 
 ## Evidence block
 
@@ -33,6 +37,9 @@ Acceptance: VERIFIED | NOT VERIFIED
 Intent: <issue URL, brief path, or exact user-request label>
 Artifact: <full commit SHA | patch-sha256:digest>
 Base: <full base SHA | n/a for committed-head identity>
+Origin: <served URL, worktree/tree source, or n/a with reason>
+Runtime: <development, built artifact, production-like, or precise equivalent>
+Transport: <real, fixture, mock, or precise equivalent>
 Run: <ISO-8601 UTC timestamp>
 
 | Criterion | Status | Proof |
@@ -49,7 +56,8 @@ Gaps: <none | concrete untested states, environments, or untracked files>
 Status rules:
 
 - `PASS` requires evidence that directly proves the criterion on the recorded
-  artifact. Name the verification method when proof is visual judgment.
+  artifact under the recorded material provenance. Name the verification method
+  when proof is visual judgment.
 - `FAIL` means observed behavior contradicts the criterion.
 - `UNPROVEN` means the step was skipped, the evidence is indirect, the intent
   source is missing, or artifact identity cannot be established.
@@ -89,7 +97,7 @@ Status rules:
    comment. Never turn an ownership conflict into another duplicate.
 6. After creation or update, re-list every marker comment on the PR. Claim
    publication only when exactly one marker comment exists and that comment has
-   the expected owner, artifact identity, acceptance status, and URL. Zero or
+   the expected owner, artifact identity, provenance, acceptance status, and URL. Zero or
    multiple matches report `QA COMMENT CONFLICT`; do not claim success. This
    post-write invariant detects a create race from a separate clone.
 7. Release only the lock acquired by this run, including on failure.
@@ -99,6 +107,14 @@ lookup and update. Never use `--edit-last`: the last comment may be unrelated.
 The local lock serializes writers sharing a Git common directory; marker
 conflict detection and read-back remain the fail-closed guard for external
 writers.
+
+## Source
+
+The provenance and freshness rules adapt the evidence-chain principles from
+DeepSeek Harness's MIT-licensed
+[`record-browser-gif`](https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/skills/record-browser-gif/SKILL.md)
+and outgoing-head invalidation from
+[`dsh-pre-push-checks`](https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/skills/dsh-pre-push-checks/SKILL.md).
 
 ## Screenshot on failure
 

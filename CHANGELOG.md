@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.31.0 — Evidence and durable-record hygiene
+
+### Changed
+
+- Bound QA evidence to material origin, runtime, transport, exact artifact, and
+  current head; rewritten heads or provenance changes now invalidate affected
+  evidence before Ship can claim ready or done. (#371)
+- Defined repository-owned review instructions as the project-local overlay for
+  known bug classes, real entry paths, invariants, and checks without adding a
+  Verbs configuration or routing surface. (#371)
+- Added shared durable-record guidance for Specs and Decision Maps: preserve the
+  complete proposition, remove session-vantage narration, and retain records by
+  current authority and future decision value. (#371)
+- Extended Improve Codebase Architecture with deletion-first candidates backed
+  by production-consumer, current-decision, and net-simplification evidence.
+  The survey remains read-only and human-selected. (#371)
+
+### Attribution
+
+- Adapted maintenance principles from DeepSeek Harness's MIT-licensed
+  repository-local skills; exact sources are recorded in
+  `THIRD_PARTY_NOTICES.md` and the affected shared resources. (#371)
+
 ## v0.30.1 — Review major-model canary
 
 ### Verified

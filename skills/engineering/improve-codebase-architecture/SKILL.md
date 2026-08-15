@@ -34,26 +34,31 @@ architecture-decision records when present. Record missing history or domain doc
 Done when the report can name its scope, why those paths were selected, and
 which domain and ADR evidence constrained the scan.
 
-## 2. Find deepening candidates
+## 2. Find deepening or deletion-first candidates
 
-Trace concepts through callers, implementation, tests, and external effects.
-Look for wide interfaces, knowledge scattered across callers, pass-through
-modules, seams crossed by concrete dependencies, and behavior that tests cannot
-alter through the caller-facing interface.
+Trace concepts through production callers, implementation, tests, external
+effects, and current decision records. Look for wide interfaces, scattered
+knowledge, pass-through modules, concrete dependencies crossing seams, and
+behavior tests cannot alter through the caller-facing interface. Also look for
+unused production surface, mirrored state, speculative public API, duplicate
+lifecycle machinery, and hand-rolled infrastructure a maintained dependency
+could replace with net deletion.
 
 Keep a candidate only when repository evidence identifies all of:
 
 - current friction and the files that demonstrate it;
-- the responsibility that should gain locality;
-- a smaller plausible seam, without proposing its final interface;
-- leverage across named callers or tests;
-- the deletion-test result: removal would let responsibility concentrate behind
-  the proposed seam rather than scatter required knowledge across callers.
+- production consumers, or explicit evidence that tests/docs are the only users;
+- the responsibility to localize, delete, collapse, demote, or replace;
+- leverage across named callers/tests, or net deletion including remaining glue;
+- current ADR/decision ownership and why the candidate does not discard an
+  intentional seam or defensive guarantee;
+- the deletion-test result: removal concentrates responsibility or deletes it
+  without scattering required knowledge.
 
-Merge candidates with the same seam. Exclude style cleanup, dormant code with no
-named future pressure, generic layering advice, and ADR-rejected directions
-without new evidence. Done when every retained candidate passes every item or is
-discarded.
+Merge candidates with the same seam or responsibility. Exclude style cleanup,
+generic layering advice, unsupported dependency swaps, dormant code with no
+named pressure, and decision-rejected directions without new evidence. Done
+when every retained candidate passes every item or is discarded.
 
 ## 3. Rank honestly
 
@@ -78,8 +83,9 @@ or executable script. Open it with the platform command when available; a failed
 open leaves the report valid and the absolute path visible.
 
 Each card must contain files, evidence-backed friction, plain-language
-deepening, locality and leverage gains, test-surface effect, deletion-test
-result, strength, ADR conflict when present, and a side-by-side Before / After
+change, production-consumer evidence, locality/leverage or net-deletion gain,
+test-surface effect, deletion-test result, strength, ADR conflict when present,
+and a side-by-side Before / After
 diagram. End with one top recommendation only when a non-Speculative candidate
 exists.
 
@@ -89,6 +95,7 @@ selected candidate belongs in a later `grill` session. That session reads
 
 ## Native delta
 
-Repository search can list complexity. This flow binds findings to recent
-change pressure, deletion-test evidence, honest ranking, and a visual artifact
+Repository search can list complexity. This flow binds deepening and
+simplification findings to consumer evidence, current decisions, deletion-test
+evidence, honest ranking, and a visual artifact
 while preserving a no-edit decision boundary.
