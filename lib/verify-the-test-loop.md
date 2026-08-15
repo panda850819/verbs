@@ -26,19 +26,21 @@ verified by someone re-running something.
 the artifact embeds this change.** No proof → do not ask them to test;
 the bug to fix is the pipeline, not the code.
 
-> **Enforce in code, not prose** (Nisi: enforce, don't instruct). Required
-> proof compares a commit identifier embedded in the deployed artifact, or an
-> equivalent commit-bound build manifest, with the current commit. A mismatch,
-> missing identifier, or failed comparison means STOP: do not ask a human to
-> test and do not use that artifact as completion evidence. A grep-by-eye that
-> gets skipped is exactly the lie this prevents.
+> **Run an executable proof, not a prose assertion.** The agent must execute the
+> target project's command that compares a commit identifier embedded in the
+> deployed artifact, or an equivalent commit-bound build manifest, with the
+> current commit and record that command's output. Verbs cannot supply one
+> cross-stack command. A mismatch, missing identifier, failed comparison, or
+> unavailable executable check means STOP: do not ask a human to test and do
+> not use that artifact as completion evidence.
 
 The checks below are supplementary. They strengthen commit-bound proof but
 cannot replace it:
 
-- **Content marker**: grep the *deployed* binary/bundle/image for a
-  string/symbol/constant that identifies the current commit or build manifest.
-  A marker that identifies only the feature is insufficient. Absent ⇒ stale,
+- **Optional content marker**: after commit-bound proof succeeds, grep the
+  *deployed* binary/bundle/image for a string/symbol/constant unique to the
+  expected change. A marker that identifies only the feature cannot replace
+  commit identity. When this supplementary check is used, absence means stale:
   stop.
 - **Source-not-newer-than-artifact**: no source file is newer than the
   built artifact (`find <src> -newer <artifact>`). Any hit ⇒ stale build.
