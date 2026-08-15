@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.32.0 — AGENTS.md Project Contract
+
+### Changed
+
+- Replaced the product lifecycle with one authoritative `AGENTS.md` Project
+  Contract covering work source, goals, acceptance, verification, delivery,
+  approval gates, and the Brain First Rule. GBrain now holds evidence-backed
+  project memory and fails soft; policy promotion requires a preview and human
+  approval. (#374, #376)
+- Requirement ambiguity now starts an automatic Grilling Session during intake.
+  Grilling is no longer a user-invoked runtime skill.
+- Reduced the runtime surface from 22 to 10 specialist skills. Retired Advisor,
+  Ask Boss, Product Planning, Backlog Refinement, Sprint Planning, Sprint,
+  Sprint Review, Retro, Grill, Setup Verbs, To Spec, and To Tickets.
+- Added `scripts/verbs setup --questionnaire` and made `AGENTS.md` the sole
+  setup target. GitHub identity checks now resolve SSH aliases through `ssh -G`
+  and treat an `AGENTS.md` compatibility symlink as one document. (#375)
+
+### Added
+
+- Added `lib/project-contract.md`, the GBrain learning and promotion contract,
+  and structural tests for intake, authority, fail-soft memory, runtime slimming,
+  setup idempotence, and generated metadata.
+
 ## v0.31.0 — Sprint Planning input repair
 
 ### Changed

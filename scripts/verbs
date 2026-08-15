@@ -970,9 +970,9 @@ def _generated_loaders(manifest_data):
     paths = _manifest_skill_paths(manifest_data)
     description = f"{product['description']} Includes {total} composable skills."
     long_description = (
-        f"{description} {product['support']} Skills cover clarification, "
-        "execution, debugging, UI, review, QA, shipping, cross-model judgment, "
-        "trust gates, writing, and skill construction."
+        f"{description} {product['support']} Skills cover debugging, UI, review, "
+        "QA, shipping, prototypes, architecture surveys, decision maps, "
+        "destructive-action gates, and external-artifact trust checks."
     )
     author = {"name": "Panda Zeng"}
     keywords = list(product["keywords"])
@@ -1322,14 +1322,66 @@ def run_sync(args):
 # Repository tracker setup
 # ---------------------------------------------------------------------------
 
-_AGENT_DOCUMENTS = ("AGENTS.md", "CLAUDE.md")
+_AGENT_DOCUMENTS = ("AGENTS.md",)
+_PROJECT_QUESTIONNAIRE = """Verbs Project Contract questionnaire
+
+Answer these in AGENTS.md under ## verbs:
+1. Work source: github-issues | jira | linear | document | prompt
+2. Ticket policy: required | large-changes-only | optional
+3. Goal source: ticket | document | confirmed-prompt
+4. Acceptance source: ticket | document | confirmed-work-contract
+5. Verification command(s): exact agent-runnable commands
+6. Delivery: branch, review, PR, release, and approval gates
+7. GBrain: enabled | disabled (lookup always fails soft)
+
+Required intake behavior:
+- Search GBrain first when enabled.
+- Establish Goal, Scope, Out of Scope, Acceptance Criteria, Constraints, and Delivery Target.
+- Automatically enter a Grilling Session when any field is unclear.
+- Implement only after the Work Contract is confirmed.
+"""
 _VERBS_HEADING = re.compile(r"^##[ \t]+verbs[ \t]*$", re.IGNORECASE)
 _HEADING = re.compile(r"^(#{1,2})[ \t]+")
 _TRACKER = re.compile(r"^(?P<indent>[ \t]*)tracker[ \t]*:[ \t]*(?P<value>[^#\n]*?)[ \t]*$")
+_PROJECT_FIELDS = (
+    "work-source", "ticket-policy", "goal-source", "acceptance-source",
+    "unclear-intent", "gbrain", "test", "delivery",
+)
 _GITHUB_REMOTE = re.compile(
-    r"(?:github\.com[/:])(?P<owner>[^/\s:]+)/(?P<repo>[^/\s]+?)(?:\.git)?/?$",
+    r"^(?:(?:https?|git)://github\.com/|ssh://git@github\.com/|git@github\.com:)"
+    r"(?P<owner>[^/\s:]+)/(?P<repo>[^/\s]+?)(?:\.git)?/?$",
     re.IGNORECASE,
 )
+_SSH_REMOTE = re.compile(
+    r"^(?:ssh://git@|git@)(?P<host>[^/:]+)(?::|/)(?P<owner>[^/\s:]+)/(?P<repo>[^/\s]+?)(?:\.git)?/?$",
+    re.IGNORECASE,
+)
+
+
+def _github_remote_match(url):
+    direct = _GITHUB_REMOTE.match(url)
+    if direct:
+        return direct.group("owner"), direct.group("repo")
+
+    ssh_remote = _SSH_REMOTE.match(url)
+    if not ssh_remote:
+        return None
+    ssh_args = ["ssh", "-G"]
+    user_config = Path.home() / ".ssh" / "config"
+    if user_config.is_file():
+        ssh_args.extend(["-F", str(user_config)])
+    ssh_args.append(ssh_remote.group("host"))
+    resolved = subprocess.run(ssh_args, text=True, capture_output=True)
+    if resolved.returncode != 0:
+        return None
+    hostname = next((
+        line.split(None, 1)[1].strip().lower()
+        for line in resolved.stdout.splitlines()
+        if line.lower().startswith("hostname ")
+    ), "")
+    if hostname != "github.com":
+        return None
+    return ssh_remote.group("owner"), ssh_remote.group("repo")
 
 
 def _verbs_blocks(text):
@@ -1370,9 +1422,9 @@ def _github_identities(repo):
         fields = line.split()
         if len(fields) < 2:
             continue
-        match = _GITHUB_REMOTE.search(fields[1])
-        if match:
-            identities.add((match.group("owner").lower(), match.group("repo").lower()))
+        identity = _github_remote_match(fields[1])
+        if identity:
+            identities.add(tuple(part.lower() for part in identity))
     return identities, None
 
 
@@ -1385,7 +1437,14 @@ def _setup_plan(repo):
         detail = observed or "none"
         return None, f"BLOCKED: expected one GitHub repository identity; found {detail}"
 
-    existing = [repo / name for name in _AGENT_DOCUMENTS if (repo / name).is_file()]
+    existing = []
+    for name in _AGENT_DOCUMENTS:
+        path = repo / name
+        if not path.is_file():
+            continue
+        if any(path.samefile(other) for other in existing):
+            continue
+        existing.append(path)
     states = [_document_state(path) for path in existing]
     with_blocks = [state for state in states if state["blocks"]]
     if len(with_blocks) == 1:
@@ -1395,9 +1454,9 @@ def _setup_plan(repo):
     elif len(states) == 1:
         target = states[0]
     elif len(states) > 1:
-        return None, "BLOCKED: AGENTS.md and CLAUDE.md both exist without ## verbs; choose the canonical document"
+        return None, "BLOCKED: multiple AGENTS.md documents resolved; keep one canonical file"
     else:
-        return None, "BLOCKED: no AGENTS.md or CLAUDE.md exists; choose which canonical document to create"
+        return None, "BLOCKED: no AGENTS.md exists; create the authoritative Project Contract first"
 
     if len(target["blocks"]) > 1:
         return None, f"BLOCKED: {target['path'].name} contains multiple ## verbs blocks"
@@ -1428,6 +1487,19 @@ def _setup_plan(repo):
     }, None
 
 
+def _project_contract_gaps(text):
+    lines, blocks = _verbs_blocks(text)
+    if len(blocks) != 1:
+        return list(_PROJECT_FIELDS)
+    start, end = blocks[0]
+    present = {
+        line.split(":", 1)[0].strip().lower()
+        for line in lines[start + 1:end]
+        if ":" in line and not line.lstrip().startswith("#")
+    }
+    return [field for field in _PROJECT_FIELDS if field not in present]
+
+
 def _setup_diff(plan):
     name = plan["path"].name
     return "".join(difflib.unified_diff(
@@ -1438,6 +1510,9 @@ def _setup_diff(plan):
 
 
 def run_setup(args):
+    if args.questionnaire:
+        print(_PROJECT_QUESTIONNAIRE, end="")
+        return 0
     repo = Path(args.repo).resolve()
     plan, error = _setup_plan(repo)
     if error:
@@ -1449,7 +1524,15 @@ def run_setup(args):
         if changed:
             print(f"NOT CONFIGURED: {plan['path'].name} needs tracker: github")
             return 1
-        print(f"OK: {plan['path'].name} has one tracker: github; Git remote is {plan['identity']}")
+        gaps = _project_contract_gaps(plan["new"])
+        if gaps:
+            print(
+                "NOT CONFIGURED: AGENTS.md Project Contract is missing: "
+                + ", ".join(gaps)
+                + ". Run `scripts/verbs setup --questionnaire` and add the answers."
+            )
+            return 1
+        print(f"OK: AGENTS.md has one complete Project Contract; Git remote is {plan['identity']}")
         return 0
 
     if not changed:
@@ -1526,6 +1609,7 @@ def main():
     setup_mode.add_argument("--check", action="store_true", help="Validate without writing")
     setup_mode.add_argument("--preview", action="store_true", help="Print the exact idempotent diff")
     setup_mode.add_argument("--apply", action="store_true", help="Apply the previewed edit")
+    setup_mode.add_argument("--questionnaire", action="store_true", help="Print the AGENTS.md Project Contract questionnaire")
     setup.add_argument("--approve", action="store_true", help="Explicitly approve --apply")
     setup.add_argument("--repo", default=".", help="Repository path (default: current directory)")
 

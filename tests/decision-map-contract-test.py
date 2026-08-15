@@ -1,39 +1,32 @@
 #!/usr/bin/env python3
-"""Keep Decision Map's one-entry and trustworthy-date contract explicit."""
-
+"""Keep Decision Map bounded to named, cross-session decision state."""
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
-DECISION_MAP = (
-    ROOT / "skills/productivity/decision-map/SKILL.md"
-).read_text(encoding="utf-8")
+text = (ROOT / "skills/productivity/decision-map/SKILL.md").read_text()
 
 
-def section(text: str, heading: str) -> str:
+def section(heading):
     marker = f"\n## {heading}\n"
     start = text.index(marker) + len(marker)
     end = text.find("\n## ", start)
     return text[start:] if end == -1 else text[start:end]
 
 
-work_map = section(DECISION_MAP, "Work an existing map")
+create = section("Create a map")
+work = section("Work a map")
+completion = section("Completion")
+
 for fragment in (
-    "take the first frontier entry",
-    "trustworthy host context or a tool",
-    "write `status: in-progress` without a date",
-    "never infer or guess one",
-    "Apply the same rule to the final closed status",
-    "Stop after one entry",
+    "If the Work Contract can be completed now, create no map",
+    "Stop after creation",
 ):
-    assert fragment in work_map, f"Decision Map work section lost rule: {fragment!r}"
-
-status_rules = (
-    "trustworthy host context or a tool",
-    "write `status: in-progress` without a date",
-    "Apply the same rule to the final closed status",
-)
-positions = [work_map.index(fragment) for fragment in status_rules]
-assert positions == sorted(positions), "Decision Map status-date rules are out of order"
-
+    assert fragment in create, fragment
+for fragment in (
+    "Never schedule the\n   frontier autonomously",
+    "update\n   the map status and newly unblocked entries, then stop",
+):
+    assert fragment in work, fragment
+assert "Implementation remains a new,\nhuman-selected coding task" in completion
+assert "Ordinary ambiguity stays\ninside the automatic Grilling Session" in text.split("\n## Create a map", 1)[0]
 print("decision map contract: ok")

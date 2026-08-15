@@ -84,7 +84,7 @@ diagram. End with one top recommendation only when a non-Speculative candidate
 exists.
 
 Report the absolute path and stop. Ask the user to select one candidate; the
-selected candidate belongs in a later `grill` session. That session reads
+selected candidate belongs in a later automatic Grilling Session. That session reads
 `lib/codebase-design.md` to choose the interface and seam.
 
 ## Native delta

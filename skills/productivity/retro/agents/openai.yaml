@@ -1,5 +1,0 @@
-interface:
-  display_name: "Retro"
-  short_description: "Choose one evidenced process improvement"
-policy:
-  allow_implicit_invocation: false

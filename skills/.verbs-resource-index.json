@@ -1,8 +1,6 @@
 {
   "schema": 1,
   "files": [
-    "skills/engineering/advisor/lib/gate-contract.md",
-    "skills/engineering/advisor/lib/model-anchors.md",
     "skills/engineering/careful/lib/verify-the-test-loop.md",
     "skills/engineering/debug/lib/learning-format.md",
     "skills/engineering/debug/lib/learning-recall.md",
@@ -14,17 +12,7 @@
     "skills/engineering/ship/lib/learning-format.md",
     "skills/engineering/ship/lib/qa-evidence-format.md",
     "skills/engineering/ship/lib/trigger-first-skill-evolution.md",
-    "skills/engineering/sprint/lib/learning-format.md",
-    "skills/engineering/sprint/lib/verify-the-test-loop.md",
-    "skills/productivity/backlog-refinement/lib/interview.md",
-    "skills/productivity/backlog-refinement/lib/push-once.md",
-    "skills/productivity/decision-map/lib/interview.md",
-    "skills/productivity/grill/lib/codebase-design.md",
-    "skills/productivity/grill/lib/interview.md",
-    "skills/productivity/grill/lib/output-templates.md",
-    "skills/productivity/grill/lib/push-once.md",
-    "skills/productivity/grill/lib/skill-decision-tree.md",
-    "skills/productivity/grill/lib/stop-rule.md",
-    "skills/productivity/sprint-review/lib/qa-evidence-format.md"
+    "skills/engineering/ship/lib/verify-the-test-loop.md",
+    "skills/productivity/decision-map/lib/interview.md"
   ]
 }

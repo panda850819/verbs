@@ -26,7 +26,7 @@ require(SKILL, "Merge candidates with the same seam", "candidate deduplication")
 require(SKILL, "If every result is Speculative", "honest empty recommendation")
 require(SKILL, "Use no CDN, remote asset,\nor executable script", "offline report")
 require(SKILL, "Report the absolute path and stop", "survey stopping boundary")
-require(SKILL, "later `grill` session", "selected-candidate route")
+require(SKILL, "later automatic Grilling Session", "selected-candidate route")
 
 for field in (
     "repository-relative files",
