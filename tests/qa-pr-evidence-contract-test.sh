@@ -17,6 +17,7 @@ grep -Fq 'UNPROVEN' "$canonical"
 block=$(mktemp)
 trap 'rm -f "$block"' EXIT
 awk '/<!-- verbs-qa-evidence:v1 -->/{inside=1} inside{print} /<!-- \/verbs-qa-evidence -->/{exit}' "$canonical" > "$block"
+grep -Fq '<!-- /verbs-qa-evidence -->' "$block"
 grep -Fq 'Acceptance: VERIFIED | NOT VERIFIED' "$block"
 grep -Fq 'Origin: <redacted URL or opaque source ID; no credentials, tokens, or sensitive paths>' "$block"
 grep -Fq 'Runtime: <development, built, production-like, or precise non-secret equivalent>' "$block"
