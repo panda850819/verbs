@@ -94,7 +94,7 @@ description = "Make one backlog item READY or NOT_READY by clarifying outcome, s
 tier = "core"
 resources = []
 composes = ["backlog-refinement", "grill", "product-planning", "to-spec"]
-description = "Repair unreliable planning inputs through Grill and relevant planning skills, then plan one Sprint Goal and select ready work after a human approval gate."
+description = "Repair unreliable planning inputs through Grill and relevant planning skills, then propose one Sprint Goal and ready work for human approval."
 
 [skill.sprint-review]
 tier = "core"
@@ -181,7 +181,7 @@ tier = "ext"
 requires = ["cli:git", "cli:gh"]
 resources = []
 composes = ["setup-verbs"]
-description = "Decompose one canonical GitHub Spec Issue into an approved vertical-slice child Issue graph with native relations, body fallbacks, and verified frontier reporting."
+description = "Decompose one canonical GitHub Spec Issue into an approval-gated vertical-slice child Issue graph, including when reached through an approved planning flow."
 
 [skill.to-spec]
 tier = "ext"

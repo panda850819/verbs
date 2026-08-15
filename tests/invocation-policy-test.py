@@ -32,6 +32,14 @@ assert codex_human_only == EXPECTED_HUMAN_ONLY, (
 )
 assert claude_human_only == codex_human_only
 
+# To Tickets is intentionally reachable from an approved planning flow, while
+# its body retains the mandatory publication approval gate.
+to_tickets_policy = (
+    ROOT / "skills/productivity/to-tickets/agents/openai.yaml"
+).read_text(encoding="utf-8")
+assert "allow_implicit_invocation: true" in to_tickets_policy
+assert "to-tickets" not in claude_human_only
+
 
 def indirect_human_only_refs(text):
     return {

@@ -1,6 +1,6 @@
 ---
 name: sprint-planning
-description: "Plan one Sprint Goal, repair unreliable planning inputs through Grill and relevant planning skills, then select ready work after a human approval gate."
+description: "Repair unreliable planning inputs through Grill and relevant planning skills, then propose one Sprint Goal and ready work for human approval."
 reads:
   - repo: "**"
   - repo: AGENTS.md

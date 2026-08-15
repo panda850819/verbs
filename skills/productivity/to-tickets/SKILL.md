@@ -1,9 +1,10 @@
 ---
 name: to-tickets
 description: |
-  Turn one complete canonical GitHub Spec Issue into approved child Issues and
-  dependency edges. Use for vertical-slice ticketing only. NOT discovery, Spec
-  publication, scheduling, or implementation.
+  Turn one complete canonical GitHub Spec Issue into approval-gated child Issues
+  and dependency edges, including when reached through an approved planning flow.
+  Use for vertical-slice ticketing only. NOT discovery, Spec publication,
+  scheduling, or implementation.
 reads:
   - repo: AGENTS.md
   - repo: CLAUDE.md
