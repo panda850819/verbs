@@ -31,6 +31,12 @@ require(SKILL, "If every result is Speculative", "honest empty recommendation")
 require(SKILL, "Use no CDN, remote asset,\nor executable script", "offline report")
 require(SKILL, "Report the absolute path and stop", "survey stopping boundary")
 require(SKILL, "later `grill` session", "selected-candidate route")
+require(
+    SKILL,
+    "production consumers or explicit evidence that tests/docs are the only users",
+    "skill card consumer alternative",
+)
+require(SKILL, "a current-decision check", "skill card current-decision check")
 
 for field in (
     "repository-relative files",

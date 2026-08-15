@@ -70,14 +70,14 @@ Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
 
 Map every acceptance criterion to the strongest step evidence. Emit the exact
 marker block from `lib/qa-evidence-format.md`, including intent, current
-artifact identity, material origin/runtime/transport provenance, per-criterion
-`PASS` / `FAIL` / `UNPROVEN`, totals, gaps, and timestamp. Use `n/a` only when a
-field cannot affect the claim. Persist it at
+artifact identity, redacted origin/runtime/transport provenance and its
+canonical digest, per-criterion `PASS` / `FAIL` / `UNPROVEN`, totals, gaps, and
+timestamp. Use `n/a:<reason>` only when a field cannot affect the claim. Persist it at
 `git rev-parse --git-path verbs/qa-evidence.md` without dirtying the worktree.
 
 QA does not write to GitHub; `ship` owns the PR upsert. A later code change,
-rewritten head, or material provenance change invalidates the affected evidence
-until those checks rerun.
+rewritten head, unidentified relevant untracked input, or invalid provenance
+digest invalidates affected evidence until those checks rerun.
 
 ## Fix and learning
 

@@ -7,10 +7,21 @@ existing pull-request comment without creating duplicates.
 ## Artifact identity
 
 Evidence is valid only for the exact content and material execution provenance
-tested. Prefer a committed HEAD SHA when QA runs after commit. Record the served
-origin or artifact source, runtime/build mode, and transport (`real`, `fixture`,
-`mock`, or a precise equivalent); use `n/a` only when a field cannot affect the
-claim. These fields bound what the evidence proves and do not imply stronger
+tested. Prefer a committed HEAD SHA when QA runs after commit. Record canonical
+provenance values:
+
+- **Origin:** for a URL, keep only scheme, host, port, and a non-sensitive app
+  route; remove userinfo, query, and fragment. For a local source, use an opaque
+  label plus artifact identity, never an absolute path.
+- **Runtime:** one normalized mode (`development`, `built`, `production-like`,
+  or a precise non-secret equivalent).
+- **Transport:** one normalized mode (`real`, `fixture`, `mock`, or a precise
+  non-secret equivalent).
+
+Use `n/a:<reason>` only when a field cannot affect the claim. Join the three
+canonical values in `Origin`, `Runtime`, `Transport` order with LF separators,
+hash the UTF-8 bytes with SHA-256, and record `Provenance: sha256:<digest>`.
+These fields bound what the evidence proves and do not imply stronger
 environment coverage. When QA runs before commit, use a stable patch identity:
 
 1. Resolve the comparison base from the tracking PR, upstream default branch,
@@ -18,10 +29,14 @@ environment coverage. When QA runs before commit, use a stable patch identity:
 2. Hash `git diff --binary <base>` with SHA-256 and record it as
    `patch-sha256:<digest>` plus the full base SHA.
 3. List relevant untracked files as a gap. A patch hash does not cover them.
+   A file that affects a criterion must enter a deterministic artifact manifest;
+   otherwise mark that criterion `UNPROVEN` and set `Acceptance: NOT VERIFIED`.
 
 `ship` recomputes the base-to-PR-head patch hash before publishing. A changed
-or rewritten head, hash mismatch, or material provenance change makes affected
-evidence stale; rerun those checks. Never relabel stale evidence as current.
+or rewritten head or hash mismatch makes affected evidence stale. Ship also
+recomputes the provenance digest from the three published canonical values; a
+missing field or digest mismatch is stale. Rerun affected checks and never
+relabel stale evidence as current.
 
 ## Evidence block
 
@@ -37,9 +52,10 @@ Acceptance: VERIFIED | NOT VERIFIED
 Intent: <issue URL, brief path, or exact user-request label>
 Artifact: <full commit SHA | patch-sha256:digest>
 Base: <full base SHA | n/a for committed-head identity>
-Origin: <served URL, worktree/tree source, or n/a with reason>
-Runtime: <development, built artifact, production-like, or precise equivalent>
-Transport: <real, fixture, mock, or precise equivalent>
+Origin: <redacted URL or opaque source ID; no credentials, tokens, or sensitive paths>
+Runtime: <development, built, production-like, or precise non-secret equivalent>
+Transport: <real, fixture, mock, or precise non-secret equivalent>
+Provenance: sha256:<digest of canonical Origin LF Runtime LF Transport>
 Run: <ISO-8601 UTC timestamp>
 
 | Criterion | Status | Proof |
@@ -60,7 +76,8 @@ Status rules:
   when proof is visual judgment.
 - `FAIL` means observed behavior contradicts the criterion.
 - `UNPROVEN` means the step was skipped, the evidence is indirect, the intent
-  source is missing, or artifact identity cannot be established.
+  source is missing, artifact identity cannot be established, a relevant
+  untracked input is unidentified, or the provenance digest is invalid.
 - `Acceptance: VERIFIED` is legal only when every criterion is `PASS` and the
   artifact identity is current. Any `FAIL` or `UNPROVEN` row forces
   `Acceptance: NOT VERIFIED`.

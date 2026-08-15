@@ -82,10 +82,11 @@ temp directory. Escape all repository-derived text. Use no CDN, remote asset,
 or executable script. Open it with the platform command when available; a failed
 open leaves the report valid and the absolute path visible.
 
-Each card must contain files, evidence-backed friction, plain-language
-change, production-consumer evidence, locality/leverage or net-deletion gain,
-test-surface effect, deletion-test result, strength, ADR conflict when present,
-and a side-by-side Before / After
+Each card must contain files, evidence-backed friction, plain-language change,
+production consumers or explicit evidence that tests/docs are the only users,
+locality/leverage or net-deletion gain, test-surface effect, deletion-test
+result, strength, a current-decision check, ADR conflict when present, and a
+side-by-side Before / After
 diagram. End with one top recommendation only when a non-Speculative candidate
 exists.
 
