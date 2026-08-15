@@ -5,16 +5,15 @@
 > at all, the search space, and when to stop. It owns nothing about what happens
 > afterwards — alternatives, artifacts, maps, and routing belong to the caller.
 >
-> Origin: extracted from `grill` (2026-07-31, issue #284). `grill` bundled the
-> interview with its own close, so a skill wanting only the interview had to
-> invoke all of `grill` and stop at its routing gate. The former `wayfinder`
-> (now `decision-map`) was the casualty; see the entry 4 decision note in the v1 direction map. The
-> frontier-round cadence was adapted from `mattpocock/skills` v1.2 in #328.
+> Origin: extracted from the retired Grill skill (2026-07-31, issue #284).
+> Automatic Grilling Sessions now belong to the AGENTS.md Project Contract;
+> this module remains the interview primitive for cross-session Decision Maps.
+> The frontier-round cadence was adapted from `mattpocock/skills` v1.2 in #328.
 
 ## When to load
 
-Skills that interview a human to discover requirements, scope, or intent:
-`grill` before its structured close, `decision-map` while charting a map.
+Load during an automatic Grilling Session or while `decision-map` charts a
+cross-session map.
 
 Skip when scope is already concrete. An interview run against a locked scope is
 theatre.
@@ -132,11 +131,10 @@ to ask again.
 
 ## Switching callers mid-interview
 
-The user names a different interviewing skill while this interview is still
-unfinished — `/grill` typed three questions into a `decision-map` charting
-session, `/decision-map` typed during a `grill` drilling session. Nothing is running that can
-be interrupted, so the switch happens whatever the combined prose implies; state
-it instead of letting it resolve silently.
+The user names `decision-map` while an automatic Grilling Session is still
+unfinished, or asks to return to ordinary intake while charting a map. Nothing
+is running that can be interrupted, so state the switch instead of letting it
+resolve silently.
 
 **The answers survive. The original caller's close does not.** Do not restart
 the interview and do not re-ask an answered question. Carry every answer so far,

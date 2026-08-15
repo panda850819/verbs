@@ -1,5 +1,0 @@
-interface:
-  display_name: "To Tickets"
-  short_description: "Publish an approved implementation Issue graph"
-policy:
-  allow_implicit_invocation: true

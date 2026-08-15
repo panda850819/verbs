@@ -1,39 +1,16 @@
 #!/usr/bin/env python3
-"""Keep Decision Map's one-entry and trustworthy-date contract explicit."""
-
+"""Keep Decision Map bounded to named, cross-session decision state."""
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
-DECISION_MAP = (
-    ROOT / "skills/productivity/decision-map/SKILL.md"
-).read_text(encoding="utf-8")
-
-
-def section(text: str, heading: str) -> str:
-    marker = f"\n## {heading}\n"
-    start = text.index(marker) + len(marker)
-    end = text.find("\n## ", start)
-    return text[start:] if end == -1 else text[start:end]
-
-
-work_map = section(DECISION_MAP, "Work an existing map")
+text = (ROOT / "skills/productivity/decision-map/SKILL.md").read_text()
 for fragment in (
-    "take the first frontier entry",
-    "trustworthy host context or a tool",
-    "write `status: in-progress` without a date",
-    "never infer or guess one",
-    "Apply the same rule to the final closed status",
-    "Stop after one entry",
+    "Ordinary ambiguity stays\ninside the automatic Grilling Session",
+    "If the Work Contract can be completed now, create no map",
+    "Stop after creation",
+    "Never schedule the\n   frontier autonomously",
+    "update\n   the map status and newly unblocked entries, then stop",
+    "Implementation remains a new,\nhuman-selected coding task",
 ):
-    assert fragment in work_map, f"Decision Map work section lost rule: {fragment!r}"
-
-status_rules = (
-    "trustworthy host context or a tool",
-    "write `status: in-progress` without a date",
-    "Apply the same rule to the final closed status",
-)
-positions = [work_map.index(fragment) for fragment in status_rules]
-assert positions == sorted(positions), "Decision Map status-date rules are out of order"
-
+    assert fragment in text, fragment
 print("decision map contract: ok")

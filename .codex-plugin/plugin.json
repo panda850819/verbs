@@ -1,7 +1,7 @@
 {
   "name": "verbs",
-  "version": "0.31.0",
-  "description": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 22 composable skills.",
+  "version": "0.32.0",
+  "description": "Project contracts and specialist procedures for coding agents. Includes 10 composable skills.",
   "author": {
     "name": "Panda Zeng",
     "url": "https://github.com/panda850819"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Verbs",
-    "shortDescription": "Hard-won ways of working, encoded as composable skills for coding agents.",
-    "longDescription": "An opinionated skill pack for taking software work from ambiguity to verified delivery. Includes 22 composable skills. Skills-only Marketplace Plugins support Claude Code and Codex. Pi and Hermes support direct skill loading. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
+    "shortDescription": "Bind how a project defines, verifies, and delivers work to AGENTS.md.",
+    "longDescription": "Project contracts and specialist procedures for coding agents. Includes 10 composable skills. Skills-only Marketplace Plugins support Claude Code and Codex. Pi and Hermes support direct skill loading. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
     "developerName": "Panda Zeng",
     "category": "Developer Tools",
     "capabilities": [

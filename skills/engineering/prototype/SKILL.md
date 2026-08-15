@@ -4,7 +4,7 @@ description: |
   Throwaway prototype overrides the default production-build reflex with one cheap artifact
   for one design question. Logic questions get a tiny interactive terminal
   driver; UI questions get structurally different variants behind `?variant=`.
-  Use it to make a `grill` open question concrete. `ui` builds the chosen
+  Use it to make a Grilling Session's open question concrete. `ui` builds the chosen
   direction; production execution remains a separate human-selected entry point.
 reads:
   - repo: "**"
@@ -70,5 +70,5 @@ Done means the question is answered AND captured:
 - `prototype` diverges cheap to choose a direction — UI.md's converge mode
   just repeats that choice level by level, still on throwaway mocks; `ui`
   then builds the committed direction for production.
-- A grill open question of the shape "how should it look / behave" is often
+- A Grilling Session question of the shape "how should it look / behave" is often
   fastest resolved here; feed the verdict back into the brief.

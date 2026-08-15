@@ -1,91 +1,54 @@
-# Learning Candidate Format
+# GBrain Project Learning Format
 
-Verbs emits this shape to stdout. It does not select a storage path or
-write a learning file. A host/project may persist the candidate in its own
-configured store.
+Verbs stores reusable project memory in GBrain. The root `AGENTS.md` remains the
+authoritative Project Contract; memory is historical evidence and cannot change
+policy without a preview and explicit human approval.
 
-## Optional host store
+## Brain First Rule
 
-Configured in CLAUDE.md or AGENTS.md under `## verbs`:
+Before planning, implementing, debugging, reviewing, or shipping, search GBrain
+for relevant project decisions, conventions, pitfalls, preferences, and failed
+approaches. Cite memories that materially affect the work. If GBrain is
+unavailable, continue from `AGENTS.md`, the work source, and repository evidence
+and report the memory gap.
+
+## Record
+
 ```yaml
-learnings: docs/learnings    # default, can be any path
-```
-
-If the host persists candidates, it may use a structure such as:
-
-```
-{learnings_dir}/
-├── patterns/        # Reusable approaches
-├── pitfalls/        # What NOT to do
-├── architecture/    # Structural decisions
-└── preferences/     # User-stated preferences
-```
-
-## Candidate Format
-
-```markdown
----
-type: pattern | pitfall | architecture | preference
+type: decision | convention | pitfall | preference | failed-approach
+project: owner/repo
+scope: repository | module | path
 key: short-kebab-case-name
-confidence: 1-10
-source: observed | inferred | user-stated
-skill: review | debug | qa | ship | sprint
-files:
-  - path/to/relevant/file.ts
-first_seen: YYYY-MM-DD   # first time this learning was hit (= created on day one)
-recurrence: N            # times this same key recurred; starts at 1, +1 on each match
-status: active           # active | stale — host policy proposes; human sets it
-stale_reason: ...        # why it went stale (only when status: stale)
-stale_date: YYYY-MM-DD   # when it was marked stale
-created: YYYY-MM-DD
-last_seen: YYYY-MM-DD
----
-
-## Problem
-1-2 sentences. Include observable symptoms.
-
-## What Didn't Work
-Failed approaches and WHY they failed. (Optional for patterns)
-
-## Solution
-The fix or approach, with code if useful.
-
-## Prevention
-How to catch this earlier next time.
+summary: concise reusable statement
+evidence:
+  - commit, pull request, ticket, command output, or file path
+context: when this applies
+exceptions: when this does not apply
+confidence: candidate | confirmed | superseded
+observed_at: YYYY-MM-DD
+source: observed | user-confirmed
 ```
 
-## Confidence Scale
+Never store secrets, credentials, personal data, unsupported inference, routine
+task detail, or a duplicate of policy already present in `AGENTS.md`.
 
-| Score | Meaning |
-|-------|---------|
-| 9-10 | Verified in code. Concrete evidence. |
-| 7-8 | High confidence pattern. Very likely correct. |
-| 5-6 | Moderate. Could be wrong. Show with caveat. |
-| 3-4 | Low confidence. Suppress from review output. |
-| 1-2 | Speculation. Only surface for P0 severity. |
+## Write gate
 
-## Source Types
+- Emit a candidate only when evidence shows it would save time or prevent a
+  repeated failure in a future session.
+- Search GBrain for the same project, scope, and key before writing.
+- A duplicate appends current evidence; it does not create a competing record.
+- User-confirmed or repeated evidence may promote a candidate to `confirmed`.
+- Changed policy marks conflicting memory `superseded`.
+- GBrain failure is fail-soft: report the unwritten candidate and continue.
 
-| Source | Decays? | Meaning |
-|--------|---------|---------|
-| `observed` | Yes, -1 per 30 days | Found in code during review/debug |
-| `inferred` | Yes, -1 per 30 days | AI deduction, not directly verified |
-| `user-stated` | Never | User explicitly told us this |
+## Policy promotion
 
-## Candidate Rules
+A confirmed memory becomes Project Contract policy only when:
 
-- Emit only genuine discoveries that would save time in a future session.
-- Search the host-configured store for the same key when one is available.
-- A match emits `seen_again: <key>` plus the new context. The host decides
-  whether to update `last_seen` or `recurrence`; the skill never mutates it.
-- Do not emit obvious things or routine fixes.
+1. it is stable beyond one task or explicitly declared by the user;
+2. the exact `AGENTS.md` diff is previewed;
+3. the user approves the mutation;
+4. the updated contract is read back and verified.
 
-## Reading Rules
-
-- Calculate effective confidence: `max(0, confidence - floor(days_since_created / 30))`
-- `user-stated` sources never decay.
-- Skip learnings with effective confidence < 3.
-- Skip `status: stale` learnings entirely (kept for provenance; the host or human sets them, same as `recurrence` and `last_seen`). Passive decay only *suppresses*; an explicit stale mark is the corpus correcting itself.
-- A high host-provided `recurrence` (>= 2) marks a repeat offender — surface it
-  even at lower effective confidence.
-- When a learning matches the current work, display: "Prior learning: [key] (confidence N/10, recurrence M, from [date])"
+GBrain never edits `AGENTS.md` autonomously.

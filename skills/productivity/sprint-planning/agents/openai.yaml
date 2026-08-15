@@ -1,5 +1,0 @@
-interface:
-  display_name: "Sprint Planning"
-  short_description: "Set one Sprint Goal and select ready work"
-policy:
-  allow_implicit_invocation: false

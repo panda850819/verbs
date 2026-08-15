@@ -1,6 +1,6 @@
 # lib/verify-the-test-loop.md — The test loop must be trustworthy before the bug is
 
-> Shared module. Loaded by `sprint`, `careful`, and `debug`.
+> Shared module. Loaded by `careful` and `debug`.
 > An untrustworthy build/test loop manufactures phantom bugs: you debug
 > code that never ran, on an environment that keeps changing under you.
 > This module makes "is what I'm testing actually what I built, in a
@@ -16,7 +16,7 @@
 
 Any time a human (or a flaky external system) is the test harness: a
 build the user must launch, a deploy someone manually exercises, a
-repro that needs a device. Load at `sprint` Stage 5 before declaring
+repro that needs a device. Load before declaring
 SHIPPED on manually-validated work; load in `debug` whenever a fix will be
 verified by someone re-running something.
 

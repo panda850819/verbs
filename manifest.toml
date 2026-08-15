@@ -1,34 +1,5 @@
-# Verbs manifest — single source of truth for product identity, skill tier,
-# and dependencies.
-#
-# Read by:
-#   - scripts/bootstrap.sh   (decides what to install on a fresh clone)
-#   - scripts/verbs          (doctor, install hints, generated loader metadata)
-#
-# Tier semantics:
-#   core      — markdown-first. Runs after clone + plugin install; a software
-#               operation may still declare the baseline `git` CLI.
-#   ext       — needs a publicly installable CLI (brew / npm / pipx / curl / gh release).
-#               bootstrap.sh prints the install command; user opts in.
-#
-# The package is self-contained: clone + install exposes everything declared in
-# this manifest. Personal skills and private CLIs are outside this product.
-#
-# Requires syntax:
-#   cli:<name>          — generic command must be on PATH
-#   brew:<formula>      — brew install <formula>
-#   brew-tap:<tap/name> — brew install from a tap
-#   npm:<pkg>           — npm install -g <pkg>
-#   pipx:<pkg>          — pipx install <pkg>
-#
-# This file is hand-curated. When you add or rename a skill, update here.
-#
-# Resource vendoring fields:
-#   resources = ["<repo-relative canonical file>"]
-#       scripts/verbs sync copies each file to the same skill-relative path so
-#       every skill directory stays self-contained.
-#   composes = ["<frontmatter name>"]
-#       directional companion edges; the supported install is the full pack.
+# Verbs manifest — single source of truth for product identity, runtime skills,
+# dependencies, and vendored resources.
 
 [product]
 id = "verbs"
@@ -36,29 +7,21 @@ display_name = "Verbs"
 marketplace_id = "verbs"
 repository = "panda850819/verbs"
 homepage = "https://github.com/panda850819/verbs"
-description = "An opinionated skill pack for taking software work from ambiguity to verified delivery."
-hero = "Hard-won ways of working, encoded as composable skills for coding agents."
+description = "Project contracts and specialist procedures for coding agents."
+hero = "Bind how a project defines, verifies, and delivers work to AGENTS.md."
 support = "Skills-only Marketplace Plugins support Claude Code and Codex. Pi and Hermes support direct skill loading."
 category = "Developer Tools"
 environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.31.0"
+version = "0.32.0"
 schema  = "skill-tier-v1"
 updated = "2026-08-15"
 
-# History from before pandastack was renamed to Verbs is retained in CHANGELOG.md.
-
-# ============================================================================
-# CORE (18) — markdown-first, fresh-clone available
-# Buckets on disk: engineering / productivity / meta
-#
-# Git is the baseline software-work CLI, so review / debug stay core with a
-# cli:git requirement. A host-native capability such as browser automation does
-# not make the pack own a CLI dependency. Skills that directly invoke optional
-# external CLIs are ext — see /ship and /advisor below.
-# ============================================================================
+# Project intake, Brain First retrieval, automatic Grilling Sessions, and
+# delivery policy live in the root AGENTS.md Project Contract. Runtime skills
+# exist only where a specialist procedure has a material execution delta.
 
 [skill.careful]
 tier = "core"
@@ -70,56 +33,7 @@ description = "Confirmation gate for production, shared infrastructure, live har
 tier = "core"
 resources = []
 composes = []
-description = "Pre-adoption trust check for external skills / MCPs / repos."
-
-[skill.ask-boss]
-tier = "core"
-resources = []
-composes = ["decision-map", "grill"]
-description = "Route unclear workplace requests to one existing specialist by retrieving facts and resolving intent, target, audience, and minimum sufficient authority. Use for an unclear starting point, owner, reference, or next route; clear typed requests, named maps, bugs, UI work, and code review go directly to their specialist."
-
-[skill.product-planning]
-tier = "core"
-resources = []
-composes = ["ask-boss", "decision-map", "prototype", "to-spec"]
-description = "Clarify the product problem, Product Goal, priority, and candidate backlog outcomes before readiness or implementation work."
-
-[skill.backlog-refinement]
-tier = "core"
-resources = ["lib/interview.md", "lib/push-once.md"]
-composes = ["grill"]
-description = "Make one backlog item READY or NOT_READY by clarifying outcome, scope, acceptance criteria, dependencies, and unresolved decisions."
-
-[skill.sprint-planning]
-tier = "core"
-resources = []
-composes = ["backlog-refinement", "grill", "product-planning", "to-spec"]
-description = "Repair unreliable planning inputs through Grill and relevant planning skills, then propose one Sprint Goal and ready work for human approval."
-
-[skill.sprint-review]
-tier = "core"
-resources = ["lib/qa-evidence-format.md"]
-composes = ["qa", "review"]
-description = "Review one Sprint outcome against its Goal and product acceptance evidence."
-
-[skill.retro]
-tier = "core"
-resources = []
-composes = []
-description = "Review one completed Sprint and choose one evidence-backed process improvement."
-
-[skill.grill]
-tier = "core"
-resources = ["lib/interview.md", "lib/push-once.md", "lib/stop-rule.md", "lib/output-templates.md", "lib/skill-decision-tree.md", "lib/codebase-design.md"]
-composes = ["decision-map", "to-spec"]
-description = "Adversarial requirement discovery for unclear scope or a 3+ file feature/refactor; routes large foggy work to Decision Map, spec-sized work to one canonical GitHub Spec Issue, and smaller work to a local brief and plan."
-
-[skill.setup-verbs]
-tier = "core"
-requires = ["cli:git"]
-resources = []
-composes = []
-description = "Resolve tracker setup ambiguity and approval around deterministic scripts/verbs setup checks, previews, applies, and read-back verification."
+description = "Pre-adoption trust check for external skills, MCPs, repositories, packages, URLs, APIs, and services."
 
 [skill.review]
 tier = "core"
@@ -133,85 +47,42 @@ tier = "core"
 requires = ["cli:git"]
 resources = ["lib/learning-format.md", "lib/learning-recall.md", "lib/verify-the-test-loop.md"]
 composes = []
-description = "Systematic root-cause debugging: hypothesis gate, instrument-first by bug class, bisect, scope-blast, known bug classes. NOT diff review (review) or UI taste (ui)."
-
-[skill.sprint]
-tier = "core"
-resources = ["lib/learning-format.md", "lib/verify-the-test-loop.md"]
-composes = ["debug", "grill", "review", "ship", "ui"]
-description = "Acceptance-driven execution with bounded review and delivery evidence."
+description = "Systematic root-cause debugging with an evidence gate before fixes."
 
 [skill.ui]
 tier = "core"
 resources = []
 composes = []
-description = "Build/fix UI with a committed point of view. Four override reflexes + craft lore in references (reflex-font blocklist, CJK+Latin type, OKLCH, CSS bans+rewrites, strategic omissions). NOT browser-test (qa) or render-bug debugging (debug)."
+description = "Build or fix production UI with a committed visual direction."
 
 [skill.qa]
 tier = "core"
 resources = ["lib/learning-format.md", "lib/qa-evidence-format.md"]
 composes = []
-description = "Browser-based UI QA with PR-ready acceptance evidence through a host-provided browser automation capability."
+description = "Browser-based UI QA with PR-ready acceptance evidence through host-provided browser automation."
 
 [skill.improve-codebase-architecture]
 tier = "core"
 requires = ["cli:git"]
 resources = ["lib/codebase-design.md"]
-composes = ["grill"]
-description = "Produce a read-only visual survey of codebase architecture opportunities."
+composes = []
+description = "Produce an explicitly requested, read-only visual survey of codebase architecture opportunities."
 
 [skill.prototype]
 tier = "core"
 resources = []
 composes = []
-description = "Throwaway prototype answering ONE design question: logic → terminal state driver; UI → N structurally different variants behind ?variant=. Verdict outlives the code. NOT production UI (ui)."
+description = "Build one throwaway artifact to answer one logic or UI design question."
 
 [skill.decision-map]
 tier = "core"
 resources = ["lib/interview.md"]
-composes = ["grill", "prototype"]
-description = "Create or work cross-session Decision Maps when the request names a map or ask-boss identifies multi-session decision fog: with no map yet, run the interview and write it here, then stop; with an existing map, take ONE unblocked entry, resolve it by type, write the decision back, and graduate the fog. A request without a named map that only needs one-session requirement discovery goes to grill."
-
-# ============================================================================
-# EXT (4) — public CLI dependencies
-# ============================================================================
-
-[skill.to-tickets]
-tier = "ext"
-requires = ["cli:git", "cli:gh"]
-resources = []
-composes = ["setup-verbs"]
-description = "Decompose one canonical GitHub Spec Issue into an approval-gated vertical-slice child Issue graph, including when reached through an approved planning flow."
-
-[skill.to-spec]
-tier = "ext"
-requires = ["cli:git", "cli:gh"]
-resources = []
-composes = ["setup-verbs", "to-tickets"]
-description = "Synthesize established requirements into one canonical GitHub Spec Issue, then continue into approved child-Issue decomposition when planning requests it."
+composes = ["prototype"]
+description = "Create or work a named cross-session Decision Map when several dependent decisions must remain visible."
 
 [skill.ship]
 tier = "ext"
 requires = ["cli:git", "cli:gh"]
 resources = ["lib/learning-format.md", "lib/qa-evidence-format.md", "lib/trigger-first-skill-evolution.md"]
 composes = []
-description = "Close completed code work through test, commit, push, PR, and QA evidence publication. Needs `gh`, hence ext."
-
-[skill.advisor]
-tier = "ext"
-requires = ["cli:codex", "cli:claude"]
-resources = ["lib/gate-contract.md", "lib/model-anchors.md"]
-composes = []
-description = "Pull a decorrelated second opinion from a DIFFERENT model into the current session (executor-calls-advisor). Zero-config self-locate seat: Claude seat reaches out to codex/GPT, Codex seat to `claude -p`. Default = one cross-model consult on a load-bearing judgment; --panel = blind cross-model critics on a prepared plan. Verified minimums: Codex CLI 0.144.1, Claude Code 2.1.206."
-
-# ============================================================================
-# Notes
-# ============================================================================
-#
-# When adding a new skill:
-#   1. Create skills/<bucket>/<name>/SKILL.md (bucket = engineering|productivity|writing|meta)
-#   2. Add a [skill.<name>] entry here with tier + requires + config
-#   3. Run scripts/verbs sync to regenerate every loader manifest
-#   4. If tier=ext, add its dependency report to scripts/bootstrap.sh
-#   5. Write it against maintainer/writing-great-skills.md
-#   6. Update RESOLVER.md skill catalog
+description = "Close completed code work through test, commit, push, PR, and available QA evidence publication."

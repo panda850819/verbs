@@ -1,5 +1,0 @@
-interface:
-  display_name: "Sprint Review"
-  short_description: "Inspect a delivered product outcome"
-policy:
-  allow_implicit_invocation: false
