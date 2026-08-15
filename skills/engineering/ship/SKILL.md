@@ -13,6 +13,7 @@ reads:
   - skill: lib/learning-format.md
   - skill: lib/qa-evidence-format.md
   - skill: lib/trigger-first-skill-evolution.md
+  - skill: lib/verify-the-test-loop.md
   - skill: lib/quote-gate.md
   - skill: lib/rationalizations.md
   - cli: git
@@ -91,7 +92,11 @@ to write a commit; this skill is the gate sequence, not the coaching.
     a UI diff that required `qa`, missing evidence also blocks completion. For
     non-UI work, state `QA evidence: not applicable`; never fabricate a report.
     Re-running `ship` updates the same comment rather than adding another.
-11. **Closure evidence** — done means the PR URL, pushed commit/branch, and,
+11. **Artifact proof** — before asking a human to validate an artifact or using
+    manual validation as completion evidence, apply `lib/verify-the-test-loop.md`
+    and prove that the tested artifact contains the current commit. Missing
+    artifact identity blocks the completion claim.
+12. **Closure evidence** — done means the PR URL, pushed commit/branch, and,
     when QA ran, the verified QA comment URL are printed. Missing delivery
     evidence → name the gap and do not claim done.
 

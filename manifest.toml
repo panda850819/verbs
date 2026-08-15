@@ -83,6 +83,6 @@ description = "Create or work a named cross-session Decision Map when several de
 [skill.ship]
 tier = "ext"
 requires = ["cli:git", "cli:gh"]
-resources = ["lib/learning-format.md", "lib/qa-evidence-format.md", "lib/trigger-first-skill-evolution.md"]
+resources = ["lib/learning-format.md", "lib/qa-evidence-format.md", "lib/trigger-first-skill-evolution.md", "lib/verify-the-test-loop.md"]
 composes = []
 description = "Close completed code work through test, commit, push, PR, and available QA evidence publication."

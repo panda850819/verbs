@@ -49,18 +49,12 @@ structural lint. Green before any PR; CI runs the same suite on macOS.
 name the surface it replaces or extends, clear `.out-of-scope/` precedent,
 and take a RESOLVER row plus a concrete routing description.
 
-## Project Contract
+## Project Contract reference
 
-The root `AGENTS.md` `## verbs` block is the only authoritative project policy.
-`CLAUDE.md` is a compatibility target for the `AGENTS.md` symlink, not a second
-contract. Every coding task must apply `lib/project-contract.md`: search GBrain
-first, establish the Work Contract, automatically enter a Grilling Session when
-intent is unclear, and implement only after confirmation.
-
-GBrain stores evidence-backed project decisions, conventions, pitfalls,
-preferences, and failed approaches in `lib/learning-format.md` shape. It is
-historical evidence, not policy. GBrain failure is fail-soft. Promoting stable
-memory into this file requires an exact preview and explicit human approval.
+Normative project behavior lives only under the `AGENTS.md` `## verbs` block
+below. `CLAUDE.md` is its compatibility target, not a second contract.
+`lib/project-contract.md` and `lib/learning-format.md` explain the mechanics but
+cannot override that block.
 
 ## verbs
 
@@ -71,6 +65,7 @@ acceptance-source: ticket-or-confirmed-work-contract
 unclear-intent: automatic-grilling-session
 gbrain: required-lookup-fail-soft
 test: bash tests/run-all.sh
+delivery: pull-request
 main: main
 tag: semver
 release: true

@@ -970,9 +970,9 @@ def _generated_loaders(manifest_data):
     paths = _manifest_skill_paths(manifest_data)
     description = f"{product['description']} Includes {total} composable skills."
     long_description = (
-        f"{description} {product['support']} Skills cover clarification, "
-        "execution, debugging, UI, review, QA, shipping, cross-model judgment, "
-        "trust gates, writing, and skill construction."
+        f"{description} {product['support']} Skills cover debugging, UI, review, "
+        "QA, shipping, prototypes, architecture surveys, decision maps, "
+        "destructive-action gates, and external-artifact trust checks."
     )
     author = {"name": "Panda Zeng"}
     keywords = list(product["keywords"])
@@ -1345,10 +1345,11 @@ _HEADING = re.compile(r"^(#{1,2})[ \t]+")
 _TRACKER = re.compile(r"^(?P<indent>[ \t]*)tracker[ \t]*:[ \t]*(?P<value>[^#\n]*?)[ \t]*$")
 _PROJECT_FIELDS = (
     "work-source", "ticket-policy", "goal-source", "acceptance-source",
-    "unclear-intent", "gbrain",
+    "unclear-intent", "gbrain", "test", "delivery",
 )
 _GITHUB_REMOTE = re.compile(
-    r"(?:github\.com[/:])(?P<owner>[^/\s:]+)/(?P<repo>[^/\s]+?)(?:\.git)?/?$",
+    r"^(?:(?:https?|git)://github\.com/|ssh://git@github\.com/|git@github\.com:)"
+    r"(?P<owner>[^/\s:]+)/(?P<repo>[^/\s]+?)(?:\.git)?/?$",
     re.IGNORECASE,
 )
 _SSH_REMOTE = re.compile(
@@ -1358,7 +1359,7 @@ _SSH_REMOTE = re.compile(
 
 
 def _github_remote_match(url):
-    direct = _GITHUB_REMOTE.search(url)
+    direct = _GITHUB_REMOTE.match(url)
     if direct:
         return direct.group("owner"), direct.group("repo")
 

@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Verbs",
     "shortDescription": "Bind how a project defines, verifies, and delivers work to AGENTS.md.",
-    "longDescription": "Project contracts and specialist procedures for coding agents. Includes 10 composable skills. Skills-only Marketplace Plugins support Claude Code and Codex. Pi and Hermes support direct skill loading. Skills cover clarification, execution, debugging, UI, review, QA, shipping, cross-model judgment, trust gates, writing, and skill construction.",
+    "longDescription": "Project contracts and specialist procedures for coding agents. Includes 10 composable skills. Skills-only Marketplace Plugins support Claude Code and Codex. Pi and Hermes support direct skill loading. Skills cover debugging, UI, review, QA, shipping, prototypes, architecture surveys, decision maps, destructive-action gates, and external-artifact trust checks.",
     "developerName": "Panda Zeng",
     "category": "Developer Tools",
     "capabilities": [

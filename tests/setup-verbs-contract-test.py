@@ -24,6 +24,8 @@ goal-source: ticket
 acceptance-source: ticket
 unclear-intent: automatic-grilling-session
 gbrain: enabled
+test: bash tests/run-all.sh
+delivery: pull-request
 tracker: {tracker}
 """
 
@@ -84,6 +86,8 @@ assert alias_check.returncode == 0, alias_check.stderr
 assert "acme/widget" in alias_check.stdout
 
 repo = fixture(contract(), "git@not-github:Acme/Widget.git")
+assert "expected one GitHub repository identity" in run(repo, "--check").stderr
+repo = fixture(contract(), "https://notgithub.com/Acme/Widget.git")
 assert "expected one GitHub repository identity" in run(repo, "--check").stderr
 
 # AGENTS.md symlinked to a host compatibility file is still one canonical path.

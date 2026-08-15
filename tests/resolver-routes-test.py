@@ -27,7 +27,7 @@ for name in active:
 
 for retired in (
     "advisor", "ask-boss", "product-planning", "backlog-refinement",
-    "sprint-planning", "sprint-review", "setup-verbs", "to-spec",
+    "sprint-planning", "sprint", "sprint-review", "setup-verbs", "to-spec",
     "to-tickets", "verbs:grill",
 ):
     assert f"`{retired}` |" not in resolver, retired

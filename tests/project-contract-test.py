@@ -14,6 +14,8 @@ for fragment in (
     "work-source: github-issues",
     "unclear-intent: automatic-grilling-session",
     "gbrain: required-lookup-fail-soft",
+    "test: bash tests/run-all.sh",
+    "delivery: pull-request",
     "### Intake contract",
     "Goal, Scope,",
     "wait for confirmation",
