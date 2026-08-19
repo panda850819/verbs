@@ -3,10 +3,11 @@ name: gatekeeper
 aliases: [slowmist-agent-security]
 version: 0.4.0
 description: |
-  Pre-adoption trust check for software artifacts before they touch your system:
-  skill/MCP installs, GitHub repositories, URLs/documents, packages, APIs, SDKs,
-  and software services. Triggers on /gatekeeper, /slowmist-agent-security
-  (alias), "is this safe to install", "check this repo".
+  Pre-adoption trust route when an external skill, MCP server, repository, URL,
+  package, API, SDK, or service may be installed, executed, granted access, or
+  trusted. Classify STRIDE, follow the artifact-specific review, and return
+  adopt, restrict, or reject. High-risk paths require human approval; rejected
+  paths stop with refusal and evidence.
 license: MIT
 upstream: https://github.com/slowmist/slowmist-agent-security
 user-invocable: true

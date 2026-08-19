@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verbs Task Lifecycles</title>
+  <style>
+    :root{--page:#0a0a0a;--paper:#141414;--bar:#1b1b1b;--border:#2b2b2b;--ink:#f5f5f5;--muted:#9a9a9a;--soft:#5c5c5c;--accent:#ff5a36;--accent-tint:rgba(255,90,54,.12)}
+    *{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Noto Sans Mono CJK TC",monospace}.shell{width:min(1248px,calc(100vw - 32px));margin:32px auto;background:var(--paper);border:1px solid var(--border);border-radius:12px;overflow:hidden}.titlebar{height:48px;display:flex;align-items:center;gap:8px;padding:0 16px;background:var(--bar);border-bottom:1px solid var(--border)}.dot{width:8px;height:8px;border-radius:50%;background:var(--soft)}.dot.accent{background:var(--accent)}.window-title{margin-left:8px;color:var(--muted);font-size:12px}main{padding:32px}.prompt{margin:0 0 12px;color:var(--muted);font-size:12px}.prompt .sign{color:var(--accent)}h1{margin:0;font-size:clamp(24px,4vw,40px);line-height:1.1}.lede{max-width:920px;margin:16px 0 32px;color:var(--muted);font-size:14px;line-height:1.7}.spine{display:flex;align-items:center;gap:12px;overflow-x:auto;padding:16px;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:12px;white-space:nowrap}.spine strong{color:var(--ink)}.spine .arr{color:var(--accent)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}.panel{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#111}.panel-head{padding:16px 20px;border-bottom:1px solid var(--border)}.eyebrow{margin:0 0 8px;color:var(--accent);font-size:10px;letter-spacing:.12em}.panel h2{margin:0;font-size:16px}.panel .signal{margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.diagram{overflow-x:auto}.diagram svg{display:block;width:100%;min-width:520px;height:auto}.legend{display:flex;flex-wrap:wrap;gap:20px;margin-top:32px;padding:16px 0;border-top:1px solid var(--border);color:var(--muted);font-size:11px}.legend b{color:var(--ink)}footer{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);color:var(--soft);font-size:10px}
+    svg text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Noto Sans Mono CJK TC",monospace}.node{fill:#141414;stroke:#9a9a9a;stroke-width:1}.skill{fill:rgba(255,90,54,.12);stroke:#ff5a36;stroke-width:1.2}.state{fill:#141414;stroke:#f5f5f5;stroke-width:1.2}.optional{fill:#141414;stroke:#5c5c5c;stroke-width:1;stroke-dasharray:4 4}.done{fill:#141414;stroke:#f5f5f5;stroke-width:1.2}.arrow{fill:none;stroke:#9a9a9a;stroke-width:1.2}.arrow-accent{fill:none;stroke:#ff5a36;stroke-width:1.2}.name{fill:#f5f5f5;font-size:12px;font-weight:700;text-anchor:middle}.sub{fill:#9a9a9a;font-size:10px;text-anchor:middle}.tag{fill:#ff5a36;font-size:8px;font-weight:700;text-anchor:middle;letter-spacing:.08em}.foot{fill:#5c5c5c;font-size:8px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}.shell{width:calc(100vw - 16px);margin:8px auto}main{padding:20px 12px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="titlebar"><span class="dot accent"></span><span class="dot"></span><span class="dot"></span><span class="window-title">verbs-lifecycles.html — six valid task paths</span></div>
+  <main>
+    <p class="prompt"><span class="sign">$</span> verbs task --show-lifecycles</p>
+    <h1># One task spine, multiple lifecycles</h1>
+    <p class="lede">連貫的是 task state。Skill 在特定狀態介入，交付結果與證據後回到主線。以下六條路徑都是完整 lifecycle，但完成的 task 類型與 Delivery Target 不同。</p>
+    <div class="spine"><strong>INTENT</strong><span class="arr">→</span><strong>WORK CONTRACT</strong><span class="arr">→</span><strong>EXECUTION</strong><span class="arr">→</span><strong>ACCEPTANCE EVIDENCE</strong><span class="arr">→</span><strong>DELIVERY / CLOSURE</strong></div>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">01 · STANDARD CHANGE</p><h2>一般程式碼變更</h2><p class="signal">Signal：需求清楚，沒有未知設計或未解 failure。</p></div>
+        <div class="diagram"><svg viewBox="0 0 520 560" role="img" aria-labelledby="l1t l1d"><title id="l1t">一般程式碼變更 lifecycle</title><desc id="l1d">從 Work Contract、實作、測試、Review、Acceptance Evidence 到 Ship。</desc><defs><marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
+          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456" marker-end="url(#a1)"/>
+          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">WORK CONTRACT</text><text class="sub" x="260" y="60">goal · scope · acceptance · delivery</text>
+          <rect class="node" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">NATIVE IMPLEMENTATION</text><text class="sub" x="260" y="132">完成 bounded change</text>
+          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">DETERMINISTIC TESTS</text><text class="sub" x="260" y="204">觀察 red-capable checks</text>
+          <rect class="skill" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">/review</text><text class="sub" x="260" y="276">依 contract / user gate 執行</text>
+          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">ACCEPTANCE EVIDENCE</text><text class="sub" x="260" y="348">每條 AC 對應目前 artifact</text>
+          <rect class="node" x="100" y="384" width="320" height="48" rx="6"/><text class="name" x="260" y="404">/ship</text><text class="sub" x="260" y="420">只有 delivery requested 才進入</text>
+          <rect class="done" x="100" y="456" width="320" height="48" rx="20"/><text class="name" x="260" y="476">DONE · DELIVERY REACHED</text><text class="sub" x="260" y="492">PR URL + pushed commit</text>
+          <text class="foot" x="24" y="536">DONE WHEN · scope implemented + AC evidence + delivery target</text>
+        </svg></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">02 · UI DISCOVERY</p><h2>UI 探索與正式建置</h2><p class="signal">Signal：視覺方向仍開放，需要先用 cheap artifact 做決策。</p></div>
+        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l2t l2d"><title id="l2t">UI 探索 lifecycle</title><desc id="l2d">Prototype 產生 verdict，UI 正式建置，QA 綁定 browser evidence，最後 Ship。</desc><defs><marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
+          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a2)"/>
+          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">WORK CONTRACT</text><text class="sub" x="260" y="60">state · visual direction unresolved</text>
+          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/prototype</text><text class="sub" x="260" y="132">可丟棄 variants 回答一個問題</text>
+          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">HUMAN VERDICT</text><text class="sub" x="260" y="204">選定方向並寫回 brief</text>
+          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">/ui</text><text class="sub" x="260" y="276">正式建置方向、states、locales</text>
+          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">/qa</text><text class="sub" x="260" y="348">browser checks 綁定目前 artifact</text>
+          <rect class="node" x="100" y="384" width="320" height="48" rx="6"/><text class="name" x="260" y="404">ACCEPTANCE EVIDENCE</text><text class="sub" x="260" y="420">PASS / FAIL / UNPROVEN</text>
+          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">/ship</text><text class="sub" x="260" y="492">test + review gates + PR + QA handoff</text>
+          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · UI DELIVERED</text><text class="sub" x="260" y="564">current PR carries acceptance evidence</text>
+          <text class="foot" x="24" y="616">RETURN PATH · prototype verdict → task state → production implementation</text>
+        </svg></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">03 · FAILURE RECOVERY</p><h2>Bug fix</h2><p class="signal">Signal：failure 已觀察到，root cause 仍未知。</p></div>
+        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l3t l3d"><title id="l3t">Bug fix lifecycle</title><desc id="l3d">Debug 先證明 root cause，再修正、測試、依 UI 條件執行 QA，然後 Review 與 Ship。</desc><defs><marker id="a3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
+          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a3)"/>
+          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">FAILURE OBSERVED</text><text class="sub" x="260" y="60">error · regression · flaky behavior</text>
+          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/debug · DIAGNOSE</text><text class="sub" x="260" y="132">重現並在 edit 前證明 root cause</text>
+          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">CORRECT THE CAUSE</text><text class="sub" x="260" y="204">修機制並掃描 sibling signatures</text>
+          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">RED-CAPABLE CHECK</text><text class="sub" x="260" y="276">看到修正後的實際輸出</text>
+          <rect class="optional" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">/qa · IF UI ACCEPTANCE</text><text class="sub" x="260" y="348">compile 不能證明 browser behavior</text>
+          <rect class="node" x="100" y="384" width="320" height="48" rx="6"/><text class="name" x="260" y="404">/review</text><text class="sub" x="260" y="420">驗證 correction 沒有新增 defect</text>
+          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">/ship</text><text class="sub" x="260" y="492">delivery requested 才交付</text>
+          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · FIX DELIVERED</text><text class="sub" x="260" y="564">root cause + regression proof + target</text>
+          <text class="foot" x="24" y="616">RULE · “應該好了”不是 terminal result；必須看過 check output</text>
+        </svg></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">04 · ARCHITECTURE INVESTMENT</p><h2>架構探索後實作</h2><p class="signal">Signal：知道有架構壓力，但還不知道值得投資的 seam。</p></div>
+        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l4t l4d"><title id="l4t">架構探索 lifecycle</title><desc id="l4d">明確要求 read-only survey，使用者選 candidate，Grilling Session 形成 Work Contract，再進入獨立實作與交付。</desc><defs><marker id="a4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
+          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a4)"/>
+          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">EXPLICIT SURVEY REQUEST</text><text class="sub" x="260" y="60">architecture investment area unknown</text>
+          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/improve-codebase-architecture</text><text class="sub" x="260" y="132">read-only evidence + ranked seams</text>
+          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">VISUAL REPORT</text><text class="sub" x="260" y="204">survey stops without repo edits</text>
+          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">HUMAN SELECTS CANDIDATE</text><text class="sub" x="260" y="276">沒有自動選 frontier</text>
+          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">GRILLING → WORK CONTRACT</text><text class="sub" x="260" y="348">決定 final interface 與 acceptance</text>
+          <rect class="node" x="100" y="384" width="320" height="48" rx="6"/><text class="name" x="260" y="404">SEPARATE IMPLEMENTATION TASK</text><text class="sub" x="260" y="420">native coding + tests</text>
+          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">/review → /ship</text><text class="sub" x="260" y="492">依 project gates 完成交付</text>
+          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · CHANGE DELIVERED</text><text class="sub" x="260" y="564">selected seam passes acceptance</text>
+          <text class="foot" x="24" y="616">BOUNDARY · survey task 與 implementation task 是兩個 Work Contract</text>
+        </svg></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">05 · CROSS-SESSION DECISIONS</p><h2>Decision Map</h2><p class="signal">Signal：多個相依決策與證據無法在目前 Grilling Session 內完成。</p></div>
+        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l5t l5d"><title id="l5t">Decision Map lifecycle</title><desc id="l5d">建立 map，每次由人選一個 frontier entry，解完寫回 evidence；仍有決策時下一個 session 迴圈，map clear 後形成 brief。</desc><defs><marker id="a5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker><marker id="a5x" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#ff5a36"/></marker></defs>
+          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a5)"/>
+          <path class="arrow-accent" d="M100 408H48V192H100" marker-end="url(#a5x)"/>
+          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">DESTINATION EXCEEDS SESSION</text><text class="sub" x="260" y="60">dependent decisions remain visible</text>
+          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/decision-map · CREATE</text><text class="sub" x="260" y="132">destination + typed entries + dependencies</text>
+          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">HUMAN SELECTS ONE FRONTIER ENTRY</text><text class="sub" x="260" y="204">不自動排程下一個 entry</text>
+          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">RESOLVE ONE TYPE</text><text class="sub" x="260" y="276">research · prototype · grilling · task</text>
+          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">WRITE EVIDENCE + UPDATE FRONTIER</text><text class="sub" x="260" y="348">一次 invocation 到此停止</text>
+          <polygon points="260,384 320,408 260,432 200,408" fill="#141414" stroke="#f5f5f5" stroke-width="1.2"/><text class="name" x="260" y="412">MORE?</text><text class="tag" x="76" y="400">YES · NEXT SESSION</text>
+          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">MAP CLEAR → DECISION BRIEF</text><text class="sub" x="260" y="492">reasoning remains on entry evidence</text>
+          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · DECISION TASK CLOSED</text><text class="sub" x="260" y="564">implementation starts as a new task</text>
+          <text class="foot" x="24" y="616">SCOPE · one map per destination；一個 session 解一個 frontier entry</text>
+        </svg></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">06 · TRUST &amp; RISK</p><h2>外部 artifact 採用或高風險操作</h2><p class="signal">Signal：外部輸入將進入系統，或下一動作可能破壞 shared state。</p></div>
+        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l6t l6d"><title id="l6t">Trust 與 risk lifecycle</title><desc id="l6d">Gatekeeper 先做採用前 trust review，高風險由人決定；核准後執行，若有破壞性動作再由 Careful 暫停確認，最後驗證 closure。</desc><defs><marker id="a6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
+          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a6)"/>
+          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">EXTERNAL ARTIFACT INTENT</text><text class="sub" x="260" y="60">install · execute · grant access · trust</text>
+          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/gatekeeper</text><text class="sub" x="260" y="132">STRIDE + artifact route + risk result</text>
+          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">ADOPT · RESTRICT · REJECT</text><text class="sub" x="260" y="204">HIGH needs approval · REJECT closes</text>
+          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">HUMAN DECISION</text><text class="sub" x="260" y="276">reject closes；approved continues</text>
+          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">APPROVED CHANGE / ADOPTION</text><text class="sub" x="260" y="348">execute only approved scope</text>
+          <rect class="optional" x="100" y="384" width="320" height="48" rx="6"/><text class="name" x="260" y="404">/careful · IF RISKY ACTION</text><text class="sub" x="260" y="420">pause action；reversible work continues</text>
+          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">VERIFY CURRENT STATE</text><text class="sub" x="260" y="492">permissions · behavior · recovery evidence</text>
+          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · TRUST BOUNDARY CLOSED</text><text class="sub" x="260" y="564">decision + approved effects + verification</text>
+          <text class="foot" x="24" y="616">STOP · missing evidence、HIGH、REJECT 或未確認 action 都不能穿越 gate</text>
+        </svg></div>
+      </section>
+    </div>
+
+    <div class="legend"><span><b>STATE</b> 白框：task spine</span><span><b>SKILL</b> 橘框：該 lifecycle 的主要 specialist</span><span><b>OPTIONAL</b> 虛線：條件成立才介入</span><span><b>DONE</b> 圓角端點：這個 task 的完成契約</span></div>
+    <footer>VERBS · lifecycle examples, not a mandatory universal pipeline · situation → task state → specialist → evidence → closure</footer>
+  </main>
+</div>
+</body>
+</html>

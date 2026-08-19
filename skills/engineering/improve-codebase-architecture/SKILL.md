@@ -1,7 +1,7 @@
 ---
 name: improve-codebase-architecture
 type: flow
-description: Produce a read-only visual survey of codebase architecture opportunities.
+description: Explicitly requested, read-only survey for a repository area where the best architecture investment is unknown; ranks evidence-backed seams in a visual report for the user to choose before a later Grilling Session.
 disable-model-invocation: true
 reads:
   - repo: "**"

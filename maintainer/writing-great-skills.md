@@ -28,6 +28,9 @@ A model-invoked **description** states what the skill is and lists the **branche
 
 - **Front-load the leading word** — it does the invocation work.
 - **One trigger per branch.** Synonyms renaming one branch are **duplication**. Collapse them.
+- **Write the route, not a capability list.** A proactive branch names the current
+  situation, the specialist delta, and the terminal result or handoff. Mention an
+  adjacent skill only when that boundary changes routing.
 - **Cut identity already in the body.** Keep triggers + any "when another skill needs…" reach clause.
 
 ## Information hierarchy

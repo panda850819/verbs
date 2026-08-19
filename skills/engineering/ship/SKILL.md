@@ -1,9 +1,10 @@
 ---
 name: ship
 description: |
-  Close completed code work through test, commit, push, and PR. Use when asked
-  to "ship", "create PR", or publish the current branch. Unfinished work stays
-  with its execution owner.
+  Delivery route after coding work is complete and the user asks to ship, create
+  a PR, or publish the branch. Run test, scope, and review gates; commit relevant
+  files; push a non-default branch; then upsert the PR and available QA evidence.
+  Unfinished work returns to its execution owner.
 reads:
   - repo: "**"
   - repo: CLAUDE.md

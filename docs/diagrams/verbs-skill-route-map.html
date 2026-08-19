@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verbs Skill Route Map</title>
+  <style>
+    :root {
+      --page: #0a0a0a;
+      --paper: #141414;
+      --bar: #1b1b1b;
+      --border: #2b2b2b;
+      --ink: #f5f5f5;
+      --muted: #9a9a9a;
+      --soft: #5c5c5c;
+      --accent: #ff5a36;
+      --accent-tint: rgba(255, 90, 54, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Noto Sans Mono CJK TC", monospace;
+    }
+    .shell {
+      width: min(1184px, calc(100vw - 32px));
+      margin: 32px auto;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .titlebar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      background: var(--bar);
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--soft); }
+    .dot.accent { background: var(--accent); }
+    .window-title { margin-left: 8px; color: var(--muted); font-size: 12px; }
+    main { padding: 32px; }
+    .prompt { margin: 0 0 12px; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+    .prompt .sign { color: var(--accent); }
+    h1 { margin: 0; font-size: clamp(24px, 4vw, 40px); line-height: 1.1; }
+    .lede { max-width: 840px; margin: 16px 0 32px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .section-label {
+      margin: 40px 0 12px;
+      color: var(--ink);
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .diagram { width: 100%; overflow-x: auto; }
+    svg { display: block; width: 100%; min-width: 960px; height: auto; }
+    .rule { height: 1px; margin: 40px 0 24px; background: var(--border); }
+    .notes { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; }
+    .note { border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+    .note strong { color: var(--accent); }
+    .note p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--soft); font-size: 10px; }
+    @media (max-width: 720px) {
+      .shell { width: calc(100vw - 16px); margin: 8px auto; }
+      main { padding: 20px 12px; }
+      .notes { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="titlebar">
+      <span class="dot accent"></span><span class="dot"></span><span class="dot"></span>
+      <span class="window-title">verbs-map.html — specialist routing</span>
+    </div>
+    <main>
+      <p class="prompt"><span class="sign">$</span> verbs route --show-paths</p>
+      <h1># Verbs Skill Route Map</h1>
+      <p class="lede">先辨識目前真正未知或有風險的部分，再進入一條 specialist route。每條路徑都有明確停止點；它們不構成強制 lifecycle。</p>
+
+      <p class="section-label">01 · OPEN WORK — what is unresolved?</p>
+      <div class="diagram">
+        <svg viewBox="0 0 1120 760" role="img" aria-labelledby="open-title open-desc">
+          <title id="open-title">Verbs 開放工作路徑</title>
+          <desc id="open-desc">依問題類型選擇 Decision Map、Architecture Survey、Prototype、Debug 或 UI。</desc>
+          <defs>
+            <marker id="arrow-a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <polygon points="0 0, 8 4, 0 8" fill="#9a9a9a"/>
+            </marker>
+          </defs>
+
+          <!-- connectors first -->
+          <path d="M560 96 V136" fill="none" stroke="#9a9a9a" stroke-width="1.2" marker-end="url(#arrow-a)"/>
+
+          <!-- start -->
+          <rect x="400" y="24" width="320" height="72" rx="20" fill="#141414" stroke="#f5f5f5" stroke-width="1.2"/>
+          <text x="560" y="52" fill="#f5f5f5" font-size="14" font-weight="700" text-anchor="middle">START · NAME THE OPEN QUESTION</text>
+          <text x="560" y="76" fill="#9a9a9a" font-size="12" text-anchor="middle">一次只選一個真正需要 specialist 的問題</text>
+
+          <text x="560" y="160" fill="#ff5a36" font-size="12" font-weight="700" text-anchor="middle">↓ MATCH THE CURRENT SITUATION</text>
+
+          <!-- row 1 -->
+          <rect x="32" y="200" width="320" height="168" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <rect x="44" y="212" width="112" height="20" rx="4" fill="none" stroke="#5c5c5c"/>
+          <text x="100" y="227" fill="#9a9a9a" font-size="10" text-anchor="middle">CROSS-SESSION</text>
+          <text x="52" y="264" fill="#f5f5f5" font-size="16" font-weight="700">/decision-map</text>
+          <text x="52" y="292" fill="#9a9a9a" font-size="12">WHEN  多個相依決策跨越一次 session</text>
+          <text x="52" y="316" fill="#9a9a9a" font-size="12">DOES  建 map 或解一個人選的 entry</text>
+          <text x="52" y="340" fill="#f5f5f5" font-size="12">STOP  更新 frontier，實作另開任務</text>
+
+          <rect x="400" y="200" width="320" height="168" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <rect x="412" y="212" width="104" height="20" rx="4" fill="none" stroke="#5c5c5c"/>
+          <text x="464" y="227" fill="#9a9a9a" font-size="10" text-anchor="middle">READ-ONLY</text>
+          <text x="420" y="264" fill="#f5f5f5" font-size="12" font-weight="700">/improve-codebase-architecture</text>
+          <text x="420" y="292" fill="#9a9a9a" font-size="12">WHEN  不知道哪個架構投資最值得</text>
+          <text x="420" y="316" fill="#9a9a9a" font-size="12">DOES  依 repo 證據排名 candidate seams</text>
+          <text x="420" y="340" fill="#f5f5f5" font-size="12">STOP  交付視覺報告，等人選方向</text>
+
+          <rect x="768" y="200" width="320" height="168" rx="6" fill="rgba(255,90,54,0.12)" stroke="#ff5a36" stroke-width="1.2"/>
+          <rect x="780" y="212" width="112" height="20" rx="4" fill="none" stroke="#ff5a36"/>
+          <text x="836" y="227" fill="#ff5a36" font-size="10" text-anchor="middle">CHEAP ANSWER</text>
+          <text x="788" y="264" fill="#f5f5f5" font-size="16" font-weight="700">/prototype</text>
+          <text x="788" y="292" fill="#9a9a9a" font-size="12">WHEN  一個問題用看／操作較快回答</text>
+          <text x="788" y="316" fill="#9a9a9a" font-size="12">DOES  做可丟棄 driver 或 UI variants</text>
+          <text x="788" y="340" fill="#f5f5f5" font-size="12">NEXT  記錄 verdict；視覺方向 → /ui</text>
+
+          <!-- row 2 -->
+          <rect x="56" y="480" width="320" height="192" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <rect x="68" y="492" width="96" height="20" rx="4" fill="none" stroke="#5c5c5c"/>
+          <text x="116" y="507" fill="#9a9a9a" font-size="10" text-anchor="middle">BROKEN</text>
+          <text x="76" y="544" fill="#f5f5f5" font-size="16" font-weight="700">/debug</text>
+          <text x="76" y="572" fill="#9a9a9a" font-size="12">WHEN  錯誤已發生，但 root cause 未知</text>
+          <text x="76" y="596" fill="#9a9a9a" font-size="12">DOES  重現 → 證明原因 → 修正 → red check</text>
+          <text x="76" y="620" fill="#9a9a9a" font-size="12">CHECK 掃描相同 signature 的 siblings</text>
+          <text x="76" y="644" fill="#f5f5f5" font-size="12">NEXT  UI 行為仍待證明 → /qa</text>
+
+          <rect x="400" y="480" width="320" height="192" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <rect x="412" y="492" width="104" height="20" rx="4" fill="none" stroke="#5c5c5c"/>
+          <text x="464" y="507" fill="#9a9a9a" font-size="10" text-anchor="middle">COMMITTED</text>
+          <text x="420" y="544" fill="#f5f5f5" font-size="16" font-weight="700">/ui</text>
+          <text x="420" y="572" fill="#9a9a9a" font-size="12">WHEN  視覺方向已選定，準備正式建置</text>
+          <text x="420" y="596" fill="#9a9a9a" font-size="12">DOES  建立方向、狀態與 375/1280 render</text>
+          <text x="420" y="620" fill="#9a9a9a" font-size="12">BOUNDARY render failure → /debug</text>
+          <text x="420" y="644" fill="#f5f5f5" font-size="12">NEXT  browser acceptance → /qa</text>
+
+          <rect x="744" y="480" width="320" height="192" rx="6" fill="#141414" stroke="#5c5c5c" stroke-dasharray="4,4"/>
+          <text x="764" y="532" fill="#f5f5f5" font-size="16" font-weight="700">IMPLEMENTATION</text>
+          <text x="764" y="568" fill="#9a9a9a" font-size="12">普通 inspection、planning、coding、tests</text>
+          <text x="764" y="592" fill="#9a9a9a" font-size="12">由 coding agent 的 native workflow 負責</text>
+          <text x="764" y="632" fill="#ff5a36" font-size="12">specialist 回傳 verdict / evidence 後再進來</text>
+
+          <line x1="32" y1="716" x2="1088" y2="716" stroke="#2b2b2b"/>
+          <text x="32" y="744" fill="#5c5c5c" font-size="10">RULE · choose by current uncertainty · one route does not imply the next</text>
+        </svg>
+      </div>
+
+      <p class="section-label">02 · GUARDS &amp; DELIVERY — what must be proven?</p>
+      <div class="diagram">
+        <svg viewBox="0 0 1120 800" role="img" aria-labelledby="delivery-title delivery-desc">
+          <title id="delivery-title">Verbs 護欄與交付路徑</title>
+          <desc id="delivery-desc">外部輸入走 Gatekeeper，高風險動作走 Careful，完成變更後依需求走 Review、QA 與 Ship。</desc>
+          <defs>
+            <marker id="arrow-b" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <polygon points="0 0, 8 4, 0 8" fill="#9a9a9a"/>
+            </marker>
+            <marker id="arrow-b-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <polygon points="0 0, 8 4, 0 8" fill="#ff5a36"/>
+            </marker>
+          </defs>
+
+          <!-- connectors first -->
+          <path d="M280 104 V144" fill="none" stroke="#9a9a9a" stroke-width="1.2" marker-end="url(#arrow-b)"/>
+          <path d="M840 104 V144" fill="none" stroke="#9a9a9a" stroke-width="1.2" marker-end="url(#arrow-b)"/>
+          <path d="M560 392 V432" fill="none" stroke="#9a9a9a" stroke-width="1.2" marker-end="url(#arrow-b)"/>
+          <path d="M720 608 H744" fill="none" stroke="#ff5a36" stroke-width="1.2" marker-end="url(#arrow-b-accent)"/>
+
+          <!-- guard starts -->
+          <rect x="120" y="32" width="320" height="72" rx="20" fill="#141414" stroke="#f5f5f5"/>
+          <text x="280" y="60" fill="#f5f5f5" font-size="14" font-weight="700" text-anchor="middle">EXTERNAL ARTIFACT ENTERS</text>
+          <text x="280" y="84" fill="#9a9a9a" font-size="12" text-anchor="middle">install · execute · grant access · trust</text>
+
+          <rect x="680" y="32" width="320" height="72" rx="20" fill="#141414" stroke="#f5f5f5"/>
+          <text x="840" y="60" fill="#f5f5f5" font-size="14" font-weight="700" text-anchor="middle">HIGH-RISK ACTION AHEAD</text>
+          <text x="840" y="84" fill="#9a9a9a" font-size="12" text-anchor="middle">production · shared state · destructive</text>
+
+          <rect x="120" y="144" width="320" height="184" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <text x="140" y="188" fill="#f5f5f5" font-size="16" font-weight="700">/gatekeeper</text>
+          <text x="140" y="224" fill="#9a9a9a" font-size="12">CLASSIFY  STRIDE + artifact route</text>
+          <text x="140" y="248" fill="#9a9a9a" font-size="12">RESULT    adopt · restrict · reject</text>
+          <text x="140" y="288" fill="#f5f5f5" font-size="12">STOP      HIGH → approval · REJECT → refusal</text>
+
+          <rect x="680" y="144" width="320" height="184" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <text x="700" y="188" fill="#f5f5f5" font-size="16" font-weight="700">/careful</text>
+          <text x="700" y="224" fill="#9a9a9a" font-size="12">PAUSE     only the risky action</text>
+          <text x="700" y="248" fill="#9a9a9a" font-size="12">ASK       explicit confirmation</text>
+          <text x="700" y="288" fill="#f5f5f5" font-size="12">CONTINUE  reversible work stays unblocked</text>
+
+          <!-- delivery -->
+          <rect x="400" y="344" width="320" height="48" rx="20" fill="#141414" stroke="#f5f5f5"/>
+          <text x="560" y="374" fill="#f5f5f5" font-size="14" font-weight="700" text-anchor="middle">CHANGE IS COMPLETE</text>
+
+          <text x="560" y="456" fill="#ff5a36" font-size="12" font-weight="700" text-anchor="middle">↓ CHOOSE THE EVIDENCE STILL MISSING</text>
+
+          <rect x="56" y="512" width="320" height="192" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <text x="76" y="556" fill="#f5f5f5" font-size="16" font-weight="700">/review</text>
+          <text x="76" y="592" fill="#9a9a9a" font-size="12">WHEN   diff / PR needs correctness verdict</text>
+          <text x="76" y="616" fill="#9a9a9a" font-size="12">DOES   scope → risk lane → test findings</text>
+          <text x="76" y="656" fill="#f5f5f5" font-size="12">STOP   findings or grounded clean result</text>
+
+          <rect x="400" y="512" width="320" height="192" rx="6" fill="#141414" stroke="#9a9a9a"/>
+          <text x="420" y="556" fill="#f5f5f5" font-size="16" font-weight="700">/qa</text>
+          <text x="420" y="592" fill="#9a9a9a" font-size="12">WHEN   browser acceptance remains unproven</text>
+          <text x="420" y="616" fill="#9a9a9a" font-size="12">DOES   bind checks to current artifact</text>
+          <text x="420" y="656" fill="#f5f5f5" font-size="12">NEXT   persist PR-ready evidence → /ship</text>
+
+          <rect x="744" y="512" width="320" height="192" rx="6" fill="rgba(255,90,54,0.12)" stroke="#ff5a36" stroke-width="1.2"/>
+          <text x="764" y="556" fill="#f5f5f5" font-size="16" font-weight="700">/ship</text>
+          <text x="764" y="592" fill="#9a9a9a" font-size="12">WHEN   completed code needs delivery</text>
+          <text x="764" y="616" fill="#9a9a9a" font-size="12">DOES   gates → commit → push branch → PR</text>
+          <text x="764" y="656" fill="#f5f5f5" font-size="12">DONE   PR URL + commit + QA handoff</text>
+
+          <line x1="32" y1="752" x2="1088" y2="752" stroke="#2b2b2b"/>
+          <text x="32" y="780" fill="#5c5c5c" font-size="10">BOUNDARY · /review does not replace /qa · /ship does not finish incomplete work</text>
+        </svg>
+      </div>
+
+      <div class="rule"></div>
+      <div class="notes">
+        <div class="note"><p><strong>主動觸發原則</strong><br />description 要讓 agent 從目前情境看見入口，知道 skill 做出的 specialist delta，並預先看見停止點或下一個 handoff。</p></div>
+        <div class="note"><p><strong>地圖規則</strong><br />一次只解一個問題。沒有 specialist delta 的工作留在 native coding workflow，不硬塞進技能 lifecycle。</p></div>
+      </div>
+      <footer>VERBS · situation → route → evidence → stop / handoff · generated as a self-contained inline-SVG HTML</footer>
+    </main>
+  </div>
+</body>
+</html>

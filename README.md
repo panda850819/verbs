@@ -81,18 +81,49 @@ Work Contract for confirmation. Grilling is not a command or runtime skill.
 
 Use a specialist only when the problem type is known:
 
-| Situation | Skill |
-|---|---|
-| Regression, crash, failing test, or unexplained error | `debug` |
-| Diff or PR correctness review | `review` |
-| Completed Git work needs commit, push, and PR delivery | `ship` |
-| Production UI needs a committed visual direction | `ui` |
-| Changed UI needs browser acceptance evidence | `qa` |
-| One design question needs a disposable artifact | `prototype` |
-| External artifact needs a pre-adoption trust check | `gatekeeper` |
-| Production, shared infrastructure, or destructive work needs gates | `careful` |
-| Several dependent decisions must remain visible across sessions | `decision-map` |
-| Repository architecture opportunities need an explicit read-only survey | `improve-codebase-architecture` |
+- **`debug`** — You have an observed error, regression, crash, failing test, or
+  intermittent failure, but its cause is unknown. `debug` reproduces it, names
+  the root cause before editing, verifies the correction with a red-capable
+  check, and scans for siblings. Browser acceptance can continue through `qa`.
+- **`review`** — You have a bounded diff or PR that needs a correctness verdict.
+  `review` binds intent and scope, selects a risk lane, tests each surviving
+  finding, and stops with actionable findings or an evidence-backed clean result.
+- **`ship`** — The code work is complete and you want the branch delivered.
+  `ship` runs test, scope, and review gates, commits relevant files, pushes a
+  non-default branch, then upserts the PR and available QA evidence. Unfinished
+  work returns to its execution owner.
+- **`ui`** — A production page or component needs a committed visual direction,
+  or a taste complaint needs correction. `ui` names and implements the direction,
+  covers required states, and verifies rendered locales. Use `prototype` first
+  while the direction remains open, then `qa` for browser acceptance.
+- **`qa`** — UI changed and browser-visible acceptance remains unproven. `qa`
+  maps current-artifact browser checks to acceptance criteria and stores a
+  PR-ready evidence handoff for `ship`.
+- **`prototype`** — One logic, state, or visual design question is cheaper to
+  experience than discuss. `prototype` builds one disposable terminal driver or
+  set of UI variants, records the verdict in the brief, and stops before
+  production work. A selected visual direction continues through `ui`.
+- **`gatekeeper`** — An external skill, MCP server, repository, URL, package,
+  API, SDK, or service may enter the system. `gatekeeper` classifies STRIDE,
+  follows the artifact-specific review, and returns adopt, restrict, or reject.
+  High-risk paths require human approval; rejected paths stop with refusal and
+  evidence.
+- **`careful`** — Work touches production, shared infrastructure, live harness
+  paths, or an imminent destructive action. `careful` pauses that action for
+  explicit confirmation while reversible work continues.
+- **`decision-map`** — One destination depends on several decisions whose
+  evidence cannot fit the current Grilling Session. `decision-map` creates a
+  named cross-session map or resolves one human-selected unblocked entry, updates
+  the frontier, and stops before implementation.
+- **`improve-codebase-architecture`** — You explicitly want to find where
+  architectural investment would pay off. It surveys repository evidence,
+  ranks candidate seams in a read-only visual report, and stops for the user to
+  choose one before a later Grilling Session.
+
+Visual references:
+
+- [Skill routing map](docs/diagrams/verbs-skill-route-map.html)
+- [Task lifecycle examples](docs/diagrams/verbs-task-lifecycles.html)
 
 These procedures do not form a mandatory lifecycle. Native coding-agent behavior
 owns ordinary inspection, planning, implementation, testing, and correction.

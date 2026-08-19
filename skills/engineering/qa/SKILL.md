@@ -1,9 +1,10 @@
 ---
 name: qa
 description: |
-  Browser-based QA for UI changes or explicit "test this" / "QA" / "check the
-  page" requests. Requires host browser automation. NOT non-UI checks, diff
-  review (`review`).
+  Browser evidence route when UI changed, browser acceptance remains unproven,
+  or the user asks to test a page. Requires host browser automation; maps the
+  current artifact to acceptance criteria and stores a PR-ready handoff for
+  `ship`. Use `review` for the diff and native tests for non-UI behavior.
 capability_required:
   - host browser automation
 reads:
