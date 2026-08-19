@@ -1,12 +1,10 @@
 ---
 name: debug
 description: |
-  Systematic root-cause debugging. Use for errors, crashes, regressions,
-  failing tests, "used to work and now doesn't", or flaky/intermittent
-  behavior. Triggers: 排查, 查 bug, 報錯, 崩潰, 跑不通, 以前是好的, 回歸,
-  反覆修不好, debug, why is this broken, regression, root cause, used to work,
-  stack trace. NOT for code-diff review (use `review`), UI taste complaints
-  (use `ui`), or building new features.
+  Root-cause route for an observed error, crash, regression, failing test, or
+  intermittent behavior whose cause is still unknown. Reproduce it, name the
+  evidence-backed cause before editing, verify the fix with a red-capable check,
+  and scan for siblings. Use `review` for diff review and `ui` for taste complaints.
 user-invocable: true
 ---
 # Debug

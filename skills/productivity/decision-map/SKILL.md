@@ -1,9 +1,10 @@
 ---
 name: decision-map
 description: |
-  Create or work a named cross-session Decision Map when several dependent
-  decisions must remain visible. NOT ordinary requirement clarification,
-  implementation planning, or task scheduling.
+  Cross-session navigation route when one destination depends on several
+  decisions whose dependencies or evidence cannot fit the current Grilling
+  Session. Create a named map or resolve one human-selected unblocked entry,
+  optionally through `prototype`; update the frontier and stop before implementation.
 reads:
   - repo: AGENTS.md
   - skill: prototype

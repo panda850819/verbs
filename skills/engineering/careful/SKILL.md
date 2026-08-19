@@ -1,10 +1,10 @@
 ---
 name: careful
 description: |
-  Use when working on production code, shared infrastructure, live harness paths
-  such as ~/.agents, ~/.claude, or ~/.codex, or unfamiliar codebases. Adds
-  confirmation gates before destructive commands (force push, rm -rf, publish,
-  DROP).
+  Safety gate for work on production, shared infrastructure, live harness paths
+  such as ~/.agents, ~/.claude, or ~/.codex, or unfamiliar code where the next
+  action could damage shared state. Invoke it before a destructive command; it
+  pauses only the high-risk action for confirmation while reversible work continues.
 writes:
   - cli: stdout
 forbids:

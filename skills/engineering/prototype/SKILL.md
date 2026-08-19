@@ -1,11 +1,10 @@
 ---
 name: prototype
 description: |
-  Throwaway prototype overrides the default production-build reflex with one cheap artifact
-  for one design question. Logic questions get a tiny interactive terminal
-  driver; UI questions get structurally different variants behind `?variant=`.
-  Use it to make a Grilling Session's open question concrete. `ui` builds the chosen
-  direction; production execution remains a separate human-selected entry point.
+  Decision probe for one unresolved logic, state, or visual design question that
+  is cheaper to experience than discuss. Build a throwaway terminal driver or UI
+  variants, capture the verdict in the brief, then stop. `ui` implements a chosen
+  visual direction; production work remains a separate human-selected task.
 reads:
   - repo: "**"
 writes:

@@ -1,11 +1,11 @@
 ---
 name: ui
 description: |
-  Build or fix UI surfaces with a committed visual direction: pages, components,
-  layout, typography, motion, screenshots, or design review. Use for frontend
-  work or visual complaints such as 不好看、突兀、死板、沒回饋感. NOT for backend
-  logic, browser QA (`qa`), render bugs (`debug`), or throwaway exploration
-  (`prototype`).
+  Production UI craft route when a page or component needs a committed visual
+  direction, or a taste complaint such as 不好看、突兀、死板、沒回饋感 needs
+  correction. Name the direction, implement required states, and verify rendered
+  locales. Use `prototype` while direction is open, `debug` for render failures,
+  and `qa` for browser acceptance evidence.
 user-invocable: true
 ---
 # UI

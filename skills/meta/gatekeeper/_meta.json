@@ -1,7 +1,7 @@
 {
   "name": "gatekeeper",
   "version": "0.4.0",
-  "description": "Pre-adoption trust check for software artifacts before they touch your system:\nskill/MCP installs, GitHub repositories, URLs/documents, packages, APIs, SDKs,\nand software services. Triggers on /gatekeeper, /slowmist-agent-security\n(alias), \"is this safe to install\", \"check this repo\".",
+  "description": "Pre-adoption trust route when an external skill, MCP server, repository, URL,\npackage, API, SDK, or service may be installed, executed, granted access, or\ntrusted. Classify STRIDE, follow the artifact-specific review, and return\nadopt, restrict, or reject. High-risk paths require human approval; rejected\npaths stop with refusal and evidence.",
   "author": "evilcos",
   "license": "MIT",
   "homepage": "https://github.com/slowmist/slowmist-agent-security",
