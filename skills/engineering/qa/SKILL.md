@@ -38,8 +38,11 @@ brief, or explicit goal, report `INTENT GAP`; behavior alone cannot prove intent
 
 Produce ONE numbered list of action → expected result checks: core user flows
 first, then error/empty/loading states, edge inputs, double submit, Escape,
-keyboard-only navigation, mobile viewport, and console errors. If the flows are
-unclear, ask what to test.
+keyboard-only navigation, mobile viewport, and console errors. For UI work,
+also include 320px reflow, 200% zoom, every shipped locale and reduced-motion
+behavior where motion exists. Name the width, zoom, locale and state in each
+check instead of treating "mobile" as coverage. If the flows are unclear, ask
+what to test.
 
 ## Test
 
