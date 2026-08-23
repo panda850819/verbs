@@ -15,6 +15,13 @@ direction, craft review, and rendered evidence. Load `references/craft.md` befor
 writing CSS, not after. A CJK gut-feel complaint (很傻 / 突兀 / 丑 / 乱) is taste, not a bug — keep the
 word, name the defect, fix; do not send it to `debug`.
 
+- **Evidence over taste.** A preference is not a finding. Name the observable
+defect and its user impact, then confirm it in the rendered surface. Keep a
+deliberate choice that meets the task, accessibility and acceptance contract.
+- **Keep ownership clear.** `prototype` answers an open visual question, `ui`
+chooses and implements the direction, `qa` proves browser acceptance, and
+`review` checks the code diff. Do not turn a visual preference into a code-review
+finding.
 - **Fight your defaults.** Your first draft is the AI-default — Inter, purple→blue gradient, centered hero
   with two CTAs, a grid of identical cards. Lock one named direction, then scan the first screen against the
   default-trap checklist in `craft.md` and replace what drifted.
@@ -23,7 +30,7 @@ word, name the defect, fix; do not send it to `debug`.
 - **Build past the happy path.** States (loading/empty/error) and the shippability layer a visual pass
   skips — 404, back-nav, form validation, skip-link, footer legal — are in `craft.md`.
 
-Done when the named direction passes the default-trap scan, required states are covered, and 375px/1280px screenshots are captured for every shipped locale.
+Done when the named direction passes the default-trap scan, required states are covered, every visual claim has rendered evidence, and 375px/1280px screenshots are captured for every shipped locale.
 
 Everything else — fonts, CJK type, OKLCH, CSS bans, motion, spacing, content rules — is craft you cannot
 derive: `references/craft.md`.

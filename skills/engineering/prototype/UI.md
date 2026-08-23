@@ -29,21 +29,30 @@ Default **3 variants**, cap 5 — beyond that stops being radically different
 and starts being noise. One-line plan in a top-of-file comment: "Three
 variants of the settings page via `?variant=` on `/settings`."
 
-### 2. Generate structurally different variants
+### 2. Name the primary axis
+
+Before writing code, name one axis under test: structure, density, emphasis,
+type or voice. Give each variant a distinct position on it. Let secondary
+choices follow from that position instead of changing independently.
+Accessibility, keyboard support, content validity and required states are the
+shared floor, never a tradeoff.
+
+### 3. Generate structurally different variants
 
 Hold each variant to the page's purpose, the data it actually has, and the
 project's component/styling system; export clear names (`VariantA`, …).
-Variants must disagree about structure — layout, information hierarchy,
-primary affordance — not colours. Two drafts too similar → redo one with
-explicit "do not use a card grid" style guidance.
+Variants must disagree on the named axis. If the axis is structure, vary layout,
+information hierarchy or the primary affordance. Do not vary every axis at once.
+Two drafts too similar → redo one with explicit "do not use a card grid" style
+guidance.
 
-### 3. Wire the switcher
+### 4. Wire the switcher
 
 One switcher component on the route reads `?variant=` and renders the matching
 variant; existing data fetching stays above it. Sub-shape B mounts the same
 switcher on the throwaway route.
 
-### 4. The floating bar
+### 5. The floating bar
 
 Fixed at bottom-centre: left arrow · current label (`B — Sidebar layout`) ·
 right arrow, wrapping both ways. Arrows update the URL param through the
@@ -57,12 +66,12 @@ hidden in production builds (`NODE_ENV !== 'production'` or equivalent) so a
 stray merge can't ship it. One shared component, located with the project's
 shared UI.
 
-### 5. Hand it over
+### 6. Hand it over
 
 Surface the URL and the variant keys. The real feedback is usually "the header
 from B with the sidebar from C" — that's the design they want.
 
-### 6. Converge over rounds (optional)
+### 7. Converge over rounds (optional)
 
 One round usually answers the question. When the ONE question is surface-sized
 ("what should this whole feature look like?") — the user asks to design it by
@@ -81,7 +90,7 @@ per round, walking down the visual design tree:
   brief driving the work — so no decision lives only in the discarded mock.
   Stop when the user stops caring about the next level down.
 
-### 7. Capture and clean up
+### 8. Capture and clean up
 
 Per [SKILL.md](SKILL.md): fold the winner into the existing page (A) or
 promote it to a real route (B). The full variant set and the switcher land on
