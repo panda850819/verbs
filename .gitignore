@@ -6,7 +6,7 @@ secrets.env
 .env.local
 
 # local event/log state (machine-generated, host-specific)
-.pandastack/
+.verbs/
 
 # Python bytecode caches (e.g. scripts/__pycache__ from running tests)
 __pycache__/

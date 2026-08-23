@@ -42,7 +42,8 @@ else
 fi
 
 canonical_help="$($PY3 "$CLI" help)"
-if [ ! -e "$repo_root/scripts/pandastack" ]; then
+if [ ! -e "$repo_root/scripts/pandastack" ] \
+    && [ ! -L "$repo_root/scripts/pandastack" ]; then
   pass "retired pandastack shim is absent"
 else
   fail_t "retired pandastack shim still exists"
