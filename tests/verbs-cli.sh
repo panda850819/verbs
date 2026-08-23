@@ -5,7 +5,6 @@ set -uo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 CLI="$repo_root/scripts/verbs"
-LEGACY_CLI="$repo_root/scripts/pandastack"
 PY3="$(command -v python3)"
 fail=0
 tmp="$(mktemp -d)"
@@ -43,24 +42,12 @@ else
 fi
 
 canonical_help="$($PY3 "$CLI" help)"
-for invocation in direct python3; do
-  legacy_stdout="$tmp/legacy-$invocation.out"
-  legacy_stderr="$tmp/legacy-$invocation.err"
-  if [ "$invocation" = direct ]; then
-    "$LEGACY_CLI" help >"$legacy_stdout" 2>"$legacy_stderr"
-  else
-    "$PY3" "$LEGACY_CLI" help >"$legacy_stdout" 2>"$legacy_stderr"
-  fi
-  if [ "$?" -eq 0 ] \
-     && [ "$(cat "$legacy_stdout")" = "$canonical_help" ] \
-     && [ "$(wc -l < "$legacy_stderr" | tr -d ' ')" = 1 ] \
-     && grep -qF "DEPRECATED: scripts/pandastack moved to scripts/verbs" \
-          "$legacy_stderr"; then
-    pass "shim preserves $invocation invocation output and exit status"
-  else
-    fail_t "shim broke $invocation invocation compatibility"
-  fi
-done
+if [ ! -e "$repo_root/scripts/pandastack" ] \
+    && [ ! -L "$repo_root/scripts/pandastack" ]; then
+  pass "retired pandastack shim is absent"
+else
+  fail_t "retired pandastack shim still exists"
+fi
 
 if ! "$PY3" "$CLI" notacommand >/dev/null 2>&1; then
   pass "unknown command exits nonzero"
@@ -214,20 +201,17 @@ VERBS_REPO_ROOT="$space_root" "$PY3" "$CLI" \
   init --host claude --dry-run >"$tmp/spaced-claude.out"
 VERBS_REPO_ROOT="$space_root" "$PY3" "$CLI" \
   init --host codex --dry-run >"$tmp/spaced-codex.out"
-PANDASTACK_REPO_ROOT="$space_root" "$PY3" "$LEGACY_CLI" \
-  init --host claude --dry-run >"$tmp/legacy-spaced.out" 2>"$tmp/legacy-spaced.err"
 bash "$space_root/scripts/bootstrap.sh" --claude >"$tmp/spaced-bootstrap.out"
 
 if "$PY3" - "$space_root" "$tmp/spaced-claude.out" \
-    "$tmp/spaced-codex.out" "$tmp/spaced-bootstrap.out" \
-    "$tmp/legacy-spaced.out" <<'PY'
+    "$tmp/spaced-codex.out" "$tmp/spaced-bootstrap.out" <<'PY'
 import shlex
 import sys
 from pathlib import Path
 
 root = sys.argv[1]
 roots = {root, str(Path(root).resolve())}
-claude, codex, bootstrap, legacy = [Path(path).read_text().splitlines() for path in sys.argv[2:]]
+claude, codex, bootstrap = [Path(path).read_text().splitlines() for path in sys.argv[2:]]
 
 
 def commands(lines):
@@ -242,7 +226,6 @@ def commands(lines):
 claude_commands = commands(claude)
 codex_commands = commands(codex)
 bootstrap_commands = commands(bootstrap)
-legacy_commands = commands(legacy)
 def has_validate(rows):
     return any(row[:3] == ["claude", "plugin", "validate"] and row[3] in roots for row in rows)
 
@@ -268,29 +251,11 @@ assert has_claude_add(claude_commands)
 assert has_codex_add(codex_commands)
 assert has_validate(bootstrap_commands)
 assert has_claude_add(bootstrap_commands)
-assert has_validate(legacy_commands)
 PY
 then
   pass "paste-ready install commands shell-quote checkout paths with spaces"
 else
   fail_t "paste-ready install commands split checkout paths with spaces"
-fi
-
-if grep -qF "DEPRECATED: scripts/pandastack moved to scripts/verbs" \
-        "$tmp/legacy-spaced.err"; then
-  pass "shim maps legacy PANDASTACK_REPO_ROOT to VERBS_REPO_ROOT"
-else
-  fail_t "shim lost the legacy repo-root environment override"
-fi
-
-if PANDA_VERBS_REPO_ROOT="$space_root" \
-    PANDASTACK_REPO_ROOT="$tmp/older-stack-root" \
-    "$PY3" "$LEGACY_CLI" init --host claude --dry-run \
-    >"$tmp/legacy-precedence.out" 2>"$tmp/legacy-precedence.err" \
-    && grep -qF "$space_root" "$tmp/legacy-precedence.out"; then
-  pass "PANDA_VERBS_REPO_ROOT wins over the older PANDASTACK fallback"
-else
-  fail_t "shim legacy precedence selected the older PANDASTACK path"
 fi
 
 init_hermes="$(HOME="$clean_home" "$PY3" "$CLI" init --host hermes --dry-run 2>&1)"
