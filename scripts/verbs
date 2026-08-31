@@ -716,21 +716,8 @@ def run_init(args):
         print(f"  codex plugin marketplace add {quoted_repo} --json")
         print(f"  codex plugin add {plugin_selector} --json")
         print("  # Restart Codex before verification.")
-    elif host == "hermes":
-        selected_source = shlex.quote(
-            str(REPO_ROOT / "skills" / "<bucket>" / "<skill>")
-        )
-        print(f"Commands to import {product['display_name']} skills into Hermes:")
-        print("  mkdir -p $HOME/.hermes/skills")
-        print(f"  SKILL_DIR={selected_source}")
-        print("  SKILL_NAME='<skill>'")
-        print('  ln -sfn "$SKILL_DIR" "$HOME/.hermes/skills/$SKILL_NAME"')
-        print("  # Repeat only for each reviewed, selected skill.")
-        print("See docs/ADDING_A_HOST.md#hermes-selective-manual-import "
-              "for the direct-import support model.")
-        print("No mutation of ~/.hermes will be performed by this command.")
     else:
-        print(f"Unknown host: {host}. Use --host claude|codex|hermes",
+        print(f"Unknown host: {host}. Use --host claude|codex",
               file=sys.stderr)
         sys.exit(2)
 
@@ -971,8 +958,8 @@ def _generated_loaders(manifest_data):
     description = f"{product['description']} Includes {total} composable skills."
     long_description = (
         f"{description} {product['support']} Skills cover debugging, UI, review, "
-        "QA, shipping, prototypes, architecture surveys, decision maps, "
-        "destructive-action gates, and external-artifact trust checks."
+        "QA, shipping, prototypes, destructive-action gates, and external-artifact "
+        "trust checks."
     )
     author = {"name": "Panda Zeng"}
     keywords = list(product["keywords"])
@@ -1584,7 +1571,7 @@ def main():
     ini = sub.add_parser("init", help="Print host install commands")
     ini.add_argument(
         "--host",
-        choices=["claude", "codex", "hermes"],
+        choices=["claude", "codex"],
         default="claude",
         help="Target host (default: claude)",
     )

@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.33.0 — Evidence-based runtime retirement
+
+### Changed
+
+- Retired `decision-map` and `improve-codebase-architecture` after an audit of
+  89 August Pi primary/subagent session files found zero production dispatches
+  for both; their only loads were Verbs meta/test sessions. The eight workflows
+  with observed production
+  dispatch remain installed. (#383)
+- Removed the Hermes install and support surface. Hermes is no longer a Verbs
+  host; Pi remains the direct-loading portable runtime alongside the verified
+  Claude Code and Codex Marketplace Plugins. (#383)
+- Removed the retired skills' orphan canonical resources, generated copies,
+  contract tests, routing entries, and third-party file notices. (#383)
+
 ## v0.32.0 — AGENTS.md Project Contract
 
 ### Changed

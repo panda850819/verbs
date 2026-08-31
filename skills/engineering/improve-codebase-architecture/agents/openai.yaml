@@ -1,5 +1,0 @@
-interface:
-  display_name: "Improve Codebase Architecture"
-  short_description: "Survey and rank architecture deepening opportunities"
-policy:
-  allow_implicit_invocation: false

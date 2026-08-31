@@ -18,12 +18,9 @@ Affected files:
 - `maintainer/writing-great-skills-glossary.md`
 - `skills/productivity/grill/SKILL.md`
 - `skills/engineering/codebase-design/SKILL.md`
-- `skills/engineering/improve-codebase-architecture/SKILL.md`
-- `skills/engineering/improve-codebase-architecture/HTML-REPORT.md`
 - `skills/engineering/prototype/SKILL.md`
 - `skills/engineering/prototype/LOGIC.md`
 - `skills/engineering/prototype/UI.md`
-- `skills/productivity/decision-map/SKILL.md`
 
 ### garrytan/gstack
 

@@ -45,13 +45,14 @@ for fragment in (
 active = set(manifest["skill"])
 expected = {
     "careful", "gatekeeper", "review", "debug", "ui", "qa",
-    "improve-codebase-architecture", "prototype", "decision-map", "ship",
+    "prototype", "ship",
 }
 assert active == expected, (active, expected)
 retired = {
     "advisor", "ask-boss", "product-planning", "backlog-refinement",
     "sprint-planning", "sprint", "sprint-review", "retro", "grill",
-    "setup-verbs", "to-spec", "to-tickets",
+    "setup-verbs", "to-spec", "to-tickets", "decision-map",
+    "improve-codebase-architecture",
 }
 for name in retired:
     assert not list((ROOT / "skills").glob(f"*/{name}/SKILL.md")), name

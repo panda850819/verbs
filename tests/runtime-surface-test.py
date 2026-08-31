@@ -26,9 +26,7 @@ PRODUCT = {
     "hero": (
         "Hard-won ways of working, encoded as composable skills for coding agents."
     ),
-    "support": (
-        "Verified on Claude Code and Codex. Hermes supports selective manual import."
-    ),
+    "support": "Verified on Claude Code and Codex. Pi supports direct skill loading.",
     "category": "Developer Tools",
     "environment_prefix": "VERBS",
     "keywords": ["agent-skills", "coding-agents"],

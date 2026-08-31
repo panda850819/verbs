@@ -13,11 +13,11 @@
 </head>
 <body>
 <div class="shell">
-  <div class="titlebar"><span class="dot accent"></span><span class="dot"></span><span class="dot"></span><span class="window-title">verbs-lifecycles.html — six valid task paths</span></div>
+  <div class="titlebar"><span class="dot accent"></span><span class="dot"></span><span class="dot"></span><span class="window-title">verbs-lifecycles.html — four valid task paths</span></div>
   <main>
     <p class="prompt"><span class="sign">$</span> verbs task --show-lifecycles</p>
     <h1># One task spine, multiple lifecycles</h1>
-    <p class="lede">連貫的是 task state。Skill 在特定狀態介入，交付結果與證據後回到主線。以下六條路徑都是完整 lifecycle，但完成的 task 類型與 Delivery Target 不同。</p>
+    <p class="lede">連貫的是 task state。Skill 在特定狀態介入，交付結果與證據後回到主線。以下四條路徑都是完整 lifecycle，但完成的 task 類型與 Delivery Target 不同。</p>
     <div class="spine"><strong>INTENT</strong><span class="arr">→</span><strong>WORK CONTRACT</strong><span class="arr">→</span><strong>EXECUTION</strong><span class="arr">→</span><strong>ACCEPTANCE EVIDENCE</strong><span class="arr">→</span><strong>DELIVERY / CLOSURE</strong></div>
 
     <div class="grid">
@@ -69,40 +69,7 @@
       </section>
 
       <section class="panel">
-        <div class="panel-head"><p class="eyebrow">04 · ARCHITECTURE INVESTMENT</p><h2>架構探索後實作</h2><p class="signal">Signal：知道有架構壓力，但還不知道值得投資的 seam。</p></div>
-        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l4t l4d"><title id="l4t">架構探索 lifecycle</title><desc id="l4d">明確要求 read-only survey，使用者選 candidate，Grilling Session 形成 Work Contract，再進入獨立實作與交付。</desc><defs><marker id="a4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
-          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a4)"/>
-          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">EXPLICIT SURVEY REQUEST</text><text class="sub" x="260" y="60">architecture investment area unknown</text>
-          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/improve-codebase-architecture</text><text class="sub" x="260" y="132">read-only evidence + ranked seams</text>
-          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">VISUAL REPORT</text><text class="sub" x="260" y="204">survey stops without repo edits</text>
-          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">HUMAN SELECTS CANDIDATE</text><text class="sub" x="260" y="276">沒有自動選 frontier</text>
-          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">GRILLING → WORK CONTRACT</text><text class="sub" x="260" y="348">決定 final interface 與 acceptance</text>
-          <rect class="node" x="100" y="384" width="320" height="48" rx="6"/><text class="name" x="260" y="404">SEPARATE IMPLEMENTATION TASK</text><text class="sub" x="260" y="420">native coding + tests</text>
-          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">/review → /ship</text><text class="sub" x="260" y="492">依 project gates 完成交付</text>
-          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · CHANGE DELIVERED</text><text class="sub" x="260" y="564">selected seam passes acceptance</text>
-          <text class="foot" x="24" y="616">BOUNDARY · survey task 與 implementation task 是兩個 Work Contract</text>
-        </svg></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head"><p class="eyebrow">05 · CROSS-SESSION DECISIONS</p><h2>Decision Map</h2><p class="signal">Signal：多個相依決策與證據無法在目前 Grilling Session 內完成。</p></div>
-        <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l5t l5d"><title id="l5t">Decision Map lifecycle</title><desc id="l5d">建立 map，每次由人選一個 frontier entry，解完寫回 evidence；仍有決策時下一個 session 迴圈，map clear 後形成 brief。</desc><defs><marker id="a5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker><marker id="a5x" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#ff5a36"/></marker></defs>
-          <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a5)"/>
-          <path class="arrow-accent" d="M100 408H48V192H100" marker-end="url(#a5x)"/>
-          <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">DESTINATION EXCEEDS SESSION</text><text class="sub" x="260" y="60">dependent decisions remain visible</text>
-          <rect class="skill" x="100" y="96" width="320" height="48" rx="6"/><text class="name" x="260" y="116">/decision-map · CREATE</text><text class="sub" x="260" y="132">destination + typed entries + dependencies</text>
-          <rect class="node" x="100" y="168" width="320" height="48" rx="6"/><text class="name" x="260" y="188">HUMAN SELECTS ONE FRONTIER ENTRY</text><text class="sub" x="260" y="204">不自動排程下一個 entry</text>
-          <rect class="node" x="100" y="240" width="320" height="48" rx="6"/><text class="name" x="260" y="260">RESOLVE ONE TYPE</text><text class="sub" x="260" y="276">research · prototype · grilling · task</text>
-          <rect class="node" x="100" y="312" width="320" height="48" rx="6"/><text class="name" x="260" y="332">WRITE EVIDENCE + UPDATE FRONTIER</text><text class="sub" x="260" y="348">一次 invocation 到此停止</text>
-          <polygon points="260,384 320,408 260,432 200,408" fill="#141414" stroke="#f5f5f5" stroke-width="1.2"/><text class="name" x="260" y="412">MORE?</text><text class="tag" x="76" y="400">YES · NEXT SESSION</text>
-          <rect class="node" x="100" y="456" width="320" height="48" rx="6"/><text class="name" x="260" y="476">MAP CLEAR → DECISION BRIEF</text><text class="sub" x="260" y="492">reasoning remains on entry evidence</text>
-          <rect class="done" x="100" y="528" width="320" height="48" rx="20"/><text class="name" x="260" y="548">DONE · DECISION TASK CLOSED</text><text class="sub" x="260" y="564">implementation starts as a new task</text>
-          <text class="foot" x="24" y="616">SCOPE · one map per destination；一個 session 解一個 frontier entry</text>
-        </svg></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head"><p class="eyebrow">06 · TRUST &amp; RISK</p><h2>外部 artifact 採用或高風險操作</h2><p class="signal">Signal：外部輸入將進入系統，或下一動作可能破壞 shared state。</p></div>
+        <div class="panel-head"><p class="eyebrow">04 · TRUST &amp; RISK</p><h2>外部 artifact 採用或高風險操作</h2><p class="signal">Signal：外部輸入將進入系統，或下一動作可能破壞 shared state。</p></div>
         <div class="diagram"><svg viewBox="0 0 520 640" role="img" aria-labelledby="l6t l6d"><title id="l6t">Trust 與 risk lifecycle</title><desc id="l6d">Gatekeeper 先做採用前 trust review，高風險由人決定；核准後執行，若有破壞性動作再由 Careful 暫停確認，最後驗證 closure。</desc><defs><marker id="a6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#9a9a9a"/></marker></defs>
           <path class="arrow" d="M260 72V96M260 144V168M260 216V240M260 288V312M260 360V384M260 432V456M260 504V528" marker-end="url(#a6)"/>
           <rect class="state" x="100" y="24" width="320" height="48" rx="20"/><text class="name" x="260" y="44">EXTERNAL ARTIFACT INTENT</text><text class="sub" x="260" y="60">install · execute · grant access · trust</text>
