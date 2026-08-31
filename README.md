@@ -111,14 +111,6 @@ Use a specialist only when the problem type is known:
 - **`careful`** — Work touches production, shared infrastructure, live harness
   paths, or an imminent destructive action. `careful` pauses that action for
   explicit confirmation while reversible work continues.
-- **`decision-map`** — One destination depends on several decisions whose
-  evidence cannot fit the current Grilling Session. `decision-map` creates a
-  named cross-session map or resolves one human-selected unblocked entry, updates
-  the frontier, and stops before implementation.
-- **`improve-codebase-architecture`** — You explicitly want to find where
-  architectural investment would pay off. It surveys repository evidence,
-  ranks candidate seams in a read-only visual report, and stops for the user to
-  choose one before a later Grilling Session.
 
 Visual references:
 
@@ -153,9 +145,7 @@ agent previews the exact contract diff and the user approves it.
 | `/verbs:debug` | core | Systematic root-cause debugging with an evidence gate before fixes. |
 | `/verbs:ui` | core | Build or fix production UI with a committed visual direction. |
 | `/verbs:qa` | core | Browser-based UI QA with PR-ready acceptance evidence through host-provided browser automation. |
-| `/verbs:improve-codebase-architecture` | core | Produce an explicitly requested, read-only visual survey of codebase architecture opportunities. |
 | `/verbs:prototype` | core | Build one throwaway artifact to answer one logic or UI design question. |
-| `/verbs:decision-map` | core | Create or work a named cross-session Decision Map when several dependent decisions must remain visible. |
 | `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and available QA evidence publication. |
 <!-- END GENERATED: skill-catalog -->
 

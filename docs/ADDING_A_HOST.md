@@ -53,25 +53,8 @@ test the scanner; they do not prove the real installer.
 | Claude Code | Verified | Skills-only Marketplace Plugin |
 | Codex | Verified | Skills-only Marketplace Plugin |
 | Pi | Direct loading | `skills/` configured in Pi settings |
-| Hermes | Selective manual import | Individual skill directories |
+| Hermes | Unsupported | None |
 | OpenClaw | Unsupported / experimental | None |
 
 Keep runtime-specific coordination on the host side. A new integration should
 add the smallest install surface that can pass the verification gate.
-
-## Hermes: selective manual import
-
-Hermes has no manifest or packaged parity. Import only the
-skills you have checked against Hermes' tool vocabulary:
-
-```bash
-mkdir -p "$HOME/.hermes/skills"
-ln -sfn /absolute/path/to/verbs/skills/productivity/grill \
-  "$HOME/.hermes/skills/grill"
-```
-
-Repeat per selected skill, start a fresh Hermes session, and verify the skill
-name and its required tools resolve. Skills that require unavailable tools
-remain unsupported on that host. `git pull` updates symlinked skill content in
-place; re-run the same real
-invocation after any skill or Hermes upgrade.

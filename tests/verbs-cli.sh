@@ -258,16 +258,13 @@ else
   fail_t "paste-ready install commands split checkout paths with spaces"
 fi
 
-init_hermes="$(HOME="$clean_home" "$PY3" "$CLI" init --host hermes --dry-run 2>&1)"
-if echo "$init_hermes" | grep -qF "Repeat only for each reviewed, selected skill" \
-   && echo "$init_hermes" | grep -qF 'SKILL_NAME=' \
-   && echo "$init_hermes" | grep -qF "docs/ADDING_A_HOST.md#hermes-selective-manual-import" \
-   && test -f "$repo_root/docs/ADDING_A_HOST.md" \
-   && echo "$init_hermes" | grep -qF "No mutation of ~/.hermes" \
-   && ! echo "$init_hermes" | grep -qF '.hermes/skills/verbs'; then
-  pass "Hermes report states selective manual import, valid docs, and no mutation"
+if HOME="$clean_home" "$PY3" "$CLI" init --host hermes --dry-run \
+    >/dev/null 2>"$tmp/init-hermes-unsupported.err"; then
+  fail_t "init --host hermes should be unsupported"
+elif grep -q "Traceback" "$tmp/init-hermes-unsupported.err"; then
+  fail_t "unsupported Hermes init should not print a traceback"
 else
-  fail_t "Hermes report should state selective manual import, valid docs, and no mutation"
+  pass "Hermes is not an init host"
 fi
 
 # Every non-dry init path is report-only and leaves HOME tree-for-tree.
@@ -283,7 +280,7 @@ baseline_tree="$(find "$guard_home" -mindepth 1 -print \
   | sed "s|^$guard_home/||" | sort)"
 baseline_files="$(find "$guard_home" -type f -exec cksum {} \; | sort)"
 
-for host in claude codex hermes; do
+for host in claude codex; do
   if HOME="$guard_home" "$PY3" "$CLI" init --host "$host" \
       >/dev/null 2>"$tmp/init-$host.err"; then
     fail_t "init --host $host without --dry-run should exit nonzero"

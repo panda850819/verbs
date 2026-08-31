@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "verbs",
-      "description": "Project contracts and specialist procedures for coding agents. Includes 10 composable skills.",
+      "description": "Project contracts and specialist procedures for coding agents. Includes 8 composable skills.",
       "source": ".",
       "category": "development",
       "homepage": "https://github.com/panda850819/verbs"

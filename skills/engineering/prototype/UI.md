@@ -74,9 +74,9 @@ from B with the sidebar from C" — that's the design they want.
 ### 7. Converge over rounds (optional)
 
 One round usually answers the question. When the ONE question is surface-sized
-("what should this whole feature look like?") — the user asks to design it by
-taste, or a Decision Map entry names converge — decompose it into one question
-per round, walking down the visual design tree:
+("what should this whole feature look like?") — the user, brief, or task asks to
+design it by taste and names converge — decompose it into one question per
+round, walking down the visual design tree:
 
 - **Round 1: overall design.** Variants disagree about the page's structure.
   The verdict picks a direction (or a hybrid).

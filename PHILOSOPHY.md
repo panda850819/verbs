@@ -31,8 +31,7 @@ must be repeatable. Prefer standard-library implementations, keep helpers local
 to the capability they serve, and declare their runtime explicitly. A helper
 needed by one skill must not become an install prerequisite for every skill.
 The same source is verified as a Marketplace Plugin on Claude Code and Codex;
-Hermes supports selective manual import. One host profile uses one install
-surface.
+Pi supports direct skill loading. One host profile uses one install surface.
 
 ### 4. Less Is More
 

@@ -1,7 +1,7 @@
 {
   "name": "verbs",
-  "description": "Project contracts and specialist procedures for coding agents. Includes 10 composable skills.",
-  "version": "0.32.0",
+  "description": "Project contracts and specialist procedures for coding agents. Includes 8 composable skills.",
+  "version": "0.33.0",
   "author": {
     "name": "Panda Zeng"
   },
@@ -18,9 +18,7 @@
   "skills": [
     "./skills/engineering/careful",
     "./skills/engineering/debug",
-    "./skills/productivity/decision-map",
     "./skills/meta/gatekeeper",
-    "./skills/engineering/improve-codebase-architecture",
     "./skills/engineering/prototype",
     "./skills/engineering/qa",
     "./skills/engineering/review",

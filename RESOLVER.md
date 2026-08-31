@@ -47,15 +47,9 @@ stage, tracker mutation, scheduler, or implementation owner.
 | One design uncertainty can be answered cheaply | `prototype` | One disposable artifact yields a recorded verdict. |
 | An external artifact may enter the system | `gatekeeper` | Trust evidence supports adopt, restrict, or reject. |
 | Production, shared infrastructure, or destructive actions are involved | `careful` | Required confirmation and recovery evidence are present. |
-| Several dependent decisions need cross-session state | `decision-map` | One map is created or one selected entry is resolved. |
-| The repository area worth architectural improvement is unknown | `improve-codebase-architecture` | An explicitly requested read-only survey ranks candidates. |
 
 Known specialist tasks bypass further routing. A specialist still obeys the
-Project Contract and Brain First Rule. Architecture surveys remain explicit so
-periodic surveys do
-not start opportunistically. When the module is already chosen but its interface
-or abstraction seam is unclear, use the automatic Grilling Session with the
-canonical `lib/codebase-design.md` vocabulary instead of another survey.
+Project Contract and Brain First Rule.
 
 ## Native parity boundary
 
@@ -69,9 +63,7 @@ correction. Verbs keeps only procedures with a material delta:
 - Git and PR closure;
 - production UI craft;
 - destructive-action and trust gates;
-- disposable prototypes;
-- named cross-session decision maps;
-- explicit architecture surveys.
+- disposable prototypes.
 
 Project planning, backlog readiness, sprint selection, sprint execution, sprint
 review, retrospectives, tracker publication, generic orientation, cross-model
