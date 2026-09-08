@@ -1,118 +1,25 @@
 ---
 name: ship
-description: |
-  Delivery route after coding work is complete and the user asks to ship, create
-  a PR, or publish the branch. Run test, scope, and review gates; commit relevant
-  files; push a non-default branch; then upsert the PR and available QA evidence.
-  Unfinished work returns to its execution owner.
-reads:
-  - repo: "**"
-  - repo: CLAUDE.md
-  - repo: AGENTS.md
-  - repo: docs/briefs/**
-  - repo: docs/learnings/**
-  - skill: lib/learning-format.md
-  - skill: lib/qa-evidence-format.md
-  - skill: lib/trigger-first-skill-evolution.md
-  - skill: lib/verify-the-test-loop.md
-  - skill: lib/quote-gate.md
-  - skill: lib/rationalizations.md
-  - cli: git
-writes:
-  - repo: "**"
-  - cli: git commit
-  - cli: git branch
-  - cli: git tag
-  - cli: git push
-  - cli: gh pr create
-  - cli: gh pr comment
-  - cli: gh api
-  - cli: gh release create
-  - cli: stdout
-forbids:
-  - cli: git push --force
-  - cli: git push origin main
-domain: shared
-classification: exec
+description: On authorization to ship completed code, verify tests and review, commit scoped changes on a non-default branch, and publish the PR with current QA evidence.
 user-invocable: true
 ---
 # Ship
 
-`/ship` closes completed code work through a pull request. Knowledge-note
-lifecycle and external publication remain host concerns. You already know how
-to write a commit; this skill is the gate sequence, not the coaching.
+Read the repository's `## verbs` configuration for tests, default branch, tags, and releases. Delivery requires user authorization; this skill does not grant account access or permission to publish.
 
-## Gates (in order, none skippable silently)
+## Before committing
 
-1. **Config** — read the `## verbs` block from `CLAUDE.md` or `AGENTS.md` for
-   the test command, tag format, and release preference.
-2. **Pre-flight** — `git pull`; run the project's test/build command and STOP
-   on failure with the output; inspect `git diff --stat`,
-   `git log origin/{main}..HEAD --oneline`, and the current branch.
-3. **Pitfall ack** — search `{learnings_dir}` for `type: pitfall` entries whose
-   `files:` touch changed files; a match must be listed and acknowledged before
-   proceeding. Skip only what an earlier read this session already listed by
-   this same query: an escalated `review`'s RECALL block covers an entry only
-   when it actually named it. Running `review` is not itself evidence — its
-   recall ranks by topic-token overlap against title and tags, takes the top
-   3-5, and drops effective confidence below 3, so a pitfall naming a changed
-   file can sit outside its results entirely. Same store, different query.
-   Acknowledge the remainder here.
-4. **Scope check** — if a brief for this branch exists in `docs/briefs/`,
-   compare the current full diff against its Scope In/Out and the diff at
-   review time. Print `Scope: ON TRACK`, or `SCOPE DRIFT: [...]` /
-   `POST-REVIEW CHANGES: [...]` and ask before proceeding. No brief → still
-   warn on commits made after the last `/review` this session.
-5. **Review gate** — if `/review` has not run on the current diff this
-   session, warn: "Review not run. Run /review first?" Proceed only on an
-   explicit skip.
-6. **Branch before commit (hard rule)** — never push to main/master; always
-   ship via PR. On main → create `fix/*` / `feat/*` / `refactor/*` BEFORE
-   staging; a branch created after the commit still advances the local
-   default branch.
-7. **Commit** — stage relevant files only (never `git add -A`); conventional
-   message `type(scope): description`; empty `git diff --cached` after
-   staging → report and skip the commit; never amend, never skip hooks.
-8. **Tag / release (config-gated)** — `tag: semver` → derive the bump from
-   commits (feat = minor, fix = patch) and tag; `release: true` → GitHub
-   Release from the tag with generated notes. **Truth gate before
-   publishing:** every PR / SHA the notes cite must be an ancestor of the tag
-   (`git merge-base --is-ancestor`), and added/removed claims must match
-   `git diff {prev-tag}..{tag} --stat` — the notes describe what the tag
-   contains, nothing more. On mismatch fix the notes, never re-tag.
-   Otherwise skip both.
-9. **Push + PR** — push with `-u` (plus tags if created);
-   `gh pr create` with a title under 70 chars and a what/why/how-to-test
-   body. Resolve an existing PR instead of creating a duplicate.
-10. **QA evidence upsert** — when `qa` ran, read the handoff from the Git
-    metadata path defined in `lib/qa-evidence-format.md`. Recompute its artifact
-    identity against the PR head, then create or update the authenticated
-    viewer's single marker comment. Read the comment back before reporting its
-    URL. A stale artifact, malformed block, `FAIL`, or `UNPROVEN` row still gets
-    published as `Acceptance: NOT VERIFIED`, but blocks a ready/done claim. For
-    a UI diff that required `qa`, missing evidence also blocks completion. For
-    non-UI work, state `QA evidence: not applicable`; never fabricate a report.
-    Re-running `ship` updates the same comment rather than adding another.
-11. **Artifact proof** — before asking a human to validate an artifact or using
-    manual validation as completion evidence, apply `lib/verify-the-test-loop.md`
-    and prove that the tested artifact contains the current commit. Missing
-    artifact identity blocks the completion claim.
-12. **Closure evidence** — done means the PR URL, pushed commit/branch, and,
-    when QA ran, the verified QA comment URL are printed. Missing delivery
-    evidence → name the gap and do not claim done.
+- Inspect branch, dirty state, base-to-head diff, and upstream state. Do not blindly pull into a dirty worktree. Run the project's real test/build command after the final edit; failure blocks delivery.
+- Compare the full diff with the authorized scope and current review. Resolve scope drift and post-review changes before proceeding. Run `review` on the current diff; skipping it requires explicit approval.
+- Search configured project learnings for pitfalls whose `files:` touch changed files. Skip only what an earlier read this session already listed by this same query. Running `review` is not itself evidence: its topic query takes the top 3-5, and drops effective confidence below 3. Same store, different query. Apply any remaining relevant pitfalls.
+- Create the required non-default branch before staging or committing. Stage only relevant files; an empty staged diff needs no commit. Use Conventional Commits, preserve hooks, and never amend pushed commits.
 
-## Learning candidate
+## Publish
 
-Emit ONE candidate only when a concrete artifact surfaced during this ship (a
-test that caught a subtle bug, a deploy pattern, a CI gotcha) — fields per
-`lib/learning-format.md`, quotes gated by `@lib/quote-gate.md`; storage
-belongs to the host/project. If a flaw maps to an existing Verbs skill —
-matched against that skill's anti-pattern/checklist table, not its trigger
-keywords — emit one `skill-edit candidate: <skill> — <missing check>` line for
-the host's session-end audit (see `lib/trigger-first-skill-evolution.md`).
-Propose-only: never edit the target skill here. Nothing surfaced → skip
-silently.
+Push the authorized branch and resolve or create its single PR with what changed, why, and how it was tested. Do not force-push the default branch.
 
-## Common Rationalizations
+Tags and releases require repository configuration and authorization. Derive the configured semver bump from commits; before publication, prove cited SHAs are tag ancestors and release claims match the previous-tag diff. A mismatch blocks publication; never silently re-tag.
 
-Anti-bypass table tying each ship shortcut to the failure it causes: `@lib/rationalizations.md`.
+When `qa` ran, read its artifact-bound handoff and follow [QA comment upsert](lib/qa-evidence-format.md), including locking, owner checks, conflict handling, and read-back. Stale, malformed, `FAIL`, or `UNPROVEN` evidence must not become verified evidence. Missing required browser evidence blocks a ready/done claim; non-UI work does not need a fabricated QA report.
+
+Before asking a human to validate a built/deployed artifact, apply [artifact proof](lib/verify-the-test-loop.md). Completion requires the pushed commit/branch and PR URL, plus the verified QA comment URL when applicable. Report concrete gaps rather than claiming delivery.

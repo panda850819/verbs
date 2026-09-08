@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.33.1 — Lean specialist instructions
+
+### Changed
+
+- Shortened seven skill entry points and routing descriptions; removed
+  duplicated coaching, advisory-only firewall metadata, and conversational
+  report ceremonies. Kept authorization boundaries, domain/tool references,
+  and the artifact-bound QA handoff. Preserved the byte-bound Review contract:
+  its existing matched canary demonstrates additional high-risk defect recall.
+- Avoid repeated approval for an already-authorized exact action; inspect
+  upstream state instead of blindly pulling into a dirty worktree during ship.
+- Reuse current rendered evidence across UI and QA. Prototype decisions stay
+  local unless issue publication or production implementation is authorized.
+
 ## v0.33.0 — Evidence-based runtime retirement
 
 ### Changed

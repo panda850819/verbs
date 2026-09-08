@@ -15,9 +15,9 @@ environment_prefix = "VERBS"
 keywords = ["agent-skills", "coding-agents", "software-engineering", "review", "ship", "debug"]
 
 [manifest]
-version = "0.33.0"
+version = "0.33.1"
 schema  = "skill-tier-v1"
-updated = "2026-08-31"
+updated = "2026-09-08"
 
 # Project intake, Brain First retrieval, automatic Grilling Sessions, and
 # delivery policy live in the root AGENTS.md Project Contract. Runtime skills
@@ -27,13 +27,13 @@ updated = "2026-08-31"
 tier = "core"
 resources = ["lib/verify-the-test-loop.md"]
 composes = []
-description = "Confirmation gate for production, shared infrastructure, live harness paths, and destructive commands."
+description = "Confirmation gate before destructive commands or high-risk changes to production, shared infrastructure, or live harness configuration."
 
 [skill.gatekeeper]
 tier = "core"
 resources = []
 composes = []
-description = "Pre-adoption trust check for external skills, MCPs, repositories, packages, URLs, APIs, and services."
+description = "Review external skills, MCPs, repositories, packages, URLs, APIs, or services before execution, adoption, or granting access; recommend adopt, restrict, or reject."
 
 [skill.review]
 tier = "core"
@@ -47,29 +47,29 @@ tier = "core"
 requires = ["cli:git"]
 resources = ["lib/learning-format.md", "lib/learning-recall.md", "lib/verify-the-test-loop.md"]
 composes = []
-description = "Systematic root-cause debugging with an evidence gate before fixes."
+description = "Diagnose an unexplained error, crash, regression, or failing test; reproduce the mechanism and verify the fix on the failing path."
 
 [skill.ui]
 tier = "core"
 resources = []
 composes = []
-description = "Build or fix production UI with a committed visual direction."
+description = "Build or visually correct production UI with a deliberate direction and rendered evidence; use prototype while the design decision remains open."
 
 [skill.qa]
 tier = "core"
 resources = ["lib/learning-format.md", "lib/qa-evidence-format.md"]
 composes = []
-description = "Browser-based UI QA with PR-ready acceptance evidence through host-provided browser automation."
+description = "Verify browser-visible acceptance on the current artifact using host browser automation; preserve evidence for PR delivery."
 
 [skill.prototype]
 tier = "core"
 resources = []
 composes = []
-description = "Build one throwaway artifact to answer one logic or UI design question."
+description = "Build a disposable logic or UI probe to answer one unresolved design question; capture the decision without silently expanding into production work."
 
 [skill.ship]
 tier = "ext"
 requires = ["cli:git", "cli:gh"]
 resources = ["lib/learning-format.md", "lib/qa-evidence-format.md", "lib/trigger-first-skill-evolution.md", "lib/verify-the-test-loop.md"]
 composes = []
-description = "Close completed code work through test, commit, push, PR, and available QA evidence publication."
+description = "On authorization to ship completed code, verify tests and review, commit scoped changes on a non-default branch, and publish the PR with current QA evidence."

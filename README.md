@@ -139,14 +139,14 @@ agent previews the exact contract diff and the user approves it.
 <!-- BEGIN GENERATED: skill-catalog -->
 | Skill | Tier | Purpose |
 |---|---|---|
-| `/verbs:careful` | core | Confirmation gate for production, shared infrastructure, live harness paths, and destructive commands. |
-| `/verbs:gatekeeper` | core | Pre-adoption trust check for external skills, MCPs, repositories, packages, URLs, APIs, and services. |
+| `/verbs:careful` | core | Confirmation gate before destructive commands or high-risk changes to production, shared infrastructure, or live harness configuration. |
+| `/verbs:gatekeeper` | core | Review external skills, MCPs, repositories, packages, URLs, APIs, or services before execution, adoption, or granting access; recommend adopt, restrict, or reject. |
 | `/verbs:review` | core | Risk-adaptive diff review on request, before commit, or before PR, with a bounded low-risk fast path and cold-context escalation. |
-| `/verbs:debug` | core | Systematic root-cause debugging with an evidence gate before fixes. |
-| `/verbs:ui` | core | Build or fix production UI with a committed visual direction. |
-| `/verbs:qa` | core | Browser-based UI QA with PR-ready acceptance evidence through host-provided browser automation. |
-| `/verbs:prototype` | core | Build one throwaway artifact to answer one logic or UI design question. |
-| `/verbs:ship` | ext | Close completed code work through test, commit, push, PR, and available QA evidence publication. |
+| `/verbs:debug` | core | Diagnose an unexplained error, crash, regression, or failing test; reproduce the mechanism and verify the fix on the failing path. |
+| `/verbs:ui` | core | Build or visually correct production UI with a deliberate direction and rendered evidence; use prototype while the design decision remains open. |
+| `/verbs:qa` | core | Verify browser-visible acceptance on the current artifact using host browser automation; preserve evidence for PR delivery. |
+| `/verbs:prototype` | core | Build a disposable logic or UI probe to answer one unresolved design question; capture the decision without silently expanding into production work. |
+| `/verbs:ship` | ext | On authorization to ship completed code, verify tests and review, commit scoped changes on a non-default branch, and publish the PR with current QA evidence. |
 <!-- END GENERATED: skill-catalog -->
 
 ## Install
