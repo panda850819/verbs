@@ -1,92 +1,20 @@
 ---
 name: qa
-description: |
-  Browser evidence route when UI changed, browser acceptance remains unproven,
-  or the user asks to test a page. Requires host browser automation; maps the
-  current artifact to acceptance criteria and stores a PR-ready handoff for
-  `ship`. Use `review` for the diff and native tests for non-UI behavior.
+description: Verify browser-visible acceptance on the current artifact using host browser automation; preserve evidence for PR delivery.
 capability_required:
   - host browser automation
-reads:
-  - repo: "**"
-  - repo: CLAUDE.md
-  - repo: AGENTS.md
-  - repo: docs/briefs/**
-  - skill: lib/learning-format.md
-  - skill: lib/qa-evidence-format.md
-  - cli: git
-writes:
-  - cli: stdout
-  - repo: ".git/verbs/qa-evidence.md"
 user-invocable: true
 ---
 # QA
 
-QA is the evidence protocol: structured assertions a merge decision can trust,
-not a test-writing tutorial.
+Bind checks to the user request, issue, or brief and current artifact. Missing intent or unavailable browser automation is an explicit gap, not a pass. Use native tests for non-UI behavior and `review` for the diff.
 
-## Context
+Test relevant user flows, error/empty/loading states, edge inputs, double submission, keyboard navigation, and console errors. UI acceptance includes 320px reflow, 200% zoom, shipped locales, and reduced motion where motion exists. Record actual viewport, locale, and state rather than claiming generic mobile coverage.
 
-Read the `## verbs` config from `CLAUDE.md` or `AGENTS.md`; resolve
-`{learnings_dir}` (default `docs/learnings`) and search related `type: pitfall`
-entries using `lib/learning-format.md`. Read a matching brief from
-`docs/briefs/`. Bind the intent source and assign stable
-`AC-1`, `AC-2`, ... identifiers to its acceptance criteria. Without an issue,
-brief, or explicit goal, report `INTENT GAP`; behavior alone cannot prove intent.
+Use deterministic assertions or accessibility snapshots when they prove the property; use screenshots for visual properties. Emit one `STEP_PASS|id|evidence`, `STEP_FAIL|id|expected -> actual`, or `STEP_SKIP|id|reason` per check. These markers are the worker/handoff interface, not a required conversational transcript.
 
-## Plan
+Run directly unless independent test groups benefit from parallelism and browser-session isolation is proven. Workers receive only their test group, artifact, acceptance criteria, session boundary, and budget. They do not share browser sessions; unfinished checks are skipped with reasons, never passed.
 
-Produce ONE numbered list of action → expected result checks: core user flows
-first, then error/empty/loading states, edge inputs, double submit, Escape,
-keyboard-only navigation, mobile viewport, and console errors. For UI work,
-also include 320px reflow, 200% zoom, every shipped locale and reduced-motion
-behavior where motion exists. Name the width, zoom, locale and state in each
-check instead of treating "mobile" as coverage. If the flows are unclear, ask
-what to test.
+Use [the QA evidence format](lib/qa-evidence-format.md) for failure screenshots, bug actions, criterion statuses, totals, artifact identity, and the handoff at `git rev-parse --git-path verbs/qa-evidence.md`. Every criterion must have current `PASS`, `FAIL`, or `UNPROVEN` evidence. A later code change invalidates affected evidence until rerun.
 
-## Test
-
-Run small changes directly. Use isolated browser workers only for 3+ groups when
-session isolation is proven; otherwise run sequentially. Give each worker its
-numbered tests, the assertion protocol below, and a step budget (~25 targeted / ~40 full page / ~75 multi-page);
-at budget accept partial results with `STEP_SKIP`; the main agent merges and
-summarizes worker results, and never share a browser session.
-
-Every test step MUST emit one marker:
-
-```
-STEP_PASS|<step-id>|<evidence>
-STEP_FAIL|<step-id>|<expected> -> <actual>
-STEP_SKIP|<step-id>|<reason>
-```
-
-Use the strongest available verification in this order: deterministic evaluation,
-accessibility snapshots, before/after comparison, and screenshots only where the
-tree cannot prove the property. A
-`STEP_FAIL` always gets a screenshot and a `[BUG]` report per
-`lib/qa-evidence-format.md`. End with:
-
-```
-Tests: N | Passed: N | Failed: N | Skipped: N | Pass rate: N%
-```
-
-## Acceptance evidence handoff
-
-Map every acceptance criterion to the strongest step evidence. Emit the exact
-marker block from `lib/qa-evidence-format.md`, including intent, current
-artifact identity, per-criterion `PASS` / `FAIL` / `UNPROVEN`, totals, gaps, and
-timestamp. Persist it at `git rev-parse --git-path verbs/qa-evidence.md` without
-dirtying the worktree.
-
-QA does not write to GitHub; `ship` owns the PR upsert. A later code change
-invalidates the evidence until the affected checks rerun.
-
-## Fix and learning
-
-Run each bug report's `Action` through `lib/qa-evidence-format.md`; never
-reclassify it. Re-run an affected flow after `AUTO-FIX`; keep `ASK` pending.
-Emit one `type: pitfall` candidate only for a genuinely new UI pattern or
-browser pitfall; otherwise state no learning is warranted.
-
-Done when every acceptance criterion is mapped to current artifact-bound
-`PASS`, `FAIL`, or `UNPROVEN` evidence and the test totals are reported.
+Apply the reference's `AUTO-FIX`/`ASK` boundary and retest fixes. QA does not publish to GitHub; `ship` owns the authorized PR upsert. Report failures and gaps concisely; keep the full evidence in the handoff.

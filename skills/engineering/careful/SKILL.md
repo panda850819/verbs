@@ -1,81 +1,19 @@
 ---
 name: careful
-description: |
-  Safety gate for work on production, shared infrastructure, live harness paths
-  such as ~/.agents, ~/.claude, or ~/.codex, or unfamiliar code where the next
-  action could damage shared state. Invoke it before a destructive command; it
-  pauses only the high-risk action for confirmation while reversible work continues.
-writes:
-  - cli: stdout
-forbids:
-  - cli: git push --force
-  - cli: git reset --hard
-  - cli: git clean -f
-  - cli: npm publish
-  - cli: cargo publish
-domain: shared
-classification: exec
+description: Confirmation gate before destructive commands or high-risk changes to production, shared infrastructure, or live harness configuration.
 user-invocable: true
 ---
-# Careful Mode
+# Careful
 
-Ordinary model caution can still proceed without an answer. Careful blocks the
-listed destructive or high-risk action until explicit confirmation arrives.
+Pause the risky action for explicit approval of its exact target, impact, and recovery path. Continue unrelated reversible work. An approval already covering that action need not be requested again.
 
-## On Invoke
+Require confirmation before:
+- Discarding Git changes, force-deleting branches, rebasing shared branches, force-pushing, or pushing to the default branch.
+- Overwriting files outside the current project, deleting more than three files, or deleting non-regenerable source, data, or configuration.
+- Production mutations, deployments, package publication, schema migrations, or destructive database operations.
 
-Announce: "CAREFUL mode ON. Will confirm before destructive actions."
+Before destructive changes, inspect current state and make a recoverable backup. Approval does not waive secret protection or authorize unrelated account actions.
 
-## While Active
+Removing an explicitly named regenerable artifact (`node_modules`, `.next`, `dist`, `build`, `target`, `.cache`, `.turbo`, `__pycache__`, or lockfile-regenerable dependencies) is exempt from the filesystem gate. Every target must qualify; glob/variable expansion or mixed source/config targets are not exempt.
 
-Before executing any of the following, pause and ask the user for explicit confirmation:
-
-### Git
-- `git push --force`, `git reset --hard`, `git clean -f`
-- `git branch -D` (force delete)
-- `git checkout .` or `git restore .` (discard all changes)
-- `git rebase` on shared branches
-- Any push to main/master
-
-### Filesystem
-- `rm -rf` on an **unscoped / non-reinstallable** path: anything outside the current project, a path with a glob/variable that could expand wrong, or removal of source / data / config that isn't trivially regenerable
-- Deleting more than 3 files at once
-- Overwriting files outside the current project
-
-**Exemption (does NOT trigger the gate, regardless of where the path lives):** removal of a directory whose **basename** names a trivially-reinstallable artifact — `node_modules`, `.next`, `dist`, `build`, `target`, `.cache`, `.turbo`, `__pycache__`, or a lockfile-regenerable deps dir. Key off the artifact NAME, not project membership: `rm -rf /anywhere/node_modules` is exempt because reinstall restores it. Do NOT use "is this the current project?" as the test — you often cannot resolve the cwd vs the target path, and an absolute foreign-looking path must not re-trigger the gate. The only conditions are: (1) basename is a regenerable artifact above, and (2) the path is explicit, no glob/variable that could expand wrong. **Multi-path:** if the command removes more than one path, EVERY path must independently satisfy (1) and (2) — a single foreign or non-artifact path (e.g. `rm -rf node_modules ../../prod-data`) re-arms the gate for the whole command. The gate is for irreversible / shared-state damage, not routine cleanup.
-
-### External
-- Any API call that mutates external state (POST/PUT/DELETE to production)
-- Publishing packages (`npm publish`, `cargo publish`)
-- Deploying to production environments
-
-### Database
-- DROP, TRUNCATE, DELETE without WHERE
-- Schema migrations on production
-
-### Verification integrity (@lib/verify-the-test-loop.md)
-- Before asking a human to test a build, or claiming done from that test, apply
-  the complete proof and stopping contract in `lib/verify-the-test-loop.md`.
-  An unproven artifact identity blocks the request and the completion claim.
-
-## Confirmation Format
-
-```
-CAREFUL: About to {action}.
-  Target: {what}
-  Reversible: yes/no
-  Proceed? [y/n]
-```
-
-## Stop boundary
-
-Pause only for the destructive or high-risk gates listed above. Ordinary
-reversible work continues under the active task's own completion contract.
-
-## Deactivate
-
-User says "careful off" or starts a new session. Announce: "CAREFUL mode OFF."
-
-## Common Rationalizations
-
-Anti-bypass table tying each shortcut to the failure it causes: `@lib/rationalizations.md`.
+Before requesting human testing or claiming completion from a built/deployed artifact, apply [artifact identity verification](lib/verify-the-test-loop.md). Missing proof blocks that request or claim, not unrelated work.

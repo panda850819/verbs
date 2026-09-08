@@ -1,6 +1,6 @@
 {
   "name": "verbs",
-  "version": "0.33.0",
+  "version": "0.33.1",
   "description": "Project contracts and specialist procedures for coding agents. Includes 8 composable skills.",
   "author": {
     "name": "Panda Zeng",

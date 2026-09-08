@@ -1,73 +1,12 @@
 ---
 name: prototype
-description: |
-  Decision probe for one unresolved logic, state, or visual design question that
-  is cheaper to experience than discuss. Build a throwaway terminal driver or UI
-  variants, capture the verdict in the brief, then stop. `ui` implements a chosen
-  visual direction; production work remains a separate human-selected task.
-reads:
-  - repo: "**"
-writes:
-  - repo: "**"
-  - cli: stdout
-domain: shared
-classification: exec
+description: Build a disposable logic or UI probe to answer one unresolved design question; capture the decision without silently expanding into production work.
 user-invocable: true
 ---
 # Prototype
 
-A prototype is **throwaway code that answers a question**. The question decides
-the shape; the verdict outlives the code.
+Identify the single question the artifact must answer. Use [LOGIC.md](LOGIC.md) for an interactive state/logic probe or [UI.md](UI.md) for visual alternatives. Ask only when that choice cannot be derived from the request and repository.
 
-## Pick the branch
+Mark the artifact as a prototype, follow the project's existing location and runner conventions, and make it runnable with one command. Keep state in memory unless persistence is the question; use only an explicitly disposable store in that case. Expose the state needed to judge the result and avoid production infrastructure or unrelated polish.
 
-Identify the question from the prompt and the surrounding code. If genuinely
-ambiguous, ask when the user is present; otherwise match the surrounding code
-(backend module → logic; page or component → UI) and state the assumption at
-the top of the prototype. Getting the branch wrong wastes the whole prototype.
-
-- **"Does this logic / state model feel right?"** → [LOGIC.md](LOGIC.md): a
-  tiny interactive terminal app that pushes the state model through cases that
-  are hard to reason about on paper.
-- **"What should this look like?"** → [UI.md](UI.md): several structurally
-  different variants on one route, switchable via `?variant=` and a floating
-  bottom bar. Single round by default; UI.md's converge mode runs repeated
-  rounds down the visual design tree when the user, brief, or task asks for it.
-  Converge still only chooses a direction, at finer grain — it
-  never becomes the production build.
-
-## Rules (both branches)
-
-1. **Throwaway from day one, clearly marked.** Locate it next to the module or
-   page it prototypes so context is obvious; name it so a casual reader sees
-   prototype, not production. Obey the project's existing routing and task
-   conventions — invent no new top-level structure.
-2. **One command to run**, via the project's existing task runner. The user
-   starts it without thinking.
-3. **No persistence by default.** State lives in memory. If the question is
-   explicitly about persistence, hit a scratch store named "PROTOTYPE — wipe
-   me".
-4. **Skip the polish.** No tests, no error handling beyond what makes it
-   runnable, no abstractions. The point is to learn fast.
-5. **Surface the state.** After every action (logic) or variant switch (UI),
-   show the full relevant state so the user sees what changed.
-
-## Capture when done
-
-Done means the question is answered AND captured:
-
-- Fold the validated decision into the real code, or into the brief/plan
-  driving the work.
-- Record the verdict — the question and its answer — on the tracking issue or
-  brief that spawned the prototype.
-- Commit the prototype itself to a throwaway `prototype/<slug>` branch as the
-  primary source, never the default branch. The default branch keeps only the
-  validated decision.
-
-## Relationship to other skills
-
-- `prototype` diverges cheap to choose a direction — UI.md's converge mode
-  just repeats that choice level by level, still on throwaway mocks; `ui`
-  then builds the committed direction for production.
-- A Grilling Session question of the shape "how should it look / behave" is often
-  fastest resolved here; feed the verdict back into the brief.
+Capture the question and validated answer in the driving brief or plan. Issue updates and publication still require authorization. Production implementation is separate unless already requested; never treat choosing a mock as shipping it. If retaining prototype code in Git, use a throwaway non-default branch.

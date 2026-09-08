@@ -1,7 +1,7 @@
 {
   "name": "gatekeeper",
-  "version": "0.4.0",
-  "description": "Pre-adoption trust route when an external skill, MCP server, repository, URL,\npackage, API, SDK, or service may be installed, executed, granted access, or\ntrusted. Classify STRIDE, follow the artifact-specific review, and return\nadopt, restrict, or reject. High-risk paths require human approval; rejected\npaths stop with refusal and evidence.",
+  "version": "0.5.0",
+  "description": "Review external skills, MCPs, repositories, packages, URLs, APIs, or services before execution, adoption, or granting access; recommend adopt, restrict, or reject.",
   "author": "evilcos",
   "license": "MIT",
   "homepage": "https://github.com/slowmist/slowmist-agent-security",
