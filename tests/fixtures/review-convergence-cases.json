@@ -1,0 +1,38 @@
+[
+  {
+    "name": "initial primary",
+    "state": {"patch": null, "rounds": {"PRIMARY": 0, "COLD": 0, "VERIFY": 0}, "findings": []},
+    "request": {"round": "PRIMARY", "patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    "expected": "ALLOW"
+  },
+  {
+    "name": "one earned cold pass",
+    "state": {"patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "rounds": {"PRIMARY": 1, "COLD": 0, "VERIFY": 0}, "findings": []},
+    "request": {"round": "COLD", "patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "cold_earned": true},
+    "expected": "ALLOW"
+  },
+  {
+    "name": "duplicate cold pass blocked",
+    "state": {"patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "rounds": {"PRIMARY": 1, "COLD": 1, "VERIFY": 0}, "findings": []},
+    "request": {"round": "COLD", "patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "cold_earned": true},
+    "expected": "BLOCKED_REVIEW_LOOP"
+  },
+  {
+    "name": "focused P1 remediation verification",
+    "state": {"patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "rounds": {"PRIMARY": 1, "COLD": 1, "VERIFY": 0}, "findings": [{"id": "F-001", "severity": "P1", "status": "REMEDIATED"}]},
+    "request": {"round": "VERIFY", "patch": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    "expected": "ALLOW"
+  },
+  {
+    "name": "unchanged patch verification blocked",
+    "state": {"patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "rounds": {"PRIMARY": 1, "COLD": 1, "VERIFY": 0}, "findings": [{"id": "F-001", "severity": "P1", "status": "REMEDIATED"}]},
+    "request": {"round": "VERIFY", "patch": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    "expected": "BLOCKED_REVIEW_LOOP"
+  },
+  {
+    "name": "repeated final review blocked",
+    "state": {"patch": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "rounds": {"PRIMARY": 1, "COLD": 1, "VERIFY": 1}, "findings": [{"id": "F-001", "severity": "P1", "status": "OPEN"}]},
+    "request": {"round": "VERIFY", "patch": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+    "expected": "BLOCKED_REVIEW_LOOP"
+  }
+]

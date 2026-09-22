@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CANARY = ROOT / "evals/2026-08-12-review-major-model-canary"
 DECISION = (CANARY / "README.md").read_text(encoding="utf-8")
+DECISION_FLAT = " ".join(DECISION.split())
 EXPECTED = {
     "snapshot": "ee631904192de738547529f7c820ac703301ddeb",
     "prompt_sha256": "a561ca6bdecf253da6703d71c2229282c8255d4fff0b34bfda5b8e61cee5a58c",
@@ -42,7 +43,9 @@ def sha(path: Path) -> str:
 
 
 for fragment in (
-    "Status: **KEEP**",
+    "Status: **HISTORICAL KEEP**",
+    "the v0.34.0 convergence change is not covered",
+    "Do not use this canary to claim current model fitness",
     "Codex CLI `0.144.4`",
     "Defect recall",
     "Evidence grounding",
@@ -52,12 +55,18 @@ for fragment in (
     "initial run was discarded",
     "**KEEP**",
 ):
-    assert fragment in DECISION, fragment
+    assert " ".join(fragment.split()) in DECISION_FLAT, fragment
 
 assert sha(CANARY / "prompt.md") == EXPECTED["prompt_sha256"]
 assert sha(CANARY / "review-skill.md") == EXPECTED["skill_sha256"]
 assert sha(CANARY / "learning-recall.txt") == EXPECTED["recall_sha256"]
-assert sha(ROOT / "skills/engineering/review/SKILL.md") == EXPECTED["skill_sha256"]
+# The historical treatment remains byte-bound while the current runtime may
+# move on. If they differ, the README must scope the verdict to the frozen
+# contract instead of silently carrying old evidence forward.
+current_skill_sha = sha(ROOT / "skills/engineering/review/SKILL.md")
+if current_skill_sha != EXPECTED["skill_sha256"]:
+    assert "frozen contract only" in DECISION
+    assert "current runtime deliberately differs" in DECISION
 assert sha(ROOT / "lib/learning-recall.md") == EXPECTED["recall_sha256"]
 
 for arm, instruction_sha in ARM_INSTRUCTION.items():

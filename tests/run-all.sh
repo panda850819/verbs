@@ -17,6 +17,51 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# macOS still ships Python 3.9 while the manifest tooling uses stdlib tomllib
+# (3.11+). Select one supported interpreter once, then put a temporary python3
+# shim first in PATH so nested shell tests use the same runtime. An explicit
+# VERBS_PYTHON wins and fails closed when it is unsupported.
+select_python() {
+  local candidate
+  if [ -n "${VERBS_PYTHON:-}" ]; then
+    candidates=("$VERBS_PYTHON")
+  else
+    candidates=(python3.14 python3.13 python3.12 python3.11 python3)
+  fi
+  for candidate in "${candidates[@]}"; do
+    if command -v "$candidate" >/dev/null 2>&1 &&
+       "$candidate" -c 'import sys, tomllib; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
+      resolved="$(command -v "$candidate")"
+      case "$resolved" in
+        /*) ;;
+        *) resolved="$(cd "$(dirname "$resolved")" && pwd -P)/$(basename "$resolved")" ;;
+      esac
+      printf '%s\n' "$resolved"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! PYTHON_BIN="$(select_python)"; then
+  echo 'FAIL: tests require Python 3.11+ with stdlib tomllib; set VERBS_PYTHON' >&2
+  exit 2
+fi
+if ! PYTHON_SHIM="$(mktemp -d "${TMPDIR:-/tmp}/verbs-python.XXXXXX")"; then
+  echo 'FAIL: could not create Python runtime shim directory' >&2
+  exit 2
+fi
+trap 'rm -rf "$PYTHON_SHIM"' EXIT
+if ! ln -s "$PYTHON_BIN" "$PYTHON_SHIM/python3"; then
+  echo 'FAIL: could not create Python runtime shim' >&2
+  exit 2
+fi
+export PATH="$PYTHON_SHIM:$PATH"
+printf 'Python runtime: %s\n' "$(python3 --version 2>&1)"
+if [ "${VERBS_PYTHON_CHECK_ONLY:-0}" = "1" ]; then
+  exit 0
+fi
+
 # Non-deterministic / external-dependency tests, excluded from the blocking gate.
 # NB: host conformance probes require installed CLIs and real model calls, so
 # they run only as explicit release evidence. Currently empty.

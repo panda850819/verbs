@@ -9,6 +9,7 @@ reads:
   - repo: AGENTS.md
   - repo: CLAUDE.md
   - skill: lib/learning-recall.md
+  - skill: lib/review-convergence.md
   - cli: git
 writes:
   - cli: stdout
@@ -61,10 +62,15 @@ Self-refute: <assumption and observed result>
 
 ## 3. Escalated review
 
-Read `lib/learning-recall.md` and apply relevant repo learnings. Map the diff to
-security, data integrity, concurrency, architecture, or operations lenses.
-Medium uses only triggered lenses. High uses every relevant lens plus a
-cold review.
+Read `lib/learning-recall.md` and apply relevant repo learnings. When an earlier
+report exists, an isolated reviewer is earned, or remediation needs checking,
+also read `lib/review-convergence.md`; bind the epoch, exact patch identity,
+round budget, and prior finding states before reviewing. A changed patch does
+not by itself restart the workflow.
+
+Map the diff to security, data integrity, concurrency, architecture, or
+operations lenses. Medium uses only triggered lenses. High uses every relevant
+lens plus a cold review.
 
 Trace changed inputs through code, callers, contracts, tests, and failure
 handling. A finding survives only with severity `P0`–`P3`, a tight file/line
@@ -72,14 +78,17 @@ range, a trigger, mechanism and user-visible consequence, and a correction
 direction. Exclude style,
 unreachable speculation, and pre-existing defects; review does not edit code.
 
-Use an isolated read-only reviewer when the lane is high, the diff exceeds
-roughly 5K tokens, or a load-bearing conclusion remains disputed. Give it only
-the bound diff, intent, and applicable repository contract, without the author's
-analysis or proposed verdict. Any fresh context that satisfies those semantics is
-valid; the transport and model family do not define the review. If no isolated
-context is available, record `Cold review: unavailable — no isolation capability`.
-A second pass in this same context is not a cold review. Merge findings by
-mechanism; disagreement becomes `NEEDS TRACE`, not a vote.
+Use at most one isolated read-only reviewer per epoch when the lane is high,
+the diff exceeds roughly 5K tokens, or a load-bearing conclusion remains
+disputed. Give it only the epoch, patch identity, bound diff, intent, applicable
+repository contract, and typed result schema from `lib/review-convergence.md`,
+without the author's analysis or proposed verdict. Any fresh context that
+satisfies those semantics is valid; the transport and model family do not
+define the review. If no isolated context is available, record
+`Cold review: unavailable — no isolation capability`.
+A second pass in this same context is not a cold review. Merge by mechanism;
+the owning context assigns or preserves stable IDs after the merge.
+Disagreement becomes `DISPUTED`, not a vote or another reviewer.
 
 Match acceptance and branches to tests, run the narrowest available checks, and
 self-refute the highest-risk assumption. Report `COVERAGE GAP` only for unproved
@@ -88,11 +97,16 @@ findings, `No actionable findings.`, or `BLOCKED`.
 
 ## Output and completion
 
+The low-risk fast path keeps its compact output. Escalated review returns:
+
 ```markdown
 Review scope: <base>..<head> | <n> files | risk: <lane>
+Review epoch: <id> | round: <PRIMARY|VERIFY> | patch: sha256:<digest>
+Decision: <CLEAN|FINDINGS|BLOCKED|BLOCKED_REVIEW_LOOP>
+Finding state: <F-001 OPEN, F-002 VERIFIED, or none>
 
 Findings
-- [P1] <title> — <file:line>
+- [P1][F-001][OPEN] <title> — <file:line>
   Trigger: <input/state>
   Mechanism: <why it fails and impact>
   Direction: <correction>
@@ -103,8 +117,10 @@ Cold review: <not earned | completed | unavailable>
 Self-refute: <assumption and result>
 ```
 
-Done when findings are evidence-backed and the report names applicable
-coverage, scope drift, cold review, and self-refutation.
+Done when findings are evidence-backed, stable IDs have lifecycle states, the
+report names applicable coverage, drift, cold review and self-refutation, and
+its terminal decision matches the current patch. A spent budget with unresolved
+load-bearing findings is `BLOCKED_REVIEW_LOOP`, never clean.
 
 ## Anti-patterns
 
@@ -114,3 +130,5 @@ coverage, scope drift, cold review, and self-refutation.
 - Auto-fixing findings and reviewing the rewrite as independent proof.
 - Reporting hypothetical security language without an attacker-controlled path.
 - Calling an unavailable cold review clean; record the gap.
+- Re-running a reviewer on the same patch or calling repeated passes "final".
+- Opening a new epoch for remediation without an explicit intent/scope rebind.
