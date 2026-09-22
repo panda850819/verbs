@@ -2,7 +2,12 @@
 
 Date: 2026-08-12
 Issue: [#365](https://github.com/panda850819/verbs/issues/365)
-Status: **KEEP** — the low-risk fast path preserves native outcome parity while the high-risk contract adds independent defect recall
+Status: **HISTORICAL KEEP** — frozen evidence for the v0.30.1 contract; the v0.34.0 convergence change is not covered
+
+This artifact remains evidence for the byte-exact Review version below. The
+current runtime deliberately differs by adding epoch, patch identity, finding
+lifecycle, and round-budget semantics. Do not use this canary to claim current
+model fitness until that changed contract receives a new matched run.
 
 ## Frozen runtime identity
 
@@ -111,13 +116,12 @@ parity and removes process output, but it does not eliminate context overhead.
 High-risk cost is accepted because this canary measured additional grounded
 recall. Future runs should continue reporting low and high cost separately.
 
-## Verdict
+## Historical verdict
 
-**KEEP**.
+**KEEP** for the frozen contract only.
 
-At `Codex CLI 0.144.4 × gpt-5.6-sol/high`, native Review is strong but the
-current Skill still earns its slot. It keeps the reversible path compact and
-adds oracle-backed defect recall on a real trust-boundary diff without severe
-harm or unnecessary user interaction. No Skill-body change is justified by this
-canary. This verdict does not generalize to another host, exact model, effort,
-or materially changed Review contract.
+At `Codex CLI 0.144.4 × gpt-5.6-sol/high`, native Review was strong but the
+frozen Skill still earned its slot. It kept the reversible path compact and
+added oracle-backed defect recall on a real trust-boundary diff without severe
+harm or unnecessary user interaction. This verdict does not generalize to
+another host, exact model, effort, or materially changed Review contract.

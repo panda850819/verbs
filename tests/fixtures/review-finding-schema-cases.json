@@ -1,0 +1,27 @@
+[
+  {
+    "name": "open finding needs no status reason",
+    "finding": {"id": "F-001", "severity": "P1", "status": "OPEN", "title": "Defect", "file": "src/a.py", "line": 1, "trigger": "input", "mechanism": "failure", "consequence": "impact", "direction": "fix", "evidence": ["test"]},
+    "valid": true
+  },
+  {
+    "name": "disputed finding requires status reason",
+    "finding": {"id": "F-001", "severity": "P1", "status": "DISPUTED", "title": "Defect", "file": "src/a.py", "line": 1, "trigger": "input", "mechanism": "failure", "consequence": "impact", "direction": "fix", "evidence": ["trace"]},
+    "valid": false
+  },
+  {
+    "name": "disputed finding carries status reason",
+    "finding": {"id": "F-001", "severity": "P1", "status": "DISPUTED", "status_reason": "Trace disproves the proposed trigger.", "title": "Defect", "file": "src/a.py", "line": 1, "trigger": "input", "mechanism": "failure", "consequence": "impact", "direction": "fix", "evidence": ["trace"]},
+    "valid": true
+  },
+  {
+    "name": "superseded finding requires status reason",
+    "finding": {"id": "F-002", "severity": "P2", "status": "SUPERSEDED", "title": "Old mechanism", "file": "src/b.py", "line": 2, "trigger": "state", "mechanism": "old failure", "consequence": "impact", "direction": "replace", "evidence": ["new finding F-003"]},
+    "valid": false
+  },
+  {
+    "name": "superseded finding carries status reason",
+    "finding": {"id": "F-002", "severity": "P2", "status": "SUPERSEDED", "status_reason": "F-003 now owns the merged mechanism.", "title": "Old mechanism", "file": "src/b.py", "line": 2, "trigger": "state", "mechanism": "old failure", "consequence": "impact", "direction": "replace", "evidence": ["new finding F-003"]},
+    "valid": true
+  }
+]

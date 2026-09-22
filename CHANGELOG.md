@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.34.0 — Convergent escalated review
+
+### Changed
+
+- Bound escalated Review to an intent/base epoch, exact patch identity, stable
+  finding lifecycle, and a three-round `PRIMARY` / `COLD` / `VERIFY` budget.
+  Duplicate or exhausted review requests now stop as `BLOCKED_REVIEW_LOOP`
+  instead of launching another nominally final reviewer or reporting clean.
+  (#387)
+- Added a JSON Schema for typed isolated-review results and preserved the
+  compact low-risk fast path. The previous matched model canary remains frozen
+  historical evidence and no longer claims to validate this changed contract.
+  (#387)
+- Made the canonical test entrypoint select an available Python 3.11+ runtime
+  (or `VERBS_PYTHON`) so macOS system Python 3.9 no longer produces false
+  `tomllib` failures when a supported interpreter is installed. (#387)
+
 ## v0.33.1 — Lean specialist instructions
 
 ### Changed
