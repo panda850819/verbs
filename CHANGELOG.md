@@ -33,6 +33,11 @@
 
 ## v0.33.0 — Evidence-based runtime retirement
 
+### Removed
+
+- Removed the retired `scripts/pandastack` compatibility entry point;
+  `scripts/verbs` remains the canonical CLI surface. (#379)
+
 ### Changed
 
 - Retired `decision-map` and `improve-codebase-architecture` after an audit of
